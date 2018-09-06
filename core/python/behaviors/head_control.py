@@ -13,16 +13,18 @@ from task import Task
 from state_machine import Node, C, T, StateMachine
 
 class Playing(StateMachine):
-  class MoveHead(Node):
+  class HeadMove(Node):
     def run(self):
-      head.moveHead(4.0,1.0)
-      if self.getTime() > 1.0:
+#      head.MoveHead(0.0,-4.0,1.0)
+      commands.setHeadPan(-3.0,1.5)
+      print("getTime: %f" % (self.getTime()))
+      if self.getTime() > 3.0:
         memory.speech.say("moved my head")
         self.finish()
 
   class Shutdown(Node):
     def run(self):
-      head.moveHead()
+      head.MoveHead(0.0,0.0,1.5)
       if self.getTime() > 2.0:
         memory.speech.say("turning off")
         self.finish()
@@ -30,14 +32,16 @@ class Playing(StateMachine):
   class Off(Node):
     def run(self):
       commands.setStiffness(cfgstiff.Zero)
-      if self.getTime() > 2.0:
+      print("getTime2: %f" % (self.getTime()))
+      if self.getTime() > 5.0:
         memory.speech.say("turned off stiffness")
         self.finish()
 
   def setup(self):
-    moveHead = self.MoveHead()
-    shutdown = self.Shutdown()
-    sit = pose.Sit()
+    
+    moveHead = self.HeadMove()
     off = self.Off()
-    self.trans(moveHead,C,shutdown,C,off)
+    sit = pose.Sit()
+    shutdown = self.Shutdown()
+    self.trans(sit,C,moveHead,C,sit,C,shutdown,C,sit,C,off)
 

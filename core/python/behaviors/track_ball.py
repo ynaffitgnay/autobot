@@ -20,7 +20,7 @@ class Playing(StateMachine):
       if self.getTime() > 1.0:
         memory.speech.say("moved my head")
         self.finish()
-        
+
   class FindBall(Node):
     def run(self,ballPose):
       ballPose = ball.loc
