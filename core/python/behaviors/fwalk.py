@@ -15,6 +15,12 @@ class Playing(StateMachine):
     def run(self):
       commands.setWalkVelocity(0.3, 0, 0)
 
+  class Stand(Node):
+    def run(self):
+      commands.stand()
+      if self.getTime() > 5.0:
+        memory.speech.say("playing stand complete")
+        self.finish()
 
   class Off(Node):
     def run(self):
@@ -26,6 +32,6 @@ class Playing(StateMachine):
   def setup(self):
     walk = self.Walk()
     sit = pose.Sit()
-    stand = commands.stand()
+    stand = self.Stand()
     off = self.Off()
-    self.trans(sit,C,stand,C,walk,T(3.0),sit,C,off)
+    self.trans(stand,C,walk,T(3.0),sit,C,off)
