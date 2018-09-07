@@ -179,7 +179,7 @@ bool ImageProcessor::findBall(int& imageX, int& imageY) {
 
 void ImageProcessor::detectGoal() {
   int imageX, imageY;
-  if(!findBall(imageX,imageY)) return; // findBall fills in imageX and imageY
+  if(!findGoal(imageX,imageY)) return; // findBall fills in imageX and imageY
   WorldObject* goal = &vblocks_.world_object->objects_[WO_OWN_GOAL];
 
   goal->imageCenterX = imageX;
@@ -189,7 +189,6 @@ void ImageProcessor::detectGoal() {
   goal->visionBearing = cmatrix_.bearing(p);
   goal->visionElevation = cmatrix_.elevation(p);
   goal->visionDistance = cmatrix_.groundDistance(p);
-  printf("Ground Distance: %f\n",cmatrix_.groundDistance(p));
   // Now we know where the goal's position
   goal->seen = true;
 

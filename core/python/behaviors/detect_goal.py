@@ -5,6 +5,7 @@ from __future__ import division
 from __future__ import absolute_import
 
 import memory
+import numpy as np
 import core
 import pose
 import head
@@ -18,11 +19,11 @@ class Stand(Node):
     commands.stand()
     if self.getTime() > 1.5:
       self.finish()
-
 class DetectGoal(Node):
   def run(self):
     goal = memory.world_objects.getObjPtr(core.WO_OWN_GOAL)
     if goal.seen:
+      commands.setWalkVelocity(0.3, 0, -0.3*np.sign(goal.imageCenterX-500))
       print('Goal!')
     else:
       print('No goal!')
