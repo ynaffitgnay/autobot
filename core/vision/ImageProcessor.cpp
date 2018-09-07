@@ -163,7 +163,7 @@ bool ImageProcessor::findBall(int& imageX, int& imageY) {
     }
   }
 
-  if(total == 0){
+  if(total <= 20){
     return false;
   }
   x_mean = x_mean/total;
