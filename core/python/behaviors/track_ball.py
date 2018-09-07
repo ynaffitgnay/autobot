@@ -13,6 +13,8 @@ import cfgstiff
 from task import Task
 from state_machine import Node, C, T, StateMachine
 
+ledsC = core.ledsC
+
 class Playing(StateMachine):
   class TrackBall(Node):
     def run(self,ballPose):
@@ -25,7 +27,7 @@ class Playing(StateMachine):
     def run(self,ballPose):
       ballPose = ball.loc
       if self.getTime() > 1.0:
-      postSignal(ballPose)
+        postSignal(ballPose)
         # Light up ears? 
         self.finish()
 
@@ -51,7 +53,13 @@ class Playing(StateMachine):
     shutdown = self.Shutdown()
     sit = pose.Sit()
     off = self.Off()
-    while ball.seen
-      ball = memory.world_objects.getObjPtr(core.WO_BALL)  
+    
+
+    while ball.seen:
+      ball = memory.world_objects.getObjPtr(core.WO_BALL)
       self.trans(findBall,C,trackBall,S(ballPose))
 
+    if (world_objects.getObjPtr(core.WO_BALL).seen):
+        ledsC.frontLeftEar(1)
+    else:
+        ledsC.frontLeftEar(0)

@@ -127,10 +127,52 @@ void ImageProcessor::processFrame(){
 }
 
 void ImageProcessor::detectBall() {
+  int imageX, imageY;
+  if(!findBall(imageX,imageY)) return; // findBall fills in imageX and imageY
+  WorldObject* ball = &vblocks_.world_object->objects_[WO_BALL];
+
+  ball->imageCenterX = imageX;
+  ball->imageCenterY = imageY;
+
+  Position p = cmatrix_.getWorldPosition(imageX, imageY);
+  ball->visionBearing = cmatrix_.bearing(p);
+  ball->visionElevation = cmatrix_.elevation(p);
+  ball->visionDistance = cmatrix_.groundDistance(p);
+
+  // Now we know where the ball's position
+  ball->seen = true;
+
 }
 
-void ImageProcessor::findBall(int& imageX, int& imageY) {
+bool ImageProcessor::findBall(int& imageX, int& imageY) {
   imageX = imageY = 0;
+  int total = 0;
+  float x_mean, y_mean;
+  x_mean = y_mean = 0.0;
+  // Process from left to right
+  for(int x = 0; x < iparams_.width; x++) {
+    // Process from top to bottom
+    for(int y = 0; y < iparams_.height; y++) {
+      // Retrieve the segmented color of the pixel at (x,y)
+      auto c = getSegImg()[y * iparams_.width + x];
+      if(c == c_ORANGE){
+        total++;
+        x_mean = x_mean + x;
+        y_mean = y_mean + y;
+      }
+    }
+  }
+
+  if(total == 0){
+    return false;
+  }
+  x_mean = x_mean/total;
+  y_mean = y_mean/total;
+  imageX = (int)x_mean;
+  imageY = (int)y_mean;
+
+  // TO DO: Add heuristics to return false if ball detection fails
+  return true;
 }
 
 

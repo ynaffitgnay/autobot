@@ -1,0 +1,76 @@
+"""Sample behavior."""
+
+from __future__ import print_function
+from __future__ import division
+from __future__ import absolute_import
+
+import memory
+import core
+import pose
+import head
+import commands
+import cfgstiff
+from task import Task
+from state_machine import Node, C, T, StateMachine
+
+ledsC = core.ledsC
+
+class Playing(StateMachine):
+  class LightEars(Node):
+    def run(self):
+      # print('Debug 1')
+      ledsC.frontLeftEar(1)
+      if self.getTime() > 4.0:
+        print('More than 1 sec')
+        # self.finish()
+
+  # class TrackBall(Node):
+  #   def run(self,ballPose):
+  #     pose.ToPoseMoveHead(ballPose,1.0)
+  #     if self.getTime() > 1.0:
+  #       memory.speech.say("moved my head")
+  #       self.finish()
+
+  # class FindBall(Node):
+  #   def run(self,ballPose):
+  #     ballPose = ball.loc
+  #     if self.getTime() > 1.0:
+  #       postSignal(ballPose)
+  #       # Light up ears? 
+  #       self.finish()
+
+
+  # class Shutdown(Node):
+  #   def run(self):
+  #     head.moveHead()
+  #     if self.getTime() > 2.0:
+  #       memory.speech.say("turning off")
+  #       self.finish()
+
+  class Off(Node):
+    def run(self):
+      commands.setStiffness(cfgstiff.Zero)
+      ledsC.frontLeftEar(0)
+      if self.getTime() > 2.0:
+        memory.speech.say("turned off stiffness")
+        print('turned off stiffness')
+        self.finish()
+
+  def setup(self):
+    # ball = memory.world_objects.getObjPtr(core.WO_BALL)
+    # findBall = self.FindBall()
+    # trackBall= self.TrackBall()
+    # shutdown = self.Shutdown()
+    sit = pose.Sit()
+    light_ears = self.LightEars()
+    off = self.Off()
+    self.trans(sit,C,light_ears)
+    self.trans(light_ears,T(5.0),off)
+    # while ball.seen:
+    #   ball = memory.world_objects.getObjPtr(core.WO_BALL)
+    #   self.trans(findBall,C,trackBall,S(ballPose))
+
+    # if (world_objects.getObjPtr(core.WO_BALL).seen):
+    #     ledsC.frontLeftEar(1)
+    # else:
+    #     ledsC.frontLeftEar(0)

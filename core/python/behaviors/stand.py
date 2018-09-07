@@ -11,7 +11,23 @@ import cfgstiff
 from task import Task
 from state_machine import Node, C, T, StateMachine
 
-class Playing(Task):
-  def run(self):
-    commands.standStraight()
-    self.finish()
+class Playing(StateMachine):
+    class Stand(Node):
+        def run(self):
+         	memory.speech.say("demonstrate standing")
+            commands.standStraight()
+            if self.getTime() > 1.5:
+                self.finish()
+
+    class Off(Node):
+        def run(self):
+            memory.speech.say("turning off stiffness")
+            commands.setStiffness(cfgstiff.Zero)
+            if self.getTime() > 2.0:
+                self.finish()
+
+    def setup(self):
+        stand = self.Stand()
+        sit = pose.Sit()
+        off = self.Off()
+        self.trans(sit, C, stand, C, off)
