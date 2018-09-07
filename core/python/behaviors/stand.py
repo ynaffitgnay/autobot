@@ -14,14 +14,13 @@ from state_machine import Node, C, T, StateMachine
 class Playing(StateMachine):
     class Stand(Node):
         def run(self):
-         	memory.speech.say("demonstrate standing")
+            memory.speech.say("demonstrate standing")
             commands.standStraight()
             if self.getTime() > 1.5:
                 self.finish()
 
     class Off(Node):
         def run(self):
-            memory.speech.say("turning off stiffness")
             commands.setStiffness(cfgstiff.Zero)
             if self.getTime() > 2.0:
                 self.finish()

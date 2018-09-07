@@ -13,7 +13,7 @@ from state_machine import Node, C, T, StateMachine
 class Playing(StateMachine):
   class Turn(Node):
     def run(self):
-      commands.setWalkVelocity(0.0, 0.0, 0.3)
+      commands.setWalkVelocity(0.0, 0.0, 0.4)
 
   class Stand(Node):
     def run(self):
