@@ -11,55 +11,49 @@ import head
 import commands
 import cfgstiff
 from task import Task
-from state_machine import Node, C, T, StateMachine
+from state_machine import Node, C, T, LoopingStateMachine
 
-ledsC = core.ledsC
+class Stand(Node):
+  def run(self):
+    commands.standStraight()
+    if self.getTime() > 1.5:
+      self.finish()
 
-class Playing(StateMachine):
-  class TrackBall(Node):
-    def run(self,ballPose):
-      pose.ToPoseMoveHead(ballPose,1.0)
-      if self.getTime() > 1.0:
-        memory.speech.say("moved my head")
-        self.finish()
-
-  class FindBall(Node):
-    def run(self,ballPose):
-      ballPose = ball.loc
-      if self.getTime() > 1.0:
-        postSignal(ballPose)
-        # Light up ears? 
-        self.finish()
-
-
-  class Shutdown(Node):
-    def run(self):
-      head.moveHead()
-      if self.getTime() > 2.0:
-        memory.speech.say("turning off")
-        self.finish()
-
-  class Off(Node):
-    def run(self):
-      commands.setStiffness(cfgstiff.Zero)
-      if self.getTime() > 2.0:
-        memory.speech.say("turned off stiffness")
-        self.finish()
-
-  def setup(self):
+class DetectBall(Node):
+  def __init__(self):
+    super(DetectBall, self).__init__()
+    self.old_bearing = 0.0
+    self.old_elevation = 0.0
+    self.elevation_filtered = 0.0
+    self.bearing_filtered = 0.0
+    self.alpha_b = 0.9
+    self.alpha_e = 0.8
+  def run(self):
     ball = memory.world_objects.getObjPtr(core.WO_BALL)
-    findBall = self.FindBall()
-    trackBall= self.TrackBall()
-    shutdown = self.Shutdown()
-    sit = pose.Sit()
-    off = self.Off()
-    
-
-    while ball.seen:
-      ball = memory.world_objects.getObjPtr(core.WO_BALL)
-      self.trans(findBall,C,trackBall,S(ballPose))
-
-    if (world_objects.getObjPtr(core.WO_BALL).seen):
-        ledsC.frontLeftEar(1)
+    if ball.seen:
+      self.bearing_filtered = self.alpha_b*ball.visionBearing + (1-self.alpha_b)*self.bearing_filtered
+      self.elevation_filtered = self.alpha_e*ball.visionElevation + (1-self.alpha_e)*self.elevation_filtered
+      if (abs(self.bearing_filtered-self.old_bearing) <= 0.5):
+        bearing = self.bearing_filtered
+      else:
+        bearing = self.old_bearing
+      if (abs(self.elevation_filtered-self.old_elevation) <= 0.3):
+        elevation = self.elevation_filtered
+      else:
+        elevation = self.old_elevation
+      commands.setHeadPanTilt(bearing, core.RAD_T_DEG* elevation, 0.2)
+      # print('Ball!')
+      print('Ball!\t Bearing: %f \t Distance: %f\t Elevation: %.8f' % (ball.visionBearing, ball.visionDistance, ball.visionElevation))
+      self.old_bearing = bearing
+      self.old_elevation = elevation
     else:
-        ledsC.frontLeftEar(0)
+      commands.setHeadPanTilt(self.old_bearing, core.RAD_T_DEG* self.old_elevation, 0.2)
+      print('No Ball!')
+    if self.getTime() > 10.0:
+      self.finish()
+
+class Playing(LoopingStateMachine):
+  def setup(self):
+    stand = Stand()
+    detect = DetectBall()
+    self.trans(stand,C,detect,C,detect)

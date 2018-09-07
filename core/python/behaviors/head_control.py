@@ -14,8 +14,9 @@ from state_machine import Node, C, StateMachine
 class Playing(StateMachine):
   class HeadMove(Node):
     def run(self):
-      commands.setHeadPan(-3.0/2,2.0)
-      if self.getTime() > 4.0:
+      commands.setHeadTilt(20.0)
+      commands.setHeadPan(-1.0,2.0)
+      if self.getTime() > 6.0:
         memory.speech.say("moved my head")
         self.finish()
 
@@ -29,7 +30,7 @@ class Playing(StateMachine):
   class Shutdown(Node):
     def run(self):
       commands.setHeadPan(0.0,2.0)
-      if self.getTime() > 4.0:
+      if self.getTime() > 6.0:
         memory.speech.say("shutdown")
         commands.setStiffness(cfgstiff.Zero)
         self.finish()

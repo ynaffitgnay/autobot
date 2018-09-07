@@ -15,22 +15,22 @@ from state_machine import Node, C, T, LoopingStateMachine
 
 class Stand(Node):
   def run(self):
-    commands.standStraight()
+    commands.stand()
     if self.getTime() > 1.5:
       self.finish()
 
-class DetectBall(Node):
+class DetectGoal(Node):
   def run(self):
-    ball = memory.world_objects.getObjPtr(core.WO_BALL)
-    if ball.seen:
-      print('Orange!')
+    goal = memory.world_objects.getObjPtr(core.WO_OWN_GOAL)
+    if goal.seen:
+      print('Goal!')
     else:
-      print('No orange!')
+      print('No goal!')
     if self.getTime() > 10.0:
       self.finish()
 
 class Playing(LoopingStateMachine):
   def setup(self):
     stand = Stand()
-    detect = DetectBall()
+    detect = DetectGoal()
     self.trans(stand,C,detect,C,detect)

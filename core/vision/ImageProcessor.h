@@ -44,6 +44,8 @@ class ImageProcessor {
     bool isImageLoaded();
     void detectBall();
     bool findBall(int& imageX, int& imageY);
+    void detectGoal();
+    bool findGoal(int& imageX, int& imageY);
   private:
     int getTeamColor();
     double getCurrentTime();
