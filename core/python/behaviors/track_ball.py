@@ -26,13 +26,13 @@ class DetectBall(Node):
     self.old_elevation = 0.0
     self.elevation_filtered = 0.0
     self.bearing_filtered = 0.0
-    self.alpha_b = 1.0
-    self.alpha_e = 1.0
+    self.alpha_b = 0.9
+    self.alpha_e = 0.9
   def run(self):
     ball = memory.world_objects.getObjPtr(core.WO_BALL)
     if ball.seen:
-      self.bearing_filtered = self.alpha_b*ball.visionBearing #+ (1-self.alpha_b)*self.bearing_filtered
-      self.elevation_filtered = self.alpha_e*ball.visionElevation #+ (1-self.alpha_e)*self.elevation_filtered
+      self.bearing_filtered = self.alpha_b*ball.visionBearing + (1-self.alpha_b)*self.bearing_filtered
+      self.elevation_filtered = self.alpha_e*ball.visionElevation + (1-self.alpha_e)*self.elevation_filtered
       if (abs(self.bearing_filtered-self.old_bearing) <= 0.7):
         bearing = self.bearing_filtered
       else:
