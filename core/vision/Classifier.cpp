@@ -111,7 +111,25 @@ void Classifier::constructRuns(std::vector<VisionPointAlt>& runs) {
         runs.push_back(run);
 
         //TODO: get rid of this
-        std::cout << "run_length: " << run.dx << "run_color:" << run.color << "\n";
+        if (run_color == c_UNDEFINED) {
+          std::cout << "run_length: " << run.dx << " run_color: UNDEFINED\n";
+        } else if (run_color == c_FIELD_GREEN) {
+          std::cout << "run_length: " << run.dx << " run_color: GREEN\n";
+        } else if (run_color == c_WHITE) {           
+          std::cout << "run_length: " << run.dx << " run_color: WHITE\n";
+        } else if (run_color == c_ORANGE) {          
+          std::cout << "run_length: " << run.dx << " run_color: ORANGE\n";
+        } else if (run_color == c_PINK) {            
+          std::cout << "run_length: " << run.dx << " run_color: PINK\n";
+        } else if (run_color == c_BLUE) {            
+          std::cout << "run_length: " << run.dx << " run_color: BLUE\n";
+        } else if (run_color == c_YELLOW) {          
+          std::cout << "run_length: " << run.dx << " run_color: YELLOW\n";
+        } else if (run_color == c_ROBOT_WHITE) {     
+          std::cout << "run_length: " << run.dx << " run_color: ROBOT\n";
+        } else {
+          std::cout << "what?";
+        }
         
         run_color = pixel_color;
         run = VisionPointAlt(x, y, run_color);
