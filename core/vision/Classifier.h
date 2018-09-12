@@ -8,7 +8,9 @@
 #include <memory/TextLogger.h>
 //#include <vision/ImageConstants.h>
 #include <vision/VisionConstants.h>
-#include <vision/structures/VisionPoint.h>
+//#include <vision/structures/VisionPoint.h>
+#include <vision/structures/VisionPointAlt.h>
+#include <vision/structures/Blob.h>
 #include <vision/structures/VisionParams.h>
 #include <vision/structures/HorizonLine.h>
 #include <vision/enums/Colors.h>
@@ -33,10 +35,12 @@ class Classifier {
     return (Color)segImg_[y * iparams_.width + x];
   }
   void getStepSize(int&,int&) const;
+  void getBlobs(std::vector<Blob>& blobs);
 
  private:
   void classifyImage(const FocusArea& area, unsigned char*);
   bool setImagePointers();
+  void constructRuns(std::vector<VisionPointAlt>& runs);
   
   const VisionBlocks& vblocks_;
   const VisionParams& vparams_;

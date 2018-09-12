@@ -145,7 +145,7 @@ void ImageProcessor::detectBall() {
 
 }
 
-
+// Puts the center of the ball in imageX and imageY
 bool ImageProcessor::findBall(int& imageX, int& imageY) {
   imageX = imageY = 0;
   int total = 0;

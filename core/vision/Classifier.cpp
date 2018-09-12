@@ -1,6 +1,7 @@
 #include "Classifier.h"
 #include <vision/Logging.h>
 #include <iostream>
+#include <inttypes.h>
 
 using namespace cv;
 
@@ -68,7 +69,7 @@ bool Classifier::classifyImage(unsigned char *colorTable) {
   return true;
 }
 
-void Classifier::classifyImage(const FocusArea& area, unsigned char* colorTable){
+void Classifier::classifyImage(const FocusArea& area, unsigned char* colorTable) {
   bool imageLoaded = vblocks_.image->isLoaded();
   if(!imageLoaded) {
     tlog(20, "Classifying with no raw image");
@@ -82,6 +83,47 @@ void Classifier::classifyImage(const FocusArea& area, unsigned char* colorTable)
       segImg_[iparams_.width * y + x] = c;
     }
   }
+}
+
+void Classifier::getBlobs(std::vector<Blob>& blobs) {
+  std::vector<VisionPointAlt> runs;
+  constructRuns(runs);
+}
+
+void Classifier::constructRuns(std::vector<VisionPointAlt>& runs) {
+  // Process from top to bottom
+  uint16_t x,y;
+  for (y = 0; y < iparams_.height; y++) {
+    auto run_color = segImg_[y * iparams_.width];
+    // Create a new VisionPointAlt for the first run in this line
+    VisionPointAlt run = VisionPointAlt(0, y, run_color);
+    
+    // Process from left to right
+    for (x = 0; x < iparams_.width; x++) {
+      auto pixel_color = segImg_[y * iparams_.width + x];
+
+      if (pixel_color == run_color) {
+        // fill the visionpoint alt (increase the x)
+        run.xf = x;
+        run.dx++;
+      } else {
+        // put the current run into the vector and create a new run with this color
+        runs.push_back(run);
+        
+        
+        run_color = pixel_color;
+        run = VisionPointAlt(x, y, run_color);
+      }
+        
+    }
+    // Finish the last run in this row
+    run.xf = x;
+    run.dx++;
+
+    //put the current run into the vector
+    runs.push_back(run);
+  }
+  
 }
 
 void Classifier::getStepSize(int& h, int& v) const {
