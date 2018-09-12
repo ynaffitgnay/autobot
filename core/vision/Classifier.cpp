@@ -109,7 +109,9 @@ void Classifier::constructRuns(std::vector<VisionPointAlt>& runs) {
       } else {
         // put the current run into the vector and create a new run with this color
         runs.push_back(run);
-        
+
+        //TODO: get rid of this
+        std::cout << "run_length: " << run.dx << "run_color:" << run.color << "\n";
         
         run_color = pixel_color;
         run = VisionPointAlt(x, y, run_color);

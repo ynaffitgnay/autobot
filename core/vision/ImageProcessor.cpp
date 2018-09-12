@@ -2,6 +2,7 @@
 #include <vision/Classifier.h>
 #include <vision/BeaconDetector.h>
 #include <vision/Logging.h>
+#include <vision/structures/Blob.h>
 #include <iostream>
 
 ImageProcessor::ImageProcessor(VisionBlocks& vblocks, const ImageParams& iparams, Camera::Type camera) :
@@ -112,6 +113,7 @@ void ImageProcessor::setCalibration(const RobotCalibration& calibration){
 }
 
 void ImageProcessor::processFrame(){
+  std::vector<Blob> blobs;
   if(vblocks_.robot_state->WO_SELF == WO_TEAM_COACH && camera_ == Camera::BOTTOM) return;
   tlog(30, "Process Frame camera %i", camera_);
 
@@ -122,6 +124,7 @@ void ImageProcessor::processFrame(){
   vblocks_.robot_vision->horizon = horizon;
   tlog(30, "Classifying Image: %i", camera_);
   if(!color_segmenter_->classifyImage(color_table_)) return;
+  color_segmenter_->getBlobs(blobs);
   detectBall();
   detectGoal();
   beacon_detector_->findBeacons();
