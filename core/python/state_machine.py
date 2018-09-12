@@ -208,7 +208,7 @@ class NegationEvent(Event):
     if self.__class__ == NegationEvent or self.__class__.__name__ == "NegatedEventType":
       return "~" + repr(self.event)
     return self.__class__.__name__
- 
+
 def Negate(eventType):
   class NegatedEventType(NegationEvent):
     def __init__(self, **kwargs):

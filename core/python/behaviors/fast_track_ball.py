@@ -12,7 +12,28 @@ import head
 import commands
 import cfgstiff
 from task import Task
-from state_machine import Node, C, S, T, LoopingStateMachine
+from state_machine import Node, C, S, LoopingStateMachine, EventNode, Event, NegationEvent
+
+class BallSeen(Event):
+  """Event that fires if Ball is seen"""
+  def __init__(self, ball):
+    super(BallSeen, self).__init__()
+    self.ball = ball
+  def ready(self):
+    return self.ball.seen
+
+def B(ball=None):
+  """Ball found"""
+  return BallSeen(ball)
+
+def NB(ball=None):
+  """No ball found"""
+  return NegationEvent(BallSeen(ball))
+
+class BallNode(EventNode):
+  def __init__(self, node, ball):
+    super(BallNode, self).__init__(node)
+    self.ball = ball
 
 class Stand(Node):
   def run(self):
@@ -20,69 +41,41 @@ class Stand(Node):
     if self.getTime() > 1.5:
       self.finish()
 
-class SearchBall(Node):
-  def __init__(self):
-    super(SearchBall, self).__init__()
-    self.head_pos = False
-  def run(self):
-    print('SearchBall')
-    ball = memory.world_objects.getObjPtr(core.WO_BALL)
-    commands.setHeadTilt(-30.0)
-    if ball.seen:
-      print('Ball!')
-      self.postSignal('seen')
-    else:
-      print('No Ball!')
-      if self.head_pos:
-        commands.setHeadPan(-math.pi/2,1.0)
-        self.head_pos = False
-      else:
-        commands.setHeadPan(math.pi/2,1.0)
-        self.head_pos = True
-      if self.getTime() > 1.5:
-        self.postSignal('notSeen')
-
 class TrackBall(Node):
-  # def __init__(self):
-  #   super(TrackBall, self).__init__()
-  #   self.kp_pan = 1.0
-  #   self.ki_pan = 0.1
-  #   self.kd_pan = 0.1
-  #   self.kp_tilt = 1.0
-  #   self.ki_tilt = 0.1
-  #   self.kd_tilt = 0.1
-  #   self.old_pan = 0.0
-  #   self.int_pan = 0.0
-  #   self.d_dt_pan = 0.0
-  #   self.old_tilt = -core.DEG_T_RAD*22.0
-  #   self.int_tilt = -core.DEG_T_RAD*22.0
-  #   self.d_dt_tilt = 0.0
-  #   self.e_pan = 0.0
-  #   self.e_tilt = 0.0
-      # self.e_pan = core.joint_values[core.HeadYaw] - ball.bearing
-      # self.e_tilt = core.joint_values[core.HeadPitch] - ball.elevation
-      # self.int_pan = self.int_pan + self.e_pan
-      # self.int_tilt = self.int_tilt + self.e_tilt
+  """Controller node for tracking the ball"""
   def run(self):
     print('TrackBall')
     ball = memory.world_objects.getObjPtr(core.WO_BALL)
-    if ball.seen:
-      bearing = ball.bearing
-      elevation = ball.elevation
-      print('Ball!\t Bearing: %f \t Distance: %f\t Elevation: %.8f' % (ball.bearing, ball.distance, ball.elevation))
-      commands.setHeadPanTilt(bearing, core.RAD_T_DEG* elevation, 0.2)
-    else:
-      print('No Ball!')
-      self.postSignal('notSeen')
+    bearing = ball.bearing
+    elevation = ball.elevation
+    # print('Ball!\t Bearing: %f \t Distance: %f\t Elevation: %.8f' % (ball.bearing, ball.distance, ball.elevation))
+    commands.setHeadPanTilt(bearing, core.RAD_T_DEG* elevation, 0.2)
 
+class MoveHeadLeft(Node):
+  """Search for the ball to the left"""
+  def run(self):
+    commands.setHeadPan(-math.pi/2,1.5)
+    if self.getTime() > 2.5:
+      self.finish()
+
+class MoveHeadRight(Node):
+  """Search for the ball to the right"""
+  def run(self):
+    commands.setHeadPan(math.pi/2,1.5)
+    if self.getTime() > 2.5:
+      self.finish()
 
 class Playing(LoopingStateMachine):
   def setup(self):
+    ball = memory.world_objects.getObjPtr(core.WO_BALL)
     stand = Stand()
-    search = SearchBall()
     track = TrackBall()
-    self.add_transition(stand,C,search)
-    self.add_transition(search,S('notSeen'),search)
-    self.add_transition(search,S('seen'),track)
-    self.add_transition(track,S('seen'),track)
-    self.add_transition(track,S('notSeen'),search)
+    moveHeadLeft = MoveHeadLeft()
+    moveHeadRight = MoveHeadRight()
+    sit = pose.Sit()
+    self.add_transition(stand,C,moveHeadLeft)
+    self.add_transition(moveHeadLeft,C,moveHeadRight)
+    self.add_transition(moveHeadRight,C,moveHeadLeft)
+    self.add_transition(moveHeadLeft,B(ball),track)
+    self.add_transition(moveHeadRight,B(ball),track)
+    self.add_transition(track,NB(ball),moveHeadLeft)
