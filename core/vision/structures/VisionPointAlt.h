@@ -17,10 +17,12 @@ struct VisionPointAlt {
     yf = y;
     dy = 1;
     color = c;
+    nextVP = nullptr;
   }
-    
+  
   uint16_t xi, xf, dx, yi, yf, dy;
   unsigned char color;
+  VisionPointAlt * nextVP;
   uint16_t lbIndex;
   bool isValid;
 };
