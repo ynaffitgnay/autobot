@@ -91,22 +91,22 @@ void TestMerge::mergeRuns(std::vector<Blob>& blobs) {
   std::vector<MergeNode> adjRowCurr;
   std::vector<MergeNode> adjRowPrev;
     for(std::vector<VisionPointAlt>::const_iterator iter = vpav_.begin(); iter !=vpav_.end(); iter++) {
-    //std::cout << "VPA #" << counter << ":" << std::endl;
-    //std::cout << "Run length: " << (*iter).dy << "    Run color: " << (int)(*iter).color << std::endl;
-    node.data = (*iter);
-    node.parent = &node;
-    node.rank = vpa_num-counter;
-    counter++;
-    if ((*iter).xi != cRow) {
-      // Moved to next row
-      cRow = node.data.xi;
-      adjRowPrev.clear();
-      adjRowPrev.insert(std::end(adjRowPrev), std::begin(adjRowCurr), std::end(adjRowCurr));
-      adjRowCurr.clear();
-    }
-    adjRowCurr.push_back(node);
-    checkAdj(node, adjRowPrev);
-    
+		//std::cout << "VPA #" << counter << ":" << std::endl;
+		//std::cout << "Run length: " << (*iter).dy << "    Run color: " << (int)(*iter).color << std::endl;
+		node.data = (*iter);
+		node.parent = &node;
+		node.rank = vpa_num-counter;
+		counter++;
+		if ((*iter).yi != cRow) {
+			// Moved to next row
+			cRow = node.data.yi;
+			adjRowPrev.clear();
+			adjRowPrev.insert(std::end(adjRowPrev), std::begin(adjRowCurr), std::end(adjRowCurr));
+			adjRowCurr.clear();
+		}
+		adjRowCurr.push_back(node);
+		checkAdj(node, adjRowPrev);
+
     }
 
 
