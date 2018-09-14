@@ -9,16 +9,8 @@
     lbIndex is filled in later by blob formation*/
 
 struct VisionPointAlt {
-  VisionPointAlt(uint16_t x, uint16_t y, unsigned char c) {
-    xi = x;
-    xf = x;
-    dx = 1;
-    yi = y;
-    yf = y;
-    dy = 1;
-    color = c;
-    parent = this;
-  }
+  VisionPointAlt(uint16_t x, uint16_t y, unsigned char c) :
+    xi(x), xf(x), dx(1), yi(y), yf(y), dy(1), color(c), parent(this) {}
     
   uint16_t xi, xf, dx, yi, yf, dy;
   unsigned char color;
