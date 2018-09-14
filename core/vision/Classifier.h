@@ -25,6 +25,14 @@
 
 /// @ingroup vision
 class Classifier {
+  struct MergeNode {
+    VisionPointAlt* data;  // The run data
+    MergeNode* parent;    // Pointer to the parent
+    int rank;        // Rank for comparing sets to merge
+
+    MergeNode() : data(nullptr), parent(nullptr), rank(-1) {}
+  };
+  
  public:
   Classifier(const VisionBlocks& vblocks, const VisionParams& vparams, const ImageParams& iparams, const Camera::Type& camera);
   ~Classifier();
@@ -43,6 +51,26 @@ class Classifier {
   void constructRuns(std::vector<VisionPointAlt>& runs);
   void mergeRegions(std::vector<VisionPointAlt>& runs, std::vector<Blob> (&blobs)[5]);
   void mergeRegionsFromBlobs(std::vector<VisionPointAlt>& runs, std::vector<Blob> (&blobs)[5]);
+
+  /*
+  * Main method for merging
+  */
+  void mergeRuns(std::vector<VisionPointAlt>& runs, std::vector<Blob>& blobs);
+
+  /*
+  * Checking adjacency
+  */
+  void checkAdj(MergeNode node, std::vector<MergeNode> checkAdj);
+
+  /*
+  * find method for Union-Find
+  */
+  MergeNode * findParent(MergeNode node);
+
+  /*
+  * Union by rank for Union-Find
+  */
+  void unionByRank(MergeNode& a, MergeNode& b);
 
   
   const VisionBlocks& vblocks_;

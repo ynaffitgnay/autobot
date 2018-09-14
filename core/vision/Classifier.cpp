@@ -90,7 +90,8 @@ void Classifier::getBlobs(std::vector<Blob>& blobs) {
   std::vector<Blob> colorBlobs[5];
   std::vector<VisionPointAlt> runs;
   constructRuns(runs);
-  mergeRegions(runs, colorBlobs);
+  mergeRuns(runs, blobs);
+  //mergeRegions(runs, colorBlobs);
 }
 
 void Classifier::constructRuns(std::vector<VisionPointAlt>& runs) {
@@ -150,154 +151,231 @@ void Classifier::constructRuns(std::vector<VisionPointAlt>& runs) {
   
 }
 
-void Classifier::mergeRegions(std::vector<VisionPointAlt>& runs, std::vector<Blob> (&blobs)[5]) {
-  // Merge regions from runs
-  int regionsMerged = 0;
-
-  // Don't do undefined, green, or white blobs
-  //std::vector<Blob> orange;
-  //std::vector<Blob> pink;
-  //std::vector<Blob> blue;
-  //std::vector<Blob> yellow;
-  //std::vector<Blob> robo;
-  std::vector<Blob> * bloblist = nullptr;
-
-  bool merged;
-  uint32_t runIdx = 0;
-  unsigned char runColor;
-
-  for (auto run : runs) {
-    runColor = run.color;
-    switch(runColor) {
-      case c_ORANGE:
-        //bloblist = &orange;
-        bloblist = &(blobs[0]);
-        break;
-      case c_PINK:
-        //bloblist = &pink;
-        bloblist = &(blobs[1]);
-        break;
-      case c_BLUE:
-        //bloblist = &blue;
-        bloblist = &(blobs[2]);
-        break;
-      case c_YELLOW:
-        //bloblist = &yellow;
-        bloblist = &(blobs[3]);
-        break;
-      case c_ROBOT_WHITE:
-        //bloblist = &robo;
-        bloblist = &(blobs[4]);
-        break;
-      default:
-        // if it's one of the other colors, don't process this run
-        continue;
+void Classifier::mergeRuns(std::vector<VisionPointAlt>& runs, std::vector<Blob>& blobs) {
+  std::cout << "Merge " << runs.size() << " runs" << std::endl; 
+  int counter = 0;
+  // No default constructor for VisionPointAlt, so you have to have a dummy for the struct
+  VisionPointAlt dummy(0,0,0);
+  
+  // Just a dummy as the initial. Might need to review this
+  MergeNode node = MergeNode(); //{&dummy,NULL,NULL};
+  int vpa_num = runs.size();
+  int cRow = 0;
+  int pvRow;
+  std::vector<MergeNode> adjRowCurr;
+  std::vector<MergeNode> adjRowPrev;
+  for(std::vector<VisionPointAlt>::const_iterator iter = runs.begin(); iter !=runs.end(); iter++) {
+    //std::cout << "VPA #" << counter << ":" << std::endl;
+    //std::cout << "Run length: " << (*iter).dy << "    Run color: " << (int)(*iter).color << std::endl;
+    dummy = *iter;
+    node.data = &dummy;
+    node.parent = &node;
+    node.rank = vpa_num-counter;
+    counter++;
+    if ((*iter).yi != cRow) {
+      // Moved to next row
+      cRow = node.data->yi;
+      adjRowPrev.clear();
+      adjRowPrev.insert(std::end(adjRowPrev), std::begin(adjRowCurr), std::end(adjRowCurr));
+      adjRowCurr.clear();
     }
+    adjRowCurr.push_back(node);
+    checkAdj(node, adjRowPrev);
+  }
 
-    merged = false;
-    
-    // Check to see if this region fits in a blob
-    //std::cout << "NEW BLOBLIST!\n";
-    for (auto blob : *bloblist)
+  std::cout << "Hi we mergedruns???!\n";
+
+  //TODO: fill blobs
+
+
+}
+
+void Classifier::checkAdj(MergeNode node, std::vector<MergeNode> adjRowPrev) {
+  //not filled in yet
+  MergeNode dummy = MergeNode();
+  for(std::vector<MergeNode>::const_iterator iter = adjRowPrev.begin(); iter !=adjRowPrev.end(); iter++) {
+    if (iter->data->color == node.data->color)
     {
-      if (merged) {
-        continue;
-      }
-      //TODO
-      //if (run.dx > 2) {
-      //  std::cout << "run.xi: " << run.xi << "run.xf: " << run.xf << "run.yi: " << run.yi << "blob.yf: " << blob.yf << "\n";
-      //}
-      //if (run.xf > 320 || run.yf > 480) {
-      //  std:: cout << "AAAAHHH!!! TOO BIG???";
-      //}
-      
-      // make sure the rows are adjacent
-      if (run.yi == blob.yf + 1)
+      if (((node.data->xi >= iter->data->xi) && node.data->xi <= iter->data->xf) || ((node.data->xf >= iter->data->xi) && node.data->xf <= iter->data->xf) || ((node.data->xf >= iter->data->xf) && node.data->xi <= iter->data->xi))
       {
-        if (run.xi >= blob.xi && run.xi <= blob.xf) {
-          // Add this region to the blob
-          merged = true;
-          ++regionsMerged;
-          blob.yf = run.yf;
-          if (run.xf > blob.xf) {
-            blob.xf = run.xf;
-          }
-          blob.lpIndex[blob.lpCount] = runIdx;
-          blob.lpCount++;
-          blob.widthEnd = run.dx;
-
-          //TODO: calculate avgX and avgY
-
-        } else if (run.xf >= blob.xi && run.xf <= blob.xf) {
-          merged = true;
-          ++regionsMerged;
-          blob.yf = run.yf;
-          if (run.xi < blob.xi) {
-            blob.xi = run.xi;
-          }
-          blob.lpIndex[blob.lpCount] = runIdx;
-          blob.lpCount++;
-          blob.widthEnd = run.dx;
-
-          //TODO: calculate avgX and avgY
-          
-        } else if (run.xi <= blob.xi && run.xf >= blob.xf) {
-          merged = true;
-          ++regionsMerged;
-          blob.yf = run.yf;
-          blob.xi = run.xi;
-          blob.xf = run.xf;
-          blob.lpIndex[blob.lpCount] = runIdx;
-          blob.lpCount++;
-          blob.widthEnd = run.dx;
-        }
+        dummy = *iter;
+        unionByRank(node, dummy);
+        //node.data->parent unionByRank(iter->data->parent;
       }
     }
-    
-    // make a new blob for this run
-    if (!merged) {
-      Blob newBlob = Blob(runColor, run.xi, run.xf, run.dx, run.yi, run.yf, run.dy, run.dx);
-      newBlob.lpIndex[0] = runIdx;
-      newBlob.lpCount++;
-      bloblist->push_back(newBlob);
-
-      std::cout << "Bloblist size: " << bloblist->size() << "\n";
-
-      //TODO: calculate avgX and avgY
-    }
-    
-    ++runIdx;
-    // TODO
-    //int totalBlobs = orange.size() + pink.size() + blue.size() + yellow.size() + robo.size();
-    int totalBlobs = blobs[0].size() + blobs[1].size() + blobs[2].size() + blobs[3].size() + blobs[4].size(); 
-    std::cout << "Regions merged: " << regionsMerged << " Runs:" << runs.size() << " Blobs:" << totalBlobs << "\n";
-  }
-
-  //blobs[0] = orange;
-  //blobs[1] = pink;
-  //blobs[2] = blue;
-  //blobs[3] = yellow;
-  //blobs[4] = robo;
-
-  mergeRegionsFromBlobs(runs, blobs);
-  
-}
-
-void Classifier::mergeRegionsFromBlobs(std::vector<VisionPointAlt>& runs, std::vector<Blob> (&blobs)[5]) {
-  int regionsMerged = 0;
-  
-  
-  // only want to merge for ball, beacons, and goal
-
-  // check if two blobs overlap;
-  // if so, compare the first visionpointalt to each visionpointalt in the top blob, then the second, etc.
-  // if there's overlap, merge the blobs, else continue
-
-  // Recursively call mergeRegions on the new merged regions
-  if (regionsMerged != 0) {
-    mergeRegionsFromBlobs(runs, blobs);
   }
 }
+
+Classifier::MergeNode * Classifier::findParent(MergeNode node) {
+  MergeNode *nodePtr = &node;
+  if (node.parent != nodePtr) {
+    node.parent = findParent(*(node.parent)); //Recursive loop to find parent
+  }
+  return node.parent;
+}
+
+void Classifier::unionByRank(MergeNode& a, MergeNode& b) {
+  MergeNode *rootA = findParent(a);
+  MergeNode *rootB = findParent(b);
+  MergeNode *temp;
+  if (rootA == rootB) {
+    //Already merged, return
+    return;
+  }
+  if ((*rootA).rank < (*rootB).rank) {
+    // Swap parents
+    temp = rootA;
+    rootA = rootB;
+    rootB = temp;
+    temp = NULL;
+  }
+
+  (*rootB).parent = rootA;  // Put the parent back
+  if ((*rootA).rank == (*rootB).rank) {
+    (*rootA).rank++;  // Increment rank
+  }
+}
+
+
+void Classifier::mergeRegions(std::vector<VisionPointAlt>& runs, std::vector<Blob> (&blobs)[5]) { }
+//  // Merge regions from runs
+//  int regionsMerged = 0;
+//
+//  std::vector<Blob> * bloblist = nullptr;
+//
+//  bool merged;
+//  uint32_t runIdx = 0;
+//  unsigned char runColor;
+//
+//  // Don't do undefined, green, or white blobs
+//  for (auto run : runs) {
+//    runColor = run.color;
+//    switch(runColor) {
+//      case c_ORANGE:
+//        bloblist = &(blobs[0]);
+//        break;
+//      case c_PINK:
+//        bloblist = &(blobs[1]);
+//        break;
+//      case c_BLUE:
+//        bloblist = &(blobs[2]);
+//        break;
+//      case c_YELLOW:
+//        bloblist = &(blobs[3]);
+//        break;
+//      case c_ROBOT_WHITE:
+//        bloblist = &(blobs[4]);
+//        break;
+//      default:
+//        // if it's one of the other colors, don't process this run
+//        continue;
+//    }
+//
+//    merged = false;
+//    
+//    // Check to see if this region fits in a blob
+//    for (auto blob : *bloblist)
+//    {
+//      if (merged) {
+//        continue;
+//      }
+//
+//      // NOTE: if this coarse blob-merging does not give us good enough granularity,
+//      // can look through list of runs associated with each blob to ensure that there
+//      // is true overlap instead of disparate pieces
+//      
+//      // make sure the rows are adjacent
+//      if (run.yi == blob.yf + 1)
+//      {
+//        if (run.xi >= blob.xi && run.xi <= blob.xf) {
+//          // Add this region to the blob
+//          merged = true;
+//          ++regionsMerged;
+//          blob.yf = run.yf;
+//          if (run.xf > blob.xf) {
+//            blob.xf = run.xf;
+//          }
+//          blob.lpIndex[blob.lpCount] = runIdx;
+//          blob.lpCount++;
+//          blob.widthEnd = run.dx;
+//
+//          //TODO: calculate avgX and avgY
+//
+//        } else if (run.xf >= blob.xi && run.xf <= blob.xf) {
+//          merged = true;
+//          ++regionsMerged;
+//          blob.yf = run.yf;
+//          if (run.xi < blob.xi) {
+//            blob.xi = run.xi;
+//          }
+//          blob.lpIndex[blob.lpCount] = runIdx;
+//          blob.lpCount++;
+//          blob.widthEnd = run.dx;
+//
+//          //TODO: calculate avgX and avgY
+//          
+//        } else if (run.xi <= blob.xi && run.xf >= blob.xf) {
+//          merged = true;
+//          ++regionsMerged;
+//          blob.yf = run.yf;
+//          blob.xi = run.xi;
+//          blob.xf = run.xf;
+//          blob.lpIndex[blob.lpCount] = runIdx;
+//          blob.lpCount++;
+//          blob.widthEnd = run.dx;
+//        }
+//      }
+//    }
+//    
+//    // make a new blob for this run
+//    if (!merged) {
+//      Blob newBlob = Blob(runColor, run.xi, run.xf, run.dx, run.yi, run.yf, run.dy, run.dx);
+//      newBlob.lpIndex[0] = runIdx;
+//      newBlob.lpCount++;
+//      bloblist->push_back(newBlob);
+//
+//      std::cout << "Bloblist size: " << bloblist->size() << "\n";
+//
+//      //TODO: calculate avgX and avgY
+//    }
+//    
+//    ++runIdx;
+//    // TODO
+//    int totalBlobs = blobs[0].size() + blobs[1].size() + blobs[2].size() + blobs[3].size() + blobs[4].size(); 
+//    std::cout << "Regions merged: " << regionsMerged << " Runs:" << runs.size() << " Blobs:" << totalBlobs << "\n";
+//  }
+//
+//  // Now recursively merge these blobs
+//  mergeRegionsFromBlobs(runs, blobs);  
+//}
+//
+
+void Classifier::mergeRegionsFromBlobs(std::vector<VisionPointAlt>& runs, std::vector<Blob> (&blobs)[5]) { }
+//  // only want to merge for ball, beacons, and goal
+//  int regionsMerged = 0;
+//  int colorIdx; // 0 = ORANGE, 1 = PINK, 2 = BLUE, 3 = YELLOW, 4 = ROBOT_WHITE 
+//  
+//
+//  // Check if blobs overlap
+//  // When you merge a blob, update the values of the first blob, and then mark the second blob as invalid
+//  // Then pop all invalid blobs from the blob vector?
+//  for (colorIdx = 0; colorIdx < 5; colorIdx++)
+//  {
+//    std::vector<Blob>::iterator blobIt;
+//    // int blobIdx = 0;
+//    // If this blob marked invalid, erase it and move iterator, else check the rest of the blobs
+//    for (blobIt = blobs[colorIdx].begin(); blobIt != blobs[colorIdx].end(); blobIt++); 
+//    {
+//      // Delete blobs that are marked invalid and advance the iterator
+//      
+//    }
+//  }
+//
+//  // Recursively call mergeRegions on the new merged regions
+//  if (regionsMerged != 0) {
+//    mergeRegionsFromBlobs(runs, blobs);
+//  }
+//}
 
 void Classifier::getStepSize(int& h, int& v) const {
     h = 1 << 2;
