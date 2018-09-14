@@ -86,88 +86,23 @@ void Classifier::classifyImage(const FocusArea& area, unsigned char* colorTable)
 }
 
 void Classifier::getBlobs(std::vector<Blob>& blobs) {
-  std::vector<Blob> colorBlobs[5];
   std::vector<VisionPointAlt> runs;
   constructRuns(runs);
-  mergeRegions(runs, colorBlobs);
 }
 
 void Classifier::constructRuns(std::vector<VisionPointAlt>& runs) {
   // Process from top to bottom
   uint16_t x,y;
-  VisionPointAlt* lUndef = nullptr;
-  VisionPointAlt* lGreen = nullptr;
-  VisionPointAlt* lWhite = nullptr;
-  VisionPointAlt* lOrange = nullptr;
-  VisionPointAlt* lPink = nullptr;
-  VisionPointAlt* lBlue = nullptr;
-  VisionPointAlt* lYellow = nullptr;
-  VisionPointAlt* lRobo = nullptr;
-  
   for (y = 0; y < iparams_.height; y++) {
-    auto runColor = segImg_[y * iparams_.width];
+    auto run_color = segImg_[y * iparams_.width];
     // Create a new VisionPointAlt for the first run in this line
-    VisionPointAlt run = VisionPointAlt(0, y, runColor);
-
-    // Set the nextVP for the previous run of this color to this run
-    switch (runColor) {
-      case c_UNDEFINED:
-        if (lUndef) {
-          lUndef->nextVP = &run;
-        }
-        lUndef = &run;
-        break;
-      case c_FIELD_GREEN:
-        if (lGreen) {
-          lGreen->nextVP = &run;
-        }
-        lGreen = &run;
-        break;
-      case c_WHITE:
-        if (lWhite) {
-          lWhite->nextVP = &run;
-        }
-        lWhite = &run;
-        break;
-      case c_ORANGE:
-        if (lOrange) {
-          lOrange->nextVP = &run;
-        }
-        lOrange = &run;
-        break;
-      case c_PINK:
-        if (lPink) {
-          lPink->nextVP = &run;
-        }
-        lPink = &run;
-        break;
-      case c_BLUE:
-        if (lBlue) {
-          lBlue->nextVP = &run;
-        }
-        lBlue = &run;
-        break;
-      case c_YELLOW:
-        if (lYellow) {
-          lYellow->nextVP = &run;
-        }
-        lYellow = &run;
-        break;
-      case c_ROBOT_WHITE:
-        if (lRobo) {
-          lRobo->nextVP = &run;
-        }
-        lRobo = &run;
-        break;
-      default:
-        cout << "This shouldn't happen\n";
-    }
+    VisionPointAlt run = VisionPointAlt(0, y, run_color);
     
     // Process from left to right
     for (x = 0; x < iparams_.width; x++) {
-      auto pixelColor = segImg_[y * iparams_.width + x];
+      auto pixel_color = segImg_[y * iparams_.width + x];
 
-      if (pixelColor == runColor) {
+      if (pixel_color == run_color) {
         // fill the visionpoint alt (increase the x)
         run.xf = x;
         run.dx++;
@@ -175,248 +110,22 @@ void Classifier::constructRuns(std::vector<VisionPointAlt>& runs) {
         // put the current run into the vector and create a new run with this color
         runs.push_back(run);
 
-        ////TODO: get rid of this
-        //if (run.dx > 10) {
-        //  if (runColor == c_UNDEFINED) {
-        //    //std::cout << "run_length: " << run.dx << " runColor: UNDEFINED\n";
-        //  } else if (runColor == c_FIELD_GREEN) {
-        //    //std::cout << "run_length: " << run.dx << " runColor: GREEN\n";
-        //  } else if (runColor == c_WHITE) {           
-        //    //std::cout << "run_length: " << run.dx << " runColor: WHITE\n";
-        //  } else if (runColor == c_ORANGE) {          
-        //    std::cout << "run_length: " << run.dx << " runColor: ORANGE\n";
-        //  } else if (runColor == c_PINK) {            
-        //    //std::cout << "run_length: " << run.dx << " runColor: PINK\n";
-        //  } else if (runColor == c_BLUE) {            
-        //    //std::cout << "run_length: " << run.dx << " runColor: BLUE\n";
-        //  } else if (runColor == c_YELLOW) {          
-        //    //std::cout << "run_length: " << run.dx << " runColor: YELLOW\n";
-        //  } else if (runColor == c_ROBOT_WHITE) {     
-        //    //std::cout << "run_length: " << run.dx << " runColor: ROBOT\n";
-        //  } else {
-        //    std::cout << "what?";
-        //  }
-        //}
+        //TODO: get rid of this
+        std::cout << "run_length: " << run.dx << "run_color:" << run.color << "\n";
         
-        runColor = pixelColor;
-        run = VisionPointAlt(x, y, runColor);
-        switch (runColor) {
-          case c_UNDEFINED:
-            if (lUndef) {
-              lUndef->nextVP = &run;
-            }
-            lUndef = &run;
-            break;
-          case c_FIELD_GREEN:
-            if (lGreen) {
-              lGreen->nextVP = &run;
-            }
-            lGreen = &run;
-            break;
-          case c_WHITE:
-            if (lWhite) {
-              lWhite->nextVP = &run;
-            }
-            lWhite = &run;
-            break;
-          case c_ORANGE:
-            if (lOrange) {
-              lOrange->nextVP = &run;
-            }
-            lOrange = &run;
-            break;
-          case c_PINK:
-            if (lPink) {
-              lPink->nextVP = &run;
-            }
-            lPink = &run;
-            break;
-          case c_BLUE:
-            if (lBlue) {
-              lBlue->nextVP = &run;
-            }
-            lBlue = &run;
-            break;
-          case c_YELLOW:
-            if (lYellow) {
-              lYellow->nextVP = &run;
-            }
-            lYellow = &run;
-            break;
-          case c_ROBOT_WHITE:
-            if (lRobo) {
-              lRobo->nextVP = &run;
-            }
-            lRobo = &run;
-            break;
-          default:
-            cout << "This shouldn't happen\n";
-        }
+        run_color = pixel_color;
+        run = VisionPointAlt(x, y, run_color);
       }
+        
     }
     // Finish the last run in this row
     run.xf = x;
     run.dx++;
 
-    //TODO: get rid of this
-    //if (run.dx > 10) {
-    //  if (runColor == c_UNDEFINED) {
-    //    //std::cout << "run_length: " << run.dx << " runColor: UNDEFINED\n";
-    //  } else if (runColor == c_FIELD_GREEN) {
-    //    //std::cout << "run_length: " << run.dx << " runColor: GREEN\n";
-    //  } else if (runColor == c_WHITE) {           
-    //    //std::cout << "run_length: " << run.dx << " runColor: WHITE\n";
-    //  } else if (runColor == c_ORANGE) {          
-    //    std::cout << "run_length: " << run.dx << " runColor: ORANGE\n";
-    //  } else if (runColor == c_PINK) {            
-    //    //std::cout << "run_length: " << run.dx << " runColor: PINK\n";
-    //  } else if (runColor == c_BLUE) {            
-    //    //std::cout << "run_length: " << run.dx << " runColor: BLUE\n";
-    //  } else if (runColor == c_YELLOW) {          
-    //    //std::cout << "run_length: " << run.dx << " runColor: YELLOW\n";
-    //  } else if (runColor == c_ROBOT_WHITE) {     
-    //    //std::cout << "run_length: " << run.dx << " runColor: ROBOT\n";
-    //  } else {
-    //    std::cout << "what?";
-    //  }
-    //}
-
     //put the current run into the vector
     runs.push_back(run);
   }
-
-  //TODO:
-  //std::cout << "Total runs: " << runs.size() << "\n";
-}
-
-void Classifier::mergeRegions(std::vector<VisionPointAlt>& runs, std::vector<Blob> (&blobs)[5]) {
-  int regionsMerged = 0;
-
-  // Don't do undefined, green, or white blobs
-  std::vector<Blob> orange;
-  std::vector<Blob> pink;
-  std::vector<Blob> blue;
-  std::vector<Blob> yellow;
-  std::vector<Blob> robo;
-  std::vector<Blob> * bloblist = nullptr;
-
-  bool merged;
-  uint32_t runIdx = 0;
-  unsigned char runColor;
-
-  for (auto run : runs) {
-    runColor = run.color;
-    switch(runColor) {
-      case c_ORANGE:
-        bloblist = &orange;
-        break;
-      case c_PINK:
-        bloblist = &pink;
-        break;
-      case c_BLUE:
-        bloblist = &blue;
-        break;
-      case c_YELLOW:
-        bloblist = &yellow;
-        break;
-      case c_ROBOT_WHITE:
-        bloblist = &robo;
-        break;
-      default:
-        // if it's one of the other colors, don't process this run
-        continue;
-    }
-
-    merged = false;
-    
-    // Check to see if this region fits in a blob
-    std::cout << "NEW BLOBLIST!\n";
-    for (auto blob : *bloblist)
-    {
-      if (merged) {
-        continue;
-      }
-      //TODO
-      if (run.dx > 2) {
-        std::cout << "run.xi: " << run.xi << "run.xf: " << run.xf << "run.yi: " << run.yi << "blob.yf: " << blob.yf << "\n";
-      }
-      // make sure the rows are adjacent
-      if (run.yi == blob.yf + 1)
-      {
-        if (run.xi >= blob.xi && run.xi <= blob.xf) {
-          // Add this region to the blob
-          merged = true;
-          ++regionsMerged;
-          blob.yf = run.yf;
-          if (run.xf > blob.xf) {
-            blob.xf = run.xf;
-          }
-          blob.lpIndex[blob.lpCount] = runIdx;
-          blob.lpCount++;
-          blob.widthEnd = run.dx;
-
-          //TODO: calculate avgX and avgY
-
-        } else if (run.xf >= blob.xi && run.xf <= blob.xf) {
-          merged = true;
-          ++regionsMerged;
-          blob.yf = run.yf;
-          if (run.xi < blob.xi) {
-            blob.xi = run.xi;
-          }
-          blob.lpIndex[blob.lpCount] = runIdx;
-          blob.lpCount++;
-          blob.widthEnd = run.dx;
-
-          //TODO: calculate avgX and avgY
-          
-        } else if (run.xi <= blob.xi && run.xf >= blob.xf) {
-          merged = true;
-          ++regionsMerged;
-          blob.yf = run.yf;
-          blob.xi = run.xi;
-          blob.xf = run.xf;
-          blob.lpIndex[blob.lpCount] = runIdx;
-          blob.lpCount++;
-          blob.widthEnd = run.dx;
-        }
-      }
-    }
-
-    // make a new blob for this run
-    if (!merged) {
-      Blob newBlob = Blob(runColor, run.xi, run.xf, run.dx, run.yi, run.yf, run.dy, run.dx);
-      newBlob.lpIndex[0] = runIdx;
-      newBlob.lpCount++;
-      bloblist->push_back(newBlob);
-
-      std::cout << "Bloblist size: " << bloblist->size() << "\n";
-
-      //TODO: calculate avgX and avgY
-    }
-    
-    ++runIdx;
-    // TODO
-    int totalBlobs = orange.size() + pink.size() + blue.size() + yellow.size() + robo.size();
-    std::cout << "Regions merged: " << regionsMerged << " Runs:" << runs.size() << " Blobs:" << totalBlobs << "\n";
-  }
-
-  blobs[0] = orange;
-  blobs[1] = pink;
-  blobs[2] = blue;
-  blobs[3] = yellow;
-  blobs[4] = robo;
   
-}
-
-void Classifier::mergeRegions(std::vector<Blob> (&blobs)[5]) {
-  int regionsMerged = 0;
-  
-  // Recursively call mergeRegions on the new merged regions
-  if (regionsMerged != 0) {
-    mergeRegions(blobs);
-  }
-  // only want to merge for ball, beacons, and goal
 }
 
 void Classifier::getStepSize(int& h, int& v) const {

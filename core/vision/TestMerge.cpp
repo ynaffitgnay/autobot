@@ -1,7 +1,4 @@
-#include "pch.h"
 #include "TestMerge.h"
-
-
 
 TestMerge::TestMerge() {
 	// Constructor

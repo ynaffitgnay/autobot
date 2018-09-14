@@ -17,14 +17,14 @@ struct VisionPointAlt {
     yf = y;
     dy = 1;
     color = c;
-    nextVP = nullptr;
+    parent = this;
   }
-  
+    
   uint16_t xi, xf, dx, yi, yf, dy;
   unsigned char color;
-  VisionPointAlt * nextVP;
   uint16_t lbIndex;
   bool isValid;
+  VisionPointAlt* parent;
 };
 
 

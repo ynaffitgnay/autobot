@@ -41,8 +41,6 @@ class Classifier {
   void classifyImage(const FocusArea& area, unsigned char*);
   bool setImagePointers();
   void constructRuns(std::vector<VisionPointAlt>& runs);
-  void mergeRegions(std::vector<VisionPointAlt>& runs, std::vector<Blob> (&blobs)[5]);
-  void mergeRegions(std::vector<Blob> (&blobs)[5]);
   
   const VisionBlocks& vblocks_;
   const VisionParams& vparams_;
