@@ -2,8 +2,9 @@
 #define TEST_MERGE_H
 
 
-#include "VisionPointAlt.h"
-#include "Blob.h"
+//#include "VisionPointAlt.h"
+#include <vision/structures/VisionPointAlt.h>
+#include <vision/structures/Blob.h>
 #include <iostream>
 #include <fstream>
 #include <sstream>
