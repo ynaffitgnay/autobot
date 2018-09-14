@@ -100,7 +100,9 @@ void Classifier::constructRuns(std::vector<VisionPointAlt>& runs) {
     
     // Process from left to right
     for (x = 0; x < iparams_.width; x++) {
+      // TODO: get rid of this
       auto pixel_color = segImg_[y * iparams_.width + x];
+      cout << (uint32_t)((uint8_t)pixel_color) << " ";      
 
       if (pixel_color == run_color) {
         // fill the visionpoint alt (increase the x)
@@ -111,7 +113,7 @@ void Classifier::constructRuns(std::vector<VisionPointAlt>& runs) {
         runs.push_back(run);
 
         //TODO: get rid of this
-        std::cout << "run_length: " << run.dx << "run_color:" << run.color << "\n";
+        //std::cout << "run_length: " << run.dx << "run_color:" << run.color << "\n";
         
         run_color = pixel_color;
         run = VisionPointAlt(x, y, run_color);
@@ -121,6 +123,9 @@ void Classifier::constructRuns(std::vector<VisionPointAlt>& runs) {
     // Finish the last run in this row
     run.xf = x;
     run.dx++;
+
+    //TODO: get rid of this:
+    cout << "\n";
 
     //put the current run into the vector
     runs.push_back(run);
@@ -132,3 +137,5 @@ void Classifier::getStepSize(int& h, int& v) const {
     h = 1 << 2;
     v = 1 << 1;
 }
+
+
