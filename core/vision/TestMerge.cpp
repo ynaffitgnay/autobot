@@ -97,9 +97,9 @@ void TestMerge::mergeRuns(std::vector<Blob>& blobs) {
 		node.parent = &node;
 		node.rank = vpa_num-counter;
 		counter++;
-		if ((*iter).xi != cRow) {
+		if ((*iter).yi != cRow) {
 			// Moved to next row
-			cRow = node.data.xi;
+			cRow = node.data.yi;
 			adjRowPrev.clear();
 			adjRowPrev.insert(std::end(adjRowPrev), std::begin(adjRowCurr), std::end(adjRowCurr));
 			adjRowCurr.clear();
