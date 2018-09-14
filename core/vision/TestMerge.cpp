@@ -117,7 +117,14 @@ void TestMerge::mergeRuns(std::vector<Blob>& blobs) {
 
 void TestMerge::checkAdj(MergeNode node, std::vector<MergeNode> adjRowPrev) {
 	//not filled in yet
-	
+    for(std::vector<VisionPointAlt>::const_iterator iter = adjRowPrev.begin(); iter !=adjRowPrev.end(); iter++) {
+		if ((*iter).color == node.color)
+		{
+			if (((node.xi > (*iter).xi) && node.xi < (*iter).xf) || ((node.xf > (*iter).xi) && node.xf < (*iter).xf))
+			{
+				node.parent = (*iter).parent
+			}
+		}
 	// TODO: Fill in Union part
 }
 
