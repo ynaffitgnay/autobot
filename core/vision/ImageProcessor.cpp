@@ -124,7 +124,7 @@ void ImageProcessor::processFrame(){
   vblocks_.robot_vision->horizon = horizon;
   tlog(30, "Classifying Image: %i", camera_);
   if(!color_segmenter_->classifyImage(color_table_)) return;
-  color_segmenter_->getBlobs(blobs);
+  color_segmenter_->makeBlobs(blobs);
   detectBall();
   detectGoal();
   beacon_detector_->findBeacons();

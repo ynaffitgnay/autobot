@@ -43,7 +43,7 @@ class Classifier {
     return (Color)segImg_[y * iparams_.width + x];
   }
   void getStepSize(int&,int&) const;
-  void getBlobs(std::vector<Blob>& blobs);
+  void makeBlobs(std::vector<Blob>& blobs);
 
  private:
   void classifyImage(const FocusArea& area, unsigned char*);
@@ -53,7 +53,7 @@ class Classifier {
   /*
   * Main method for merging
   */
-  void mergeRuns(std::vector<VisionPointAlt>& runs, std::vector<Blob>& blobs);
+  void mergeRuns(std::vector<VisionPointAlt>& runs);
 
   /*
   * Checking adjacency
@@ -64,6 +64,13 @@ class Classifier {
   * find method for Union-Find
   */
   VisionPointAlt * findParent(VisionPointAlt& node);
+
+  /*
+  * Make lists of parents
+  */
+  void makeParentLists(std::vector<VisionPointAlt>& runs, std::vector<std::vector<VisionPointAlt*>>& parents);
+
+
 
   /*
   * Union by rank for Union-Find

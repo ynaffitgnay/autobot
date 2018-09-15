@@ -11,11 +11,11 @@
 struct VisionPointAlt {
   VisionPointAlt(uint16_t x, uint16_t y, unsigned char c) {
     xi = x;
-    xf = x;
-    dx = 1;
+    xf = x+3;
+    dx = 4;
     yi = y;
-    yf = y;
-    dy = 1;
+    yf = y+1;
+    dy = 2;
     color = c;
     parent = nullptr;
   }

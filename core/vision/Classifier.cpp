@@ -86,11 +86,111 @@ void Classifier::classifyImage(const FocusArea& area, unsigned char* colorTable)
   }
 }
 
-void Classifier::getBlobs(std::vector<Blob>& blobs) {
-  std::vector<Blob> colorBlobs[5];
+void Classifier::makeBlobs(std::vector<Blob>& blobs) {
   std::vector<VisionPointAlt> runs;
+  std::vector<std::vector<VisionPointAlt*>> parents;
+  std::vector<VisionPointAlt*>::iterator parentIt;
   constructRuns(runs);
-  mergeRuns(runs, blobs);
+  mergeRuns(runs);
+  makeParentLists(runs,parents);
+  unsigned char c;
+  uint16_t xi, xf, dx, yi, yf, dy, widthStart, widthEnd, avgX, avgY, total;
+  float meanX, meanY;
+  std::cout << "Number of paRENTS " << parents.size() << std::endl;
+  for (int i = 0; i < parents.size(); ++i)
+  {
+    if (parents.at(i).size() < 30)
+    {
+      continue;
+    }
+    total = 0;
+    xi = parents.at(i).front()->xi;
+    xf = parents.at(i).front()->xf;
+    dx = parents.at(i).front()->dx;
+    widthStart = parents.at(i).front()->dx;
+    c = parents.at(i).front()->color;
+    yi = parents.at(i).front()->yi;
+    yf = parents.at(i).front()->yf;
+    dy = parents.at(i).front()->dy;
+    widthEnd = parents.at(i).front()->dx;
+    avgX = 0;
+    avgY = 0;
+    meanX = 0.0;
+    meanY = 0.0;
+    for(parentIt = parents.at(i).begin(); parentIt != parents.at(i).end(); parentIt++){
+      if((*parentIt)->xi < xi) xi = (*parentIt)->xi;
+      if((*parentIt)->xf > xf) xf = (*parentIt)->xf;
+      if((*parentIt)->yi < yi) widthStart = (*parentIt)->dx;
+      if((*parentIt)->yf > yf) widthEnd = (*parentIt)->dx;
+      if((*parentIt)->yi < yi) yi = (*parentIt)->yi;
+      if((*parentIt)->yf > yf) yf = (*parentIt)->yf;
+      total += (*parentIt)->dx;
+      meanX += (0.5*((*parentIt)->xi + (*parentIt)->xf) * ((*parentIt)->dx));
+      meanY += (0.5*((*parentIt)->yi + (*parentIt)->yf) * ((*parentIt)->dx));
+    }
+    dy = yf-yi;
+    if (c == c_ORANGE)
+    {
+      std::cout << "meanX: " << meanX << " meanY: " << meanY << " total orange: " << total << std::endl;
+    }
+    avgX = (uint16_t) (meanX/total);
+    avgY = (uint16_t) (meanY/total);
+    Blob blob = Blob(c, xi, xf, dx, yi, yf, dy, widthStart, widthEnd, avgX, avgY, total);
+    blobs.push_back(blob);
+  }
+  for (int i = 0; i < blobs.size(); ++i)
+  {
+    if(camera_ == Camera::TOP){
+      unsigned char run_color = blobs.at(i).color;
+      if (run_color == c_UNDEFINED) {
+          std::cout << " run_color: UNDEFINED";
+        } else if (run_color == c_FIELD_GREEN) {
+          std::cout << " run_color: GREEN";
+        } else if (run_color == c_WHITE) {           
+          std::cout << " run_color: WHITE";
+        } else if (run_color == c_ORANGE) {          
+          std::cout << " run_color: ORANGE";
+        } else if (run_color == c_PINK) {            
+          std::cout << " run_color: PINK";
+        } else if (run_color == c_BLUE) {            
+          std::cout << " run_color: BLUE";
+        } else if (run_color == c_YELLOW) {          
+          std::cout << " run_color: YELLOW";
+        } else if (run_color == c_ROBOT_WHITE) {     
+          std::cout << " run_color: ROBOT";
+        } else {
+          std::cout << "what??";
+        }
+      std::cout << " avgX: " << blobs.at(i).avgX << " avgY: " << blobs.at(i).avgY << " ToTaL: " << blobs.at(i).total 
+      << " xi: " << blobs.at(i).xi << " yi: " << blobs.at(i).yi << " xf: " << blobs.at(i).xf << " yf: " << blobs.at(i).yf 
+      << std::endl;
+    }
+  }
+}
+
+void Classifier::makeParentLists(std::vector<VisionPointAlt>& runs, std::vector<std::vector<VisionPointAlt*>>& parents) {
+  std::vector<VisionPointAlt>::iterator iter = runs.begin();
+  std::vector<std::vector<VisionPointAlt*>>::iterator parentIt;
+  bool found = false;
+  for(iter; iter!=runs.end(); iter++){
+    if(iter->parent){
+      found = false;
+      for(parentIt = parents.begin(); parentIt != parents.end(); parentIt++){
+        if (parentIt->front() == iter->parent)
+        {
+          parentIt->push_back(&(*iter));
+          found = true;
+          break;
+        }
+      }
+      if (!found)
+      {
+        std::vector<VisionPointAlt*> newParent;
+        newParent.push_back(iter->parent);
+        parents.push_back(newParent);
+      }
+    }
+  }
 }
 
 void Classifier::constructRuns(std::vector<VisionPointAlt>& runs) {
@@ -100,25 +200,25 @@ void Classifier::constructRuns(std::vector<VisionPointAlt>& runs) {
     int undef_count = 0;
     
     // Create a new VisionPointAlt for the first run in this line
-    VisionPointAlt run = VisionPointAlt(0, y / 2, run_color);
+    VisionPointAlt run = VisionPointAlt(0, y, run_color);
     // Process from left to right
     for (x = 0; x < iparams_.width; x+=4) {
       auto pixel_color = segImg_[y * iparams_.width + x];
-            
+      
       if (pixel_color == run_color) {
         // fill the visionpoint alt (increase the x)
-        run.xf = x / 4;
-        run.dx++;
+        run.xf = x;
+        run.dx += 4;
       } else {
         // put the current run into the vector and create a new run with this color
         runs.push_back(run);
         run_color = pixel_color;
-        run = VisionPointAlt(x / 4, y / 2, run_color);
+        run = VisionPointAlt(x, y, run_color);
       }
     }
     // Finish the last run in this row
-    run.xf = x / 4;
-    run.dx++;
+    run.xf = x;
+    run.dx += 4;
 
     //put the current run into the vector
     runs.push_back(run);
@@ -126,7 +226,7 @@ void Classifier::constructRuns(std::vector<VisionPointAlt>& runs) {
   
 }
 
-void Classifier::mergeRuns(std::vector<VisionPointAlt>& runs, std::vector<Blob>& blobs) {
+void Classifier::mergeRuns(std::vector<VisionPointAlt>& runs) {
   // TODO: get rid of this
   std::cout << "Merge " << runs.size() << " runs" << std::endl; 
   int counter = 0;
@@ -153,11 +253,17 @@ void Classifier::mergeRuns(std::vector<VisionPointAlt>& runs, std::vector<Blob>&
     }
   }
 
-  std::cout << "Hi we mergedruns\n";
+  iter = runs.begin();
+  for(iter; iter !=runs.end(); iter++) {
+    if (iter->color != c_UNDEFINED && iter->color != c_FIELD_GREEN && iter->color != c_WHITE) {
+      iter->parent = findParent(*iter);
+    }
+  }
 }
 
 void Classifier::checkAdj(VisionPointAlt& node, std::vector<VisionPointAlt>::iterator row_begin, std::vector<VisionPointAlt>::iterator row_end) {
   if (node.color == c_UNDEFINED || node.color == c_FIELD_GREEN || node.color == c_WHITE) {
+    node.parent = nullptr;
     return;
   }
   for(row_begin; row_begin != row_end; row_begin++) {
@@ -173,7 +279,6 @@ void Classifier::checkAdj(VisionPointAlt& node, std::vector<VisionPointAlt>::ite
 
 VisionPointAlt * Classifier::findParent(VisionPointAlt& node) {
   VisionPointAlt *nodePtr = &node;
-
   if (node.parent != nodePtr) {
     node.parent = findParent(*(node.parent)); //Recursive loop to find parent
   }
@@ -188,7 +293,7 @@ void Classifier::unionByRank(VisionPointAlt& a, VisionPointAlt& b) {
     //Already merged, return
     return;
   }
-  if ((*rootA).rank < (*rootB).rank) {
+  if (rootA->rank < rootB->rank) {
     // Swap parents
     temp = rootA;
     rootA = rootB;
@@ -196,9 +301,9 @@ void Classifier::unionByRank(VisionPointAlt& a, VisionPointAlt& b) {
     temp = NULL;
   }
 
-  (*rootB).parent = rootA;  // Put the parent back
-  if ((*rootA).rank == (*rootB).rank) {
-    (*rootA).rank++;  // Increment rank
+  rootB->parent = rootA;  // Put the parent back
+  if (rootA->rank == rootB->rank) {
+    rootA->rank++;  // Increment rank
   }
 }
 
