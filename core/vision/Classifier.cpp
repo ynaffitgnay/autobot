@@ -155,45 +155,36 @@ void Classifier::mergeRuns(std::vector<VisionPointAlt>& runs, std::vector<Blob>&
   std::cout << "Merge " << runs.size() << " runs" << std::endl; 
   int counter = 0;
   // No default constructor for VisionPointAlt, so you have to have a dummy for the struct
-  VisionPointAlt dummy(0,0,0);
   
   // Just a dummy as the initial. Might need to review this
   int vpa_num = runs.size();
   int cRow = 0;
   int pvRow;
-  std::deque<MergeNode*> adjRowCurr;
-  std::deque<MergeNode*> adjRowPrev;
-  for(std::vector<VisionPointAlt>::const_iterator iter = runs.begin(); iter !=runs.end(); iter++) {
-    std::cout << "VPA #" << counter << ":" << std::endl;
+  std::deque<VisionPointAlt*> adjRowCurr;
+  std::deque<VisionPointAlt*> adjRowPrev;
+  for(std::vector<VisionPointAlt>::iterator iter = runs.begin(); iter !=runs.end(); iter++) {
+    // std::cout << "VPA #" << counter << ":" << std::endl;
     //std::cout << "Run length: " << (*iter).dy << "    Run color: " << (int)(*iter).color << std::endl;
     
-    MergeNode *node = new MergeNode; //{&dummy,NULL,NULL};
 
-    std::cout << "PosCheck X: "  << (*iter).xi << " PosCheck Y: " << (*iter).yi << std::endl;
-    dummy = *iter;
-
-    node->data = &dummy;
     // node->parent = &node;
-    node->rank = vpa_num-counter;
-    std::cout << "Node Rank: " << node->rank << "Node Parent rank: " << node->parent->rank << std::endl;
+    iter->rank = vpa_num-counter;
+    // std::cout << "Node Rank: " << node->rank << "Node Parent rank: " << node->parent->rank << std::endl;
     counter++;
-    if ((*iter).yi != cRow) {
+    if (iter->yi != cRow) {
       // Moved to next row
       std::cout << "New Row" << std::endl; 
-      cRow = node->data->yi;
-      std::cout << "1 adjRowPrev size: " << adjRowPrev.size() << std::endl;
-      std::cout << "adjRowCurr size: " << adjRowCurr.size() << std::endl;
+      cRow = iter->yi;
+
       adjRowPrev.clear();
       adjRowPrev.insert(std::end(adjRowPrev), std::begin(adjRowCurr), std::end(adjRowCurr));
       adjRowCurr.clear();
-      std::cout << "2 adjRowPrev size: " << adjRowPrev.size() << std::endl;
-      std::cout << "adjRowCurr size: " << adjRowCurr.size() << std::endl;
+
     }
-    std::cout << "PosCheck X: "  << node->data->xi << " PosCheck Y: " << node->data->yi << std::endl;
-    adjRowCurr.push_back(node);
-    std::cout << "adjRowPrev size: " << adjRowPrev.size() << std::endl;
-    std::cout << "adjRowCurr size: " << adjRowCurr.size() << std::endl;
-    checkAdj(*node, adjRowPrev);
+    // std::cout << "PosCheck X: "  << node->data.xi << " PosCheck Y: " << node->data.yi << std::endl;
+    adjRowCurr.push_back(&(*iter));
+
+    checkAdj(*iter, adjRowPrev);
   }
 
   std::cout << "Hi we mergedruns\n";
@@ -203,29 +194,28 @@ void Classifier::mergeRuns(std::vector<VisionPointAlt>& runs, std::vector<Blob>&
 
 }
 
-void Classifier::checkAdj(MergeNode node, std::deque<MergeNode*> adjRowPrev) {
+void Classifier::checkAdj(VisionPointAlt node, std::deque<VisionPointAlt*> adjRowPrev) {
   //not filled in yet
-  MergeNode dummy = MergeNode();
-  std::cout << "adjRowPrev size: " << adjRowPrev.size() << std::endl;
-  for(std::deque<MergeNode*>::const_iterator iter = adjRowPrev.begin(); iter !=adjRowPrev.end(); iter++) {
-    std::cout << "Iter Rank: "  << (*iter)->rank << std::endl;
-    std::cout << "PosCheck X: "  << (*iter)->data->xi << " PosCheck Y: " << (*iter)->data->yi << std::endl;
-    if ((*iter)->data->color == node.data->color)
+  // std::cout << "adjRowPrev size: " << adjRowPrev.size() << std::endl;
+  for(std::deque<VisionPointAlt*>::const_iterator iter = adjRowPrev.begin(); iter !=adjRowPrev.end(); iter++) {
+    // std::cout << "Iter Rank: "  << (*iter)->rank << std::endl;
+    // std::cout << "PosCheck X: "  << (*iter)->data.xi << " PosCheck Y: " << (*iter)->data.yi << std::endl;
+    if ((*iter)->color == node.color)
     {
-    if (((node.data->xi >= (*iter)->data->xi) && node.data->xi <= (*iter)->data->xf) || ((node.data->xf >= (*iter)->data->xi) && node.data->xf <= (*iter)->data->xf) || ((node.data->xf >= (*iter)->data->xf) && node.data->xi <= (*iter)->data->xi))
+    if (((node.xi >= (*iter)->xi) && node.xi <= (*iter)->xf) || ((node.xf >= (*iter)->xi) && node.xf <= (*iter)->xf) || ((node.xf >= (*iter)->xf) && node.xi <= (*iter)->xi))
       {
-        dummy = *(*iter);
         std::cout << "Starting Union" << std::endl; 
-        // unionByRank(node, dummy);
-        //node.data->parent unionByRank(iter->data->parent;
+        unionByRank(node, *(*iter));
+        //node.parent unionByRank(iter-->parent;
       }
     }
   }
 }
 
-Classifier::MergeNode * Classifier::findParent(MergeNode node) {
+VisionPointAlt * Classifier::findParent(VisionPointAlt node) {
   std::cout << "Finding Parent" << std::endl; 
-  MergeNode *nodePtr = &node;
+  std::cout << "Node Rank: " << node.parent->rank << std::endl;
+  VisionPointAlt *nodePtr = &node;
 
   if (node.parent != nodePtr) {
     node.parent = findParent(*(node.parent)); //Recursive loop to find parent
@@ -233,12 +223,12 @@ Classifier::MergeNode * Classifier::findParent(MergeNode node) {
   return node.parent;
 }
 
-void Classifier::unionByRank(MergeNode& a, MergeNode& b) {
+void Classifier::unionByRank(VisionPointAlt& a, VisionPointAlt& b) {
   std::cout << "Running Union" << std::endl; 
   std::cout << "Node Rank: " << a.parent->rank<< "Node Parent rank: " << b.parent->rank << std::endl;
-  MergeNode *rootA = findParent(a);
-  MergeNode *rootB = findParent(b);
-  MergeNode *temp;
+  VisionPointAlt *rootA = findParent(a);
+  VisionPointAlt *rootB = findParent(b);
+  VisionPointAlt *temp;
   if (rootA == rootB) {
     //Already merged, return
     return;
