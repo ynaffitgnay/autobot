@@ -112,7 +112,6 @@ void Classifier::constructRuns(std::vector<VisionPointAlt>& runs) {
     
     // Create a new VisionPointAlt for the first run in this line
     VisionPointAlt run = VisionPointAlt(0, y / 2, run_color);
-    
     // Process from left to right
     for (x = 0; x < iparams_.width; x+=4) {
       // TODO: get rid of this
@@ -160,31 +159,42 @@ void Classifier::mergeRuns(std::vector<VisionPointAlt>& runs, std::vector<Blob>&
   int vpa_num = runs.size();
   int cRow = 0;
   int pvRow;
-  std::deque<VisionPointAlt*> adjRowCurr;
-  std::deque<VisionPointAlt*> adjRowPrev;
-  for(std::vector<VisionPointAlt>::iterator iter = runs.begin(); iter !=runs.end(); iter++) {
+  // std::deque<VisionPointAlt*> adjRowCurr;
+  // std::deque<VisionPointAlt*> adjRowPrev;
+  std::vector<VisionPointAlt>::iterator iter = runs.begin();
+  std::vector<VisionPointAlt>::iterator row_begin = iter;
+  std::vector<VisionPointAlt>::iterator row_end;
+  // std::copy(iter,row_begin);
+  bool first = true;
+  for(iter; iter !=runs.end(); iter++) {
+    iter->parent = &(*iter);
     // std::cout << "VPA #" << counter << ":" << std::endl;
     //std::cout << "Run length: " << (*iter).dy << "    Run color: " << (int)(*iter).color << std::endl;
     
 
     // node->parent = &node;
+    // std::cout << "1 Node Rank: " << iter->rank << std::endl;
     iter->rank = vpa_num-counter;
-    // std::cout << "Node Rank: " << node->rank << "Node Parent rank: " << node->parent->rank << std::endl;
+    // std::cout << "2 Node Rank: " << iter->rank << std::endl;
     counter++;
     if (iter->yi != cRow) {
+      first = false;
+      row_end = iter;
       // Moved to next row
-      std::cout << "New Row" << std::endl; 
+      // std::cout << "New Row" << std::endl; 
       cRow = iter->yi;
 
-      adjRowPrev.clear();
-      adjRowPrev.insert(std::end(adjRowPrev), std::begin(adjRowCurr), std::end(adjRowCurr));
-      adjRowCurr.clear();
+      // adjRowPrev.clear();
+      // adjRowPrev.insert(std::end(adjRowPrev), std::begin(adjRowCurr), std::end(adjRowCurr));
+      // adjRowCurr.clear();
 
     }
     // std::cout << "PosCheck X: "  << node->data.xi << " PosCheck Y: " << node->data.yi << std::endl;
-    adjRowCurr.push_back(&(*iter));
-
-    checkAdj(*iter, adjRowPrev);
+    // adjRowCurr.push_back(&(*iter));
+    if(!first){
+      // printf("%p\t %p\n", (void *) &(*row_begin),(void *) &(*row_end));
+      checkAdj(*iter, row_begin, row_end);
+    }
   }
 
   std::cout << "Hi we mergedruns\n";
@@ -194,38 +204,55 @@ void Classifier::mergeRuns(std::vector<VisionPointAlt>& runs, std::vector<Blob>&
 
 }
 
-void Classifier::checkAdj(VisionPointAlt node, std::deque<VisionPointAlt*> adjRowPrev) {
+void Classifier::checkAdj(VisionPointAlt& node, std::vector<VisionPointAlt>::iterator row_begin, std::vector<VisionPointAlt>::iterator row_end) {
+  // printf("%p\t %p\n", (void *) &(*row_begin),(void *) &(*row_end));
+// void Classifier::checkAdj(VisionPointAlt& node, std::deque<VisionPointAlt*> adjRowPrev) {
   //not filled in yet
   // std::cout << "adjRowPrev size: " << adjRowPrev.size() << std::endl;
-  for(std::deque<VisionPointAlt*>::const_iterator iter = adjRowPrev.begin(); iter !=adjRowPrev.end(); iter++) {
-    // std::cout << "Iter Rank: "  << (*iter)->rank << std::endl;
-    // std::cout << "PosCheck X: "  << (*iter)->data.xi << " PosCheck Y: " << (*iter)->data.yi << std::endl;
-    if ((*iter)->color == node.color)
+  // for(std::deque<VisionPointAlt*>::iterator iter = adjRowPrev.begin(); iter !=adjRowPrev.end(); iter++) {
+  for(row_begin; row_begin != row_end; row_begin++) {
+    // std::cout << "Iter Rank: "  << (*iter)->rank << " PosCheck X: "  << (*iter)->xi << " PosCheck Y: " << (*iter)->yi << std::endl;
+    if (row_begin->color == node.color)
     {
-    if (((node.xi >= (*iter)->xi) && node.xi <= (*iter)->xf) || ((node.xf >= (*iter)->xi) && node.xf <= (*iter)->xf) || ((node.xf >= (*iter)->xf) && node.xi <= (*iter)->xi))
+    if (((node.xi >= row_begin->xi) && node.xi <= row_begin->xf) || ((node.xf >= row_begin->xi) && node.xf <= row_begin->xf) || ((node.xf >= row_begin->xf) && node.xi <= row_begin->xi))
       {
-        std::cout << "Starting Union" << std::endl; 
-        unionByRank(node, *(*iter));
+        // std::cout << "Starting Union" << std::endl;
+        // std::cout << "3 Node Rank: " << node.rank << std::endl;
+        // printf("%p\t %p\n", (void *) &node,(void *) node.parent);
+        unionByRank(node, *row_begin);
         //node.parent unionByRank(iter-->parent;
       }
     }
   }
 }
 
-VisionPointAlt * Classifier::findParent(VisionPointAlt node) {
-  std::cout << "Finding Parent" << std::endl; 
-  std::cout << "Node Rank: " << node.parent->rank << std::endl;
+VisionPointAlt * Classifier::findParent(VisionPointAlt& node) {
+  // std::cout << "Finding Parent" << std::endl; 
+  // std::cout << "Node Rank: " << node.parent->rank << std::endl;
   VisionPointAlt *nodePtr = &node;
 
-  if (node.parent != nodePtr) {
-    node.parent = findParent(*(node.parent)); //Recursive loop to find parent
+  // if (node.parent != nodePtr) {
+  //   node.parent = findParent(*(node.parent)); //Recursive loop to find parent
+  //   nodePtr = nodePtr->parent;
+  // }
+  while(nodePtr->parent != nodePtr){
+    // std::cout << "Iter Rank: "  << nodePtr->rank << " PosCheck X: "  << nodePtr->xi << " PosCheck Y: " << nodePtr->yi << std::endl;
+    // printf("nodePtr = %p\t nodePtr->parent = %p\n", (void *) nodePtr,(void *) (*nodePtr).parent);
+    nodePtr = nodePtr->parent;
   }
+
+  node.parent = nodePtr;
   return node.parent;
 }
 
+void Classifier::setParent(VisionPointAlt& node, VisionPointAlt* newParent){
+  //TODO: reset all upstream parents to new parent
+}
+
 void Classifier::unionByRank(VisionPointAlt& a, VisionPointAlt& b) {
-  std::cout << "Running Union" << std::endl; 
-  std::cout << "Node Rank: " << a.parent->rank<< "Node Parent rank: " << b.parent->rank << std::endl;
+  // std::cout << "Running Union" << std::endl; 
+  // printf("&a = %p\t a.parent = %p\n", (void *) &a,(void *) a.parent);
+  // std::cout << "Node Rank: " << a.parent->rank << "Node Parent rank: " << b.parent->rank << std::endl;
   VisionPointAlt *rootA = findParent(a);
   VisionPointAlt *rootB = findParent(b);
   VisionPointAlt *temp;

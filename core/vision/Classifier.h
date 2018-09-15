@@ -60,12 +60,13 @@ class Classifier {
   /*
   * Checking adjacency
   */
-  void checkAdj(VisionPointAlt node, std::deque<VisionPointAlt*> checkAdj);
+  void checkAdj(VisionPointAlt& node, std::vector<VisionPointAlt>::iterator row_begin, std::vector<VisionPointAlt>::iterator row_end);
+  // void checkAdj(VisionPointAlt& node, std::deque<VisionPointAlt*> checkAdj);
 
   /*
   * find method for Union-Find
   */
-  VisionPointAlt * findParent(VisionPointAlt node);
+  VisionPointAlt * findParent(VisionPointAlt& node);
 
   /*
   * Union by rank for Union-Find
