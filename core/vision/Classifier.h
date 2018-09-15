@@ -30,7 +30,7 @@ class Classifier {
     MergeNode* parent;    // Pointer to the parent
     int rank;        // Rank for comparing sets to merge
 
-    MergeNode() : data(nullptr), parent(nullptr), rank(-1) {}
+    MergeNode() : data(nullptr), parent(this), rank(-1) {}
   };
   
  public:
@@ -60,7 +60,7 @@ class Classifier {
   /*
   * Checking adjacency
   */
-  void checkAdj(MergeNode node, std::vector<MergeNode> checkAdj);
+  void checkAdj(MergeNode node, std::deque<MergeNode*> checkAdj);
 
   /*
   * find method for Union-Find
