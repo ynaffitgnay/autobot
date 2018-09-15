@@ -49,8 +49,6 @@ class Classifier {
   void classifyImage(const FocusArea& area, unsigned char*);
   bool setImagePointers();
   void constructRuns(std::vector<VisionPointAlt>& runs);
-  void mergeRegions(std::vector<VisionPointAlt>& runs, std::vector<Blob> (&blobs)[5]);
-  void mergeRegionsFromBlobs(std::vector<VisionPointAlt>& runs, std::vector<Blob> (&blobs)[5]);
 
   /*
   * Main method for merging
@@ -61,7 +59,6 @@ class Classifier {
   * Checking adjacency
   */
   void checkAdj(VisionPointAlt& node, std::vector<VisionPointAlt>::iterator row_begin, std::vector<VisionPointAlt>::iterator row_end);
-  // void checkAdj(VisionPointAlt& node, std::deque<VisionPointAlt*> checkAdj);
 
   /*
   * find method for Union-Find

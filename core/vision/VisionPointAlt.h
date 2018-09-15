@@ -17,7 +17,7 @@ struct VisionPointAlt {
     yf = y;
     dy = 1;
     color = c;
-    parent = this;
+    parent = nullptr;
   }
     
   uint16_t xi, xf, dx, yi, yf, dy;
