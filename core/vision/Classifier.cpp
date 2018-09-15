@@ -210,14 +210,14 @@ void Classifier::checkAdj(MergeNode node, std::deque<MergeNode*> adjRowPrev) {
   for(std::deque<MergeNode*>::const_iterator iter = adjRowPrev.begin(); iter !=adjRowPrev.end(); iter++) {
     std::cout << "Iter Rank: "  << (*iter)->rank << std::endl;
     std::cout << "PosCheck X: "  << (*iter)->data->xi << " PosCheck Y: " << (*iter)->data->yi << std::endl;
-    if ((*iter)->data->color == node->data->color)
+    if ((*iter)->data->color == node.data->color)
     {
-      if (((node->data->xi >= (*iter)->data->xi) && node->data->xi <= (*iter)->data->xf) || ((node->data->xf >= (*iter)->data->xi) && node->data->xf <= (*iter)->data->xf) || ((node->data->xf >= (*iter)->data->xf) && node->data->xi <= (*iter)->data->xi))
+    if (((node.data->xi >= (*iter)->data->xi) && node.data->xi <= (*iter)->data->xf) || ((node.data->xf >= (*iter)->data->xi) && node.data->xf <= (*iter)->data->xf) || ((node.data->xf >= (*iter)->data->xf) && node.data->xi <= (*iter)->data->xi))
       {
         dummy = *(*iter);
         std::cout << "Starting Union" << std::endl; 
         // unionByRank(node, dummy);
-        //node->data->parent unionByRank(iter->data->parent;
+        //node.data->parent unionByRank(iter->data->parent;
       }
     }
   }
