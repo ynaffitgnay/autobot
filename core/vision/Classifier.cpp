@@ -210,6 +210,10 @@ void Classifier::checkAdj(VisionPointAlt& node, std::vector<VisionPointAlt>::ite
   //not filled in yet
   // std::cout << "adjRowPrev size: " << adjRowPrev.size() << std::endl;
   // for(std::deque<VisionPointAlt*>::iterator iter = adjRowPrev.begin(); iter !=adjRowPrev.end(); iter++) {
+
+  if (node.color == c_UNDEFINED || node.color == c_FIELD_GREEN || node.color == c_WHITE) {
+    return;
+  }
   for(row_begin; row_begin != row_end; row_begin++) {
     // std::cout << "Iter Rank: "  << (*iter)->rank << " PosCheck X: "  << (*iter)->xi << " PosCheck Y: " << (*iter)->yi << std::endl;
     if (row_begin->color == node.color)
@@ -231,23 +235,21 @@ VisionPointAlt * Classifier::findParent(VisionPointAlt& node) {
   // std::cout << "Node Rank: " << node.parent->rank << std::endl;
   VisionPointAlt *nodePtr = &node;
 
-  // if (node.parent != nodePtr) {
-  //   node.parent = findParent(*(node.parent)); //Recursive loop to find parent
-  //   nodePtr = nodePtr->parent;
-  // }
-  while(nodePtr->parent != nodePtr){
-    // std::cout << "Iter Rank: "  << nodePtr->rank << " PosCheck X: "  << nodePtr->xi << " PosCheck Y: " << nodePtr->yi << std::endl;
-    // printf("nodePtr = %p\t nodePtr->parent = %p\n", (void *) nodePtr,(void *) (*nodePtr).parent);
-    nodePtr = nodePtr->parent;
+  if (node.parent != nodePtr) {
+    node.parent = findParent(*(node.parent)); //Recursive loop to find parent
+    // nodePtr = nodePtr->parent;
   }
+  // while(nodePtr->parent != nodePtr){
+    // nodePtr = nodePtr->parent;
+  // }
 
-  node.parent = nodePtr;
+  // node.parent = nodePtr;
   return node.parent;
 }
 
-void Classifier::setParent(VisionPointAlt& node, VisionPointAlt* newParent){
-  //TODO: reset all upstream parents to new parent
-}
+// void Classifier::setParent(VisionPointAlt& node, VisionPointAlt* newParent){
+//   //TODO: reset all upstream parents to new parent
+// }
 
 void Classifier::unionByRank(VisionPointAlt& a, VisionPointAlt& b) {
   // std::cout << "Running Union" << std::endl; 
