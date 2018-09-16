@@ -10,12 +10,10 @@ GoalDetector::GoalDetector(DETECTOR_DECLARE_ARGS) : DETECTOR_INITIALIZE {
 void GoalDetector::findGoals() {
   if(camera_ == Camera::BOTTOM) return;
   static map<WorldObjectType,int> heights = {
-    { WO_OWN_GOAL, 300 },
-    { WO_OPP_GOAL, 200 }
+    { WO_UNKNOWN_GOAL, 300 }
   };
   static map<WorldObjectType,vector<int>> goals = {
-    { WO_OWN_GOAL, { 24, 15, 74, 83} },
-    { WO_OPP_GOAL, { 104, 41, 138, 96 } }
+    { WO_UNKNOWN_GOAL, { 24, 15, 74, 83} }
   };
   auto fid = vblocks_.frame_info->frame_id;
   if(fid >= 6150) return;
