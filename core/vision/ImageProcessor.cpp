@@ -3,7 +3,10 @@
 #include <vision/BeaconDetector.h>
 #include <vision/Logging.h>
 #include <vision/structures/Blob.h>
+#include <common/ColorConversion.h>
 #include <iostream>
+#include "opencv2/highgui/highgui.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
 
 ImageProcessor::ImageProcessor(VisionBlocks& vblocks, const ImageParams& iparams, Camera::Type camera) :
   vblocks_(vblocks), iparams_(iparams), camera_(camera), cmatrix_(iparams_, camera)
@@ -125,14 +128,14 @@ void ImageProcessor::processFrame(){
   tlog(30, "Classifying Image: %i", camera_);
   if(!color_segmenter_->classifyImage(color_table_)) return;
   color_segmenter_->makeBlobs(blobs);
-  detectBall();
+  detectBall(blobs);
   detectGoal();
   beacon_detector_->findBeacons();
 }
 
-void ImageProcessor::detectBall() {
+void ImageProcessor::detectBall(std::vector<Blob>& blobs) {
   int imageX, imageY;
-  if(!findBall(imageX,imageY)) return; // findBall fills in imageX and imageY
+  if(!findBall(blobs, imageX,imageY)) return; // findBall fills in imageX and imageY
   WorldObject* ball = &vblocks_.world_object->objects_[WO_BALL];
 
   ball->imageCenterX = imageX;
@@ -149,11 +152,77 @@ void ImageProcessor::detectBall() {
 }
 
 // Puts the center of the ball in imageX and imageY
-bool ImageProcessor::findBall(int& imageX, int& imageY) {
+bool ImageProcessor::findBall(std::vector<Blob>& blobs, int& imageX, int& imageY) {
+  if(camera_ == Camera::TOP) {
+    // TODO: fix this logic (right now we only detect one orange ball)
+    Blob orangeBlob;
+    for (auto blob : blobs) {
+      if (blob.color == c_ORANGE) {
+        orangeBlob = blob;
+        break;
+      }
+    }
+    
+    cv::Mat frame, grayFrame;
+    //frame =  color::rawToMat(vblocks_.image->getImgTop(), iparams_);
+
+    // Make sure the row/col you want are within range
+    int row = ((orangeBlob.yi - 50) < 0) ? 0 : (orangeBlob.yi - 50);
+    int col = ((orangeBlob.xi - 50) < 0) ? 0 : (orangeBlob.xi - 50);
+    int width = ((orangeBlob.xf - orangeBlob.xi + 100) > iparams_.width) ? iparams_.width : (orangeBlob.xf - orangeBlob.xi + 100);
+    int height = ((orangeBlob.yf - orangeBlob.yi + 100) > iparams_.height) ? iparams_.height : (orangeBlob.yf - orangeBlob.yi + 100);
+
+    std::cout << "row: " << row << " col: " << col << " width: " << width << " height: " << height << "\n";
+    
+    frame = color::rawToMatSubset(vblocks_.image->getImgTop(), iparams_, row, col, width, height, 1, 1);
+
+    
+    //cv::Mat crzyframe;
+    //crzyframe = color::rawToMatSubset(vblocks_.image->getImgTop(), iparams_, col, row, width, height, 1, 1);
+    
+    std::vector<cv::Vec3f> circles;
+  
+    if (!frame.data) {
+      return false;
+    }
+
+    //// GET THE COLOR??
+    //cv::Point3_<uchar>* p1 = frame.ptr<cv::Point3_<uchar> >(col / 2, (row/2));
+    //std::cout << "frame R: " << unsigned(p1->z) << " G: " << unsigned(p1->y) << "B: " << unsigned(p1->x) << "\n";
+    //cv::Point3_<uchar>* p2 = crzyframe.ptr<cv::Point3_<uchar> >(col / 2, (row/2));
+    //std::cout << "crzyframe R: " << unsigned(p2->z) << " G: " << unsigned(p2->y) << "B: " << unsigned(p2->x) << "\n";
+    
+    // Convert the Mat to gray
+    cv::cvtColor(frame, grayFrame, CV_BGR2GRAY);
+  
+    // CHeck to see if getting rid of this speeds anything up
+    cv::GaussianBlur(grayFrame, grayFrame, cv::Size(9, 9), 2, 2);
+
+    std::cout << "grayFrame.rows: " << grayFrame.rows << "\n";
+    cv::HoughCircles(grayFrame, circles, CV_HOUGH_GRADIENT, 20, grayFrame.rows/8, 200, 100, 0, 0);
+    
+    // Now turn circles into a vector of floats
+    
+    // Populates a v with circles.size() elements, each a vector with 3 floats
+    std::vector<std::vector<float>> v(circles.size(), std::vector<float>(3));
+  
+    for (size_t i = 0; i < circles.size(); ++i) {
+      const cv::Vec3f& c = circles[i];
+      v[i][0] = c[0] + col; // if downsampled
+      v[i][1] = c[1] + row; // if downsampled
+      v[i][2] = c[2];
+  
+      std::cout << "Circle " << i << " x: " << v[i][0] << " y: " << v[i][1] << " r: " << v[i][2] << "\n";
+    }
+  }
+  
   imageX = imageY = 0;
   int total = 0;
   float x_mean, y_mean;
   x_mean = y_mean = 0.0;
+
+  //std::cout << "iparams_.width: " << iparams_.width << " iparams_.height: " << iparams_.height << "\n";
+  
   // Process from left to right
   for(int x = 0; x < iparams_.width; x++) {
     // Process from top to bottom
@@ -167,7 +236,7 @@ bool ImageProcessor::findBall(int& imageX, int& imageY) {
       }
     }
   }
-
+  
   if(total <= 20){
     return false;
   }
@@ -176,6 +245,8 @@ bool ImageProcessor::findBall(int& imageX, int& imageY) {
   imageX = (int)x_mean;
   imageY = (int)y_mean;
 
+  std::cout << "ImageX: " << imageX << " ImageY: " << imageY << "\n";
+  
   // TO DO: Add heuristics to return false if ball detection fails
   return true;
 }

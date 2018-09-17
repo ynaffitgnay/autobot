@@ -1,6 +1,7 @@
 #ifndef IMAGEPROCESSOR_H
 #define IMAGEPROCESSOR_H
 
+#include <vector>
 #include <kinematics/ForwardKinematics.h>
 #include <common/RobotDimensions.h>
 #include <common/Profiling.h>
@@ -12,6 +13,7 @@
 #include <vision/structures/BallCandidate.h>
 #include <math/Pose3D.h>
 #include <vision/structures/VisionParams.h>
+#include <vision/structures/Blob.h>
 
 class BallDetector;
 class Classifier;
@@ -42,8 +44,8 @@ class ImageProcessor {
     std::vector<BallCandidate*> getBallCandidates();
     BallCandidate* getBestBallCandidate();
     bool isImageLoaded();
-    void detectBall();
-    bool findBall(int& imageX, int& imageY);
+    void detectBall(std::vector<Blob>& blobs);
+    bool findBall(std::vector<Blob>& blobs, int& imageX, int& imageY);
     void detectGoal();
     bool findGoal(int& imageX, int& imageY);
   private:
