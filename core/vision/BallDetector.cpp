@@ -10,7 +10,7 @@ BallDetector::BallDetector(DETECTOR_DECLARE_ARGS) : DETECTOR_INITIALIZE {
 void BallDetector::findBall() {
   if(camera_ == Camera::BOTTOM) return;
   static map<WorldObjectType,int> heights = {
-    { WO_BALL, 300 },
+    { WO_BALL, 33 },
   };
   static map<WorldObjectType,vector<int>> balls = {
     { WO_BALL, { 24, 15, 74, 83} }

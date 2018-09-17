@@ -272,7 +272,9 @@ void Classifier::checkAdj(VisionPointAlt& node, std::vector<VisionPointAlt>::ite
     {
     if (((node.xi >= row_begin->xi) && node.xi <= row_begin->xf) || ((node.xf >= row_begin->xi) && node.xf <= row_begin->xf) || ((node.xf >= row_begin->xf) && node.xi <= row_begin->xi))
       {
-        unionByRank(node, *row_begin);
+        if (node.yi - (row_begin->yf) < 5) {
+          unionByRank(node, *row_begin);
+        }
       }
     }
   }

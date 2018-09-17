@@ -10,7 +10,7 @@ GoalDetector::GoalDetector(DETECTOR_DECLARE_ARGS) : DETECTOR_INITIALIZE {
 void GoalDetector::findGoals() {
   if(camera_ == Camera::BOTTOM) return;
   static map<WorldObjectType,int> heights = {
-    { WO_UNKNOWN_GOAL, 300 }
+    { WO_UNKNOWN_GOAL, 253 }
   };
   static map<WorldObjectType,vector<int>> goals = {
     { WO_UNKNOWN_GOAL, { 24, 15, 74, 83} }
