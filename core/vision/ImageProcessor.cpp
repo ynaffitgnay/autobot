@@ -168,14 +168,20 @@ bool ImageProcessor::findBall(std::vector<Blob>& blobs, int& imageX, int& imageY
     }
     cv::Mat frame, grayFrame;
 
+    int xPadding = std::min(orangeBlob.avgX - orangeBlob.xi, orangeBlob.xf - orangeBlob.avgX);
+    int yPadding = std::min(orangeBlob.avgY - orangeBlob.yi, orangeBlob.yf - orangeBlob.avgY);
+    int widthFactor = 1.25;
+    int heightFactor = 1.25;
+    
     // Make sure the row/col you want are within range
-    int row = ((orangeBlob.yi - 50) < 0) ? 0 : (orangeBlob.yi - 50);
-    int col = ((orangeBlob.xi - 50) < 0) ? 0 : (orangeBlob.xi - 50);
-    int width = ((2 * (orangeBlob.xf - orangeBlob.xi)) > iparams_.width) ? iparams_.width : (2 *(orangeBlob.xf - orangeBlob.xi));
-    int height = ((orangeBlob.yf - orangeBlob.yi + 100) > iparams_.height) ? iparams_.height : (orangeBlob.yf - orangeBlob.yi + 100);
+    int row = ((orangeBlob.yi - xPadding) < 0) ? 0 : (orangeBlob.yi - xPadding);
+    int col = ((orangeBlob.xi - yPadding) < 0) ? 0 : (orangeBlob.xi - yPadding);
+    int width = ((widthFactor * (orangeBlob.xf - orangeBlob.xi + xPadding)) > iparams_.width) ? iparams_.width : (widthFactor *(orangeBlob.xf - orangeBlob.xi + xPadding));
+    int height = (heightFactor * (orangeBlob.yf - orangeBlob.yi + yPadding) > iparams_.height) ? iparams_.height : heightFactor * (orangeBlob.yf - orangeBlob.yi + yPadding);
     
     //std::cout << "row: " << row << " col: " << col << " width: " << width << " height: " << height << "\n";
-  
+    std::cout << " col: " << col << " row: " << row << " xf: " << col + width << " yf: " << row + height << "\n";
+    
     //frame = color::rawToMatSubset(vblocks_.image->getImgTop(), iparams_, row, col, width, height, 1, 1);
     grayFrame = color::rawToMatGraySubset(vblocks_.image->getImgTop(), iparams_, row, col, width, height, 1, 1);
     
@@ -188,7 +194,7 @@ bool ImageProcessor::findBall(std::vector<Blob>& blobs, int& imageX, int& imageY
     // Check to see if getting rid of this speeds anything up
     cv::GaussianBlur(grayFrame, grayFrame, cv::Size(9, 9), 2, 2);
 
-    cv::HoughCircles(grayFrame, circles, CV_HOUGH_GRADIENT, 30, grayFrame.rows/8, 50, 100, 0, 0);
+    cv::HoughCircles(grayFrame, circles, CV_HOUGH_GRADIENT, 20, grayFrame.rows/8, 10, 10, 0, 0);
     
     // Now turn circles into a vector of floats
     // Populates a v with circles.size() elements, each a vector with 3 floats

@@ -95,11 +95,11 @@ void Classifier::makeBlobs(std::vector<Blob>& blobs) {
   makeParentLists(runs,parents);
   unsigned char c;
   uint16_t xi, xf, dx, yi, yf, dy, widthStart, widthEnd, avgX, avgY, total;
-  float meanX, meanY;
-  std::cout << "Number of paRENTS " << parents.size() << std::endl;
+  float meanX, meanY, pixelRatio;
+  //std::cout << "Number of paRENTS " << parents.size() << std::endl;
   for (int i = 0; i < parents.size(); ++i)
   {
-    if (parents.at(i).size() < 3)
+    if (parents.at(i).size() < 5)
     {
       continue;
     }
@@ -135,7 +135,8 @@ void Classifier::makeBlobs(std::vector<Blob>& blobs) {
     }
     avgX = (uint16_t) (meanX/total);
     avgY = (uint16_t) (meanY/total);
-    Blob blob = Blob(c, xi, xf, dx, yi, yf, dy, widthStart, widthEnd, avgX, avgY, total);
+    pixelRatio = (xf - xi) / (yf - yi);
+    Blob blob = Blob(c, xi, xf, dx, yi, yf, dy, widthStart, widthEnd, avgX, avgY, total, pixelRatio);
     blobs.push_back(blob);
   }
   for (int i = 0; i < blobs.size(); ++i)
@@ -162,8 +163,8 @@ void Classifier::makeBlobs(std::vector<Blob>& blobs) {
           std::cout << "what??";
         }
       std::cout << " avgX: " << blobs.at(i).avgX << " avgY: " << blobs.at(i).avgY << " ToTaL: " << blobs.at(i).total 
-      << " xi: " << blobs.at(i).xi << " yi: " << blobs.at(i).yi << " xf: " << blobs.at(i).xf << " yf: " << blobs.at(i).yf 
-      << std::endl;
+                << " xi: " << blobs.at(i).xi << " yi: " << blobs.at(i).yi << " xf: " << blobs.at(i).xf << " yf: "
+                << blobs.at(i).yf << " pixelRatio: " << blobs.at(i).correctPixelRatio << std::endl;
     }
   }
 }
@@ -228,7 +229,7 @@ void Classifier::constructRuns(std::vector<VisionPointAlt>& runs) {
 
 void Classifier::mergeRuns(std::vector<VisionPointAlt>& runs) {
   // TODO: get rid of this
-  std::cout << "Merge " << runs.size() << " runs" << std::endl; 
+  //std::cout << "Merge " << runs.size() << " runs" << std::endl; 
   int counter = 0;
   int vpa_num = runs.size();
   int cRow = 0;
