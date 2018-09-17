@@ -21,6 +21,7 @@ struct Blob {
   uint16_t total;
   float avgWidth;   // Summation (xf_row - xi_row)/total rows
   float correctPixelRatio;
+  float pixelDensity; 
   bool invalid;
 
   // GOAL DETECTION
@@ -30,10 +31,10 @@ struct Blob {
   Blob() : lpIndex(MAX_BLOB_VISIONPOINTS, 0) { }
   Blob(unsigned char c, uint16_t xi, uint16_t xf, uint16_t dx, uint16_t yi,
     uint16_t yf, uint16_t dy, uint16_t widthStart, uint16_t widthEnd, uint16_t avgX,
-       uint16_t avgY, uint16_t total, float pixelRatio):
+       uint16_t avgY, uint16_t total, float pixelRatio, float pixelDensity):
     color(c), xi(xi), xf(xf), dx(dx), yi(yi), yf(yf), dy(dy), widthStart(widthStart),
     widthEnd(widthEnd), avgX(avgX), avgY(avgY), total(total), correctPixelRatio(pixelRatio),
-    lpIndex(MAX_BLOB_VISIONPOINTS, 0), lpCount(0) { }
+    pixelDensity(pixelDensity), lpIndex(MAX_BLOB_VISIONPOINTS, 0), lpCount(0) { }
 };
 
 /// @ingroup vision

@@ -168,19 +168,20 @@ bool ImageProcessor::findBall(std::vector<Blob>& blobs, int& imageX, int& imageY
     }
     cv::Mat frame, grayFrame;
 
-    int xPadding = std::min(orangeBlob.avgX - orangeBlob.xi, orangeBlob.xf - orangeBlob.avgX);
-    int yPadding = std::min(orangeBlob.avgY - orangeBlob.yi, orangeBlob.yf - orangeBlob.avgY);
-    int widthFactor = 1.25;
-    int heightFactor = 1.25;
+    int xPadding = std::max(orangeBlob.avgX - orangeBlob.xi, orangeBlob.xf - orangeBlob.avgX);
+    int yPadding = std::max(orangeBlob.avgY - orangeBlob.yi, orangeBlob.yf - orangeBlob.avgY);
+    float widthFactor = 1.25;
+    float heightFactor = 1.25;
     
     // Make sure the row/col you want are within range
     int row = ((orangeBlob.yi - yPadding) < 0) ? 0 : (orangeBlob.yi - yPadding);
     int col = ((orangeBlob.xi - xPadding) < 0) ? 0 : (orangeBlob.xi - xPadding);
-    int width = ((widthFactor * (orangeBlob.xf - orangeBlob.xi + xPadding)) > iparams_.width) ? iparams_.width : (widthFactor *(orangeBlob.xf - orangeBlob.xi + xPadding));
-    int height = (heightFactor * (orangeBlob.yf - orangeBlob.yi + yPadding) > iparams_.height) ? iparams_.height : heightFactor * (orangeBlob.yf - orangeBlob.yi + yPadding);
+    int width = (int)((widthFactor * (float)(orangeBlob.xf - orangeBlob.xi + xPadding)) > iparams_.width) ? iparams_.width : (widthFactor * (float)(orangeBlob.xf - orangeBlob.xi + xPadding));
+    int height = (int)(heightFactor * (float)(orangeBlob.yf - orangeBlob.yi + yPadding) > iparams_.height) ? iparams_.height : heightFactor * (float)(orangeBlob.yf - orangeBlob.yi + yPadding);
     
     //std::cout << "row: " << row << " col: " << col << " width: " << width << " height: " << height << "\n";
-    std::cout << " col: " << col << " row: " << row << " xf: " << col + width << " yf: " << row + height << "\n";
+    //std::cout << " xPadding: " << xPadding << " yPadding: " << yPadding << " width: " << width << " height: " << height;
+    //std::cout << " col: " << col << " row: " << row << " xf: " << col + width << " yf: " << row + height << "\n";
     
     //frame = color::rawToMatSubset(vblocks_.image->getImgTop(), iparams_, row, col, width, height, 1, 1);
     grayFrame = color::rawToMatGraySubset(vblocks_.image->getImgTop(), iparams_, row, col, width, height, 1, 1);
@@ -192,7 +193,7 @@ bool ImageProcessor::findBall(std::vector<Blob>& blobs, int& imageX, int& imageY
     }
     
     // Check to see if getting rid of this speeds anything up
-    cv::GaussianBlur(grayFrame, grayFrame, cv::Size(9, 9), 2, 2);
+    cv::GaussianBlur(grayFrame, grayFrame, cv::Size(3, 3), 0, 0);
 
     cv::HoughCircles(grayFrame, circles, CV_HOUGH_GRADIENT, 20, grayFrame.rows/8, 10, 10, 0, 0);
     
