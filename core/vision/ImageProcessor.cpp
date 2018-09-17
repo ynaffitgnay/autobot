@@ -162,44 +162,46 @@ bool ImageProcessor::findBall(std::vector<Blob>& blobs, int& imageX, int& imageY
         break;
       }
     }
-    
+
     cv::Mat frame, grayFrame;
     //frame =  color::rawToMat(vblocks_.image->getImgTop(), iparams_);
 
     // Make sure the row/col you want are within range
     int row = ((orangeBlob.yi - 50) < 0) ? 0 : (orangeBlob.yi - 50);
     int col = ((orangeBlob.xi - 50) < 0) ? 0 : (orangeBlob.xi - 50);
-    int width = ((orangeBlob.xf - orangeBlob.xi + 100) > iparams_.width) ? iparams_.width : (orangeBlob.xf - orangeBlob.xi + 100);
+    int width = ((2 * (orangeBlob.xf - orangeBlob.xi)) > iparams_.width) ? iparams_.width : (2 *(orangeBlob.xf - orangeBlob.xi));
     int height = ((orangeBlob.yf - orangeBlob.yi + 100) > iparams_.height) ? iparams_.height : (orangeBlob.yf - orangeBlob.yi + 100);
-
+    
     std::cout << "row: " << row << " col: " << col << " width: " << width << " height: " << height << "\n";
-    
+  
     frame = color::rawToMatSubset(vblocks_.image->getImgTop(), iparams_, row, col, width, height, 1, 1);
-
-    
-    //cv::Mat crzyframe;
-    //crzyframe = color::rawToMatSubset(vblocks_.image->getImgTop(), iparams_, col, row, width, height, 1, 1);
     
     std::vector<cv::Vec3f> circles;
   
     if (!frame.data) {
       return false;
     }
-
-    //// GET THE COLOR??
-    //cv::Point3_<uchar>* p1 = frame.ptr<cv::Point3_<uchar> >(col / 2, (row/2));
-    //std::cout << "frame R: " << unsigned(p1->z) << " G: " << unsigned(p1->y) << "B: " << unsigned(p1->x) << "\n";
-    //cv::Point3_<uchar>* p2 = crzyframe.ptr<cv::Point3_<uchar> >(col / 2, (row/2));
-    //std::cout << "crzyframe R: " << unsigned(p2->z) << " G: " << unsigned(p2->y) << "B: " << unsigned(p2->x) << "\n";
     
     // Convert the Mat to gray
     cv::cvtColor(frame, grayFrame, CV_BGR2GRAY);
+
+    // See if converted Mat is correct
+    for (int i = 0; i < frame.rows; i+=2) {
+      for (int j = 20; j < frame.cols; j+=2) {
+        uchar red = 0;
+        if (unsigned(frame.ptr<cv::Point3_<uchar>>(j,i)->z) > 100) {
+          red = 1;
+        }
+        std::cout << unsigned(red) << " ";
+      }
+      std::cout << "\n";
+    }
   
     // CHeck to see if getting rid of this speeds anything up
     cv::GaussianBlur(grayFrame, grayFrame, cv::Size(9, 9), 2, 2);
 
     std::cout << "grayFrame.rows: " << grayFrame.rows << "\n";
-    cv::HoughCircles(grayFrame, circles, CV_HOUGH_GRADIENT, 20, grayFrame.rows/8, 200, 100, 0, 0);
+    cv::HoughCircles(grayFrame, circles, CV_HOUGH_GRADIENT, 30, grayFrame.rows/8, 50, 50, 0, 0);
     
     // Now turn circles into a vector of floats
     
