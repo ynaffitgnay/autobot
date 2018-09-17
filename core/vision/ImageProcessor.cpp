@@ -174,8 +174,8 @@ bool ImageProcessor::findBall(std::vector<Blob>& blobs, int& imageX, int& imageY
     int heightFactor = 1.25;
     
     // Make sure the row/col you want are within range
-    int row = ((orangeBlob.yi - xPadding) < 0) ? 0 : (orangeBlob.yi - xPadding);
-    int col = ((orangeBlob.xi - yPadding) < 0) ? 0 : (orangeBlob.xi - yPadding);
+    int row = ((orangeBlob.yi - yPadding) < 0) ? 0 : (orangeBlob.yi - yPadding);
+    int col = ((orangeBlob.xi - xPadding) < 0) ? 0 : (orangeBlob.xi - xPadding);
     int width = ((widthFactor * (orangeBlob.xf - orangeBlob.xi + xPadding)) > iparams_.width) ? iparams_.width : (widthFactor *(orangeBlob.xf - orangeBlob.xi + xPadding));
     int height = (heightFactor * (orangeBlob.yf - orangeBlob.yi + yPadding) > iparams_.height) ? iparams_.height : heightFactor * (orangeBlob.yf - orangeBlob.yi + yPadding);
     

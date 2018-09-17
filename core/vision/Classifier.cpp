@@ -135,7 +135,7 @@ void Classifier::makeBlobs(std::vector<Blob>& blobs) {
     }
     avgX = (uint16_t) (meanX/total);
     avgY = (uint16_t) (meanY/total);
-    pixelRatio = (xf - xi) / (yf - yi);
+    pixelRatio = (float)(xf - xi) / (float)(yf - yi);
     Blob blob = Blob(c, xi, xf, dx, yi, yf, dy, widthStart, widthEnd, avgX, avgY, total, pixelRatio);
     blobs.push_back(blob);
   }
