@@ -1,3 +1,6 @@
+#ifndef BEACON_DETECTOR_H
+#define BEACON_DETECTOR_H
+
 #pragma once
 
 #include <vision/ObjectDetector.h>
@@ -13,3 +16,5 @@ class BeaconDetector : public ObjectDetector {
  private:
   TextLogger* textlogger;
 };
+
+#endif

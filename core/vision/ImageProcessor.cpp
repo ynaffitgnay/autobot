@@ -1,6 +1,7 @@
 #include <vision/ImageProcessor.h>
 #include <vision/Classifier.h>
 #include <vision/BeaconDetector.h>
+#include <vision/BallDetector.h>
 #include <vision/Logging.h>
 #include <vision/structures/Blob.h>
 #include <common/ColorConversion.h>
@@ -13,6 +14,7 @@ ImageProcessor::ImageProcessor(VisionBlocks& vblocks, const ImageParams& iparams
 {
   enableCalibration_ = false;
   color_segmenter_ = std::make_unique<Classifier>(vblocks_, vparams_, iparams_, camera_);
+  ball_detector_ = std::make_unique<BallDetector>(DETECTOR_PASS_ARGS);
   beacon_detector_ = std::make_unique<BeaconDetector>(DETECTOR_PASS_ARGS);
   calibration_ = std::make_unique<RobotCalibration>();
 }
@@ -24,6 +26,7 @@ void ImageProcessor::init(TextLogger* tl){
   textlogger = tl;
   vparams_.init();
   color_segmenter_->init(tl);
+  ball_detector_->init(tl);
   beacon_detector_->init(tl);
 }
 
@@ -128,8 +131,9 @@ void ImageProcessor::processFrame(){
   tlog(30, "Classifying Image: %i", camera_);
   if(!color_segmenter_->classifyImage(color_table_)) return;
   color_segmenter_->makeBlobs(blobs);
-  detectBall(blobs);
-  detectGoal();
+  //detectBall(blobs);
+  //detectGoal();
+  ball_detector_->detectBall(blobs);
   beacon_detector_->findBeacons();
 }
 

@@ -1,3 +1,6 @@
+#ifndef GOAL_DETECTOR_H
+#define GOAL_DETECTOR_H
+
 #pragma once
 
 #include <vision/ObjectDetector.h>
@@ -13,3 +16,4 @@ class GoalDetector : public ObjectDetector {
  private:
   TextLogger* textlogger;
 };
+#endif
