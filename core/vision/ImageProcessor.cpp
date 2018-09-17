@@ -164,7 +164,6 @@ bool ImageProcessor::findBall(std::vector<Blob>& blobs, int& imageX, int& imageY
     }
 
     cv::Mat frame, grayFrame;
-    //frame =  color::rawToMat(vblocks_.image->getImgTop(), iparams_);
 
     // Make sure the row/col you want are within range
     int row = ((orangeBlob.yi - 50) < 0) ? 0 : (orangeBlob.yi - 50);
@@ -172,39 +171,23 @@ bool ImageProcessor::findBall(std::vector<Blob>& blobs, int& imageX, int& imageY
     int width = ((2 * (orangeBlob.xf - orangeBlob.xi)) > iparams_.width) ? iparams_.width : (2 *(orangeBlob.xf - orangeBlob.xi));
     int height = ((orangeBlob.yf - orangeBlob.yi + 100) > iparams_.height) ? iparams_.height : (orangeBlob.yf - orangeBlob.yi + 100);
     
-    std::cout << "row: " << row << " col: " << col << " width: " << width << " height: " << height << "\n";
+    //std::cout << "row: " << row << " col: " << col << " width: " << width << " height: " << height << "\n";
   
-    frame = color::rawToMatSubset(vblocks_.image->getImgTop(), iparams_, row, col, width, height, 1, 1);
+    //frame = color::rawToMatSubset(vblocks_.image->getImgTop(), iparams_, row, col, width, height, 1, 1);
+    grayFrame = color::rawToMatGraySubset(vblocks_.image->getImgTop(), iparams_, row, col, width, height, 1, 1);
     
     std::vector<cv::Vec3f> circles;
   
-    if (!frame.data) {
+    if (!grayFrame.data) {
       return false;
     }
     
-    // Convert the Mat to gray
-    cv::cvtColor(frame, grayFrame, CV_BGR2GRAY);
-
-    // See if converted Mat is correct
-    for (int i = 0; i < frame.rows; i+=2) {
-      for (int j = 20; j < frame.cols; j+=2) {
-        uchar red = 0;
-        if (unsigned(frame.ptr<cv::Point3_<uchar>>(j,i)->z) > 100) {
-          red = 1;
-        }
-        std::cout << unsigned(red) << " ";
-      }
-      std::cout << "\n";
-    }
-  
-    // CHeck to see if getting rid of this speeds anything up
+    // Check to see if getting rid of this speeds anything up
     cv::GaussianBlur(grayFrame, grayFrame, cv::Size(9, 9), 2, 2);
 
-    std::cout << "grayFrame.rows: " << grayFrame.rows << "\n";
-    cv::HoughCircles(grayFrame, circles, CV_HOUGH_GRADIENT, 30, grayFrame.rows/8, 50, 50, 0, 0);
+    cv::HoughCircles(grayFrame, circles, CV_HOUGH_GRADIENT, 30, grayFrame.rows/8, 50, 100, 0, 0);
     
     // Now turn circles into a vector of floats
-    
     // Populates a v with circles.size() elements, each a vector with 3 floats
     std::vector<std::vector<float>> v(circles.size(), std::vector<float>(3));
   
