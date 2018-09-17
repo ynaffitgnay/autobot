@@ -1,6 +1,7 @@
 #include <vision/BallDetector.h>
 #include <memory/TextLogger.h>
 #include <vision/Logging.h>
+#include <vision/ImageProcessor.h>
 #include <vision/structures/Blob.h>
 #include <common/ColorConversion.h>
 #include <iostream>
@@ -11,6 +12,13 @@ using namespace Eigen;
 
 BallDetector::BallDetector(DETECTOR_DECLARE_ARGS) : DETECTOR_INITIALIZE {
 }
+
+unsigned char* BallDetector::getSegImg(){
+  if(camera_ == Camera::TOP)
+    return vblocks_.robot_vision->getSegImgTop();
+  return vblocks_.robot_vision->getSegImgBottom();
+}
+
 
 void BallDetector::detectBall(std::vector<Blob>& blobs) {
   int imageX, imageY;

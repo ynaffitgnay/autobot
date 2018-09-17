@@ -13,9 +13,10 @@ class BallDetector : public ObjectDetector {
   BallDetector(DETECTOR_DECLARE_ARGS);
   void init(TextLogger* tl){ textlogger = tl; }
   void detectBall(std::vector<Blob>& blobs);
-  void findBall2(std::vector<Blob>& blobs, int& imageX, int& imageY);
+  bool findBall2(std::vector<Blob>& blobs, int& imageX, int& imageY);
   void findBall();
  private:
+  unsigned char* getSegImg();
   TextLogger* textlogger;
 };
 

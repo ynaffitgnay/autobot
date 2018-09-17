@@ -18,6 +18,7 @@
 class BallDetector;
 class Classifier;
 class BeaconDetector;
+class GoalDetector;
 
 /// @ingroup vision
 class ImageProcessor {
@@ -28,6 +29,8 @@ class ImageProcessor {
     void processFrame();
     void init(TextLogger*);
     void SetColorTable(unsigned char*);
+    std::unique_ptr<BallDetector> ball_detector_;
+    std::unique_ptr<GoalDetector> goal_detector_;
     std::unique_ptr<BeaconDetector> beacon_detector_;
     std::unique_ptr<Classifier> color_segmenter_;
     unsigned char* getImg();
