@@ -99,7 +99,7 @@ void Classifier::makeBlobs(std::vector<Blob>& blobs) {
   std::cout << "Number of paRENTS " << parents.size() << std::endl;
   for (int i = 0; i < parents.size(); ++i)
   {
-    if (parents.at(i).size() < 30)
+    if (parents.at(i).size() < 3)
     {
       continue;
     }

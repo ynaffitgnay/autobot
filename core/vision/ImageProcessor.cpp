@@ -163,6 +163,9 @@ bool ImageProcessor::findBall(std::vector<Blob>& blobs, int& imageX, int& imageY
       }
     }
 
+    if (orangeBlob.color != c_ORANGE) {
+      return false;
+    }
     cv::Mat frame, grayFrame;
 
     // Make sure the row/col you want are within range
