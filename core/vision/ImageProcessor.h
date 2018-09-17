@@ -47,8 +47,6 @@ class ImageProcessor {
     std::vector<BallCandidate*> getBallCandidates();
     BallCandidate* getBestBallCandidate();
     bool isImageLoaded();
-    void detectBall(std::vector<Blob>& blobs);
-    bool findBall(std::vector<Blob>& blobs, int& imageX, int& imageY);
     void detectGoal();
     bool findGoal(int& imageX, int& imageY);
   private:
