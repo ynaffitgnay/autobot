@@ -122,7 +122,7 @@ void ImageProcessor::setCalibration(const RobotCalibration& calibration){
 }
 
 void ImageProcessor::processFrame(){
-  std::vector<Blob> blobs;
+  //std::vector<Blob> blobs;
   if(vblocks_.robot_state->WO_SELF == WO_TEAM_COACH && camera_ == Camera::BOTTOM) return;
   tlog(30, "Process Frame camera %i", camera_);
 
@@ -133,11 +133,15 @@ void ImageProcessor::processFrame(){
   vblocks_.robot_vision->horizon = horizon;
   tlog(30, "Classifying Image: %i", camera_);
   if(!color_segmenter_->classifyImage(color_table_)) return;
-  color_segmenter_->makeBlobs(blobs);
-  std::sort(blobs.begin(), blobs.end(), sortBlobAreaPredicate);
+  color_segmenter_->makeBlobs(blobs_);
+  std::sort(blobs_.begin(), blobs_.end(), sortBlobAreaPredicate);
   //detectGoal();
-  ball_detector_->findBall(blobs);
-  beacon_detector_->findBeacons(blobs);
+  //ball_detector_->findBall(blobs_);
+  //getBallCandidates(blobs_);
+
+  // Populate world objects with the best ball candidate
+  getBestBallCandidate();
+  beacon_detector_->findBeacons(blobs_);
 }
 
 void ImageProcessor::detectGoal() {
@@ -204,11 +208,35 @@ float ImageProcessor::getHeadChange() const {
 }
 
 std::vector<BallCandidate*> ImageProcessor::getBallCandidates() {
-  return std::vector<BallCandidate*>();
+  std::vector<BallCandidate*> ballCands;
+  ball_detector_->findBall(blobs_, ballCands);
+  //return std::vector<BallCandidate*>();
+  return ballCands;
 }
 
 BallCandidate* ImageProcessor::getBestBallCandidate() {
-  return NULL;
+  std::vector<BallCandidate*> ballCands = getBallCandidates();
+  BallCandidate* bestCand = nullptr;
+  // now put some heuristics in here to get the best one. for now just choose the first one.
+  if (ballCands.size() == 0) return bestCand;
+
+  // FOR NOW: return the first one in the list
+  bestCand = ballCands.at(0);
+
+  auto& ball = vblocks_.world_object->objects_[WO_BALL];
+  ball.imageCenterX = bestCand->centerX;
+  ball.imageCenterY = bestCand->centerY;
+  ball.radius = bestCand->radius;
+  ball.visionDistance = bestCand->groundDistance;
+  ball.seen = true;
+
+  std::cout << "bestBall " << " x: " << bestCand->centerX << " y: " << bestCand->centerY << " r: " << bestCand->radius << "\n";
+  ball.fromTopCamera = camera_ == Camera::TOP;
+  tlog(30, "saw %s at (%i,%i) with calculated distance %2.4f", getName(WO_BALL), ball.imageCenterX, ball.imageCenterY, ball.visionDistance);
+  
+
+  // go through and delete all the ones that aren't the best?
+  return bestCand;
 }
 
 void ImageProcessor::enableCalibration(bool value) {
