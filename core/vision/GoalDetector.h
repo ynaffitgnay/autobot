@@ -12,7 +12,7 @@ class GoalDetector : public ObjectDetector {
  public:
   GoalDetector(DETECTOR_DECLARE_ARGS);
   void init(TextLogger* tl){ textlogger = tl; }
-  void findGoals();
+  void findGoals(std::vector<Blob>& blobs);
  private:
   TextLogger* textlogger;
 };
