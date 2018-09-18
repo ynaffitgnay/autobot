@@ -74,10 +74,12 @@ void BeaconDetector::genCombos(std::vector<Blob>& yBlobs, std::vector<Blob>& pBl
         // std::cout << "Xdiff within threshold" << std::endl;
         if (alignsY(yBlobs.at(i),bBlobs.at(j)) > 0) {
           object = addBeaconObject(yBlobs.at(i).avgX, yBlobs.at(i).yf, WO_BEACON_YELLOW_BLUE);
+          objectValidInWorld(object,yBlobs.at(i),bBlobs.at(j));
           yb_beacons.push_back(object);    
         }
         else if (alignsY(yBlobs.at(i),bBlobs.at(j)) < 0) {          
           object = addBeaconObject(yBlobs.at(i).avgX, yBlobs.at(i).yi, WO_BEACON_BLUE_YELLOW);
+          objectValidInWorld(object,bBlobs.at(j),yBlobs.at(i));
           by_beacons.push_back(object); 
         }
       }
@@ -90,10 +92,12 @@ void BeaconDetector::genCombos(std::vector<Blob>& yBlobs, std::vector<Blob>& pBl
         if (alignsY(yBlobs.at(i),pBlobs.at(k) )> 0) {
           // std::cout << "2 yDiffTop within threshold, yellow is just on top of pink" << std::endl;
           object = addBeaconObject(yBlobs.at(i).avgX, yBlobs.at(i).yf, WO_BEACON_YELLOW_PINK);
+          objectValidInWorld(object,yBlobs.at(i),pBlobs.at(k));
           yp_beacons.push_back(object); 
         } else if (alignsY(yBlobs.at(i),pBlobs.at(k) )< 0) {
           // std::cout << "1 yDiffBottom within threshold, pink is just on top of yellow" << std::endl;
           object = addBeaconObject(yBlobs.at(i).avgX, yBlobs.at(i).yi, WO_BEACON_PINK_YELLOW);   
+          objectValidInWorld(object,pBlobs.at(k),yBlobs.at(i));
           py_beacons.push_back(object);   
         }
       }
@@ -107,10 +111,12 @@ void BeaconDetector::genCombos(std::vector<Blob>& yBlobs, std::vector<Blob>& pBl
         if (alignsY(bBlobs.at(p),pBlobs.at(q)) > 0) {
           // std::cout << "2 yDiffTop within threshold, blue is just on top of pink" << std::endl;
           object = addBeaconObject(bBlobs.at(p).avgX, bBlobs.at(p).yf, WO_BEACON_BLUE_PINK);
+          objectValidInWorld(object,bBlobs.at(p),pBlobs.at(q));
           bp_beacons.push_back(object); 
         } else if (alignsY(bBlobs.at(p),pBlobs.at(q)) < 0) {
           // std::cout << "1 yDiffBottom within threshold, pink is just on top of blue" << std::endl;
           object = addBeaconObject(bBlobs.at(p).avgX, bBlobs.at(p).yi, WO_BEACON_PINK_BLUE);
+          objectValidInWorld(object,pBlobs.at(q),bBlobs.at(p));
           pb_beacons.push_back(object); 
         }
       }
@@ -170,6 +176,10 @@ WorldObject BeaconDetector::addBeaconObject(int newCenterX,int newCenterY,WorldO
   tlog(30, "saw %s at (%i,%i) with calculated distance %2.4f", getName(wo_type), beaconObject.imageCenterX, beaconObject.imageCenterY, beaconObject.visionDistance);
   // passObject = beaconObject;
   return beaconObject;
+}
+
+bool BeaconDetector::objectValidInWorld(WorldObject& object, Blob& topBlob, Blob& bottomBlob) {
+  return true;
 }
 
 
