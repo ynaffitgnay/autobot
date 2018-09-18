@@ -48,7 +48,7 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
         int col = ((orangeBlob->xi - xPadding) < 0) ? 0 : (orangeBlob->xi - xPadding);
         int width = (int)((widthFactor * (float)(orangeBlob->xf - orangeBlob->xi + xPadding)) > iparams_.width) ? iparams_.width : (widthFactor * (float)(orangeBlob->xf - orangeBlob->xi + xPadding));
         int height = (int)(heightFactor * (float)(orangeBlob->yf - orangeBlob->yi + yPadding) > iparams_.height) ? iparams_.height : heightFactor * (float)(orangeBlob->yf - orangeBlob->yi + yPadding);
-        
+
         grayFrame = color::rawToMatGraySubset(vblocks_.image->getImgTop(), iparams_, row, col, width, height, 1, 1);
         
         std::vector<cv::Vec3f> circles;
@@ -58,11 +58,13 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
         }
         
         // Check to see if getting rid of this speeds anything up
-        cv::GaussianBlur(grayFrame, grayFrame, cv::Size(9, 9), 0, 0);
+        cv::GaussianBlur(grayFrame, grayFrame, cv::Size(13, 13), 0, 0);
         
-        
-        //TODO: set the min radius as 1/2 the min(orangeBlob->avgX - orangeBlob->xi, orangeBlob->xf - orangeBlob->avgX, orangeBlob->avgY - orangeBlob->yi, orangeBlob->yf - orangeBlob->avgY);g
-        cv::HoughCircles(grayFrame, circles, CV_HOUGH_GRADIENT, 12, grayFrame.rows/8, 5, 10, 0, 0);
+        double maxR = 0;//2 * orangeBlob->dx;
+        double minR = 0;//0.5 * (double)std::min(std::min(orangeBlob->avgX - orangeBlob->xi, orangeBlob->xf - orangeBlob->avgX), std::min(orangeBlob->avgY - orangeBlob->yi, orangeBlob->yf - orangeBlob->avgY));
+
+        //TODO: set smarter thresholds based off of size?
+        cv::HoughCircles(grayFrame, circles, CV_HOUGH_GRADIENT, 5, grayFrame.rows/8, 5, 10, minR, maxR);
                 
         for (size_t i = 0; i < circles.size(); ++i) {
           ballDetected = true;
@@ -80,6 +82,7 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
           newCand->height = orangeBlob->dy;
           auto position = cmatrix_.getWorldPosition(newCand->centerX, newCand->centerY, heights[WO_BALL]);
           newCand->groundDistance = cmatrix_.groundDistance(position);
+          newCand->elevation = cmatrix_.elevation(position);
           newCand->blob = orangeBlob;
           newCand->valid = true;
           //std::cout << "Circle " << i << " x: " << v[i][0] << " y: " << v[i][1] << " r: " << v[i][2] << "\n";

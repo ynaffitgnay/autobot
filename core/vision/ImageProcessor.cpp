@@ -136,9 +136,9 @@ void ImageProcessor::processFrame(){
   vblocks_.robot_vision->horizon = horizon;
   tlog(30, "Classifying Image: %i", camera_);
   if(!color_segmenter_->classifyImage(color_table_)) return;
-  std::cout << "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nblobs size: " << blobs_.size() << "\n";
+  //std::cout << "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nblobs size: " << blobs_.size() << "\n";
   color_segmenter_->makeBlobs(blobs_);
-  std::cout << "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nblobs size: " << blobs_.size() << "\n";
+  //std::cout << "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nblobs size: " << blobs_.size() << "\n";
   std::sort(blobs_.begin(), blobs_.end(), sortBlobAreaPredicate);
   //detectGoal();
   //ball_detector_->findBall(blobs_);
@@ -180,8 +180,8 @@ BallCandidate* ImageProcessor::getBestBallCandidate() {
   // now put some heuristics in here to get the best one. for now just choose the first one.
   if (ballCands.size() == 0) {
     vblocks_.world_object->objects_[WO_BALL].seen = false;
-    std::cout << "seen? " << vblocks_.world_object->objects_[WO_BALL].seen << "\n";
-    printf("bestCand: %p\n", bestCand);
+    //std::cout << "seen? " << vblocks_.world_object->objects_[WO_BALL].seen << "\n";
+    //printf("bestCand: %p\n", bestCand);
     return bestCand;
   }
 

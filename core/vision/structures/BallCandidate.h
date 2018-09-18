@@ -14,6 +14,7 @@ struct BallCandidate {
   float width;
   float height;
   float groundDistance;
+  float elevation;
   float confidence;
   float kwDistanceDiscrepancy;
   Blob* blob;
