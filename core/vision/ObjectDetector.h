@@ -6,6 +6,7 @@
 #include <vision/VisionBlocks.h>
 #include <common/Profiling.h>
 #include <vision/Macros.h>
+#include <vision/structures/Blob.h>
 
 #define DETECTOR_DECLARE_ARGS VisionBlocks& vblocks, const VisionParams& vparams, const ImageParams& iparams, const CameraMatrix& cmatrix, const Camera::Type& camera
 #define DETECTOR_INITIALIZE ObjectDetector(vblocks, vparams, iparams, cmatrix, camera)

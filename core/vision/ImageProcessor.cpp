@@ -136,7 +136,7 @@ void ImageProcessor::processFrame(){
   color_segmenter_->makeBlobs(blobs);
   //detectGoal();
   ball_detector_->detectBall(blobs);
-  beacon_detector_->findBeacons();
+  beacon_detector_->findBeacons(blobs);
 }
 
 void ImageProcessor::detectGoal() {

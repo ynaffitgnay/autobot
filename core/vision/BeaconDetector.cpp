@@ -7,7 +7,7 @@ using namespace Eigen;
 BeaconDetector::BeaconDetector(DETECTOR_DECLARE_ARGS) : DETECTOR_INITIALIZE {
 }
 
-void BeaconDetector::findBeacons() {
+void BeaconDetector::findBeacons(std::vector<Blob>& blobs) {
   if(camera_ == Camera::BOTTOM) return;
   static map<WorldObjectType,int> heights = {
     { WO_BEACON_YELLOW_BLUE, 300 },
@@ -15,6 +15,16 @@ void BeaconDetector::findBeacons() {
     { WO_BEACON_PINK_YELLOW, 200 },
     { WO_BEACON_BLUE_PINK, 200 }
   };
+
+  for (int i; i < blobs.size(); i++) {
+    auto position = cmatrix_.getWorldPosition(blobs.at(i).avgX, blobs.at(i).avgY, 150);
+    auto visionDistance = cmatrix_.groundDistance(position);
+    auto visionBearing = cmatrix_.bearing(position);
+    std::cout << "Saw " << i << " at [" << blobs.at(i).avgX << " ," << blobs.at(i).avgY << "] with calculated distance " << visionDistance << std::endl;
+  }
+
+
+
   static map<WorldObjectType,vector<int>> beacons = {
     { WO_BEACON_YELLOW_BLUE, { 24, 15, 74, 83} },
     { WO_BEACON_YELLOW_PINK, { 104, 41, 138, 96 } },
