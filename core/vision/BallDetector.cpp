@@ -64,7 +64,7 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
         double minR = 0;//0.5 * (double)std::min(std::min(orangeBlob->avgX - orangeBlob->xi, orangeBlob->xf - orangeBlob->avgX), std::min(orangeBlob->avgY - orangeBlob->yi, orangeBlob->yf - orangeBlob->avgY));
 
         //TODO: set smarter thresholds based off of size?
-        cv::HoughCircles(grayFrame, circles, CV_HOUGH_GRADIENT, 5, grayFrame.rows/8, 5, 10, minR, maxR);
+        cv::HoughCircles(grayFrame, circles, CV_HOUGH_GRADIENT, 2, grayFrame.rows/8, 2, 2, minR, maxR);
                 
         for (size_t i = 0; i < circles.size(); ++i) {
           ballDetected = true;
