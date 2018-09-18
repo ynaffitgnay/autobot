@@ -22,6 +22,7 @@ class BeaconDetector : public ObjectDetector {
   WorldObject addBeaconObject(int newCenterX,int newCenterY,WorldObjectType wo_type);
   bool alignsX(Blob& blobA, Blob& blobB);
   int alignsY(Blob& blobA, Blob& blobB);
+  bool objectValidInWorld(WorldObject& object, Blob& topBlob, Blob& bottomBlob);
   void chooseBestBeacons(std::vector<std::vector<WorldObject> >& beacon_list);
   std::map<WorldObjectType,int> heights_ = {
     { WO_BEACON_YELLOW_BLUE, 300 },
