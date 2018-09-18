@@ -122,7 +122,7 @@ void ImageProcessor::setCalibration(const RobotCalibration& calibration){
 }
 
 void ImageProcessor::processFrame(){
-  //std::vector<Blob> blobs;
+  BallCandidate* bestBall = nullptr;
   if(vblocks_.robot_state->WO_SELF == WO_TEAM_COACH && camera_ == Camera::BOTTOM) return;
   tlog(30, "Process Frame camera %i", camera_);
 
@@ -140,7 +140,10 @@ void ImageProcessor::processFrame(){
   //getBallCandidates(blobs_);
 
   // Populate world objects with the best ball candidate
-  getBestBallCandidate();
+  bestBall = getBestBallCandidate();
+  if (bestBall) {
+    std::cout << "bestBall " << " x: " << bestBall->centerX << " y: " << bestBall->centerY << " r: " << bestBall->radius << "\n";
+  }
   beacon_detector_->findBeacons(blobs_);
 }
 
@@ -208,7 +211,7 @@ float ImageProcessor::getHeadChange() const {
 }
 
 std::vector<BallCandidate*> ImageProcessor::getBallCandidates() {
-  std::vector<BallCandidate*> ballCands;
+  std::vector<BallCandidate*> ballCands = std::vector<BallCandidate*>();
   ball_detector_->findBall(blobs_, ballCands);
   //return std::vector<BallCandidate*>();
   return ballCands;
@@ -218,7 +221,12 @@ BallCandidate* ImageProcessor::getBestBallCandidate() {
   std::vector<BallCandidate*> ballCands = getBallCandidates();
   BallCandidate* bestCand = nullptr;
   // now put some heuristics in here to get the best one. for now just choose the first one.
-  if (ballCands.size() == 0) return bestCand;
+  if (ballCands.size() == 0) {
+    vblocks_.world_object->objects_[WO_BALL].seen = false;
+    std::cout << "seen? " << vblocks_.world_object->objects_[WO_BALL].seen << "\n";
+    printf("bestCand: %p\n", bestCand);
+    return bestCand;
+  }
 
   // FOR NOW: return the first one in the list
   bestCand = ballCands.at(0);
@@ -230,7 +238,6 @@ BallCandidate* ImageProcessor::getBestBallCandidate() {
   ball.visionDistance = bestCand->groundDistance;
   ball.seen = true;
 
-  std::cout << "bestBall " << " x: " << bestCand->centerX << " y: " << bestCand->centerY << " r: " << bestCand->radius << "\n";
   ball.fromTopCamera = camera_ == Camera::TOP;
   tlog(30, "saw %s at (%i,%i) with calculated distance %2.4f", getName(WO_BALL), ball.imageCenterX, ball.imageCenterY, ball.visionDistance);
   

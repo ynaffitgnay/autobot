@@ -19,9 +19,6 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
   static map<WorldObjectType,int> heights = {
     { WO_BALL, 33 },
   };
-  //static map<WorldObjectType,vector<int>> balls = {
-  //  { WO_BALL, { 24, 15, 74, 83} }  //
-  //};
   
   auto fid = vblocks_.frame_info->frame_id;
   
@@ -30,11 +27,14 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
     // TODO: fix this logic (right now we only detect one orange ball)
     Blob* orangeBlob = nullptr;
     BallCandidate* newCand = nullptr;
-    
+    int i = 0;
     for (auto blob : blobs) {
-      if (blob.color == c_ORANGE) { //maybe update pixel ratio here too!! 
+      if (blob.color == c_ORANGE) { //maybe update pixel ratio here too!!
+        std::cout << "frame: " << fid << " oBlob: " << i++ << " avgX: " << blob.avgX << " avgY: " << blob.avgY << " ToTaL: " << blob.total 
+                << " xi: " << blob.xi << " yi: " << blob.yi << " xf: " << blob.xf << " yf: "
+                << blob.yf << " pRatio: " << blob.correctPixelRatio << " pDensity: "
+                << blob.pixelDensity << std::endl;
         orangeBlob = &blob;
-        //break;
 
         cv::Mat frame, grayFrame;
 
@@ -63,11 +63,7 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
         
         //TODO: set the min radius as 1/2 the min(orangeBlob->avgX - orangeBlob->xi, orangeBlob->xf - orangeBlob->avgX, orangeBlob->avgY - orangeBlob->yi, orangeBlob->yf - orangeBlob->avgY);g
         cv::HoughCircles(grayFrame, circles, CV_HOUGH_GRADIENT, 12, grayFrame.rows/8, 5, 10, 0, 0);
-        
-        // Now turn circles into a vector of floats
-        // Populates a v with circles.size() elements, each a vector with 3 floats
-        //std::vector<std::vector<float>> v(circles.size(), std::vector<float>(3));
-        
+                
         for (size_t i = 0; i < circles.size(); ++i) {
           ballDetected = true;
           newCand = new BallCandidate;
@@ -90,9 +86,10 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
           ballCands.push_back(newCand);
           std::cout << "newCand " << i << " x: " << newCand->centerX << " y: " << newCand->centerY << " r: " << newCand->radius << "\n";
         }
+
+       
+        //if(fid >= 6150) return;
         
-        if(fid >= 6150) return;
-        //
         //auto& ball = vblocks_.world_object->objects_[WO_BALL];
         //
         //if (!ballDetected) return;
