@@ -210,29 +210,19 @@ void VisionWindow::drawBall(ImageWidget* image) {
   if(!config_.ball) return;
   QPainter painter(image->getImage());
   painter.setPen(QPen(QColor(0, 255, 127), 3));
-  
   if(IS_RUNNING_CORE) {
-    std::cout << "running core!\n";
     ImageProcessor* processor = getImageProcessor(image);
 
-    processor->getBestBallCandidate();
-   //BallCandidate* best = processor->getBestBallCandidate();
-   //printf("best: %p\n", best);
-   //if(!best) return;
-   //
-   //std::cout << "somehow here even if I was supposed to return\n";
-   //std::cout << "x: " << best->centerX << " y: " << best->centerY << " r: " << best->radius << "\n";
-   //int r = best->radius;
-   //painter.drawEllipse(
-   //  (int)best->centerX - r - 1,
-   //  (int)best->centerY - r - 1, 2 * r + 2, 2 * r + 2);
-   }
-    //else if (world_object_block_ != NULL) {
-  if (world_object_block_ != NULL) {
-    std::cout << "in world object\n";
-    //std::cout << "Should be drawing balls now?\n";
+    BallCandidate* best = processor->getBestBallCandidate();
+    if(!best) return;
+
+    int r = best->radius;
+    painter.drawEllipse(
+      (int)best->centerX - r - 1,
+      (int)best->centerY - r - 1, 2 * r + 2, 2 * r + 2);
+  }
+  else if (world_object_block_ != NULL) {
     WorldObject* ball = &world_object_block_->objects_[WO_BALL];
-    //std::cout << "ball->seen: " << ball->seen << "\n"
     if(!ball->seen) return;
     if( (ball->fromTopCamera && _widgetAssignments[image] == Camera::BOTTOM) ||
         (!ball->fromTopCamera && _widgetAssignments[image] == Camera::TOP) ) return;

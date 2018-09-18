@@ -123,6 +123,7 @@ void ImageProcessor::setCalibration(const RobotCalibration& calibration){
 
 void ImageProcessor::processFrame(){
   BallCandidate* bestBall = nullptr;
+  
   // clear out the blobs for a new frame
   std::vector<Blob>().swap(blobs_);
   if(vblocks_.robot_state->WO_SELF == WO_TEAM_COACH && camera_ == Camera::BOTTOM) return;
@@ -151,55 +152,6 @@ void ImageProcessor::processFrame(){
   beacon_detector_->findBeacons(blobs_);
   goal_detector_->findGoals(blobs_);
 }
-
-// void ImageProcessor::detectGoal() {
-//   int imageX, imageY;
-//   if(!findGoal(imageX,imageY)) return; // findBall fills in imageX and imageY
-//   WorldObject* goal = &vblocks_.world_object->objects_[WO_OWN_GOAL];
-
-//   goal->imageCenterX = imageX;
-//   goal->imageCenterY = imageY;
-
-//   Position p = cmatrix_.getWorldPosition(imageX, imageY);
-//   goal->visionBearing = cmatrix_.bearing(p);
-//   goal->visionElevation = cmatrix_.elevation(p);
-//   goal->visionDistance = cmatrix_.groundDistance(p);
-//   // Now we know where the goal's position
-//   goal->seen = true;
-
-// }
-
-// bool ImageProcessor::findGoal(int& imageX, int& imageY) {
-//   imageX = imageY = 0;
-//   int total = 0;
-//   float x_mean, y_mean;
-//   x_mean = y_mean = 0.0;
-//   // Process from left to right
-//   for(int x = 0; x < iparams_.width; x++) {
-//     // Process from top to bottom
-//     for(int y = 0; y < iparams_.height; y++) {
-//       // Retrieve the segmented color of the pixel at (x,y)
-//       auto c = getSegImg()[y * iparams_.width + x];
-//       if(c == c_BLUE){
-//         total++;
-//         x_mean = x_mean + x;
-//         y_mean = y_mean + y;
-//       }
-//     }
-//   }
-
-//   if(total <= 100){
-//     return false;
-//   }
-//   x_mean = x_mean/total;
-//   y_mean = y_mean/total;
-//   imageX = (int)x_mean;
-//   imageY = (int)y_mean;
-
-//   // TO DO: Add heuristics to return false if ball detection fails
-//   return true;
-// }
-
 
 int ImageProcessor::getTeamColor() {
   return vblocks_.robot_state->team_;
