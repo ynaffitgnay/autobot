@@ -38,6 +38,6 @@ struct Blob {
 };
 
 /// @ingroup vision
-bool sortBlobAreaPredicate(Blob* left, Blob* right);
+bool sortBlobAreaPredicate(Blob& left, Blob& right);
 
 #endif

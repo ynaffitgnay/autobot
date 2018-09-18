@@ -134,6 +134,7 @@ void ImageProcessor::processFrame(){
   tlog(30, "Classifying Image: %i", camera_);
   if(!color_segmenter_->classifyImage(color_table_)) return;
   color_segmenter_->makeBlobs(blobs);
+  std::sort(blobs.begin(), blobs.end(), sortBlobAreaPredicate);
   //detectGoal();
   ball_detector_->detectBall(blobs);
   beacon_detector_->findBeacons(blobs);

@@ -44,9 +44,33 @@ bool BallDetector::findBall2(std::vector<Blob>& blobs, int& imageX, int& imageY)
     // TODO: fix this logic (right now we only detect one orange ball)
     Blob orangeBlob;
     for (auto blob : blobs) {
+    //  auto run_color = blob.color;
+    //  if (run_color == c_UNDEFINED) {
+    //      std::cout << " run_color: UNDEFINED";
+    //    } else if (run_color == c_FIELD_GREEN) {
+    //      std::cout << " run_color: GREEN";
+    //    } else if (run_color == c_WHITE) {           
+    //      std::cout << " run_color: WHITE";
+    //    } else if (run_color == c_ORANGE) {          
+    //      std::cout << " run_color: ORANGE";
+    //    } else if (run_color == c_PINK) {            
+    //      std::cout << " run_color: PINK";
+    //    } else if (run_color == c_BLUE) {            
+    //      std::cout << " run_color: BLUE";
+    //    } else if (run_color == c_YELLOW) {          
+    //      std::cout << " run_color: YELLOW";
+    //    } else if (run_color == c_ROBOT_WHITE) {     
+    //      std::cout << " run_color: ROBOT";
+    //    } else {
+    //      std::cout << "what??";
+    //    }
+    //  std::cout << " ToTaL: " << blob.total 
+    //            << " xi: " << blob.xi << " yi: " << blob.yi << " xf: " << blob.xf << " yf: "
+    //            << blob.yf << " pRatio: " << blob.correctPixelRatio << " pDensity: "
+    //            << blob.pixelDensity << std::endl;
       if (blob.color == c_ORANGE) {
         orangeBlob = blob;
-        break;
+        //break;
       }
     }
 
@@ -80,9 +104,11 @@ bool BallDetector::findBall2(std::vector<Blob>& blobs, int& imageX, int& imageY)
     }
     
     // Check to see if getting rid of this speeds anything up
-    cv::GaussianBlur(grayFrame, grayFrame, cv::Size(3, 3), 0, 0);
+    cv::GaussianBlur(grayFrame, grayFrame, cv::Size(9, 9), 0, 0);
 
-    cv::HoughCircles(grayFrame, circles, CV_HOUGH_GRADIENT, 20, grayFrame.rows/8, 10, 10, 0, 0);
+
+    //TODO: set the min radius as 1/2 the min(orangeBlob.avgX - orangeBlob.xi, orangeBlob.xf - orangeBlob.avgX, orangeBlob.avgY - orangeBlob.yi, orangeBlob.yf - orangeBlob.avgY);g
+    cv::HoughCircles(grayFrame, circles, CV_HOUGH_GRADIENT, 10, grayFrame.rows/8, 5, 10, 0, 0);
     
     // Now turn circles into a vector of floats
     // Populates a v with circles.size() elements, each a vector with 3 floats

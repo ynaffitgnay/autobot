@@ -129,6 +129,7 @@ void Classifier::makeBlobs(std::vector<Blob>& blobs) {
       meanY += (0.5*((*parentIt)->yi + (*parentIt)->yf) * ((*parentIt)->dx));
     }
     dy = yf-yi;
+    dx = xf-xi;
     if (c == c_ORANGE)
     {
       std::cout << "meanX: " << meanX << " meanY: " << meanY << " total orange: " << total << std::endl;
@@ -140,6 +141,7 @@ void Classifier::makeBlobs(std::vector<Blob>& blobs) {
     Blob blob = Blob(c, xi, xf, dx, yi, yf, dy, widthStart, widthEnd, avgX, avgY, total, pixelRatio, pixelDensity);
     blobs.push_back(blob);
   }
+  
   for (int i = 0; i < blobs.size(); ++i)
   {
     if(camera_ == Camera::TOP){
