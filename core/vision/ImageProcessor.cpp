@@ -136,7 +136,7 @@ void ImageProcessor::processFrame(){
   color_segmenter_->makeBlobs(blobs);
   std::sort(blobs.begin(), blobs.end(), sortBlobAreaPredicate);
   //detectGoal();
-  ball_detector_->detectBall(blobs);
+  ball_detector_->findBall(blobs);
   beacon_detector_->findBeacons(blobs);
 }
 
