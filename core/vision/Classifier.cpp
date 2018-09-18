@@ -130,10 +130,7 @@ void Classifier::makeBlobs(std::vector<Blob>& blobs) {
     }
     dy = yf-yi;
     dx = xf-xi;
-    if (c == c_ORANGE)
-    {
-      std::cout << "meanX: " << meanX << " meanY: " << meanY << " total orange: " << total << std::endl;
-    }
+    
     avgX = (uint16_t) (meanX/total);
     avgY = (uint16_t) (meanY/total);
     pixelRatio = (float)(xf - xi) / (float)(yf - yi);
