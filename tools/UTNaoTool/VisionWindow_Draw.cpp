@@ -4,6 +4,7 @@
 #include <tool/Util.h>
 #include <vision/Classifier.h>
 #include <common/ColorSpaces.h>
+#include <common/Field.h>
 
 #define MIN_PEN_WIDTH 3
 #define IS_RUNNING_CORE (core_ && core_->vision_ && ((UTMainWnd*)parent_)->runCoreRadio->isChecked())
@@ -256,12 +257,13 @@ void VisionWindow::drawGoal(ImageWidget* image) {
   std::cout << "Drawing goal" << std::endl;
   QPen pen(segCol[c_BLUE]);
 
-  int width = cmatrix.getCameraWidthByDistance(goal.visionDistance, 110);
-  int height = cmatrix.getCameraHeightByDistance(goal.visionDistance, 100);
+  int width = cmatrix.getCameraWidthByDistance(goal.visionDistance, GOAL_WIDTH - GOAL_POST_WIDTH);
+  int height = cmatrix.getCameraHeightByDistance(goal.visionDistance, GOAL_HEIGHT);
   int x1 = goal.imageCenterX - width / 2;
+  printf("Width = %d, Height = %d, GoalX = %d, GoalY = %d\n",width, height, goal.imageCenterX,goal.imageCenterY);
   
   // Draw top
-  int ty1 = goal.imageCenterY - height;
+  int ty1 = goal.imageCenterY - height/2;
   QPainterPath path;
   path.addRoundedRect(QRect(x1, ty1, width, height), 5, 5);
   painter.setPen(pen);
