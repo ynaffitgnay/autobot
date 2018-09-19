@@ -30,10 +30,10 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
     int i = 0;
     for (auto blob : blobs) {
       if (blob.color == c_ORANGE) { //maybe update pixel ratio here too!!
-        std::cout << "frame: " << fid << " oBlob: " << i++ << " avgX: " << blob.avgX << " avgY: " << blob.avgY << " ToTaL: " << blob.total 
-                << " xi: " << blob.xi << " yi: " << blob.yi << " xf: " << blob.xf << " yf: "
-                << blob.yf << " pRatio: " << blob.correctPixelRatio << " pDensity: "
-                << blob.pixelDensity << std::endl;
+        //std::cout << "frame: " << fid << " oBlob: " << i++ << " avgX: " << blob.avgX << " avgY: " << blob.avgY << " ToTaL: " << blob.total 
+        //        << " xi: " << blob.xi << " yi: " << blob.yi << " xf: " << blob.xf << " yf: "
+        //        << blob.yf << " pRatio: " << blob.correctPixelRatio << " pDensity: "
+        //        << blob.pixelDensity << std::endl;
         orangeBlob = &blob;
 
         cv::Mat frame, grayFrame;
@@ -62,9 +62,54 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
         
         double maxR = 0;//2 * orangeBlob->dx;
         double minR = 0;//0.5 * (double)std::min(std::min(orangeBlob->avgX - orangeBlob->xi, orangeBlob->xf - orangeBlob->avgX), std::min(orangeBlob->avgY - orangeBlob->yi, orangeBlob->yf - orangeBlob->avgY));
+        double dp, p1, p2;
 
+        if (orangeBlob->avgY < 63 && orangeBlob->total >= 10) {
+          continue;
+        }
+
+        // INSTEAD OF THIS OR, CAN MAYBE LOOK AT GYRX TO SEE IF SITTING OR STANDING
+        if (orangeBlob->avgY < 90 || (orangeBlob->avgY < 95 && orangeBlob->total < 20))
+        {
+          if (orangeBlob->total > 20) {
+            continue;
+          }
+          dp = 2;
+          p1 = 2;
+          p2 = 2;
+        //} else if (orangeBlob->avgY < 100) {
+        //  dp = 5;
+        //  p1 = 5;
+        //  p2 = 10;
+        } else if (orangeBlob->avgY < 110) {
+          dp = 5;
+          p1 = 10;
+          p2 = 10;
+        } else if (orangeBlob->avgY < 115) {
+          dp = 4;
+          p1 = 5;
+          p2 = 10;
+        } else if (orangeBlob->avgY < 135) {
+          dp = 10;
+          p1 = 10;
+          p2 = 10;
+        } else if (orangeBlob->avgY < 170) {
+          dp = 6;
+          p1 = 10;
+          p2 = 10;
+        } else if (orangeBlob->avgY > 200) {
+          minR = 0.75 * (double)std::min(std::min(orangeBlob->avgX - orangeBlob->xi, orangeBlob->xf - orangeBlob->avgX), std::min(orangeBlob->avgY - orangeBlob->yi, orangeBlob->yf - orangeBlob->avgY));
+          dp = 5;
+          p1 = 10;
+          p2 = 10;
+        } else {
+          dp = 5;
+          p1 = 10;
+          p2 = 10;
+        }
+        
         //TODO: set smarter thresholds based off of size?
-        cv::HoughCircles(grayFrame, circles, CV_HOUGH_GRADIENT, 2, grayFrame.rows/8, 2, 2, minR, maxR);
+        cv::HoughCircles(grayFrame, circles, CV_HOUGH_GRADIENT, dp, grayFrame.rows/8, p1, p2, (int)minR, (int)maxR);
                 
         for (size_t i = 0; i < circles.size(); ++i) {
           ballDetected = true;
@@ -87,7 +132,7 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
           newCand->valid = true;
           //std::cout << "Circle " << i << " x: " << v[i][0] << " y: " << v[i][1] << " r: " << v[i][2] << "\n";
           ballCands.push_back(newCand);
-          std::cout << "newCand " << i << " x: " << newCand->centerX << " y: " << newCand->centerY << " r: " << newCand->radius << "\n";
+          //std::cout << "newCand " << i << " x: " << newCand->centerX << " y: " << newCand->centerY << " r: " << newCand->radius << "\n";
         }
 
        
