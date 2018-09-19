@@ -15,7 +15,7 @@ void GoalDetector::findGoals(std::vector<Blob>& blobs) {
   };
   // auto fid = vblocks_.frame_info->frame_id;
   // if(fid >= 6150) return;
-  if((blobs.at(0).color == c_BLUE) && (blobs.at(0).lpCount>=10) && (blobs.at(0).total>=200)) {
+  if((blobs.at(0).color == c_BLUE) && (blobs.at(0).lpCount>=10) && (blobs.at(0).total>=200)) { // Already 
     auto& object = vblocks_.world_object->objects_[WO_UNKNOWN_GOAL];
     object.imageCenterX = blobs.at(0).avgX;
     object.imageCenterY = blobs.at(0).avgY;

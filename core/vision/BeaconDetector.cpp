@@ -184,21 +184,21 @@ bool BeaconDetector::objectValidInWorld(WorldObject& object, Blob& topBlob, Blob
   float bottomratioWidth = width/((float)bottomBlob.xf-bottomBlob.xi);
   float bottomratioHeight = height/((float)bottomBlob.yf-bottomBlob.yi);
   float ratioThresh;
-  if (width - ((float)topBlob.xf-topBlob.xi) > 10) {
-    ratioThresh = 1.2;
+  if (width*height - topBlob.total > 600) {
+    ratioThresh = 0.4;
   }
   else{
     ratioThresh = 1.5;
   }
-  printf("Width = %f, Height = %f, Object Type = %s\n", width, height, getName(object.type));
-  printf("W_topBlob = %d, H_topBlob = %d, ratio_topWidth = %f, ratio_topHeight = %f\n", topBlob.xf - topBlob.xi, topBlob.yf - topBlob.yi, topratioWidth, topratioHeight);
+  printf("Width = %f, Height = %f, Total (est): %f Object Type = %s\n", width, height, width*height, getName(object.type));
+  printf("W_topBlob = %d, H_topBlob = %d, total top: %d ratio_topWidth = %f, ratio_topHeight = %f\n", topBlob.xf - topBlob.xi, topBlob.yf - topBlob.yi, topBlob.total, topratioWidth, topratioHeight);
   printf("W_bottomBlob = %d, H_bottomBlob = %d, ratio_bottomWidth = %f, ratio_bottomHeight = %f\n",bottomBlob.xf - bottomBlob.xi, bottomBlob.yf - bottomBlob.yi, bottomratioWidth, bottomratioHeight);
   // if ( (abs(topBlob.xf - topBlob.xi - width) > 5) || (abs(topBlob.yf - topBlob.yi - height) > 5) || (abs(bottomBlob.xf - bottomBlob.xi - width) > 5) || (abs(bottomBlob.yf - bottomBlob.yi - height) > 5))
   if (((std::abs(1-topratioWidth) < ratioThresh)+ (std::abs(1-topratioHeight) < ratioThresh) + (std::abs(1-bottomratioWidth) < ratioThresh) + (std::abs(1-bottomratioHeight) < ratioThresh)) >= 3) 
   {
-    if (object.visionDistance > 4000){
-      return false;
-    }
+    // if (object.visionDistance > 4000){
+    //   return false;
+    // }
     object.visionConfidence = std::abs(1-topratioWidth)+ std::abs(1-topratioWidth) + std::abs(1-topratioWidth) + std::abs(1-topratioWidth);
     return true;
   }

@@ -259,14 +259,14 @@ void Classifier::mergeRuns(std::vector<VisionPointAlt>& runs) {
 
   iter = runs.begin();
   for(iter; iter !=runs.end(); iter++) {
-    if (iter->color != c_UNDEFINED && iter->color != c_FIELD_GREEN) {
+    if (iter->color != c_UNDEFINED && iter->color != c_FIELD_GREEN && iter->color != c_WHITE) {
       iter->parent = findParent(*iter);
     }
   }
 }
 
 void Classifier::checkAdj(VisionPointAlt& node, std::vector<VisionPointAlt>::iterator row_begin, std::vector<VisionPointAlt>::iterator row_end) {
-  if (node.color == c_UNDEFINED || node.color == c_FIELD_GREEN) {
+  if (node.color == c_UNDEFINED || node.color == c_FIELD_GREEN || node.color == c_WHITE) {
     node.parent = nullptr;
     return;
   }
