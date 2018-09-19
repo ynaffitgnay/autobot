@@ -30,38 +30,40 @@ def NB(ball=None):
   """No ball found"""
   return NegationEvent(BallSeen(ball))
 
-class BallNode(EventNode):
-  def __init__(self, node, ball):
-    super(BallNode, self).__init__(node)
-    self.ball = ball
+# class BallNode(EventNode):
+#   def __init__(self, node, ball):
+#     super(BallNode, self).__init__(node)
+#     self.ball = ball
 
 class Stand(Node):
   def run(self):
-    commands.standStraight()
+    commands.stand()
+    commands.setHeadTilt(-30.0)
     if self.getTime() > 1.5:
       self.finish()
 
 class TrackBall(Node):
   """Controller node for tracking the ball"""
   def run(self):
-    print('TrackBall')
     ball = memory.world_objects.getObjPtr(core.WO_BALL)
-    bearing = ball.bearing
-    elevation = ball.elevation
-    # print('Ball!\t Bearing: %f \t Distance: %f\t Elevation: %.8f' % (ball.bearing, ball.distance, ball.elevation))
-    commands.setHeadPanTilt(bearing, core.RAD_T_DEG* elevation, 0.2)
+    bearing = ball.visionBearing
+    elevation = ball.visionElevation
+    print('Ball!\t Bearing: %f \t Distance: %f\t Elevation: %.8f' % (ball.visionBearing, ball.visionDistance, ball.visionElevation))
+    commands.setHeadPanTilt(bearing, core.RAD_T_DEG* elevation, 1.0)
 
 class MoveHeadLeft(Node):
   """Search for the ball to the left"""
   def run(self):
-    commands.setHeadPan(-math.pi/2,1.5)
+    commands.setHeadPanTilt(-math.pi/2,-30.0,1.5)
+    commands.setHeadTilt(-30.0)
     if self.getTime() > 2.5:
       self.finish()
 
 class MoveHeadRight(Node):
   """Search for the ball to the right"""
   def run(self):
-    commands.setHeadPan(math.pi/2,1.5)
+    commands.setHeadPanTilt(math.pi/2,-30.0,1.5)
+    commands.setHeadTilt(-30.0)
     if self.getTime() > 2.5:
       self.finish()
 
@@ -78,4 +80,4 @@ class Playing(LoopingStateMachine):
     self.add_transition(moveHeadRight,C,moveHeadLeft)
     self.add_transition(moveHeadLeft,B(ball),track)
     self.add_transition(moveHeadRight,B(ball),track)
-    self.add_transition(track,NB(ball),moveHeadLeft)
+    self.add_transition(track,B(ball).negation(),moveHeadLeft)

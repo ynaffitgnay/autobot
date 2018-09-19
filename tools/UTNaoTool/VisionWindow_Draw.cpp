@@ -244,7 +244,7 @@ void VisionWindow::drawGoal(ImageWidget* image) {
   if(not goal.seen) return;
   if(goal.fromTopCamera and _widgetAssignments[image] == Camera::BOTTOM) return;
   if(not goal.fromTopCamera and _widgetAssignments[image] == Camera::TOP) return;
-  std::cout << "Drawing goal" << std::endl;
+  // std::cout << "Drawing goal" << std::endl;
   QPen pen(segCol[c_BLUE]);
 
   int width = cmatrix.getCameraWidthByDistance(goal.visionDistance, 800);
