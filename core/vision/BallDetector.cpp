@@ -30,10 +30,10 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
     int i = 0;
     for (auto blob : blobs) {
       if (blob.color == c_ORANGE) { //maybe update pixel ratio here too!!
-        //std::cout << "frame: " << fid << " oBlob: " << i++ << " avgX: " << blob.avgX << " avgY: " << blob.avgY << " ToTaL: " << blob.total 
-        //        << " xi: " << blob.xi << " yi: " << blob.yi << " xf: " << blob.xf << " yf: "
-        //        << blob.yf << " pRatio: " << blob.correctPixelRatio << " pDensity: "
-        //        << blob.pixelDensity << std::endl;
+        std::cout << "frame: " << fid << " oBlob: " << i++ << " avgX: " << blob.avgX << " avgY: " << blob.avgY << " ToTaL: " << blob.total 
+                << " xi: " << blob.xi << " yi: " << blob.yi << " xf: " << blob.xf << " yf: "
+                << blob.yf << " pRatio: " << blob.correctPixelRatio << " pDensity: "
+                << blob.pixelDensity << std::endl;
         orangeBlob = &blob;
 
         cv::Mat frame, grayFrame;
@@ -59,12 +59,26 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
         
         // Check to see if getting rid of this speeds anything up
         cv::GaussianBlur(grayFrame, grayFrame, cv::Size(13, 13), 0, 0);
-        
-        double maxR = 0;//2 * orangeBlob->dx;
-        double minR = 0;//0.5 * (double)std::min(std::min(orangeBlob->avgX - orangeBlob->xi, orangeBlob->xf - orangeBlob->avgX), std::min(orangeBlob->avgY - orangeBlob->yi, orangeBlob->yf - orangeBlob->avgY));
-        double dp, p1, p2;
+
+        double maxRFactor = 2;
+        double minRFactor = 0.5;
+        double maxR = maxRFactor * (double)std::max(std::max(orangeBlob->avgX - orangeBlob->xi, orangeBlob->xf - orangeBlob->avgX), std::max(orangeBlob->avgY - orangeBlob->yi, orangeBlob->yf - orangeBlob->avgY));
+        double minR = minRFactor * (double)std::min(std::min(orangeBlob->avgX - orangeBlob->xi, orangeBlob->xf - orangeBlob->avgX), std::min(orangeBlob->avgY - orangeBlob->yi, orangeBlob->yf - orangeBlob->avgY));
+        double dp, p1, p2;`-=
+        std::cout << " minR: " << (int)minR << " maxR: " << (int)maxR << " total: " << orangeBlob->total;// << "\n";
+
+        //maxR = 0;
+        //minR = 0;
+        //minR = 1;
+        //maxR = 15;
 
         if (orangeBlob->avgY < 63 && orangeBlob->total >= 10) {
+          std::cout << "tried to filter for decoy \n";
+          continue;
+        }
+
+        if (orangeBlob->correctPixelRatio > 1.2) {
+          std::cout << "tried to filter for decoy \n";
           continue;
         }
 
@@ -98,7 +112,7 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
           p1 = 10;
           p2 = 10;
         } else if (orangeBlob->avgY > 200) {
-          minR = 0.75 * (double)std::min(std::min(orangeBlob->avgX - orangeBlob->xi, orangeBlob->xf - orangeBlob->avgX), std::min(orangeBlob->avgY - orangeBlob->yi, orangeBlob->yf - orangeBlob->avgY));
+          // minR = 0.75 * (double)std::min(std::min(orangeBlob->avgX - orangeBlob->xi, orangeBlob->xf - orangeBlob->avgX), std::min(orangeBlob->avgY - orangeBlob->yi, orangeBlob->yf - orangeBlob->avgY));
           dp = 5;
           p1 = 10;
           p2 = 10;
@@ -107,7 +121,8 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
           p1 = 10;
           p2 = 10;
         }
-        
+
+        std:: cout << " dp: " << dp << " p1: " << p1 << " p2: " << p2 << "\n";
         //TODO: set smarter thresholds based off of size?
         cv::HoughCircles(grayFrame, circles, CV_HOUGH_GRADIENT, dp, grayFrame.rows/8, p1, p2, (int)minR, (int)maxR);
                 
@@ -132,7 +147,7 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
           newCand->valid = true;
           //std::cout << "Circle " << i << " x: " << v[i][0] << " y: " << v[i][1] << " r: " << v[i][2] << "\n";
           ballCands.push_back(newCand);
-          //std::cout << "newCand " << i << " x: " << newCand->centerX << " y: " << newCand->centerY << " r: " << newCand->radius << "\n";
+          std::cout << "newCand " << i << " x: " << newCand->centerX << " y: " << newCand->centerY << " r: " << newCand->radius << "\n\n\n\n\n\n";
         }
 
        
