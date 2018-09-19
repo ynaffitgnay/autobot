@@ -26,7 +26,7 @@ unsigned char* BallDetector::getSegImg(){
 }
 
 void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*>& ballCands) {
-  int ballHeightMM = 33;
+  int ballHeightMM = 40;
   
   auto fid = vblocks_.frame_info->frame_id;
   
@@ -118,6 +118,7 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
       
       newCand->width = orangeBlob->dx;
       newCand->height = orangeBlob->dy;
+      
       auto position = cmatrix_.getWorldPosition(newCand->centerX, newCand->centerY, ballHeightMM);
       newCand->groundDistance = cmatrix_.groundDistance(position);
       
