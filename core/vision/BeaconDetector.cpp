@@ -212,9 +212,10 @@ void BeaconDetector::chooseBestBeacons(std::vector<std::vector<WorldObject> >& b
   for (int i = 0; i < beacon_list.size(); i++){
     WorldObject bestBeacon;
     WorldObject evalBeacon;
+    bool rejected = false;
     float bestFitness = 99.0;
     for(int j = 0; j < beacon_list.at(i).size(); j++) {
-      if (beacon_list.at(i).at(j).visionConfidence < bestFitness) {
+      
         evalBeacon = beacon_list.at(i).at(j);
         for (int c = 0; c < beacon_list.size(); c++){
           WorldObject neighborBeacon;
@@ -229,22 +230,24 @@ void BeaconDetector::chooseBestBeacons(std::vector<std::vector<WorldObject> >& b
               float centerNeighborX = neighborBeacon.imageCenterX;
               float centerEvalY = evalBeacon.imageCenterY;
               float centerNeighborY = neighborBeacon.imageCenterY;
+              // std::cout << "Type Eval: " << getName(evalBeacon.type) << " Type Neighbor: " << getName(neighborBeacon.type) <<" Height Eval: " << heightEvalBeacon << " Height Neighbor: " << heightNeighborBeacon << std::endl;
+              // std::cout << "CenterX Eval: " << centerEvalX << " CenterX Neighbor: " << centerNeighborX << " CenterY Eval: " << centerEvalY << " CenterY Neighbor: " << centerNeighborY << std::endl;
               if (std::abs(centerEvalX - centerNeighborX) < widthEvalBeacon) {
                 if ( (std::abs(centerEvalY-centerNeighborY)-(heightEvalBeacon+heightNeighborBeacon)) < std::max(heightEvalBeacon,heightNeighborBeacon) ){
-                  std::cout << "Type Eval: " << getName(evalBeacon.type) << " Type Neighbor: " << getName(neighborBeacon.type) <<" Height Eval: " << heightEvalBeacon << " Height Neighbor: " << heightNeighborBeacon << std::endl;
-                  std::cout << "CenterX Eval: " << centerEvalX << " CenterX Neighbor: " << centerNeighborX << " CenterY Eval: " << centerEvalY << " CenterY Neighbor: " << centerNeighborY << std::endl;
-                  std::cout << "Reject Beacon" << std::endl;
-                  continue;
-                }
+                  // std::cout << "Reject Beacon" << std::endl;
+                  rejected = true;
+                } 
               }
             }
           }
         }
-        bestBeacon = beacon_list.at(i).at(j);
-        bestFitness = bestBeacon.visionConfidence;
-      }
+        if (beacon_list.at(i).at(j).visionConfidence < bestFitness && rejected == false) {
+          bestBeacon = beacon_list.at(i).at(j);
+          bestFitness = bestBeacon.visionConfidence;
+          rejected = false;
+        }
     }
-    if (beacon_list.at(i).size() > 0) {
+    if (beacon_list.at(i).size() > 0 && rejected == false ) {
       auto& object = vblocks_.world_object->objects_[bestBeacon.type];
       object.imageCenterX = bestBeacon.imageCenterX;
       object.imageCenterY = bestBeacon.imageCenterY;
@@ -252,7 +255,7 @@ void BeaconDetector::chooseBestBeacons(std::vector<std::vector<WorldObject> >& b
       object.visionBearing = bestBeacon.visionBearing;
       object.seen = true;
       object.fromTopCamera = camera_ == Camera::TOP;
-      std::cout << "Adding: " << getName(bestBeacon.type) << " CenterX: " << bestBeacon.imageCenterX << " CenterY: " <<  bestBeacon.imageCenterY << " Vision Distance: " <<  bestBeacon.visionDistance << std::endl;
+      // std::cout << "Adding: " << getName(bestBeacon.type) << " CenterX: " << bestBeacon.imageCenterX << " CenterY: " <<  bestBeacon.imageCenterY << " Vision Distance: " <<  bestBeacon.visionDistance << std::endl;
       tlog(30, "saw %s at (%i,%i) with calculated distance %2.4f", getName(bestBeacon.type), object.imageCenterX, object.imageCenterY, object.visionDistance);
     }
   }
