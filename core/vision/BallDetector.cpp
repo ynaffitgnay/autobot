@@ -37,70 +37,42 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
   int i = 0;
   for (auto blob : blobs) {
     if (blob.color == c_ORANGE) { //maybe update pixel ratio here too!!
-      orangeBlob = &blob;
-      float ratioHighFactor = 1.2;
-      float ratioLowFactor = 0.75;
+      //if (camera_ == Camera::TOP) {
+      //  std::cout << "top ";
+      //} else {
+      //  std::cout << "bottom ";
+      //}
+      //std::cout << "frame: " << fid << " oBlob: " << i++ << " avgX: " << blob.avgX << " avgY: " << blob.avgY << " ToTaL: " << blob.total 
+      //          << " xi: " << blob.xi << " yi: " << blob.yi << " xf: " << blob.xf << " yf: "
+      //          << blob.yf << " pRatio: " << blob.correctPixelRatio << " pDensity: "
+      //          << blob.pixelDensity << std::endl;
 
+      orangeBlob = &blob;
+
+      // Now some heuristics
+      if (camera_ == Camera::TOP) {
+        if (orangeBlob->total > 1000) {
+          //std::cout << "Eliminated for being too large.\n";
+          continue;
+        }
+      }
+      
+      float ratioHighFactor = 1.45;  // maybe add heuristics for higher pixel ratio when in lower quadrant
+      float ratioLowFactor = 0.65;
+      
       // Check that the ratio makes sense
-      if (orangeBlob->correctPixelRatio > ratioHighFactor || orangeBlob->correctPixelRatio < ratioLowFactor) {
+      if (orangeBlob->correctPixelRatio != 0 &&
+          (orangeBlob->correctPixelRatio > ratioHighFactor ||
+           orangeBlob->correctPixelRatio < ratioLowFactor)) {
+        //std::cout << "Eliminated for pixel ratio\n";
         continue;
       }
 
-
-      // Now some heuristics
-      float rad = ((float)(orangeBlob->avgX - orangeBlob->xi) + (float)(orangeBlob->xf - orangeBlob->avgX) + (float)(orangeBlob->avgY - orangeBlob->yi) + (float)(orangeBlob->yf - orangeBlob->avgY)) / 4.0;
-      
-      
-      // Make sure the ground below ball is green
-      //int floorY = (int)(0.10 * (float)(orangeBlob->dy) + (float)orangeBlob->yf);
-      //if ((floorY % 2) != 0) floorY += 1;
-      int incFloor = 2;
-      int floorY = (orangeBlob->yf + incFloor);
-      // just in case, make sure the value is even
-      floorY += (floorY % 2);
-
-      int floorX = orangeBlob->avgX;
-      // Make sure that you are checking a valid point in the segmented image
-      if (floorX % 4 != 0) floorX += (4 - (floorX % 4));
-      
-      unsigned char floorColor = getSegImg()[floorY * iparams_.width + orangeBlob->avgX];
-
-      while (floorColor == c_UNDEFINED && (incFloor < orangeBlob->dy)) {
-        incFloor += 2;
-        
-        floorColor = getSegImg()[floorY * iparams_.width + orangeBlob->avgX];
+      if (!checkBottomColor(orangeBlob)) {
+        continue;
       }
-
-      //std::cout << " blob.yf:  " << orangeBlob->yf << " floorY: " << floorY << " floorX: " << floorX << " color: ";
-      //
-      //if (floorColor == c_UNDEFINED) {
-      //  std::cout << " UNDEFINED";
-      //} else if (floorColor == c_FIELD_GREEN) {
-      //  std::cout << " GREEN";
-      //} else if (floorColor == c_WHITE) {           
-      //  std::cout << " WHITE";
-      //} else if (floorColor == c_ORANGE) {          
-      //  std::cout << " ORANGE";
-      //} else if (floorColor == c_PINK) {            
-      //  std::cout << " PINK";
-      //} else if (floorColor == c_BLUE) {            
-      //  std::cout << " BLUE";
-      //} else if (floorColor == c_YELLOW) {          
-      //  std::cout << " YELLOW";
-      //} else if (floorColor == c_ROBOT_WHITE) {     
-      //  std::cout << " ROBOT";
-      //} else {
-      //  std::cout << "what??";
-      //}
-      //std::cout << "\n";
-
-      if (floorColor != c_FIELD_GREEN) {
-        //continue;
-      }
-
-      // if white, check the sides
       
-
+      
       // Make sure that the center of the object (check a couple of points around the middle) are orange
       // (rule out the white folder with orange)
       
@@ -121,13 +93,23 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
       
       auto position = cmatrix_.getWorldPosition(newCand->centerX, newCand->centerY, ballHeightMM);
       newCand->groundDistance = cmatrix_.groundDistance(position);
-      
+
+
+      // CHECK ELEVATION
       newCand->bearing = cmatrix_.bearing(position);
       newCand->elevation = cmatrix_.elevation(position);
       newCand->blob = orangeBlob;
       newCand->valid = true;
+
+      //std::cout << "X: " << newCand->centerX << " Y: " << newCand->centerY << " R: " << newCand->radius <<
+      //  " groundDist: " << newCand->groundDistance << " elevation: " << newCand-> elevation << "\n";
+
+      // if (elevation check)
+      // delete newCand;
+      //
       ballCands.push_back(newCand);
 
+      
       //cv::Mat frame, grayFrame;
       //
       //int xPadding = std::max(orangeBlob->avgX - orangeBlob->xi, orangeBlob->xf - orangeBlob->avgX);
@@ -238,4 +220,172 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
       //}
     }    
   }
+}
+
+bool BallDetector::checkBottomColor(Blob * orangeBlob) {
+  float rad = ((float)(orangeBlob->avgX - orangeBlob->xi) + (float)(orangeBlob->xf - orangeBlob->avgX) + (float)(orangeBlob->avgY - orangeBlob->yi) + (float)(orangeBlob->yf - orangeBlob->avgY)) / 4.0;
+    
+  // Make sure the ground below ball is green
+  //int floorY = (int)(0.10 * (float)(orangeBlob->dy) + (float)orangeBlob->yf);
+  //if ((floorY % 2) != 0) floorY += 1;
+  //int incFloor = 2;
+  int floorY = (orangeBlob->yf + 4);
+  // just in case, make sure the value is even
+  floorY += (floorY % 2);
+
+  if (floorY >= iparams_.height) {
+    return checkSideColors(orangeBlob);
+  }
+
+  int floorX = orangeBlob->avgX;
+  // Make sure that you are checking a valid point in the segmented image
+  if (floorX % 4 != 0) floorX += (4 - (floorX % 4));
+  // Don't go out of bounds of the picture
+  if (floorX >= iparams_.width) {
+    floorX -= 4;
+  }
+  
+  unsigned char floorColor = getSegImg()[floorY * iparams_.width + floorX];
+
+  // At the edges, the orange can appear pink, or the carpet can appear blue
+  while ((floorColor == c_UNDEFINED || floorColor == c_PINK || floorColor == c_BLUE) && ((floorY - orangeBlob->yf) < rad)) {
+    floorY+=2;
+
+    if (floorY >= iparams_.height) {
+      return checkSideColors(orangeBlob);
+    }
+
+    //std::cout << "updating floorColor\n";
+    floorColor = getSegImg()[floorY * iparams_.width + floorX];
+  }
+
+  //std::cout << "\n\n\n\n\n\n\n";
+  ////int x = floorX;
+  //for (int k = 0; k < 4; k+=2) {
+  //for (int j = 0; j < 5; j++) {
+  //  std::cout << "floorY: " << (floorY + k) << " x: " << (floorX + j) << " ";
+  //  floorColor = getSegImg()[(floorY + k) * iparams_.width + (floorX + j)];
+  //
+  //  if (floorColor == c_UNDEFINED) {
+  //    std::cout << " UNDEFINED";
+  //  } else if (floorColor == c_FIELD_GREEN) {
+  //    std::cout << " GREEN";
+  //  } else if (floorColor == c_WHITE) {           
+  //    std::cout << " WHITE";
+  //  } else if (floorColor == c_ORANGE) {          
+  //    std::cout << " ORANGE";
+  //  } else if (floorColor == c_PINK) {            
+  //    std::cout << " PINK";
+  //  } else if (floorColor == c_BLUE) {            
+  //    std::cout << " BLUE";
+  //  } else if (floorColor == c_YELLOW) {          
+  //    std::cout << " YELLOW";
+  //  } else if (floorColor == c_ROBOT_WHITE) {     
+  //    std::cout << " ROBOT";
+  //  } else {
+  //    std::cout << "what??";
+  //  }
+  //
+  //  std::cout << "\n";
+  //}
+  //std::cout << "\n";
+  //}
+
+  //std::cout <<  " floorX: " << floorX << " floorY: " << floorY << " color: ";
+
+
+  //if (floorColor == c_UNDEFINED) {
+  //  std::cout << " UNDEFINED";
+  //} else if (floorColor == c_FIELD_GREEN) {
+  //  std::cout << " GREEN";
+  //} else if (floorColor == c_WHITE) {           
+  //  std::cout << " WHITE";
+  //} else if (floorColor == c_ORANGE) {          
+  //  std::cout << " ORANGE";
+  //} else if (floorColor == c_PINK) {            
+  //  std::cout << " PINK";
+  //} else if (floorColor == c_BLUE) {            
+  //  std::cout << " BLUE";
+  //} else if (floorColor == c_YELLOW) {          
+  //  std::cout << " YELLOW";
+  //} else if (floorColor == c_ROBOT_WHITE) {     
+  //  std::cout << " ROBOT";
+  //} else {
+  //  std::cout << "what??";
+  //}
+  //std::cout << "\n";
+
+  
+
+  // if white, check the sides
+  if (floorColor == c_WHITE) {
+    // check the ground on either side of the ball
+    // floorY = (orangeBlob->yf + incFloor);
+    // just in case, make sure the value is even
+    //floorY += (floorY % 2);
+
+    //int lFloorX = orangeBlob->xi;
+    //int rFloorX = orangeBlob->xf;
+    //// Make sure that you are checking a valid point in the segmented image
+    //if (floorX % 4 != 0) floorX += (4 - (floorX % 4));
+    //
+    //unsigned char rFloorColor = getSegImg()[floorY * iparams_.width + rFloorX];
+    //unsigned char lFloorColor = getSegImg()[floorY * iparams_.width + lFloorX];
+    //
+    //// Check either side of the ball
+    //if (rFloorColor != c_FIELD_GREEN && lFloorColor != c_FIELD_GREEN) {
+    //  std::cout << "Eliminated over white line with no green\n";
+    //  continue;
+    //}
+    return checkSideColors(orangeBlob);
+
+    // Todo: what if the ball is horizontally on a white line?
+    
+  }
+  else if (floorColor != c_FIELD_GREEN) {
+    //std::cout << "no green below\n";
+    return false;
+  }
+      
+  return true;
+}
+
+bool BallDetector::checkSideColors(Blob * orangeBlob) {
+  //int floorY = std::min(orangeBlob->yf, (iparams_.height - 2));
+  int floorY;
+  // Check from the bottom of the ball if using the top camera
+  if (camera_ == Camera::TOP) {
+    floorY = (orangeBlob->yf < (iparams_.height - 2)) ? orangeBlob->yf : (iparams_.height - 2);
+  }
+  else
+  {
+    floorY = (int)(orangeBlob->avgY);
+    floorY += (floorY % 2);
+  }
+  
+  int lFloorX = orangeBlob->xi - 4;
+  int rFloorX = orangeBlob->xf + 4;
+  // Make sure that you are checking a valid point in the segmented image
+  if (lFloorX % 4 != 0) lFloorX -= (4 - (lFloorX % 4));
+  if (lFloorX < 0) lFloorX = 0;
+  if (rFloorX % 4 != 0) rFloorX += (4 - (rFloorX % 4));
+  if (rFloorX >= iparams_.width) rFloorX = (iparams_.width - 2);
+  
+  unsigned char rFloorColor = getSegImg()[floorY * iparams_.width + rFloorX];
+  unsigned char lFloorColor = getSegImg()[floorY * iparams_.width + lFloorX];
+
+  // Check either side of the ball
+  if (rFloorColor != c_FIELD_GREEN && lFloorColor != c_FIELD_GREEN) {
+    //std::cout << "Eliminated over white line with no green\n";
+    //std::cout << "Eliminated for not having green on either side\n";
+    return false;
+  }
+  
+  return true;
+}
+
+bool BallDetector::checkNextToLine(Blob * orangeBlob) {
+  //int floorY = 
+  //todo: add more logic, if necessary
+  return checkSideColors(orangeBlob);
 }
