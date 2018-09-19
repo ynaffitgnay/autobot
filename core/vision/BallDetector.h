@@ -17,6 +17,7 @@ class BallDetector : public ObjectDetector {
   bool checkBottomColor(Blob * orangeBlob);
   bool checkSideColors(Blob * orangeBlob);
   bool checkNextToLine(Blob * orangeBlob);
+  bool checkCenter(Blob * orangeBlob);
  private:
   unsigned char* getImg();
   unsigned char* getSegImg();
