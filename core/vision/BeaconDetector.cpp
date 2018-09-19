@@ -190,9 +190,9 @@ bool BeaconDetector::objectValidInWorld(WorldObject& object, Blob& topBlob, Blob
   else{
     ratioThresh = 1.5;
   }
-  printf("Width = %f, Height = %f, Total (est): %f Object Type = %s\n", width, height, width*height, getName(object.type));
-  printf("W_topBlob = %d, H_topBlob = %d, total top: %d ratio_topWidth = %f, ratio_topHeight = %f\n", topBlob.xf - topBlob.xi, topBlob.yf - topBlob.yi, topBlob.total, topratioWidth, topratioHeight);
-  printf("W_bottomBlob = %d, H_bottomBlob = %d, ratio_bottomWidth = %f, ratio_bottomHeight = %f\n",bottomBlob.xf - bottomBlob.xi, bottomBlob.yf - bottomBlob.yi, bottomratioWidth, bottomratioHeight);
+  // printf("Width = %f, Height = %f, Total (est): %f Object Type = %s\n", width, height, width*height, getName(object.type));
+  // printf("W_topBlob = %d, H_topBlob = %d, total top: %d ratio_topWidth = %f, ratio_topHeight = %f\n", topBlob.xf - topBlob.xi, topBlob.yf - topBlob.yi, topBlob.total, topratioWidth, topratioHeight);
+  // printf("W_bottomBlob = %d, H_bottomBlob = %d, ratio_bottomWidth = %f, ratio_bottomHeight = %f\n",bottomBlob.xf - bottomBlob.xi, bottomBlob.yf - bottomBlob.yi, bottomratioWidth, bottomratioHeight);
   // if ( (abs(topBlob.xf - topBlob.xi - width) > 5) || (abs(topBlob.yf - topBlob.yi - height) > 5) || (abs(bottomBlob.xf - bottomBlob.xi - width) > 5) || (abs(bottomBlob.yf - bottomBlob.yi - height) > 5))
   if (((std::abs(1-topratioWidth) < ratioThresh)+ (std::abs(1-topratioHeight) < ratioThresh) + (std::abs(1-bottomratioWidth) < ratioThresh) + (std::abs(1-bottomratioHeight) < ratioThresh)) >= 3) 
   {
@@ -208,11 +208,38 @@ bool BeaconDetector::objectValidInWorld(WorldObject& object, Blob& topBlob, Blob
 
 void BeaconDetector::chooseBestBeacons(std::vector<std::vector<WorldObject> >& beacon_list) {
 
+
   for (int i = 0; i < beacon_list.size(); i++){
     WorldObject bestBeacon;
+    WorldObject evalBeacon;
     float bestFitness = 99.0;
     for(int j = 0; j < beacon_list.at(i).size(); j++) {
       if (beacon_list.at(i).at(j).visionConfidence < bestFitness) {
+        evalBeacon = beacon_list.at(i).at(j);
+        for (int c = 0; c < beacon_list.size(); c++){
+          WorldObject neighborBeacon;
+          for(int d = 0; d < beacon_list.at(c).size(); d++) {
+            if (i != c && j != d) {
+              neighborBeacon = beacon_list.at(c).at(d);
+              float heightEvalBeacon = cmatrix_.getCameraHeightByDistance(evalBeacon.visionDistance, 100);
+              float heightNeighborBeacon = cmatrix_.getCameraHeightByDistance(neighborBeacon.visionDistance, 100);
+              float widthEvalBeacon = cmatrix_.getCameraWidthByDistance(evalBeacon.visionDistance, 110);
+              float widthNeighborBeacon = cmatrix_.getCameraWidthByDistance(neighborBeacon.visionDistance, 110);
+              float centerEvalX = evalBeacon.imageCenterX;
+              float centerNeighborX = neighborBeacon.imageCenterX;
+              float centerEvalY = evalBeacon.imageCenterY;
+              float centerNeighborY = neighborBeacon.imageCenterY;
+              if (std::abs(centerEvalX - centerNeighborX) < widthEvalBeacon) {
+                if ( (std::abs(centerEvalY-centerNeighborY)-(heightEvalBeacon+heightNeighborBeacon)) < std::max(heightEvalBeacon,heightNeighborBeacon) ){
+                  std::cout << "Type Eval: " << getName(evalBeacon.type) << " Type Neighbor: " << getName(neighborBeacon.type) <<" Height Eval: " << heightEvalBeacon << " Height Neighbor: " << heightNeighborBeacon << std::endl;
+                  std::cout << "CenterX Eval: " << centerEvalX << " CenterX Neighbor: " << centerNeighborX << " CenterY Eval: " << centerEvalY << " CenterY Neighbor: " << centerNeighborY << std::endl;
+                  std::cout << "Reject Beacon" << std::endl;
+                  continue;
+                }
+              }
+            }
+          }
+        }
         bestBeacon = beacon_list.at(i).at(j);
         bestFitness = bestBeacon.visionConfidence;
       }

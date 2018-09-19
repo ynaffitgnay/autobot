@@ -61,10 +61,10 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
         cv::GaussianBlur(grayFrame, grayFrame, cv::Size(13, 13), 0, 0);
 
         double maxRFactor = 2;
-        double minRFactor = 0.5;
+        double minRFactor = 0.65;
         double maxR = maxRFactor * (double)std::max(std::max(orangeBlob->avgX - orangeBlob->xi, orangeBlob->xf - orangeBlob->avgX), std::max(orangeBlob->avgY - orangeBlob->yi, orangeBlob->yf - orangeBlob->avgY));
         double minR = minRFactor * (double)std::min(std::min(orangeBlob->avgX - orangeBlob->xi, orangeBlob->xf - orangeBlob->avgX), std::min(orangeBlob->avgY - orangeBlob->yi, orangeBlob->yf - orangeBlob->avgY));
-        double dp, p1, p2;`-=
+        double dp, p1, p2;
         std::cout << " minR: " << (int)minR << " maxR: " << (int)maxR << " total: " << orangeBlob->total;// << "\n";
 
         //maxR = 0;
