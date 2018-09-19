@@ -31,10 +31,10 @@ struct Blob {
   Blob() : lpIndex(MAX_BLOB_VISIONPOINTS, 0) { }
   Blob(unsigned char c, uint16_t xi, uint16_t xf, uint16_t dx, uint16_t yi,
     uint16_t yf, uint16_t dy, uint16_t widthStart, uint16_t widthEnd, uint16_t avgX,
-       uint16_t avgY, uint16_t total, float pixelRatio, float pixelDensity):
+       uint16_t avgY, uint16_t total, float pixelRatio, float pixelDensity, uint16_t lpCount):
     color(c), xi(xi), xf(xf), dx(dx), yi(yi), yf(yf), dy(dy), widthStart(widthStart),
     widthEnd(widthEnd), avgX(avgX), avgY(avgY), total(total), correctPixelRatio(pixelRatio),
-    pixelDensity(pixelDensity), lpIndex(MAX_BLOB_VISIONPOINTS, 0), lpCount(0) { }
+    pixelDensity(pixelDensity), lpCount(lpCount), lpIndex(MAX_BLOB_VISIONPOINTS, 0) { }
 };
 
 /// @ingroup vision

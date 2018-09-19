@@ -12,6 +12,7 @@ void BeaconDetector::findBeacons(std::vector<Blob>& blobs) {
   std::vector<Blob> blueCand;
   std::vector<Blob> pinkCand;
   std::vector<Blob> yellowCand;
+  std::vector<Blob> whiteCand;
   std::vector<WorldObject> yb_beacons;
   std::vector<WorldObject> by_beacons;
   std::vector<WorldObject> yp_beacons;
@@ -38,12 +39,15 @@ void BeaconDetector::findBeacons(std::vector<Blob>& blobs) {
         // std::cout << "Pushed back pink" << std::endl;  
         pinkCand.push_back(blobs.at(i));
         break;
+      case c_WHITE:
+        whiteCand.push_back(blobs.at(i));
+        break;
       default: // None of the beacon colors
         break;       
     }
   }
 
-  genCombos(yellowCand,pinkCand,blueCand,yb_beacons,by_beacons,yp_beacons,py_beacons,bp_beacons,pb_beacons);
+  genCombos(yellowCand,pinkCand,blueCand,whiteCand,yb_beacons,by_beacons,yp_beacons,py_beacons,bp_beacons,pb_beacons);
   // std::cout << "YB beacons: " << yb_beacons.size() << " BY beacons: " << by_beacons.size() << " YP beacons: " << yp_beacons.size() << " PY beacons: " << py_beacons.size() << " BP beacons: " << bp_beacons.size() << " PB beacons: " << pb_beacons.size() << std::endl;
   
   beacon_list.push_back(yb_beacons);
@@ -55,7 +59,7 @@ void BeaconDetector::findBeacons(std::vector<Blob>& blobs) {
   chooseBestBeacons(beacon_list);
 }
 
-void BeaconDetector::genCombos(std::vector<Blob>& yBlobs, std::vector<Blob>& pBlobs, std::vector<Blob>& bBlobs,
+void BeaconDetector::genCombos(std::vector<Blob>& yBlobs, std::vector<Blob>& pBlobs, std::vector<Blob>& bBlobs, std::vector<Blob>& wBlobs,
                                std::vector<WorldObject>& yb_beacons, std::vector<WorldObject>& by_beacons,
                                std::vector<WorldObject>& yp_beacons, std::vector<WorldObject>& py_beacons,
                                std::vector<WorldObject>& bp_beacons, std::vector<WorldObject>& pb_beacons ) {
@@ -74,13 +78,11 @@ void BeaconDetector::genCombos(std::vector<Blob>& yBlobs, std::vector<Blob>& pBl
         // std::cout << "Xdiff within threshold" << std::endl;
         if (alignsY(yBlobs.at(i),bBlobs.at(j)) > 0) {
           object = addBeaconObject(yBlobs.at(i).avgX, yBlobs.at(i).yf, WO_BEACON_YELLOW_BLUE);
-          objectValidInWorld(object,yBlobs.at(i),bBlobs.at(j));
-          yb_beacons.push_back(object);    
+          if(objectValidInWorld(object,yBlobs.at(i),bBlobs.at(j)))  yb_beacons.push_back(object);    
         }
         else if (alignsY(yBlobs.at(i),bBlobs.at(j)) < 0) {          
           object = addBeaconObject(yBlobs.at(i).avgX, yBlobs.at(i).yi, WO_BEACON_BLUE_YELLOW);
-          objectValidInWorld(object,bBlobs.at(j),yBlobs.at(i));
-          by_beacons.push_back(object); 
+          if(objectValidInWorld(object,bBlobs.at(j),yBlobs.at(i)))  by_beacons.push_back(object); 
         }
       }
     }
@@ -92,13 +94,11 @@ void BeaconDetector::genCombos(std::vector<Blob>& yBlobs, std::vector<Blob>& pBl
         if (alignsY(yBlobs.at(i),pBlobs.at(k) )> 0) {
           // std::cout << "2 yDiffTop within threshold, yellow is just on top of pink" << std::endl;
           object = addBeaconObject(yBlobs.at(i).avgX, yBlobs.at(i).yf, WO_BEACON_YELLOW_PINK);
-          objectValidInWorld(object,yBlobs.at(i),pBlobs.at(k));
-          yp_beacons.push_back(object); 
+          if(objectValidInWorld(object,yBlobs.at(i),pBlobs.at(k)))  yp_beacons.push_back(object); 
         } else if (alignsY(yBlobs.at(i),pBlobs.at(k) )< 0) {
           // std::cout << "1 yDiffBottom within threshold, pink is just on top of yellow" << std::endl;
           object = addBeaconObject(yBlobs.at(i).avgX, yBlobs.at(i).yi, WO_BEACON_PINK_YELLOW);   
-          objectValidInWorld(object,pBlobs.at(k),yBlobs.at(i));
-          py_beacons.push_back(object);   
+          if(objectValidInWorld(object,pBlobs.at(k),yBlobs.at(i)))  py_beacons.push_back(object);   
         }
       }
     }
@@ -111,13 +111,11 @@ void BeaconDetector::genCombos(std::vector<Blob>& yBlobs, std::vector<Blob>& pBl
         if (alignsY(bBlobs.at(p),pBlobs.at(q)) > 0) {
           // std::cout << "2 yDiffTop within threshold, blue is just on top of pink" << std::endl;
           object = addBeaconObject(bBlobs.at(p).avgX, bBlobs.at(p).yf, WO_BEACON_BLUE_PINK);
-          objectValidInWorld(object,bBlobs.at(p),pBlobs.at(q));
-          bp_beacons.push_back(object); 
+          if(objectValidInWorld(object,bBlobs.at(p),pBlobs.at(q)))  bp_beacons.push_back(object); 
         } else if (alignsY(bBlobs.at(p),pBlobs.at(q)) < 0) {
           // std::cout << "1 yDiffBottom within threshold, pink is just on top of blue" << std::endl;
           object = addBeaconObject(bBlobs.at(p).avgX, bBlobs.at(p).yi, WO_BEACON_PINK_BLUE);
-          objectValidInWorld(object,pBlobs.at(q),bBlobs.at(p));
-          pb_beacons.push_back(object); 
+          if(objectValidInWorld(object,pBlobs.at(q),bBlobs.at(p)))  pb_beacons.push_back(object); 
         }
       }
     }
@@ -179,22 +177,56 @@ WorldObject BeaconDetector::addBeaconObject(int newCenterX,int newCenterY,WorldO
 }
 
 bool BeaconDetector::objectValidInWorld(WorldObject& object, Blob& topBlob, Blob& bottomBlob) {
-  return true;
+  float width = cmatrix_.getCameraWidthByDistance(object.visionDistance, 110);
+  float height = cmatrix_.getCameraHeightByDistance(object.visionDistance, 100);
+  float topratioWidth = width/((float)topBlob.xf-topBlob.xi);
+  float topratioHeight = height/((float)topBlob.yf-topBlob.yi);
+  float bottomratioWidth = width/((float)bottomBlob.xf-bottomBlob.xi);
+  float bottomratioHeight = height/((float)bottomBlob.yf-bottomBlob.yi);
+  float ratioThresh;
+  if (width - ((float)topBlob.xf-topBlob.xi) > 10) {
+    ratioThresh = 1.2;
+  }
+  else{
+    ratioThresh = 1.5;
+  }
+  printf("Width = %f, Height = %f, Object Type = %s\n", width, height, getName(object.type));
+  printf("W_topBlob = %d, H_topBlob = %d, ratio_topWidth = %f, ratio_topHeight = %f\n", topBlob.xf - topBlob.xi, topBlob.yf - topBlob.yi, topratioWidth, topratioHeight);
+  printf("W_bottomBlob = %d, H_bottomBlob = %d, ratio_bottomWidth = %f, ratio_bottomHeight = %f\n",bottomBlob.xf - bottomBlob.xi, bottomBlob.yf - bottomBlob.yi, bottomratioWidth, bottomratioHeight);
+  // if ( (abs(topBlob.xf - topBlob.xi - width) > 5) || (abs(topBlob.yf - topBlob.yi - height) > 5) || (abs(bottomBlob.xf - bottomBlob.xi - width) > 5) || (abs(bottomBlob.yf - bottomBlob.yi - height) > 5))
+  if (((std::abs(1-topratioWidth) < ratioThresh)+ (std::abs(1-topratioHeight) < ratioThresh) + (std::abs(1-bottomratioWidth) < ratioThresh) + (std::abs(1-bottomratioHeight) < ratioThresh)) >= 3) 
+  {
+    if (object.visionDistance > 4000){
+      return false;
+    }
+    object.visionConfidence = std::abs(1-topratioWidth)+ std::abs(1-topratioWidth) + std::abs(1-topratioWidth) + std::abs(1-topratioWidth);
+    return true;
+  }
+  return false;
 }
 
 
 void BeaconDetector::chooseBestBeacons(std::vector<std::vector<WorldObject> >& beacon_list) {
+
   for (int i = 0; i < beacon_list.size(); i++){
+    WorldObject bestBeacon;
+    float bestFitness = 99.0;
     for(int j = 0; j < beacon_list.at(i).size(); j++) {
-      auto& object = vblocks_.world_object->objects_[((beacon_list.at(i).at(j))).type];
-      object.imageCenterX = ((beacon_list.at(i).at(j))).imageCenterX;
-      object.imageCenterY = ((beacon_list.at(i).at(j))).imageCenterY;
-      object.visionDistance = ((beacon_list.at(i).at(j))).visionDistance;
-      object.visionBearing = ((beacon_list.at(i).at(j))).visionBearing;
+      if (beacon_list.at(i).at(j).visionConfidence < bestFitness) {
+        bestBeacon = beacon_list.at(i).at(j);
+        bestFitness = bestBeacon.visionConfidence;
+      }
+    }
+    if (beacon_list.at(i).size() > 0) {
+      auto& object = vblocks_.world_object->objects_[bestBeacon.type];
+      object.imageCenterX = bestBeacon.imageCenterX;
+      object.imageCenterY = bestBeacon.imageCenterY;
+      object.visionDistance = bestBeacon.visionDistance;
+      object.visionBearing = bestBeacon.visionBearing;
       object.seen = true;
       object.fromTopCamera = camera_ == Camera::TOP;
-      std::cout << "Adding: " << getName(((beacon_list.at(i).at(j))).type) << " CenterX: " << ((beacon_list.at(i).at(j))).imageCenterX << " CenterY: " <<  ((beacon_list.at(i).at(j))).imageCenterY << " Vision Distance: " <<  ((beacon_list.at(i).at(j))).visionDistance << std::endl;
-      tlog(30, "saw %s at (%i,%i) with calculated distance %2.4f", getName(((beacon_list.at(i).at(j))).type), object.imageCenterX, object.imageCenterY, object.visionDistance);
+      std::cout << "Adding: " << getName(bestBeacon.type) << " CenterX: " << bestBeacon.imageCenterX << " CenterY: " <<  bestBeacon.imageCenterY << " Vision Distance: " <<  bestBeacon.visionDistance << std::endl;
+      tlog(30, "saw %s at (%i,%i) with calculated distance %2.4f", getName(bestBeacon.type), object.imageCenterX, object.imageCenterY, object.visionDistance);
     }
   }
 }
