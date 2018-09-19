@@ -13,6 +13,7 @@ class GoalDetector : public ObjectDetector {
   GoalDetector(DETECTOR_DECLARE_ARGS);
   void init(TextLogger* tl){ textlogger = tl; }
   void findGoals(std::vector<Blob>& blobs);
+  unsigned char* getSegImg();
  private:
   TextLogger* textlogger;
 };
