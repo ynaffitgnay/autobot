@@ -9,4 +9,5 @@ options:
   - SHOW_VISION_RANGE
   - SHOW_SEEN_OPPONENT
   - SHOW_BEACONS
+  - SHOW_GOALS
 ...
