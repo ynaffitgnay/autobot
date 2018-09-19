@@ -52,16 +52,22 @@ class Classifier {
 
   /*
   * Main method for merging
+  * Cycles through all of the runs and performs union-find in two passes.
+  * Input: Vector of the runs that will be merged.
   */
   void mergeRuns(std::vector<VisionPointAlt>& runs);
 
   /*
-  * Checking adjacency
+  * Checking adjacency such that if the current run is horizontally aligned with a run in the row above, they are unionized (sorry, no benefits)
+  * Union-Find method starts in here
+  * Input: The current run and iterators to all of the runs in the row above
   */
   void checkAdj(VisionPointAlt& node, std::vector<VisionPointAlt>::iterator row_begin, std::vector<VisionPointAlt>::iterator row_end);
 
   /*
-  * find method for Union-Find
+  * Find method for Union-Find. Features recursion and path compression!
+  * Input: Node for which to find the parent
+  * Outpul: A pointer to the parent of the node
   */
   VisionPointAlt * findParent(VisionPointAlt& node);
 
@@ -74,6 +80,9 @@ class Classifier {
 
   /*
   * Union by rank for Union-Find
+  * Basically just moves around the parent pointers until the VPAs are connected by having the same parent
+  * Checks against rank
+  * Imput: Two VPAs to unite
   */
   void unionByRank(VisionPointAlt& a, VisionPointAlt& b);
 

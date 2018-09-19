@@ -238,16 +238,21 @@ void Classifier::mergeRuns(std::vector<VisionPointAlt>& runs) {
   int cRow = 0;
   int pvRow;
   
+
+  // Iterators to a list of runs in the row above the current run
   std::vector<VisionPointAlt>::iterator iter = runs.begin();
   std::vector<VisionPointAlt>::iterator row_begin = iter;
   std::vector<VisionPointAlt>::iterator row_end;
   
   bool first = true;
+
+  // Cycle through the runs 
+  // First pass
   for(iter; iter !=runs.end(); iter++) {
     iter->parent = &(*iter);
     iter->rank = vpa_num-counter;
     counter++;
-    if (iter->yi != cRow) {
+    if (iter->yi != cRow) {  // When we are no longer on the same row, we must be in the next
       first = false;
       row_end = iter;
       cRow = iter->yi;
@@ -257,9 +262,11 @@ void Classifier::mergeRuns(std::vector<VisionPointAlt>& runs) {
     }
   }
 
+  // Second pass
   iter = runs.begin();
   for(iter; iter !=runs.end(); iter++) {
     if (iter->color != c_UNDEFINED && iter->color != c_FIELD_GREEN && iter->color != c_WHITE) {
+      // Just running through the clean up the parent pointers for disjoint parent chains
       iter->parent = findParent(*iter);
     }
   }

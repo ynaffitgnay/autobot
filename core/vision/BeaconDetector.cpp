@@ -71,7 +71,11 @@ void BeaconDetector::genCombos(std::vector<Blob>& yBlobs, std::vector<Blob>& pBl
   int uniformTopBott;
   int uniformTopWhole;
   WorldObject object;
+
+  // Going through yellow blobs
   for (int i = 0; i < yBlobs.size(); i++) {
+
+    // Going through blue compared with yellow
     for (int j = 0; j < bBlobs.size(); j++) {
       // std::cout << "Comparing yellow at [" << yBlobs.at(i).avgX << " ," << yBlobs.at(i).avgY << "] with blue at [" << bBlobs.at(j).avgX << " ," << bBlobs.at(j).avgY << "]" << std::endl;
       if (alignsX(yBlobs.at(i),bBlobs.at(j)) ) {
@@ -86,6 +90,8 @@ void BeaconDetector::genCombos(std::vector<Blob>& yBlobs, std::vector<Blob>& pBl
         }
       }
     }
+
+    // Going through pink compared with yellow
     // std::cout << "Comparing pink now" << std::endl;
     for (int k = 0; k < pBlobs.size(); k++) {
       // std::cout << "Comparing yellow at [" << yBlobs.at(i).avgX << " ," << yBlobs.at(i).avgY << "] with pink at [" << pBlobs.at(k).avgX << " ," << pBlobs.at(k).avgY << "]" << std::endl;
@@ -102,8 +108,12 @@ void BeaconDetector::genCombos(std::vector<Blob>& yBlobs, std::vector<Blob>& pBl
         }
       }
     }
-  }
+  } // Outside of yellow now
+
+  // Going through blue blobs again
   for (int p = 0; p < bBlobs.size(); p++) { 
+
+  // Going through blue compared with pink
     for (int q = 0; q < pBlobs.size(); q++) {
       // std::cout << "Comparing blue at [" << bBlobs.at(p).avgX << " ," << bBlobs.at(p).avgY << "] with pink at [" << pBlobs.at(q).avgX << " ," << pBlobs.at(q).avgY << "]" << std::endl;
       if (alignsX(bBlobs.at(p),pBlobs.at(q))) {
@@ -123,16 +133,17 @@ void BeaconDetector::genCombos(std::vector<Blob>& yBlobs, std::vector<Blob>& pBl
 }
 
 bool BeaconDetector::alignsX(Blob& blobA, Blob& blobB) {
-  int xDiff = std::abs(blobA.avgX - blobB.avgX);
-  int sizeDiff = blobA.total - blobB.total;
-  float ratioBlobs = ((float)blobA.total)/((float)blobB.total);
-  int aLeftOfBNess = blobB.xi - blobA.xf;
-  int bLeftOfANess = blobA.xi - blobB.xf;
+  int xDiff = std::abs(blobA.avgX - blobB.avgX);  // Difference in center x values
+  float ratioBlobs = ((float)blobA.total)/((float)blobB.total); // Ratio of blob sizes
+  int aLeftOfBNess = blobB.xi - blobA.xf;  // A measure of how left a is compared to b. (It's negative if it's not left)
+  int bLeftOfANess = blobA.xi - blobB.xf;  // A measure of how left b is compared to a. (Same)
   float blobDensityA = blobA.pixelDensity;
   float blobDensityB = blobB.pixelDensity;
   // std::cout << "Difference in X: " << xDiff << " Difference in size(neg means B bigger): " << sizeDiff << " Percent Diff A to B: " << ratioBlobs << std::endl;
   // std::cout << "Leftness of A to B: " << aLeftOfBNess << " Leftness of B to A: " << bLeftOfANess << " Pixel Density A: " << blobDensityA << " Pixel Density B" << blobDensityB << std::endl;
-  if (xDiff < 10) {
+  
+  // Checking fitness conditions
+  if (xDiff < 10) {  // Some hardcoded values. Sorry
     if ((std::abs(1-ratioBlobs) < 0.75) ) {
      if (aLeftOfBNess < 0 && bLeftOfANess < 0) {
         if (blobDensityB > 0.3 && blobDensityA > 0.28) {
@@ -146,13 +157,14 @@ bool BeaconDetector::alignsX(Blob& blobA, Blob& blobB) {
 
 
 int BeaconDetector::alignsY(Blob& blobA, Blob& blobB) {
-  int yDiff = std::abs(blobA.avgY - blobB.avgY);
-  int aTopOfBNess = blobB.yi - blobA.yf;
-  int bTopOfANess = blobA.yi - blobB.yf;
+  int yDiff = std::abs(blobA.avgY - blobB.avgY);   // Difference in center y values
+  int aTopOfBNess = blobB.yi - blobA.yf;   // A measure of how far above a is compared to b. (It's negative if it's not on top)
+  int bTopOfANess = blobA.yi - blobB.yf;   // ^^ Same but reversed
   int heightA = blobA.dy;
   int heightB = blobB.dy;
   // std::cout << "Height of A: " << heightA << " Height of B: " << heightB << " Topness of A to B: " << aTopOfBNess << " Topness of B to A: " << bTopOfANess << std::endl;
   
+  // Checking fitness conditions
   if (std::abs(aTopOfBNess - bTopOfANess) < (heightA+heightB)*1.5) {
     if (aTopOfBNess > bTopOfANess) {
       // A on Top
@@ -189,6 +201,9 @@ bool BeaconDetector::objectValidInWorld(WorldObject& object, Blob& topBlob, Blob
   float bottomratioWidth = width/((float)bottomBlob.xf-bottomBlob.xi);
   float bottomratioHeight = height/((float)bottomBlob.yf-bottomBlob.yi);
   float ratioThresh;
+
+  // Scaling the threshold of what the ratio can look like based on the size of the whole blob. 
+  // more of a difference on small blobs
   if (width*height - topBlob.total > 600) {
     ratioThresh = 0.4;
   }
@@ -198,12 +213,16 @@ bool BeaconDetector::objectValidInWorld(WorldObject& object, Blob& topBlob, Blob
   // printf("Width = %f, Height = %f, Total (est): %f Object Type = %s\n", width, height, width*height, getName(object.type));
   // printf("W_topBlob = %d, H_topBlob = %d, total top: %d ratio_topWidth = %f, ratio_topHeight = %f\n", topBlob.xf - topBlob.xi, topBlob.yf - topBlob.yi, topBlob.total, topratioWidth, topratioHeight);
   // printf("W_bottomBlob = %d, H_bottomBlob = %d, ratio_bottomWidth = %f, ratio_bottomHeight = %f\n",bottomBlob.xf - bottomBlob.xi, bottomBlob.yf - bottomBlob.yi, bottomratioWidth, bottomratioHeight);
-  // if ( (abs(topBlob.xf - topBlob.xi - width) > 5) || (abs(topBlob.yf - topBlob.yi - height) > 5) || (abs(bottomBlob.xf - bottomBlob.xi - width) > 5) || (abs(bottomBlob.yf - bottomBlob.yi - height) > 5))
+  
+
+  // We want the width the camera believes the beacon is to be comparable with what the pixels tell us the width is
   if (((std::abs(1-topratioWidth) < ratioThresh)+ (std::abs(1-topratioHeight) < ratioThresh) + (std::abs(1-bottomratioWidth) < ratioThresh) + (std::abs(1-bottomratioHeight) < ratioThresh)) >= 3) 
   {
     // if (object.visionDistance > 4000){
     //   return false;
     // }
+
+    // We'll use this confidence later when comparing possible beacons to try to use the best fit. This handles the upside down beacons very well.
     object.visionConfidence = std::abs(1-topratioWidth)+ std::abs(1-topratioWidth) + std::abs(1-topratioWidth) + std::abs(1-topratioWidth);
     return true;
   }
@@ -213,18 +232,28 @@ bool BeaconDetector::objectValidInWorld(WorldObject& object, Blob& topBlob, Blob
 
 void BeaconDetector::chooseBestBeacons(std::vector<std::vector<WorldObject> >& beacon_list) {
 
-
+  // Cycle through beacon types
   for (int i = 0; i < beacon_list.size(); i++){
+
+    // A lot of setup
     WorldObject bestBeacon;
     WorldObject evalBeacon;
     bool rejected = false;
     float bestFitness = 99.0;
+
+    // Cycle through each beacon in the current type
     for(int j = 0; j < beacon_list.at(i).size(); j++) {
       
         evalBeacon = beacon_list.at(i).at(j);
+
+        // Cycle through types again
         for (int c = 0; c < beacon_list.size(); c++){
           WorldObject neighborBeacon;
+
+          // Cycle through each beacon again
           for(int d = 0; d < beacon_list.at(c).size(); d++) {
+
+            // do not compare against self
             if (i != c && j != d) {
               neighborBeacon = beacon_list.at(c).at(d);
               float heightEvalBeacon = cmatrix_.getCameraHeightByDistance(evalBeacon.visionDistance, 100);
@@ -237,6 +266,8 @@ void BeaconDetector::chooseBestBeacons(std::vector<std::vector<WorldObject> >& b
               float centerNeighborY = neighborBeacon.imageCenterY;
               // std::cout << "Type Eval: " << getName(evalBeacon.type) << " Type Neighbor: " << getName(neighborBeacon.type) <<" Height Eval: " << heightEvalBeacon << " Height Neighbor: " << heightNeighborBeacon << std::endl;
               // std::cout << "CenterX Eval: " << centerEvalX << " CenterX Neighbor: " << centerNeighborX << " CenterY Eval: " << centerEvalY << " CenterY Neighbor: " << centerNeighborY << std::endl;
+              
+              // Comparing to see if there is another beacon that is vertically aligned with our current right on top or right below it. If so, we reject it.
               if (std::abs(centerEvalX - centerNeighborX) < widthEvalBeacon) {
                 if ( (std::abs(centerEvalY-centerNeighborY)-(heightEvalBeacon+heightNeighborBeacon)) < std::max(heightEvalBeacon,heightNeighborBeacon) ){
                   // std::cout << "Reject Beacon" << std::endl;
@@ -246,12 +277,16 @@ void BeaconDetector::chooseBestBeacons(std::vector<std::vector<WorldObject> >& b
             }
           }
         }
+
+        // Checking that fitness criteria from objectValidInWorld
         if (beacon_list.at(i).at(j).visionConfidence < bestFitness && rejected == false) {
           bestBeacon = beacon_list.at(i).at(j);
           bestFitness = bestBeacon.visionConfidence;
           rejected = false;
         }
     }
+
+    // Add only the best beacon of each type to the actual world objects list
     if (beacon_list.at(i).size() > 0 && rejected == false ) {
       auto& object = vblocks_.world_object->objects_[bestBeacon.type];
       object.imageCenterX = bestBeacon.imageCenterX;
@@ -266,25 +301,3 @@ void BeaconDetector::chooseBestBeacons(std::vector<std::vector<WorldObject> >& b
   }
 }
 
-
-//   static map<WorldObjectType,vector<int>> beacons = {
-//     { WO_BEACON_YELLOW_BLUE, { 24, 15, 74, 83} },
-//     { WO_BEACON_YELLOW_PINK, { 104, 41, 138, 96 } },
-//     { WO_BEACON_PINK_YELLOW, { 187, 38, 212, 90 } },
-//     { WO_BEACON_BLUE_PINK, { 246, 36, 268, 86 } }
-//   };
-//   auto fid = vblocks_.frame_info->frame_id;
-//   if(fid >= 6150) return;
-//   for(auto beacon : beacons) {
-//     auto& object = vblocks_.world_object->objects_[beacon.first];
-//     auto box = beacon.second;
-//     object.imageCenterX = (box[0] + box[2]) / 2;
-//     object.imageCenterY = (box[1] + box[3]) / 2;
-//     auto position = cmatrix_.getWorldPosition(object.imageCenterX, object.imageCenterY, heights[beacon.first]);
-//     object.visionDistance = cmatrix_.groundDistance(position);
-//     object.visionBearing = cmatrix_.bearing(position);
-//     object.seen = true;
-//     object.fromTopCamera = camera_ == Camera::TOP;
-//     tlog(30, "saw %s at (%i,%i) with calculated distance %2.4f", getName(beacon.first), object.imageCenterX, object.imageCenterY, object.visionDistance);
-//   }
-// }
