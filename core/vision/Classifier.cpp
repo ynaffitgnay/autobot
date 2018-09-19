@@ -117,6 +117,7 @@ void Classifier::makeBlobs(std::vector<Blob>& blobs) {
     avgY = 0;
     meanX = 0.0;
     meanY = 0.0;
+    uint16_t lpcout = 0;
     for(parentIt = parents.at(i).begin(); parentIt != parents.at(i).end(); parentIt++){
       if((*parentIt)->xi < xi) xi = (*parentIt)->xi;
       if((*parentIt)->xf > xf) xf = (*parentIt)->xf;
@@ -127,6 +128,7 @@ void Classifier::makeBlobs(std::vector<Blob>& blobs) {
       total += (*parentIt)->dx;
       meanX += (0.5*((*parentIt)->xi + (*parentIt)->xf) * ((*parentIt)->dx));
       meanY += (0.5*((*parentIt)->yi + (*parentIt)->yf) * ((*parentIt)->dx));
+      lpcout += 1;
     }
     dy = yf-yi;
     dx = xf-xi;
@@ -135,7 +137,7 @@ void Classifier::makeBlobs(std::vector<Blob>& blobs) {
     avgY = (uint16_t) (meanY/total);
     pixelRatio = (float)(xf - xi) / (float)(yf - yi);
     pixelDensity = (float)total / (float)((xf - xi) * (yf - yi));
-    Blob blob = Blob(c, xi, xf, dx, yi, yf, dy, widthStart, widthEnd, avgX, avgY, total, pixelRatio, pixelDensity);
+    Blob blob = Blob(c, xi, xf, dx, yi, yf, dy, widthStart, widthEnd, avgX, avgY, total, pixelRatio, pixelDensity,lpcout);
     blobs.push_back(blob);
   }
   
@@ -257,14 +259,14 @@ void Classifier::mergeRuns(std::vector<VisionPointAlt>& runs) {
 
   iter = runs.begin();
   for(iter; iter !=runs.end(); iter++) {
-    if (iter->color != c_UNDEFINED && iter->color != c_FIELD_GREEN && iter->color != c_WHITE) {
+    if (iter->color != c_UNDEFINED && iter->color != c_FIELD_GREEN) {
       iter->parent = findParent(*iter);
     }
   }
 }
 
 void Classifier::checkAdj(VisionPointAlt& node, std::vector<VisionPointAlt>::iterator row_begin, std::vector<VisionPointAlt>::iterator row_end) {
-  if (node.color == c_UNDEFINED || node.color == c_FIELD_GREEN || node.color == c_WHITE) {
+  if (node.color == c_UNDEFINED || node.color == c_FIELD_GREEN) {
     node.parent = nullptr;
     return;
   }

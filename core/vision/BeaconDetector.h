@@ -15,7 +15,7 @@ class BeaconDetector : public ObjectDetector {
   void findBeacons(std::vector<Blob>& blobs);
  private:
   TextLogger* textlogger;
-  void genCombos(std::vector<Blob>& yBlobs, std::vector<Blob>& pBlobs, std::vector<Blob>& bBlobs,
+  void genCombos(std::vector<Blob>& yBlobs, std::vector<Blob>& pBlobs, std::vector<Blob>& bBlobs, std::vector<Blob>& wBlobs,
                  std::vector<WorldObject>& yb_beacons, std::vector<WorldObject>& by_beacons,
                  std::vector<WorldObject>& yp_beacons, std::vector<WorldObject>& py_beacons,
                  std::vector<WorldObject>& bp_beacons, std::vector<WorldObject>& pb_beacons );

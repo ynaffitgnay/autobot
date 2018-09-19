@@ -11,11 +11,11 @@ void GoalDetector::findGoals(std::vector<Blob>& blobs) {
   std::cout << "Starting FindGoals!" << std::endl;
   if(camera_ == Camera::BOTTOM) return;
   static map<WorldObjectType,int> heights = {
-    { WO_UNKNOWN_GOAL, 325 }
+    { WO_UNKNOWN_GOAL, 253 }
   };
   // auto fid = vblocks_.frame_info->frame_id;
   // if(fid >= 6150) return;
-  if(blobs.at(0).color == c_BLUE) {
+  if((blobs.at(0).color == c_BLUE) && (blobs.at(0).lpCount>=10) && (blobs.at(0).total>=200)) {
     auto& object = vblocks_.world_object->objects_[WO_UNKNOWN_GOAL];
     object.imageCenterX = blobs.at(0).avgX;
     object.imageCenterY = blobs.at(0).avgY;

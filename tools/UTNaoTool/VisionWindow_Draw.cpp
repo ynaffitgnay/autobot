@@ -247,10 +247,10 @@ void VisionWindow::drawGoal(ImageWidget* image) {
   std::cout << "Drawing goal" << std::endl;
   QPen pen(segCol[c_BLUE]);
 
-  int width = cmatrix.getCameraWidthByDistance(goal.visionDistance, GOAL_WIDTH - GOAL_POST_WIDTH);
-  int height = cmatrix.getCameraHeightByDistance(goal.visionDistance, GOAL_HEIGHT);
+  int width = cmatrix.getCameraWidthByDistance(goal.visionDistance, 800);
+  int height = cmatrix.getCameraHeightByDistance(goal.visionDistance, 500);
   int x1 = goal.imageCenterX - width / 2;
-  printf("Width = %d, Height = %d, GoalX = %d, GoalY = %d\n",width, height, goal.imageCenterX,goal.imageCenterY);
+  // printf("Distance = %f, GoalX = %d, GoalY = %d in Image Frame\n",goal.visionDistance, goal.imageCenterX,goal.imageCenterY);
   
   // Draw top
   int ty1 = goal.imageCenterY - height/2;
