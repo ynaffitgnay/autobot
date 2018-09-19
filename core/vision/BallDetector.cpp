@@ -651,7 +651,7 @@ bool BallDetector::checkCenter(Blob * orangeBlob) {
   }
 
 
-  cout << " numOrange: " << numOrange << " nonOrange: " << nonOrange << "\n";
+  //std::cout << " numOrange: " << numOrange << " nonOrange: " << nonOrange << "\n";
 
   if (numOrange < (int)(ratio * (float)(2 * numPoints))) {
     return false;
