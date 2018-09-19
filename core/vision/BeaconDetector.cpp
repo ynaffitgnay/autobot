@@ -128,11 +128,16 @@ bool BeaconDetector::alignsX(Blob& blobA, Blob& blobB) {
   float ratioBlobs = ((float)blobA.total)/((float)blobB.total);
   int aLeftOfBNess = blobB.xi - blobA.xf;
   int bLeftOfANess = blobA.xi - blobB.xf;
-  // std::cout << "Difference in X: " << xDiff << " Difference in size(neg means B bigger): " << sizeDiff << " Percent Diff A to B: " << ratioBlobs << " Leftness of A to B: " << aLeftOfBNess << " Leftness of B to A: " << bLeftOfANess << std::endl;
+  float blobDensityA = blobA.pixelDensity;
+  float blobDensityB = blobB.pixelDensity;
+  // std::cout << "Difference in X: " << xDiff << " Difference in size(neg means B bigger): " << sizeDiff << " Percent Diff A to B: " << ratioBlobs << std::endl;
+  // std::cout << "Leftness of A to B: " << aLeftOfBNess << " Leftness of B to A: " << bLeftOfANess << " Pixel Density A: " << blobDensityA << " Pixel Density B" << blobDensityB << std::endl;
   if (xDiff < 10) {
     if ((std::abs(1-ratioBlobs) < 0.75) ) {
      if (aLeftOfBNess < 0 && bLeftOfANess < 0) {
-        return true;
+        if (blobDensityB > 0.3 && blobDensityA > 0.28) {
+          return true;
+        }
       }
     }
   } 
