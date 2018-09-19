@@ -147,7 +147,7 @@ void ImageProcessor::processFrame(){
   // Populate world objects with the best ball candidate
   bestBall = getBestBallCandidate();
   if (bestBall) {
-    std::cout << "bestBall " << " x: " << bestBall->centerX << " y: " << bestBall->centerY << " r: " << bestBall->radius << "\n";
+    // std::cout << "bestBall " << " x: " << bestBall->centerX << " y: " << bestBall->centerY << " r: " << bestBall->radius << "\n";
   }
   beacon_detector_->findBeacons(blobs_);
   goal_detector_->findGoals(blobs_);
