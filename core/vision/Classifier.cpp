@@ -141,35 +141,6 @@ void Classifier::makeBlobs(std::vector<Blob>& blobs) {
     blobs.push_back(blob);
   }
   
-  //for (int i = 0; i < blobs.size(); ++i)
-  //{
-  //  if(camera_ == Camera::TOP){
-  //    unsigned char run_color = blobs.at(i).color;
-  //    if (run_color == c_UNDEFINED) {
-  //        std::cout << " run_color: UNDEFINED";
-  //      } else if (run_color == c_FIELD_GREEN) {
-  //        std::cout << " run_color: GREEN";
-  //      } else if (run_color == c_WHITE) {           
-  //        std::cout << " run_color: WHITE";
-  //      } else if (run_color == c_ORANGE) {          
-  //        std::cout << " run_color: ORANGE";
-  //      } else if (run_color == c_PINK) {            
-  //        std::cout << " run_color: PINK";
-  //      } else if (run_color == c_BLUE) {            
-  //        std::cout << " run_color: BLUE";
-  //      } else if (run_color == c_YELLOW) {          
-  //        std::cout << " run_color: YELLOW";
-  //      } else if (run_color == c_ROBOT_WHITE) {     
-  //        std::cout << " run_color: ROBOT";
-  //      } else {
-  //        std::cout << "what??";
-  //      }
-  //    std::cout << " avgX: " << blobs.at(i).avgX << " avgY: " << blobs.at(i).avgY << " ToTaL: " << blobs.at(i).total 
-  //              << " xi: " << blobs.at(i).xi << " yi: " << blobs.at(i).yi << " xf: " << blobs.at(i).xf << " yf: "
-  //              << blobs.at(i).yf << " pRatio: " << blobs.at(i).correctPixelRatio << " pDensity: "
-  //              << blobs.at(i).pixelDensity << std::endl;
-  //  }
-  //}
 }
 
 void Classifier::makeParentLists(std::vector<VisionPointAlt>& runs, std::vector<std::vector<VisionPointAlt*>>& parents) {
@@ -231,8 +202,6 @@ void Classifier::constructRuns(std::vector<VisionPointAlt>& runs) {
 }
 
 void Classifier::mergeRuns(std::vector<VisionPointAlt>& runs) {
-  // TODO: get rid of this
-  //std::cout << "Merge " << runs.size() << " runs" << std::endl; 
   int counter = 0;
   int vpa_num = runs.size();
   int cRow = 0;
