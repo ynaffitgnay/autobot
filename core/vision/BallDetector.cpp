@@ -5,6 +5,7 @@
 #include <vision/structures/Blob.h>
 #include <common/ColorConversion.h>
 #include <iostream>
+#include <cmath>
 #include "opencv2/highgui/highgui.hpp"
 #include "opencv2/imgproc/imgproc.hpp"
 
@@ -38,26 +39,26 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
   for (auto blob : blobs) {
     if (blob.color == c_ORANGE) { //maybe update pixel ratio here too!!
       if (camera_ == Camera::TOP) {
-        //std::cout << "top ";
+        std::cout << "top ";
       } else {
-        //std::cout << "bottom ";
+        std::cout << "bottom ";
       }
-      //std::cout << "frame: " << fid << " oBlob: " << i++ << " avgX: " << blob.avgX << " avgY: " << blob.avgY << " ToTaL: " << blob.total 
-      //          << " xi: " << blob.xi << " yi: " << blob.yi << " xf: " << blob.xf << " yf: "
-      //          << blob.yf << " pRatio: " << blob.correctPixelRatio << " pDensity: "
-      //          << blob.pixelDensity << std::endl;
+      std::cout << "frame: " << fid << " oBlob: " << i++ << " avgX: " << blob.avgX << " avgY: " << blob.avgY << " ToTaL: " << blob.total 
+                << " xi: " << blob.xi << " yi: " << blob.yi << " xf: " << blob.xf << " yf: "
+                << blob.yf << " pRatio: " << blob.correctPixelRatio << " pDensity: "
+                << blob.pixelDensity << std::endl;
 
       orangeBlob = &blob;
 
       // Now some heuristics
       if (orangeBlob->total < 8) {
-        //std::cout << "Eliminated for being too small.\n";
+        std::cout << "Eliminated for being too small.\n";
         break;
       }
 
       if (camera_ == Camera::TOP) {
         if (orangeBlob->total > 900) {
-          //std::cout << "Eliminated for being too large.\n";
+          std::cout << "Eliminated for being too large.\n";
           continue;
         }
       }
@@ -69,7 +70,7 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
       if (orangeBlob->correctPixelRatio != 0 &&
           (orangeBlob->correctPixelRatio > ratioHighFactor ||
            orangeBlob->correctPixelRatio < ratioLowFactor)) {
-        //std::cout << "Eliminated for pixel ratio\n";
+        std::cout << "Eliminated for pixel ratio\n";
         continue;
       }
 
@@ -81,7 +82,7 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
       // Make sure that the center of the object (check a couple of points around the middle) are orange
       // (rule out the white folder with orange)
       if (!checkCenter(orangeBlob)) {
-        //std::cout << "Eliminated for non-orange center\n";
+        std::cout << "Eliminated for non-orange center\n";
         continue;
       }
       
@@ -102,20 +103,28 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
       
       auto position = cmatrix_.getWorldPosition(newCand->centerX, newCand->centerY, ballHeightMM);
       newCand->groundDistance = cmatrix_.groundDistance(position);
-
-
-      // CHECK ELEVATION
       newCand->bearing = cmatrix_.bearing(position);
       newCand->elevation = cmatrix_.elevation(position);
+
+      std::cout << "ground dist: " << newCand->groundDistance << " elevation: " << newCand->elevation << " rad " << (RAD_T_DEG) * newCand->elevation << " degrees\n";
       newCand->blob = orangeBlob;
       newCand->valid = true;
 
-      ////std::cout << "X: " << newCand->centerX << " Y: " << newCand->centerY << " R: " << newCand->radius <<
+      //std::cout << "X: " << newCand->centerX << " Y: " << newCand->centerY << " R: " << newCand->radius <<
       //  " groundDist: " << newCand->groundDistance << " elevation: " << newCand-> elevation << "\n";
 
       // if (elevation check)
       // delete newCand;
       //
+
+      // Allow factor of 1.2
+      float expectedPixels = 3 * (39.5 - (4.43 * (RAD_T_DEG * newCand->elevation)) + (0.308 * pow((RAD_T_DEG * newCand->elevation), 2)));
+      if (orangeBlob->total > expectedPixels) {
+        std::cout << "Eliminated for having unreasonable pixel to elevation relationship.\n";
+        delete newCand;
+        continue;
+      }
+      
       ballCands.push_back(newCand);
 
       
@@ -148,15 +157,15 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
       //double maxR = maxRFactor * (double)std::max(std::max(orangeBlob->avgX - orangeBlob->xi, orangeBlob->xf - orangeBlob->avgX), std::max(orangeBlob->avgY - orangeBlob->yi, orangeBlob->yf - orangeBlob->avgY));
       //double minR = minRFactor * (double)std::min(std::min(orangeBlob->avgX - orangeBlob->xi, orangeBlob->xf - orangeBlob->avgX), std::min(orangeBlob->avgY - orangeBlob->yi, orangeBlob->yf - orangeBlob->avgY));
       //double dp, p1, p2;
-      //// //std::cout << " minR: " << (int)minR << " maxR: " << (int)maxR << " total: " << orangeBlob->total;// << "\n";
+      //// std::cout << " minR: " << (int)minR << " maxR: " << (int)maxR << " total: " << orangeBlob->total;// << "\n";
       //
       //if (orangeBlob->avgY < 63 && orangeBlob->total >= 10) {
-      //  // //std::cout << "tried to filter for decoy \n";
+      //  // std::cout << "tried to filter for decoy \n";
       //  continue;
       //}
       //
       //if (orangeBlob->correctPixelRatio > 1.2) {
-      //  // //std::cout << "tried to filter for decoy \n";
+      //  // std::cout << "tried to filter for decoy \n";
       //  continue;
       //}
       //
@@ -223,9 +232,9 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
       //  newCand->elevation = cmatrix_.elevation(position);
       //  newCand->blob = orangeBlob;
       //  newCand->valid = true;
-      //  ////std::cout << "Circle " << i << " x: " << v[i][0] << " y: " << v[i][1] << " r: " << v[i][2] << "\n";
+      //  //std::cout << "Circle " << i << " x: " << v[i][0] << " y: " << v[i][1] << " r: " << v[i][2] << "\n";
       //  ballCands.push_back(newCand);
-      //  // //std::cout << "newCand " << i << " x: " << newCand->centerX << " y: " << newCand->centerY << " r: " << newCand->radius << "\n\n\n\n\n\n";
+      //  // std::cout << "newCand " << i << " x: " << newCand->centerX << " y: " << newCand->centerY << " r: " << newCand->radius << "\n\n\n\n\n\n";
       //}
     }    
   }
@@ -267,33 +276,33 @@ bool BallDetector::checkBottomColor(Blob * orangeBlob) {
       return checkSideColors(orangeBlob);
     }
 
-    ////std::cout << "updating floorColor\n";
+    //std::cout << "updating floorColor\n";
     floorColor = getSegImg()[floorY * iparams_.width + floorX];
   }
   
-//  //std::cout <<  " floorX: " << floorX << " floorY: " << floorY << " color: ";
+//  std::cout <<  " floorX: " << floorX << " floorY: " << floorY << " color: ";
 //
 //
 //  if (floorColor == c_UNDEFINED) {
-//    //std::cout << " UNDEFINED";
+//    std::cout << " UNDEFINED";
 //  } else if (floorColor == c_FIELD_GREEN) {
-//    //std::cout << " GREEN";
+//    std::cout << " GREEN";
 //  } else if (floorColor == c_WHITE) {           
-//    //std::cout << " WHITE";
+//    std::cout << " WHITE";
 //  } else if (floorColor == c_ORANGE) {          
-//    //std::cout << " ORANGE";
+//    std::cout << " ORANGE";
 //  } else if (floorColor == c_PINK) {            
-//    //std::cout << " PINK";
+//    std::cout << " PINK";
 //  } else if (floorColor == c_BLUE) {            
-//    //std::cout << " BLUE";
+//    std::cout << " BLUE";
 //  } else if (floorColor == c_YELLOW) {          
-//    //std::cout << " YELLOW";
+//    std::cout << " YELLOW";
 //  } else if (floorColor == c_ROBOT_WHITE) {     
-//    //std::cout << " ROBOT";
+//    std::cout << " ROBOT";
 //  } else {
-//    //std::cout << "what??";
+//    std::cout << "what??";
 //  }
-//  //std::cout << "\n";
+//  std::cout << "\n";
 
   
 
@@ -314,7 +323,7 @@ bool BallDetector::checkBottomColor(Blob * orangeBlob) {
     //
     //// Check either side of the ball
     //if (rFloorColor != c_FIELD_GREEN && lFloorColor != c_FIELD_GREEN) {
-    //  //std::cout << "Eliminated over white line with no green\n";
+    //  std::cout << "Eliminated over white line with no green\n";
     //  continue;
     //}
     return checkSideColors(orangeBlob);
@@ -323,7 +332,7 @@ bool BallDetector::checkBottomColor(Blob * orangeBlob) {
     
   }
   else if (floorColor != c_FIELD_GREEN) {
-    //std::cout << "no green below\n";
+    std::cout << "no green below\n";
     return false;
   }
       
@@ -361,7 +370,7 @@ bool BallDetector::checkSideColors(Blob * orangeBlob) {
       lFloorX = 0;
     }
 
-    ////std::cout << "updating rFloorColor\n";
+    //std::cout << "updating rFloorColor\n";
     lFloorColor = getSegImg()[floorY * iparams_.width + lFloorX];
   }
   
@@ -372,59 +381,59 @@ bool BallDetector::checkSideColors(Blob * orangeBlob) {
       rFloorX = iparams_.width;
     }
 
-    ////std::cout << "updating rFloorColor\n";
+    //std::cout << "updating rFloorColor\n";
     rFloorColor = getSegImg()[floorY * iparams_.width + rFloorX];
   }
   
 
-// //std::cout << "rFloorColor: ";
+// std::cout << "rFloorColor: ";
 // if (rFloorColor == c_UNDEFINED) {
-//   //std::cout << " UNDEFINED";
+//   std::cout << " UNDEFINED";
 // } else if (rFloorColor == c_FIELD_GREEN) {
-//   //std::cout << " GREEN";
+//   std::cout << " GREEN";
 // } else if (rFloorColor == c_WHITE) {           
-//   //std::cout << " WHITE";
+//   std::cout << " WHITE";
 // } else if (rFloorColor == c_ORANGE) {          
-//   //std::cout << " ORANGE";
+//   std::cout << " ORANGE";
 // } else if (rFloorColor == c_PINK) {            
-//   //std::cout << " PINK";
+//   std::cout << " PINK";
 // } else if (rFloorColor == c_BLUE) {            
-//   //std::cout << " BLUE";
+//   std::cout << " BLUE";
 // } else if (rFloorColor == c_YELLOW) {          
-//   //std::cout << " YELLOW";
+//   std::cout << " YELLOW";
 // } else if (rFloorColor == c_ROBOT_WHITE) {     
-//   //std::cout << " ROBOT";
+//   std::cout << " ROBOT";
 // } else {
-//   //std::cout << "what??";
+//   std::cout << "what??";
 // }
-// //std::cout << "  lFloorColor: ";
+// std::cout << "  lFloorColor: ";
 // if (lFloorColor == c_UNDEFINED) {
-//   //std::cout << " UNDEFINED";
+//   std::cout << " UNDEFINED";
 // } else if (lFloorColor == c_FIELD_GREEN) {
-//   //std::cout << " GREEN";
+//   std::cout << " GREEN";
 // } else if (lFloorColor == c_WHITE) {           
-//   //std::cout << " WHITE";
+//   std::cout << " WHITE";
 // } else if (lFloorColor == c_ORANGE) {          
-//   //std::cout << " ORANGE";
+//   std::cout << " ORANGE";
 // } else if (lFloorColor == c_PINK) {            
-//   //std::cout << " PINK";
+//   std::cout << " PINK";
 // } else if (lFloorColor == c_BLUE) {            
-//   //std::cout << " BLUE";
+//   std::cout << " BLUE";
 // } else if (lFloorColor == c_YELLOW) {          
-//   //std::cout << " YELLOW";
+//   std::cout << " YELLOW";
 // } else if (lFloorColor == c_ROBOT_WHITE) {     
-//   //std::cout << " ROBOT";
+//   std::cout << " ROBOT";
 // } else {
-//   //std::cout << "what??";
+//   std::cout << "what??";
 // }
-// //std::cout << "\n";
+// std::cout << "\n";
 //
 
   
   // Check either side of the ball
   if (rFloorColor != c_FIELD_GREEN && lFloorColor != c_FIELD_GREEN) {
-    ////std::cout << "Eliminated over white line with no green\n";
-    //std::cout << "Eliminated for not having green on either side\n";
+    //std::cout << "Eliminated over white line with no green\n";
+    std::cout << "Eliminated for not having green on either side\n";
     return false;
   }
   
@@ -449,11 +458,11 @@ bool BallDetector::checkCenter(Blob * orangeBlob) {
   if (numPoints % 2 != 1) numPoints--;
   if (numPoints < 3) numPoints = 3;
 
-  //std::cout << "numPoints: " << numPoints;
+  std::cout << "numPoints: " << numPoints;
 
   // Determine where to check within the circle
   float minRad = std::min(std::min((float)orangeBlob->avgX - (float)orangeBlob->xi, (float)orangeBlob->xf - (float)orangeBlob->avgX), std::min((float)orangeBlob->avgY - (float)orangeBlob->yi, (float)orangeBlob->yf - (float)orangeBlob->avgY));
-  //std::cout << " minRad: " << minRad << "\n";
+  std::cout << " minRad: " << minRad << "\n";
 
   float rFactor = 0.75;
 
@@ -468,27 +477,27 @@ bool BallDetector::checkCenter(Blob * orangeBlob) {
   if ((xStart % 4) != 0) xStart += (4 - (xStart % 4));
   if (xStart < orangeBlob->xi) xStart = orangeBlob->xi;
   color = getSegImg()[yAxis * iparams_.width + xStart];
-//  //std::cout << "color: ";
+//  std::cout << "color: ";
 //  if (color == c_UNDEFINED) {
-//    //std::cout << " UNDEFINED";
+//    std::cout << " UNDEFINED";
 //  } else if (color == c_FIELD_GREEN) {
-//    //std::cout << " GREEN";
+//    std::cout << " GREEN";
 //  } else if (color == c_WHITE) {           
-//    //std::cout << " WHITE";
+//    std::cout << " WHITE";
 //  } else if (color == c_ORANGE) {          
-//    //std::cout << " ORANGE";
+//    std::cout << " ORANGE";
 //  } else if (color == c_PINK) {            
-//    //std::cout << " PINK";
+//    std::cout << " PINK";
 //  } else if (color == c_BLUE) {            
-//    //std::cout << " BLUE";
+//    std::cout << " BLUE";
 //  } else if (color == c_YELLOW) {          
-//    //std::cout << " YELLOW";
+//    std::cout << " YELLOW";
 //  } else if (color == c_ROBOT_WHITE) {     
-//    //std::cout << " ROBOT";
+//    std::cout << " ROBOT";
 //  } else {
-//    //std::cout << "what??";
+//    std::cout << "what??";
 //  }
-//  //std::cout << "\n";
+//  std::cout << "\n";
 
   ((color == c_ORANGE) || (color == c_UNDEFINED)) ? numOrange++ : nonOrange++;
 
@@ -496,27 +505,27 @@ bool BallDetector::checkCenter(Blob * orangeBlob) {
   if ((xEnd % 4) != 0) xEnd -= (4 - (xEnd % 4));
   if (xEnd > orangeBlob->xf) xEnd = orangeBlob->xf;
   color = getSegImg()[yAxis * iparams_.width + xEnd];
-//    //std::cout << "color: ";
+//    std::cout << "color: ";
 //  if (color == c_UNDEFINED) {
-//    //std::cout << " UNDEFINED";
+//    std::cout << " UNDEFINED";
 //  } else if (color == c_FIELD_GREEN) {
-//    //std::cout << " GREEN";
+//    std::cout << " GREEN";
 //  } else if (color == c_WHITE) {           
-//    //std::cout << " WHITE";
+//    std::cout << " WHITE";
 //  } else if (color == c_ORANGE) {          
-//    //std::cout << " ORANGE";
+//    std::cout << " ORANGE";
 //  } else if (color == c_PINK) {            
-//    //std::cout << " PINK";
+//    std::cout << " PINK";
 //  } else if (color == c_BLUE) {            
-//    //std::cout << " BLUE";
+//    std::cout << " BLUE";
 //  } else if (color == c_YELLOW) {          
-//    //std::cout << " YELLOW";
+//    std::cout << " YELLOW";
 //  } else if (color == c_ROBOT_WHITE) {     
-//    //std::cout << " ROBOT";
+//    std::cout << " ROBOT";
 //  } else {
-//    //std::cout << "what??";
+//    std::cout << "what??";
 //  }
-//  //std::cout << "\n";
+//  std::cout << "\n";
 
   ((color == c_ORANGE) || (color == c_UNDEFINED)) ? numOrange++ : nonOrange++;
 
@@ -528,27 +537,27 @@ bool BallDetector::checkCenter(Blob * orangeBlob) {
     if ((xStart % 4) != 0) xStart += (4 - (xStart % 4));
     if (xStart > xEnd) xStart = xEnd;
     color = getSegImg()[yAxis * iparams_.width + xStart];
-//    //std::cout << "color: ";
+//    std::cout << "color: ";
 //    if (color == c_UNDEFINED) {
-//      //std::cout << " UNDEFINED";
+//      std::cout << " UNDEFINED";
 //    } else if (color == c_FIELD_GREEN) {
-//      //std::cout << " GREEN";
+//      std::cout << " GREEN";
 //    } else if (color == c_WHITE) {           
-//      //std::cout << " WHITE";
+//      std::cout << " WHITE";
 //    } else if (color == c_ORANGE) {          
-//      //std::cout << " ORANGE";
+//      std::cout << " ORANGE";
 //    } else if (color == c_PINK) {            
-//      //std::cout << " PINK";
+//      std::cout << " PINK";
 //    } else if (color == c_BLUE) {            
-//      //std::cout << " BLUE";
+//      std::cout << " BLUE";
 //    } else if (color == c_YELLOW) {          
-//      //std::cout << " YELLOW";
+//      std::cout << " YELLOW";
 //    } else if (color == c_ROBOT_WHITE) {     
-//      //std::cout << " ROBOT";
+//      std::cout << " ROBOT";
 //    } else {
-//      //std::cout << "what??";
+//      std::cout << "what??";
 //    }
-//    //std::cout << "\n";
+//    std::cout << "\n";
 
     ((color == c_ORANGE) || (color == c_UNDEFINED)) ? numOrange++ : nonOrange++;
   }
@@ -565,27 +574,27 @@ bool BallDetector::checkCenter(Blob * orangeBlob) {
   yStart += (yStart % 2);
   if (yStart < orangeBlob->yi) yStart = orangeBlob->yi;
   color = getSegImg()[yStart * iparams_.width + xAxis];
-//  //std::cout << "color: ";
+//  std::cout << "color: ";
 //  if (color == c_UNDEFINED) {
-//    //std::cout << " UNDEFINED";
+//    std::cout << " UNDEFINED";
 //  } else if (color == c_FIELD_GREEN) {
-//    //std::cout << " GREEN";
+//    std::cout << " GREEN";
 //  } else if (color == c_WHITE) {           
-//    //std::cout << " WHITE";
+//    std::cout << " WHITE";
 //  } else if (color == c_ORANGE) {          
-//    //std::cout << " ORANGE";
+//    std::cout << " ORANGE";
 //  } else if (color == c_PINK) {            
-//    //std::cout << " PINK";
+//    std::cout << " PINK";
 //  } else if (color == c_BLUE) {            
-//    //std::cout << " BLUE";
+//    std::cout << " BLUE";
 //  } else if (color == c_YELLOW) {          
-//    //std::cout << " YELLOW";
+//    std::cout << " YELLOW";
 //  } else if (color == c_ROBOT_WHITE) {     
-//    //std::cout << " ROBOT";
+//    std::cout << " ROBOT";
 //  } else {
-//    //std::cout << "what??";
+//    std::cout << "what??";
 //  }
-//  //std::cout << "\n";
+//  std::cout << "\n";
 
   ((color == c_ORANGE) || (color == c_UNDEFINED)) ? numOrange++ : nonOrange++;
   
@@ -594,27 +603,27 @@ bool BallDetector::checkCenter(Blob * orangeBlob) {
   yEnd += (yEnd % 2);
   if (yEnd > orangeBlob->yf) yEnd = orangeBlob->yf;
   color = getSegImg()[yEnd * iparams_.width + yAxis];
-//  //std::cout << "color: ";
+//  std::cout << "color: ";
 //  if (color == c_UNDEFINED) {
-//    //std::cout << " UNDEFINED";
+//    std::cout << " UNDEFINED";
 //  } else if (color == c_FIELD_GREEN) {
-//    //std::cout << " GREEN";
+//    std::cout << " GREEN";
 //  } else if (color == c_WHITE) {           
-//    //std::cout << " WHITE";
+//    std::cout << " WHITE";
 //  } else if (color == c_ORANGE) {          
-//    //std::cout << " ORANGE";
+//    std::cout << " ORANGE";
 //  } else if (color == c_PINK) {            
-//    //std::cout << " PINK";
+//    std::cout << " PINK";
 //  } else if (color == c_BLUE) {            
-//    //std::cout << " BLUE";
+//    std::cout << " BLUE";
 //  } else if (color == c_YELLOW) {          
-//    //std::cout << " YELLOW";
+//    std::cout << " YELLOW";
 //  } else if (color == c_ROBOT_WHITE) {     
-//    //std::cout << " ROBOT";
+//    std::cout << " ROBOT";
 //  } else {
-//    //std::cout << "what??";
+//    std::cout << "what??";
 //  }
-//  //std::cout << "\n";
+//  std::cout << "\n";
 
   ((color == c_ORANGE) || (color == c_UNDEFINED)) ? numOrange++ : nonOrange++;
 
@@ -625,27 +634,27 @@ bool BallDetector::checkCenter(Blob * orangeBlob) {
     yStart += (yStart % 2);
     if (yStart > yEnd) yStart = yEnd;
     color = getSegImg()[yStart * iparams_.width + xAxis];
-//    //std::cout << "color: ";
+//    std::cout << "color: ";
 //    if (color == c_UNDEFINED) {
-//      //std::cout << " UNDEFINED";
+//      std::cout << " UNDEFINED";
 //    } else if (color == c_FIELD_GREEN) {
-//      //std::cout << " GREEN";
+//      std::cout << " GREEN";
 //    } else if (color == c_WHITE) {           
-//      //std::cout << " WHITE";
+//      std::cout << " WHITE";
 //    } else if (color == c_ORANGE) {          
-//      //std::cout << " ORANGE";
+//      std::cout << " ORANGE";
 //    } else if (color == c_PINK) {            
-//      //std::cout << " PINK";
+//      std::cout << " PINK";
 //    } else if (color == c_BLUE) {            
-//      //std::cout << " BLUE";
+//      std::cout << " BLUE";
 //    } else if (color == c_YELLOW) {          
-//      //std::cout << " YELLOW";
+//      std::cout << " YELLOW";
 //    } else if (color == c_ROBOT_WHITE) {     
-//      //std::cout << " ROBOT";
+//      std::cout << " ROBOT";
 //    } else {
-//      //std::cout << "what??";
+//      std::cout << "what??";
 //    }
-//    //std::cout << "\n";
+//    std::cout << "\n";
 
     ((color == c_ORANGE) || (color == c_UNDEFINED)) ? numOrange++ : nonOrange++;
   }
