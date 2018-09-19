@@ -193,6 +193,8 @@ BallCandidate* ImageProcessor::getBestBallCandidate() {
   ball.imageCenterY = bestCand->centerY;
   ball.radius = bestCand->radius;
   ball.visionDistance = bestCand->groundDistance;
+  ball.visionBearing = bestCand->bearing;
+  ball.visionElevation = bestCand->elevation;
   ball.seen = true;
 
   // std::cout << "bestBall " << " x: " << bestCand->centerX << " y: " << bestCand->centerY << " r: " << bestCand->radius << "\n";

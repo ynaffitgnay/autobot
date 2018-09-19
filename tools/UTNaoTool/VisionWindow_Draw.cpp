@@ -77,9 +77,9 @@ void VisionWindow::updateBigImage() {
     drawSegmentedImage(bigImage);
     if (cbxOverlay->isChecked()) {
       drawGoal(bigImage);
+      drawBeacons(bigImage);
       drawBall(bigImage);
       drawBallCands(bigImage);
-      drawBeacons(bigImage);
     }
   }
 
@@ -104,14 +104,14 @@ void VisionWindow::redrawImages(ImageWidget* rawImage, ImageWidget* segImage, Im
   // if overlay is on, then draw objects on the raw and seg image as well
   if (cbxOverlay->isChecked()) {
     drawGoal(rawImage);
+    drawBeacons(rawImage);
     drawBall(rawImage);
     drawBallCands(rawImage);
-    drawBeacons(rawImage);
 
     drawGoal(segImage);
+    drawBeacons(segImage);
     drawBall(segImage);
     drawBallCands(segImage);
-    drawBeacons(segImage);
   }
 
   drawBall(verticalBlobImage);
