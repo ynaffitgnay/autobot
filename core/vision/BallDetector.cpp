@@ -98,6 +98,8 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
         //continue;
       }
 
+      // if white, check the sides
+      
 
       // Make sure that the center of the object (check a couple of points around the middle) are orange
       // (rule out the white folder with orange)
@@ -118,6 +120,7 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
       newCand->height = orangeBlob->dy;
       auto position = cmatrix_.getWorldPosition(newCand->centerX, newCand->centerY, ballHeightMM);
       newCand->groundDistance = cmatrix_.groundDistance(position);
+      
       newCand->bearing = cmatrix_.bearing(position);
       newCand->elevation = cmatrix_.elevation(position);
       newCand->blob = orangeBlob;
