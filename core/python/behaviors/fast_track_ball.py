@@ -49,7 +49,7 @@ class TrackBall(Node):
     bearing = ball.visionBearing
     elevation = ball.visionElevation
     print('Ball!\t Bearing: %f \t Distance: %f\t Elevation: %.8f' % (ball.visionBearing, ball.visionDistance, ball.visionElevation))
-    commands.setHeadPanTilt(bearing, core.RAD_T_DEG* elevation, 1.0)
+    commands.setHeadPanTilt(bearing, -30.0, 0.1)
 
 class MoveHeadLeft(Node):
   """Search for the ball to the left"""
@@ -80,4 +80,4 @@ class Playing(LoopingStateMachine):
     self.add_transition(moveHeadRight,C,moveHeadLeft)
     self.add_transition(moveHeadLeft,B(ball),track)
     self.add_transition(moveHeadRight,B(ball),track)
-    self.add_transition(track,B(ball).negation(),moveHeadLeft)
+    self.add_transition(track,NB(ball),moveHeadLeft)

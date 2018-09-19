@@ -56,7 +56,7 @@ void GoalDetector::findGoals(std::vector<Blob>& blobs) {
     }
     object.seen = true;
     object.fromTopCamera = camera_ == Camera::TOP;
-    // std::cout << "Distance on the ground: " << object.visionDistance << " center X: " << object.imageCenterX << " center Y: " << object.imageCenterY << std::endl;
+    std::cout << "Distance Goal: " << object.visionDistance << " center X: " << object.imageCenterX << " center Y: " << object.imageCenterY << std::endl;
     tlog(30, "saw %s at (%i,%i) with calculated distance %2.4f", getName(WO_UNKNOWN_GOAL), object.imageCenterX, object.imageCenterY, object.visionDistance);
   }
   else {
