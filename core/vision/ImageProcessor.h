@@ -1,6 +1,7 @@
 #ifndef IMAGEPROCESSOR_H
 #define IMAGEPROCESSOR_H
 
+#include <vector>
 #include <kinematics/ForwardKinematics.h>
 #include <common/RobotDimensions.h>
 #include <common/Profiling.h>
@@ -12,10 +13,12 @@
 #include <vision/structures/BallCandidate.h>
 #include <math/Pose3D.h>
 #include <vision/structures/VisionParams.h>
+#include <vision/structures/Blob.h>
 
 class BallDetector;
 class Classifier;
 class BeaconDetector;
+class GoalDetector;
 
 /// @ingroup vision
 class ImageProcessor {
@@ -26,8 +29,11 @@ class ImageProcessor {
     void processFrame();
     void init(TextLogger*);
     void SetColorTable(unsigned char*);
+    std::unique_ptr<BallDetector> ball_detector_;
+    std::unique_ptr<GoalDetector> goal_detector_;
     std::unique_ptr<BeaconDetector> beacon_detector_;
     std::unique_ptr<Classifier> color_segmenter_;
+    std::vector<Blob> blobs_;
     unsigned char* getImg();
     unsigned char* getSegImg();
     unsigned char* getColorTable();
@@ -42,8 +48,6 @@ class ImageProcessor {
     std::vector<BallCandidate*> getBallCandidates();
     BallCandidate* getBestBallCandidate();
     bool isImageLoaded();
-    void detectBall();
-    bool findBall(int& imageX, int& imageY);
     void detectGoal();
     bool findGoal(int& imageX, int& imageY);
   private:
