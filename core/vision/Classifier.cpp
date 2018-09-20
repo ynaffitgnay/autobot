@@ -96,7 +96,6 @@ void Classifier::makeBlobs(std::vector<Blob>& blobs) {
   unsigned char c;
   uint16_t xi, xf, dx, yi, yf, dy, widthStart, widthEnd, avgX, avgY, total;
   float meanX, meanY, pixelRatio, pixelDensity;
-  //std::cout << "Number of paRENTS " << parents.size() << std::endl;
   for (int i = 0; i < parents.size(); ++i)
   {
     if (parents.at(i).size() < 4)
