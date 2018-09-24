@@ -53,7 +53,7 @@ void GoalDetector::findGoals(std::vector<Blob>& blobs) {
       }
       auto position = cmatrix_.getWorldPosition(object.imageCenterX, object.imageCenterY, heights[WO_UNKNOWN_GOAL]);
       object.visionDistance = cmatrix_.groundDistance(position);
-      std::cout << "Skewed goal distance: " << object.visionDistance << std::endl;
+      // std::cout << "Skewed goal distance: " << object.visionDistance << std::endl;
     }
     object.seen = true;
     object.fromTopCamera = camera_ == Camera::TOP;
