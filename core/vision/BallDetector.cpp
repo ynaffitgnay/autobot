@@ -37,15 +37,22 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
   int i = 0;
   for (auto blob : blobs) {
     if (blob.color == c_ORANGE) { //maybe update pixel ratio here too!!
+      //std::cout << "frame: " << fid << " oBlob: " << i++ << " avgX: " << blob.avgX << " avgY: " << blob.avgY << " ToTaL: " << blob.total 
+      //          << " xi: " << blob.xi << " yi: " << blob.yi << " xf: " << blob.xf << " yf: "
+      //          << blob.yf << " pRatio: " << blob.correctPixelRatio << " pDensity: "
+      //          << blob.pixelDensity << std::endl;
+
       orangeBlob = &blob;
 
       // Now some heuristics
       if (orangeBlob->total < 8) {
+        //std::cout << "Eliminated for being too small\n";
         break;
       }
 
       if (camera_ == Camera::TOP) {
         if (orangeBlob->total > 900) {
+          //std::cout << "Eliminated for being too big in top camera\n";
           continue;
         }
       }
@@ -57,10 +64,12 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
       if (orangeBlob->correctPixelRatio != 0 &&
           (orangeBlob->correctPixelRatio > ratioHighFactor ||
            orangeBlob->correctPixelRatio < ratioLowFactor)) {
+        //std::cout << "Eliminated for ratio\n";
         continue;
       }
 
       if (!checkBottomColor(orangeBlob)) {
+        //std::cout << "Eliminated for no green under ball\n";
         continue;
       }
       
@@ -68,6 +77,7 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
       // Make sure that the center of the object (check a couple of points around the middle) are orange
       // (rule out the white folder with orange)
       if (!checkCenter(orangeBlob)) {
+        //std::cout << "Eliminated for non-orange center\n";
         continue;
       }
       
@@ -95,6 +105,7 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
       // Allow factor of 3
       float expectedPixels = 3 * (39.5 - (4.43 * (RAD_T_DEG * newCand->elevation)) + (0.308 * pow((RAD_T_DEG * newCand->elevation), 2)));
       if (orangeBlob->total > expectedPixels) {
+        //std::cout << "Eliminated for being too large\n";
         delete newCand;
         continue;
       }
