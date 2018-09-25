@@ -15,7 +15,7 @@
 KickModule::KickModule() : state_(Finished), sequence_(NULL) { }
 
 void KickModule::initSpecificModule() {
-  auto file = cache_.memory->data_path_ + "/kicks/default.yaml";
+  auto file = cache_.memory->data_path_ + "/kicks/test_kick.yaml";
   sequence_ = new KeyframeSequence();
   printf("Loading kick sequence from '%s'...", file.c_str());
   fflush(stdout);

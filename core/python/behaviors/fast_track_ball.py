@@ -48,7 +48,7 @@ class TrackBall(Node):
     ball = memory.world_objects.getObjPtr(core.WO_BALL)
     bearing = ball.visionBearing
     elevation = ball.visionElevation
-    print('Ball!\t Bearing: %f \t Distance: %f\t Elevation: %.8f' % (ball.visionBearing, ball.visionDistance, ball.visionElevation))
+    print('Ball!\t Bearing: %f \t Distance: %f\t Elevation: %.8f\t Location: [%d,%d]\n' % (ball.visionBearing, ball.visionDistance, ball.visionElevation,ball.imageCenterX, ball.imageCenterY))
     commands.setHeadPanTilt(bearing, -30.0, 0.1)
 
 class MoveHeadLeft(Node):
@@ -70,6 +70,7 @@ class MoveHeadRight(Node):
 class Playing(LoopingStateMachine):
   def setup(self):
     ball = memory.world_objects.getObjPtr(core.WO_BALL)
+    print('Seen: %d \t Top: %d\t Location: [%d,%d]\n' % (ball.seen, ball.fromTopCamera, ball.imageCenterX, ball.imageCenterY))
     stand = Stand()
     track = TrackBall()
     moveHeadLeft = MoveHeadLeft()

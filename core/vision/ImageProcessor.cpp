@@ -141,9 +141,9 @@ void ImageProcessor::processFrame(){
 
   // Populate world objects with the best ball candidate
   bestBall = getBestBallCandidate();
-  // if (bestBall) {
-  //   std::cout << "Ball at [" << bestBall->centerX << ", " << bestBall->centerY << "]" << std::endl;
-  // }
+  if (bestBall) {
+    // std::cout << "Ball at [" << bestBall->centerX << ", " << bestBall->centerY << "]" << std::endl;
+  }
   
   beacon_detector_->findBeacons(blobs_);
   goal_detector_->findGoals(blobs_);
@@ -174,11 +174,16 @@ BallCandidate* ImageProcessor::getBestBallCandidate() {
   std::vector<BallCandidate*> ballCands = getBallCandidates();
   BallCandidate* bestCand = nullptr;
   // now put some heuristics in here to get the best one. for now just choose the first one.
+  
   if (ballCands.size() == 0) {
-    vblocks_.world_object->objects_[WO_BALL].seen = false;
+    if (camera_ == Camera::BOTTOM) {
+      vblocks_.world_object->objects_[WO_BALL].seen = false;
+    } else if (camera_ == Camera::TOP && !vblocks_.world_object->objects_[WO_BALL].seen) {
+      vblocks_.world_object->objects_[WO_BALL].seen = false;
+    }
     return bestCand;
   }
-
+  
   // FOR NOW: return the first one in the list
   bestCand = ballCands.at(0);
 
@@ -191,9 +196,8 @@ BallCandidate* ImageProcessor::getBestBallCandidate() {
   ball.visionElevation = bestCand->elevation;
   ball.seen = true;
 
-  ball.fromTopCamera = camera_ == Camera::TOP;
+  ball.fromTopCamera = (camera_ == Camera::TOP);
   tlog(30, "saw %s at (%i,%i) with calculated distance %2.4f", getName(WO_BALL), ball.imageCenterX, ball.imageCenterY, ball.visionDistance);
-  
 
   // go through and delete all the ones that aren't the best?
   return bestCand;
