@@ -30,11 +30,6 @@ def NB(ball=None):
   """No ball found"""
   return NegationEvent(BallSeen(ball))
 
-# class BallNode(EventNode):
-#   def __init__(self, node, ball):
-#     super(BallNode, self).__init__(node)
-#     self.ball = ball
-
 class Stand(Node):
   def run(self):
     commands.stand()

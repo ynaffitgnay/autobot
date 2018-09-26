@@ -14,7 +14,6 @@ from state_machine import Node, C, T, StateMachine
 class Playing(StateMachine):
     class Stand(Node):
         def run(self):
-            memory.speech.say("demonstrate standing")
             commands.standStraight()
             if self.getTime() > 1.5:
                 self.finish()

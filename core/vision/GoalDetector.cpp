@@ -24,9 +24,9 @@ void GoalDetector::findGoals(std::vector<Blob>& blobs) {
     object.imageCenterY = blobs.at(0).avgY;
     float aspectRatio = ((float) blobs.at(0).dx)/((float) blobs.at(0).dy);
     // std::cout << "Goal Found!" << std::endl;
-    // printf("Width = %d, Height = %d, Width/Height = %f\n", blobs.at(0).dx,  blobs.at(0).dy, ((float)blobs.at(0).dx)/((float)blobs.at(0).dy));
+    // printf("Width = %d, Height = %d, Width/Height = %f\n", blobs.at(0).dx,  blobs.at(0).dy, aspectRatio);
     // If not skewed
-    if (aspectRatio>1.6 && aspectRatio<1.9)
+    if (aspectRatio>1.6 && aspectRatio<2.25)
     {
       object.orientation = 0.0;
       object.imageCenterX = blobs.at(0).avgX;
@@ -35,9 +35,10 @@ void GoalDetector::findGoals(std::vector<Blob>& blobs) {
       object.visionBearing = cmatrix_.bearing(position);
       object.seen = true;
       object.fromTopCamera = camera_ == Camera::TOP;
+      tlog(30, "saw %s at (%i,%i) with calculated distance %2.4f", getName(WO_UNKNOWN_GOAL), object.imageCenterX, object.imageCenterY, object.visionDistance);
     }
     // else skewed
-    else {
+    else if (aspectRatio <=1.6) {
       object.orientation = acosf(aspectRatio/correctaspectRatio);
       float s_theta = sqrtf(1.0 - aspectRatio * aspectRatio / correctaspectRatio / correctaspectRatio);
       auto lColor = getSegImg()[(blobs.at(0).yf-5)*iparams_.width + blobs.at(0).xi-5];
@@ -55,10 +56,13 @@ void GoalDetector::findGoals(std::vector<Blob>& blobs) {
       auto position = cmatrix_.getWorldPosition(object.imageCenterX, object.imageCenterY, heights[WO_UNKNOWN_GOAL]);
       object.visionDistance = cmatrix_.groundDistance(position);
       // std::cout << "Skewed goal distance: " << object.visionDistance << std::endl;
+      object.seen = true;
+      object.fromTopCamera = camera_ == Camera::TOP;
+      tlog(30, "saw %s at (%i,%i) with calculated distance %2.4f", getName(WO_UNKNOWN_GOAL), object.imageCenterX, object.imageCenterY, object.visionDistance);
     }
-    object.seen = true;
-    object.fromTopCamera = camera_ == Camera::TOP;
-    tlog(30, "saw %s at (%i,%i) with calculated distance %2.4f", getName(WO_UNKNOWN_GOAL), object.imageCenterX, object.imageCenterY, object.visionDistance);
+    else {
+      object.seen = false;
+    }
   }
   else {
     auto& object = vblocks_.world_object->objects_[WO_UNKNOWN_GOAL];
