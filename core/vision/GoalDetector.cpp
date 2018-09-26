@@ -17,6 +17,7 @@ void GoalDetector::findGoals(std::vector<Blob>& blobs) {
   float b = 330;
   // auto fid = vblocks_.frame_info->frame_id;
   // if(fid >= 6150) return;
+  if(blobs.size() <= 0) return;
   if((blobs.at(0).color == c_BLUE) && (blobs.at(0).lpCount>=10) && (blobs.at(0).total>=500)) { // Already 
     float correctaspectRatio = 1.8;
     auto& object = vblocks_.world_object->objects_[WO_UNKNOWN_GOAL];
