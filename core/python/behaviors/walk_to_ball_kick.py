@@ -28,6 +28,19 @@ def B(ball=None):
   """Ball found"""
   return BallSeen(ball)
 
+class BallCentered(Event):
+  """Event that fires if Ball is centered"""
+  def __init__(self, ball, thresh):
+    super(BallCentered, self).__init__()
+    self.ball = ball
+    self.thresh = thresh
+  def ready(self):
+    return abs(self.ball.visionBearing) < self.thresh
+
+def BC(ball=None, thresh = 0.1):
+  """Ball centered"""
+  return BallCentered(ball, thresh)
+
 class GoalSeen(Event):
   """Event that fires if goal is seen"""
   def __init__(self, goal):
@@ -114,14 +127,15 @@ class FaceBall(Node):
     self.time_current = time.clock()
     self.calc_theta_integral()
     bearing = self.ball.visionBearing
-    commands.setHeadPanTilt(bearing, -15.0, 0.1)
+    elevation = core.RAD_T_DEG * self.ball.visionElevation
+    commands.setHeadPanTilt(bearing, -elevation, 0.1)
     if abs(self.ball.visionBearing) > 0.1:
       commands.setWalkVelocity(0.0, 0.0, 0.5*(np.sign(self.ball.visionBearing)))
     else:
       theta_cont = self.kP * bearing + self.kI * self.theta_integral + self.kD *(bearing - self.theta_prev) / (self.time_current - self.time_last)
-      print("Controller input: %.5f, Bearing: %.5f, Integral: %.5f, Difference: %.5f, Delta T: %.5f\n" % (theta_cont, bearing, self.theta_integral, (bearing - self.theta_prev), (self.time_current - self.time_last)))
-      commands.setWalkVelocity(0.0, 0.0, 0.0001*theta_cont)
-    self.theta_prev = self.ball.visionBearing
+      # print("Controller input: %.5f, Bearing: %.5f, Integral: %.5f, Difference: %.5f, Delta T: %.5f\n" % (theta_cont, bearing, self.theta_integral, (bearing - self.theta_prev), (self.time_current - self.time_last)))
+      commands.setWalkVelocity(0.0, 0.0, 0.01*theta_cont)
+    self.theta_prev = bearing
     self.time_last = self.time_current
 
 class WalkToBall(Node):
@@ -129,30 +143,47 @@ class WalkToBall(Node):
   def __init__(self, ball):
     super(WalkToBall, self).__init__()
     self.ball = ball
-    self.kP = 1.0
-    self.kI = 1.0
-    self.kD = 1.0
-    self.integral = 0.0
+    self.kP_t = 0.1
+    self.kI_t = 0.05
+    self.kD_t = 0.01
+    self.kP_d = 0.1
+    self.kI_d = 0.05
+    self.kD_d = 0.01
+    self.theta_integral = 0.0
+    self.theta_prev = 0.0
+    self.dist_integral = 0.0
     self.dist_prev = 0.0
+    self.time_last = time.clock()
+    self.time_current = time.clock()
 
   def calc_integral(self):
-    self.integral = self.integral + self.ball.visionDistance
+    self.theta_integral = self.theta_integral + (self.time_current - self.time_last)*(self.ball.visionBearing)
+    self.dist_integral = self.dist_integral + (self.time_current - self.time_last)*(self.ball.visionDistance - 300.0)
+    if abs(self.theta_integral) >= 15:
+      self.theta_integral = 15*np.sign(self.theta_integral)
+    if abs(self.dist_integral) >= 100:
+      self.dist_integral = 100*np.sign(self.dist_integral)
 
   def run(self):
-    bearing = self.ball.visionBearing
-    elevation = core.RAD_T_DEG * self.ball.visionElevation
-    distance = self.ball.visionDistance
+    self.time_current = time.clock()
     self.calc_integral()
-    # print('Ball!\t Bearing: %f \t Distance: %f\t Elevation: %.8f \t Integral: %.8f\n ' % (bearing, distance, elevation, self.integral))
-    print('Ball!\t Bearing: %f \t Distance: %f\t Elevation: %.8f\t Location: (%d,%d)\n' % (bearing, distance, elevation, self.ball.imageCenterX, self.ball.imageCenterY))
+    bearing = self.ball.visionBearing
+    distance = self.ball.visionDistance
+    elevation = core.RAD_T_DEG * self.ball.visionElevation
     commands.setHeadPanTilt(bearing, -elevation, 0.1)
-    if abs(self.ball.visionDistance) > 1500.0:
-      commands.setWalkVelocity(0.0, 0.0, -0.5*(np.sign(self.ball.visionBearing)))
+    if abs(distance) > 600.0:
+      if abs(bearing) > 0.2:
+        commands.setWalkVelocity(1.0, 0.0, 0.2*(np.sign(bearing)))
+      else:
+        commands.setWalkVelocity(1.0, 0.0, 0.0)
     else:
-      theta_cont = self.kP * self.ball.visionDistance + self.kI * self.theta_integral + self.kD * 20.0 *(self.ball.visionBearing - self.theta_prev)
-      print("Controller input: %.5f\n" % (-theta_cont))
-      commands.setWalkVelocity(0.0, 0.0, -theta_cont)
-    # commands.setWalkVelocity(0.2, 0, 0)
+      theta_cont = self.kP_t * bearing + self.kI_t * self.theta_integral + self.kD_t *(bearing - self.theta_prev) / (self.time_current - self.time_last)
+      dist_cont = self.kP_d * (distance - 300.0) + self.kI_d * self.dist_integral + self.kD_d *(distance - self.dist_prev) / (self.time_current - self.time_last)
+      print("dist_cont: %.5f, Distance: %.5f, Integral: %.5f, Difference: %.5f\n" % (dist_cont, distance, self.dist_integral, (distance - self.dist_prev)))
+      commands.setWalkVelocity(0.01*dist_cont, 0.0, 0.001*theta_cont)
+    self.theta_prev = bearing
+    self.dist_prev = distance
+    self.time_last = self.time_current
 
 class Align(Node):
   """Turn around the ball to find the goal"""
@@ -190,10 +221,11 @@ class Playing(LoopingStateMachine):
     moveHeadLeft = MoveHeadLeft()
     moveHeadRight = MoveHeadRight()
     faceball = FaceBall(ball)
-    # walk = WalkToBall(ball, kP, kI, kD)
+    walk = WalkToBall(ball)
     self.add_transition(rdy,C,moveHeadLeft,C,moveHeadRight)
     self.add_transition(moveHeadRight,C,moveHeadLeft)
     self.add_transition(moveHeadLeft,B(ball),faceball)
     self.add_transition(moveHeadRight,B(ball),faceball)
     self.add_transition(faceball,B(ball).negation(),moveHeadLeft)
-    # self.add_transition(walk,T(3.0),sit)
+    self.add_transition(faceball,BC(ball,0.1),walk)
+    self.add_transition(walk,BC(ball,0.3).negation(),faceball)
