@@ -116,7 +116,7 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
       ballCands.push_back(newCand);
 
       // Since we only choose the first ball as the best ball candidate, don't consider any other balls
-      break;
+      return;
     }    
   }
 }
