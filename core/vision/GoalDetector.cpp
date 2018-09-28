@@ -61,8 +61,10 @@ void GoalDetector::findGoals(std::vector<Blob>& blobs) {
       if (skewedPositive)
       {
         goal.imageCenterX = goalBlob->avgX - b_theta;
+        if (goal.imageCenterX < 0) goal.imageCenterX = 0;
       } else {
         goal.imageCenterX = goalBlob->avgX + b_theta;
+        if (goal.imageCenterX > iparams_.width - 2) goal.imageCenterX = iparams_.width - 2;
       }
       auto position = cmatrix_.getWorldPosition(goal.imageCenterX, goal.imageCenterY, heights[WO_UNKNOWN_GOAL]);
       goal.visionDistance = cmatrix_.groundDistance(position);
