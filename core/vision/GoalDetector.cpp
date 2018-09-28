@@ -30,7 +30,7 @@ void GoalDetector::findGoals(std::vector<Blob>& blobs) {
     float aspectRatio = ((float) goalBlob->dx)/((float) goalBlob->dy);
     // std::cout << "Goal Found!" << std::endl;
     // printf("Width = %d, Height = %d, Width/Height = %f\n", goalBlob->dx,  goalBlob->dy, aspectRatio);
-    
+
     // If not skewed
     if (aspectRatio>1.6 && aspectRatio<2.25)
     {
