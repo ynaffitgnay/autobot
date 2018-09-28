@@ -98,10 +98,12 @@ void Classifier::makeBlobs(std::vector<Blob>& blobs) {
   float meanX, meanY, pixelRatio, pixelDensity;
   for (int i = 0; i < parents.size(); ++i)
   {
-    if (parents.at(i).size() < 4)
+    // Allow smaller orange blobs (for small, far away balls)
+    if ((parents.at(i).front()->color != c_ORANGE && parents.at(i).size() < 8) || parents.at(i).size() < 3)
     {
       continue;
     }
+    
     total = 0;
     xi = parents.at(i).front()->xi;
     xf = parents.at(i).front()->xf;
