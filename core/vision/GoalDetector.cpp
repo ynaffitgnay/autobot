@@ -11,62 +11,73 @@ GoalDetector::GoalDetector(DETECTOR_DECLARE_ARGS) : DETECTOR_INITIALIZE {
 
 void GoalDetector::findGoals(std::vector<Blob>& blobs) {
   if(camera_ == Camera::BOTTOM) return;
+  if(blobs.size() <= 0) return;
+  
   static map<WorldObjectType,int> heights = {
     { WO_UNKNOWN_GOAL, 253 }
   };
+  
   float b = 330;
-  // auto fid = vblocks_.frame_info->frame_id;
-  // if(fid >= 6150) return;
-  if(blobs.size() <= 0) return;
-  if((blobs.at(0).color == c_BLUE) && (blobs.at(0).lpCount>=10) && (blobs.at(0).total>=500)) { // Already 
-    float correctaspectRatio = 1.8;
-    auto& object = vblocks_.world_object->objects_[WO_UNKNOWN_GOAL];
-    object.imageCenterY = blobs.at(0).avgY;
-    float aspectRatio = ((float) blobs.at(0).dx)/((float) blobs.at(0).dy);
+  float correctAspectRatio = 1.8;
+  Blob* goalBlob = nullptr;
+  bool skewedPositive;
+  
+  if((blobs.at(0).color == c_BLUE) && (blobs.at(0).lpCount>=10) && (blobs.at(0).total>=500)) {
+    goalBlob = &(blobs.at(0));
+        
+    auto& goal = vblocks_.world_object->objects_[WO_UNKNOWN_GOAL];
+    goal.imageCenterY = goalBlob->avgY;
+    float aspectRatio = ((float) goalBlob->dx)/((float) goalBlob->dy);
     // std::cout << "Goal Found!" << std::endl;
-    // printf("Width = %d, Height = %d, Width/Height = %f\n", blobs.at(0).dx,  blobs.at(0).dy, aspectRatio);
+    // printf("Width = %d, Height = %d, Width/Height = %f\n", goalBlob->dx,  goalBlob->dy, aspectRatio);
+    
     // If not skewed
     if (aspectRatio>1.6 && aspectRatio<2.25)
     {
-      object.orientation = 0.0;
-      object.imageCenterX = blobs.at(0).avgX;
-      auto position = cmatrix_.getWorldPosition(object.imageCenterX, object.imageCenterY, heights[WO_UNKNOWN_GOAL]);
-      object.visionDistance = cmatrix_.groundDistance(position);
-      object.visionBearing = cmatrix_.bearing(position);
-      object.seen = true;
-      object.fromTopCamera = camera_ == Camera::TOP;
-      tlog(30, "saw %s at (%i,%i) with calculated distance %2.4f", getName(WO_UNKNOWN_GOAL), object.imageCenterX, object.imageCenterY, object.visionDistance);
+      goal.orientation = 0.0;
+      goal.imageCenterX = goalBlob->avgX;
+      auto position = cmatrix_.getWorldPosition(goal.imageCenterX, goal.imageCenterY, heights[WO_UNKNOWN_GOAL]);
+      goal.visionDistance = cmatrix_.groundDistance(position);
+      goal.visionBearing = cmatrix_.bearing(position);
+      goal.visionElevation = cmatrix_.elevation(position);
+      goal.seen = true;
+      goal.fromTopCamera = camera_ == Camera::TOP;
+      tlog(30, "saw %s at (%i,%i) with calculated distance %2.4f", getName(WO_UNKNOWN_GOAL), goal.imageCenterX, goal.imageCenterY, goal.visionDistance);
     }
-    // else skewed
+    // Else, if aspectRatio smaller (skewed)
     else if (aspectRatio <=1.6) {
-      object.orientation = acosf(aspectRatio/correctaspectRatio);
-      float s_theta = sqrtf(1.0 - aspectRatio * aspectRatio / correctaspectRatio / correctaspectRatio);
-      auto lColor = getSegImg()[(blobs.at(0).yf-5)*iparams_.width + blobs.at(0).xi-5];
-      auto rColor = getSegImg()[(blobs.at(0).yf-5)*iparams_.width + blobs.at(0).xf-5];
-      auto pos = cmatrix_.getWorldPosition(blobs.at(0).avgX,blobs.at(0).avgY, heights[WO_UNKNOWN_GOAL]);
-      float b_theta = cmatrix_.getCameraWidthByDistance(cmatrix_.groundDistance(pos),b*s_theta);
+      skewedPositive = goalSkewedPos(goalBlob); 
+      goal.orientation = acosf(aspectRatio/correctAspectRatio);
+
+      if (!skewedPositive) goal.orientation = goal.orientation * -1.0;
+      
+      float s_theta = sqrtf(1.0 - aspectRatio * aspectRatio / correctAspectRatio / correctAspectRatio);
+
+      auto pos = cmatrix_.getWorldPosition(goalBlob->avgX,goalBlob->avgY, heights[WO_UNKNOWN_GOAL]);
+      float b_theta = cmatrix_.getCameraWidthByDistance(cmatrix_.groundDistance(pos), b * s_theta);
+      
       // std::cout << "b sin(theta) into image frame: " << b_theta << std::endl;
-      if (lColor == c_FIELD_GREEN)
+      
+      if (skewedPositive)
       {
-        object.imageCenterX = blobs.at(0).avgX + b_theta;
+        goal.imageCenterX = goalBlob->avgX - b_theta;
+      } else {
+        goal.imageCenterX = goalBlob->avgX + b_theta;
       }
-      else {
-        object.imageCenterX = blobs.at(0).avgX - b_theta;
-      }
-      auto position = cmatrix_.getWorldPosition(object.imageCenterX, object.imageCenterY, heights[WO_UNKNOWN_GOAL]);
-      object.visionDistance = cmatrix_.groundDistance(position);
-      // std::cout << "Skewed goal distance: " << object.visionDistance << std::endl;
-      object.seen = true;
-      object.fromTopCamera = camera_ == Camera::TOP;
-      tlog(30, "saw %s at (%i,%i) with calculated distance %2.4f", getName(WO_UNKNOWN_GOAL), object.imageCenterX, object.imageCenterY, object.visionDistance);
+      auto position = cmatrix_.getWorldPosition(goal.imageCenterX, goal.imageCenterY, heights[WO_UNKNOWN_GOAL]);
+      goal.visionDistance = cmatrix_.groundDistance(position);
+      //std::cout << "Skewed goal distance: " << goal.visionDistance << std::endl;
+      goal.seen = true;
+      goal.fromTopCamera = camera_ == Camera::TOP;
+      tlog(30, "saw %s at (%i,%i) with calculated distance %2.4f", getName(WO_UNKNOWN_GOAL), goal.imageCenterX, goal.imageCenterY, goal.visionDistance);
     }
     else {
-      object.seen = false;
+      goal.seen = false;
     }
   }
   else {
-    auto& object = vblocks_.world_object->objects_[WO_UNKNOWN_GOAL];
-    object.seen = false;
+    auto& goal = vblocks_.world_object->objects_[WO_UNKNOWN_GOAL];
+    goal.seen = false;
     // std::cout << "No Goal here!" << std::endl;
   }
 }
@@ -77,19 +88,62 @@ unsigned char* GoalDetector::getSegImg(){
   return vblocks_.robot_vision->getSegImgBottom();
 }
 
-// static map<WorldObjectType,vector<int>> goals = {
-//   { WO_UNKNOWN_GOAL, { 24, 15, 74, 83} }
-// };
-//   for(auto goal : goals) {
-//     auto& object = vblocks_.world_object->objects_[goal.first];
-//     auto box = goal.second;
-//     object.imageCenterX = (box[0] + box[2]) / 2;
-//     object.imageCenterY = (box[1] + box[3]) / 2;
-//     auto position = cmatrix_.getWorldPosition(object.imageCenterX, object.imageCenterY, heights[goal.first]);
-//     object.visionDistance = cmatrix_.groundDistance(position);
-//     object.visionBearing = cmatrix_.bearing(position);
-//     object.seen = true;
-//     object.fromTopCamera = camera_ == Camera::TOP;
-//     tlog(30, "saw %s at (%i,%i) with calculated distance %2.4f", getName(goal.first), object.imageCenterX, object.imageCenterY, object.visionDistance);
-//   }
-// }
+bool GoalDetector::goalSkewedPos(Blob* goalBlob) {
+  int thresholdForCutoff = 5;
+  float forceStopCount = ((float)goalBlob->dy / 2.5);
+  int leftX = goalBlob->xi;
+  int rightX = goalBlob->xf;
+  int y, greenCount;
+  unsigned char floorColor;
+  int leftWhiteCount = 0;
+  int rightWhiteCount = 0;
+
+  int finalY = (goalBlob->yf + (int)forceStopCount < iparams_.height - 2) ? goalBlob->yf + (int)forceStopCount : iparams_.height - 2;
+  finalY -= (finalY % 2);  // Make sure you are checking a valid point in the segmented image
+
+  if (leftX == 0) {
+    leftWhiteCount = thresholdForCutoff;
+  } else {
+    greenCount = 0;
+    
+    for (y = goalBlob->yf; y <= finalY; y+=2) {
+      if (greenCount >= 3) {
+        break;
+      }
+
+      floorColor = getSegImg()[y * iparams_.width + leftX];
+      
+      if (floorColor == c_WHITE || floorColor == c_ROBOT_WHITE) {
+        leftWhiteCount++;
+      } else if (floorColor == c_FIELD_GREEN) {
+        greenCount++;
+      }
+    }
+  }
+
+  if (rightX >= iparams_.width - 2) {
+    rightWhiteCount = thresholdForCutoff;
+  } else {
+    greenCount = 0;
+    
+    for (y = goalBlob->yf; y <= finalY; y+=2) {
+      if (greenCount >= 3) {
+        break;
+      }
+
+      floorColor = getSegImg()[y * iparams_.width + rightX];
+      
+      if (floorColor == c_WHITE || floorColor == c_ROBOT_WHITE) {
+        rightWhiteCount++;
+      } else if (floorColor == c_FIELD_GREEN) {
+        greenCount++;
+      }
+    }
+  }
+
+  if (rightWhiteCount > leftWhiteCount) {
+    return false;
+  }
+
+  return true;
+}

@@ -5,6 +5,7 @@
 #include <vision/Classifier.h>
 #include <common/ColorSpaces.h>
 #include <common/Field.h>
+#include <cmath>
 
 #define MIN_PEN_WIDTH 3
 #define IS_RUNNING_CORE (core_ && core_->vision_ && ((UTMainWnd*)parent_)->runCoreRadio->isChecked())
@@ -249,6 +250,7 @@ void VisionWindow::drawGoal(ImageWidget* image) {
 
   int width = cmatrix.getCameraWidthByDistance(goal.visionDistance, 800);
   int height = cmatrix.getCameraHeightByDistance(goal.visionDistance, 500);
+  width = width * cosf(goal.orientation);
   int x1 = goal.imageCenterX - width / 2;
   // printf("Distance = %f, GoalX = %d, GoalY = %d in Image Frame\n",goal.visionDistance, goal.imageCenterX,goal.imageCenterY);
   
