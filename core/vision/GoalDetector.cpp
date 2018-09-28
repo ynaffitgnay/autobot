@@ -34,6 +34,7 @@ void GoalDetector::findGoals(std::vector<Blob>& blobs) {
     // If not skewed
     if (aspectRatio>1.6 && aspectRatio<2.25)
     {
+      std::cout << "Not skewed!\n";
       goal.orientation = 0.0;
       goal.imageCenterX = goalBlob->avgX;
       auto position = cmatrix_.getWorldPosition(goal.imageCenterX, goal.imageCenterY, heights[WO_UNKNOWN_GOAL]);
@@ -60,9 +61,11 @@ void GoalDetector::findGoals(std::vector<Blob>& blobs) {
       
       if (skewedPositive)
       {
+        std::cout << "Skewed positive (reduce centerX)\n";
         goal.imageCenterX = goalBlob->avgX - b_theta;
         if (goal.imageCenterX < 0) goal.imageCenterX = 0;
       } else {
+        std::cout << "Skewed negative (increase centerX)\n";
         goal.imageCenterX = goalBlob->avgX + b_theta;
         if (goal.imageCenterX > iparams_.width - 2) goal.imageCenterX = iparams_.width - 2;
       }
