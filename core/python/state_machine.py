@@ -233,7 +233,7 @@ class CompletionEvent(Event):
 
   def ready(self):
     if self.time:
-      return self.source.complete() and self.source.getTime() > self.time
+      return self.source.complete() and self.sourTime() > self.time
     return self.source.complete()
 
 class FailureEvent(Event):
