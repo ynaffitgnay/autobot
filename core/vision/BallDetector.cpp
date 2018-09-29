@@ -59,7 +59,7 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
       
       float ratioHighFactor = 1.45;
       float ratioLowFactorForClose = 0.65;
-      float ratioLowFactorForFar = 0.5;
+      float ratioLowFactorForFar = 0.38;
       
       // Check that the ratio makes sense
       if (orangeBlob->correctPixelRatio > ratioHighFactor ||
