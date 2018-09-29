@@ -142,11 +142,20 @@ void ImageProcessor::processFrame(){
   // Populate world objects with the best ball candidate
   bestBall = getBestBallCandidate();
   if (bestBall) {
-    //std::cout << "Ball at [" << bestBall->centerX << ", " << bestBall->centerY << "]" << std::endl;
+    // std::cout << "Ball distance: " << bestBall->visionDistance << ", Ball bearing: " << bestBall->visionBearing << std::endl;
   }
-  
+
   beacon_detector_->findBeacons(blobs_);
   goal_detector_->findGoals(blobs_);
+
+  // auto& ball = vblocks_.world_object->objects_[WO_BALL];
+  // auto& goal = vblocks_.world_object->objects_[WO_UNKNOWN_GOAL];
+  // if(goal.seen){
+  //   std::cout << "Goal distance: " << goal.visionDistance << ", Goal bearing: " << goal.visionBearing << ", Goal orientation: " << goal.orientation << "\t";
+  // }
+  // if(ball.seen){
+  //   std::cout << "Ball distance: " << ball.visionDistance << ", Ball bearing: " << ball.visionBearing << std::endl;
+  // }
 }
 
 int ImageProcessor::getTeamColor() {
