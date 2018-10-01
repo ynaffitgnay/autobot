@@ -22,7 +22,7 @@ void KickModule::initSpecificModule() {
   // to load the kick on demand. Since kicks load quickly and happen
   // relatively infrequently this should not add too much overhead to the kick
   // behavior.
-  auto file = cache_.memory->data_path_ + "/kicks/default.yaml";
+  auto file = cache_.memory->data_path_ + "/kicks/test_kick.yaml";
   sequence_ = new KeyframeSequence();
   printf("Loading kick sequence from '%s'...", file.c_str());
   fflush(stdout);
@@ -43,7 +43,7 @@ void KickModule::start() {
   cache_.kick_request->kick_running_ = true;
   keyframe_ = 0;
   frames_ = 0;
-  auto file = cache_.memory->data_path_ + "/kicks/default.yaml";
+  auto file = cache_.memory->data_path_ + "/kicks/test_kick.yaml";
   #ifdef HACK
   sequence_ = new KeyframeSequence();
   printf("Loading kick sequence from '%s'...", file.c_str());
