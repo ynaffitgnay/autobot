@@ -118,7 +118,7 @@ void KickModule::initStiffness() {
 }
 
 void KickModule::performKick() {
-  initStiffness();
+  // initStiffness();
   if(DEBUG) printf("performKick, state: %s, keyframe: %i, frames: %i\n", getName(state_), keyframe_, frames_);
   if(state_ == Finished) return;
   if(sequence_ == NULL) return;
