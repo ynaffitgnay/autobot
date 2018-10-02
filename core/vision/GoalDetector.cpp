@@ -73,6 +73,9 @@ void GoalDetector::findGoals(std::vector<Blob>& blobs) {
       goal.visionDistance = cmatrix_.groundDistance(position);
       //std::cout << "Skewed goal distance: " << goal.visionDistance << std::endl;
       goal.seen = true;
+      goal.visionBearing = cmatrix_.bearing(position);
+      goal.visionDistance = cmatrix_.groundDistance(position);
+      goal.visionElevation = cmatrix_.elevation(position);
       goal.fromTopCamera = camera_ == Camera::TOP;
       tlog(30, "saw %s at (%i,%i) with calculated distance %2.4f", getName(WO_UNKNOWN_GOAL), goal.imageCenterX, goal.imageCenterY, goal.visionDistance);
     }
