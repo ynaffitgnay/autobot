@@ -61,11 +61,11 @@ void GoalDetector::findGoals(std::vector<Blob>& blobs) {
       
       if (skewedPositive)
       {
-        std::cout << "Skewed positive (reduce centerX)\n";
+        // std::cout << "Skewed positive (reduce centerX)\n";
         goal.imageCenterX = goalBlob->avgX - b_theta;
         if (goal.imageCenterX < 0) goal.imageCenterX = 0;
       } else {
-        std::cout << "Skewed negative (increase centerX)\n";
+        // std::cout << "Skewed negative (increase centerX)\n";
         goal.imageCenterX = goalBlob->avgX + b_theta;
         if (goal.imageCenterX > iparams_.width - 2) goal.imageCenterX = iparams_.width - 2;
       }

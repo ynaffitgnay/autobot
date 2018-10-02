@@ -54,7 +54,7 @@ class BallClose(Event):
   def ready(self):
     return abs(self.ball.visionDistance) < self.dist
 
-def CL(ball=None, dist = 200.0):
+def CL(ball=None, dist = 100.0):
   """Ball is close, dist distance away """
   return BallClose(ball, dist)
 
@@ -121,8 +121,8 @@ def S(ball = None, goal = None):
 class GetReady(Node):
   def run(self):
     commands.stand()
-    commands.setHeadTilt(-10.0)
-    if self.getTime() > 1.5:
+    commands.setHeadPanTilt(-core.DEG_T_RAD*110.0,-10.0,1.5)
+    if self.getTime() > 2.5:
       self.finish()
 
 class MoveHeadLeft(Node):
@@ -149,11 +149,18 @@ class MoveHeadRight(Node):
     if self.getTime() > 2.5:
       self.finish()
 
+class LookDown(Node):
+  """Search for the ball to the right"""
+  def run(self):
+    commands.setHeadPanTilt(0.0,-45.0,1.5)
+    if self.getTime() > 2.5:
+      self.finish()
+
 class TurnInPlace(Node):
   """Turn in place if ball not found"""
   def run(self):
-    commands.setWalkVelocity(0.0,0.0,0.2)
-    if self.getTime() > 2.5:
+    commands.setWalkVelocity(0.0,0.0,-0.2)
+    if self.getTime() > 4.0:
       self.finish()
 
 class GoToBall(Node):
@@ -162,8 +169,8 @@ class GoToBall(Node):
     super(GoToBall, self).__init__()
     self.ball = ball
     self.dist = dist
-    self.k_t = (0.1, 0.01, 0.01)
-    self.k_d = (0.1, 0.05, 0.01)
+    self.k_t = (0.7, 0.01, 0.1)
+    self.k_d = (0.001, 0.0001, 0.0001)
     self.theta_integral = 0.0
     self.theta_prev = 0.0
     self.dist_integral = 0.0
@@ -195,18 +202,19 @@ class GoToBall(Node):
       theta_cont = self.k_t[0] * bearing + self.k_t[1] * self.theta_integral + self.k_t[2] *(bearing - self.theta_prev) / dt
       dist_cont = self.k_d[0] * (distance - self.dist) + self.k_d[1] * self.dist_integral + self.k_d[2] *(distance - self.dist_prev) / dt
     
-    if abs(bearing) >=0.1:
+    if abs(bearing) >=0.3:
       # Control only the heading of the robot and not the velocity
-      print("Bearing only = %.5f, theta_cont = %.5f\n" %(bearing, theta_cont))
-      commands.setWalkVelocity(0.0, 0.0, theta_cont)
+      # print("Bearing only = %.5f, theta_cont = %.5f\n" %(bearing, theta_cont))
+      commands.setWalkVelocity(0.0, 0.0, 0.4*np.sign(bearing))
     else:
       # Control both heading and velocity
       if abs(distance) >= 600.0:
-        print("Bearing = %.5f, distance = %.5f, theta_cont = %.5f\n" %(bearing, distance, theta_cont))
+        # print("Bearing = %.5f, distance = %.5f, theta_cont = %.5f\n" %(bearing, distance, theta_cont))
         commands.setWalkVelocity(1.0, 0.0, theta_cont)
       else:
-        print("theta_cont = %.5f, dist_cont = %.5f\n" %(theta_cont, dist_cont))
+        # print("theta_cont = %.5f, dist_cont = %.5f\n" %(theta_cont, dist_cont))
         commands.setWalkVelocity(dist_cont, 0.0, theta_cont)
+    print("Bearing = %.5f, distance = %.5f\n" %(bearing, distance))
     self.theta_prev = bearing
     self.dist_prev = distance
     self.time_last = self.time_current
@@ -216,8 +224,8 @@ class TurnAroundBall(Node):
   def __init__(self, ball, dist):
     super(TurnAroundBall, self).__init__()
     self.ball = ball
-    self.k_t = (0.1, 0.01, 0.01)
-    self.k_d = (0.1, 0.05, 0.01)
+    self.k_t = (0.7, 0.01, 0.1)
+    self.k_d = (0.001, 0.0001, 0.0001)
     self.dist = dist
     self.theta_integral = 0.0
     self.theta_prev = 0.0
@@ -226,7 +234,7 @@ class TurnAroundBall(Node):
     self.time_last = time.clock()
     self.time_current = time.clock()
 
-  def calc_theta_integral(self, dt):
+  def calc_integral(self, dt):
     self.theta_integral = self.theta_integral + dt*(self.ball.visionBearing)
     self.dist_integral = self.dist_integral + dt*(self.ball.visionDistance - self.dist)
     if abs(self.theta_integral) >= 15.0:
@@ -239,14 +247,20 @@ class TurnAroundBall(Node):
     dt = self.time_current - self.time_last
     self.calc_integral(dt)
     bearing = self.ball.visionBearing
-    commands.setHeadPanTilt(bearing,-15.0,1.5)
-    theta_cont = self.k_t[0] * bearing + self.k_t[1] * self.theta_integral + self.k_t[2] *(bearing - self.theta_prev) / dt
-    dist_cont = self.k_d[0] * (distance - self.dist) + self.k_d[1] * self.dist_integral + self.k_d[2] *(distance - self.dist_prev) / dt
-    commands.setWalkVelocity(0.01*dist_cont, 0.2, 0.001*theta_cont)
+    distance = self.ball.visionDistance
+    elevation = core.RAD_T_DEG * self.ball.visionElevation
+    commands.setHeadPanTilt(bearing,-45.0,1.5)
+    if dt == 0:
+      theta_cont = self.k_t[0] * bearing + self.k_t[1] * self.theta_integral
+      dist_cont = self.k_d[0] * (distance - self.dist) + self.k_d[1] * self.dist_integral
+    else:
+      theta_cont = self.k_t[0] * bearing + self.k_t[1] * self.theta_integral + self.k_t[2] *(bearing - self.theta_prev) / dt
+      dist_cont = self.k_d[0] * (distance - self.dist) + self.k_d[1] * self.dist_integral + self.k_d[2] *(distance - self.dist_prev) / dt
+    commands.setWalkVelocity(dist_cont, 0.4, theta_cont)
     self.theta_prev = bearing
     self.dist_prev = distance
     self.time_last = self.time_current
-    if self.getTime() > 2.5:
+    if self.getTime() > 4.0:
       self.finish()
 
 class Align(Node):
@@ -315,13 +329,14 @@ class Playing(LoopingStateMachine):
 
     rdy = GetReady()
     moveHeadLeft = MoveHeadLeft(-15.0)
-    moveHeadRight = MoveHeadRight(-15.0)
+    moveHeadRight = MoveHeadRight(-45.0)
     turnInPlace = TurnInPlace()
-    goToBall = GoToBall(ball, 100.0)
+    goToBall = GoToBall(ball, 0.0)
 
-    # moveHeadLeftGoal = MoveHeadLeft(0.0)
-    # moveHeadRightGoal = MoveHeadRight(0.0)
-    # turnAroundBall = TurnAroundBall(ball,100.0)
+    moveHeadLeftGoal = MoveHeadLeft(0.0)
+    moveHeadRightGoal = MoveHeadRight(0.0)
+    turnAroundBall = TurnAroundBall(ball,200.0)
+    lookDown = LookDown()
     # align = Align(ball,goal,100.0)
 
     # wait = commands.stand()
@@ -335,8 +350,8 @@ class Playing(LoopingStateMachine):
     self.add_transition(turnInPlace,B(ball),goToBall)
     self.add_transition(goToBall,NB(ball),moveHeadLeft)
 
-    # # After Robot reaches near the ball, maintain distance to ball and find the goal
-    # self.add_transition(goToBall,CL(ball,100.0),moveHeadLeftGoal,C,moveHeadRightGoal,C,turnAroundBall,C,moveHeadLeft)
+    # After Robot reaches near the ball, maintain distance to ball and find the goal
+    self.add_transition(goToBall,CL(ball,200.0),moveHeadLeftGoal,C,moveHeadRightGoal,C,lookDown,C,turnAroundBall,C,moveHeadLeftGoal)
     # self.add_transition(moveHeadLeftGoal,G(goal),align)
     # self.add_transition(moveHeadRightGoal,G(goal),align)
     # self.add_transition(turnInPlace,G(goal),align)
