@@ -508,8 +508,8 @@ class Playing(LoopingStateMachine):
     self.add_transition(dribble,A(ball,goal,0.2).negation(),align50)
     self.add_transition(align50,A(ball,goal),dribble)
     #self.add_transition(align50,NGB(ball,goal),align200)
-    self.add_transition(dribble,D(ball,goal,1500.0).negation(),wait)
-    self.add_transition(wait,D(ball,goal,1500.0),dribble)
+    self.add_transition(dribble,D(ball,goal,1300.0).negation(),wait)
+    self.add_transition(wait,D(ball,goal,1300.0),dribble)
 
     # After it's dribbled, align between ball and goal again and then shift left
     self.add_transition(wait,T(1.0),alignForKick)
