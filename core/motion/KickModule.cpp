@@ -110,7 +110,7 @@ void KickModule::processFrame() {
 
 
 void KickModule::initStiffness() {
-  std::cout << "init stiffness!" << std::endl;
+  // std::cout << "init stiffness!" << std::endl;
   for (int i=0; i < NUM_JOINTS; i++)
     cache_.joint_command->stiffness_[i] = 1.0;
   cache_.joint_command->send_stiffness_ = true;
@@ -118,7 +118,7 @@ void KickModule::initStiffness() {
 }
 
 void KickModule::performKick() {
-  // initStiffness();
+  initStiffness();
   if(DEBUG) printf("performKick, state: %s, keyframe: %i, frames: %i\n", getName(state_), keyframe_, frames_);
   if(state_ == Finished) return;
   if(sequence_ == NULL) return;

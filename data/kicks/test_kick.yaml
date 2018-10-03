@@ -426,7 +426,7 @@ keyframes:
       RElbowYaw: -0.96440905042746
       RElbowRoll: -1.93601712024011
   - name: hold follow through
-    frames: 100000
+    frames: 50
     joints:      
       HeadYaw: 0.612831893090224
       HeadPitch: -22.4978798523823
