@@ -147,7 +147,7 @@ keyframes:
       LElbowYaw: -0.793435755123701
       LElbowRoll: -1.4917542958658
       RShoulderPitch: -99.388297592601
-      RShoulderRoll: 28.17633749315222
+      RShoulderRoll: 38.17633749315222
       RElbowYaw: -0.96440905042746
       RElbowRoll: -1.93601712024011
   - name: go left up 2
@@ -166,13 +166,13 @@ keyframes:
       RHipPitch: -1.76
       RKneePitch: 3.34
       RAnklePitch: -4.76
-      RAnkleRoll: -18.81
-      LShoulderPitch: -88.7682393593689
+      RAnkleRoll: -17.81
+      LShoulderPitch: -98.7682393593689
       LShoulderRoll: 28.25941906044261
       LElbowYaw: -0.793435755123701
       LElbowRoll: -1.4917542958658
       RShoulderPitch: -99.388297592601
-      RShoulderRoll: 28.17633749315222
+      RShoulderRoll: 32.17633749315222
       RElbowYaw: -0.96440905042746
       RElbowRoll: -1.93601712024011
   - name: go left up 3
@@ -192,11 +192,11 @@ keyframes:
       RKneePitch: 3.34
       RAnklePitch: -4.76
       RAnkleRoll: -18.81
-      LShoulderPitch: -68.7682393593689
+      LShoulderPitch: -98.7682393593689
       LShoulderRoll: 28.25941906044261
       LElbowYaw: -0.793435755123701
       LElbowRoll: -1.4917542958658
-      RShoulderPitch: -69.388297592601
+      RShoulderPitch: -99.388297592601
       RShoulderRoll: 32.17633749315222
       RElbowYaw: -0.96440905042746
       RElbowRoll: -1.93601712024011
@@ -215,14 +215,14 @@ keyframes:
       RHipRoll: 17.54
       RHipPitch: -1.76
       RKneePitch: 3.34
-      RAnklePitch: -4.76
-      RAnkleRoll: -19.0
-      LShoulderPitch: -68.7682393593689
+      RAnklePitch: -1.76
+      RAnkleRoll: -18.80
+      LShoulderPitch: -98.7682393593689
       LShoulderRoll: 28.25941906044261
       LElbowYaw: -0.793435755123701
       LElbowRoll: -1.4917542958658
-      RShoulderPitch: -69.388297592601
-      RShoulderRoll: 37.17633749315222
+      RShoulderPitch: -99.388297592601
+      RShoulderRoll: 42.17633749315222
       RElbowYaw: -0.96440905042746
       RElbowRoll: -1.93601712024011
   - name: go left up 4
@@ -240,41 +240,41 @@ keyframes:
       RHipRoll: 17.54
       RHipPitch: -1.76
       RKneePitch: 3.34
-      RAnklePitch: -4.76
-      RAnkleRoll: -18.81
-      LShoulderPitch: -68.7682393593689
+      RAnklePitch: -1.76
+      RAnkleRoll: -17.81
+      LShoulderPitch: -108.7682393593689
       LShoulderRoll: 28.25941906044261
       LElbowYaw: -0.793435755123701
       LElbowRoll: -1.4917542958658
-      RShoulderPitch: -69.388297592601
-      RShoulderRoll: 36.17633749315222
+      RShoulderPitch: -109.388297592601
+      RShoulderRoll: 44.17633749315222
       RElbowYaw: -0.96440905042746
       RElbowRoll: -1.93601712024011
-  - name: hold left up 2
-    frames: 10
-    joints:
-      HeadYaw: 0.612831893090224
-      HeadPitch: -22.4978798523823
-      LHipYawPitch: -2.0
-      LHipRoll: -18.00
-      LHipPitch: -4.58
-      LKneePitch: 43.51
-      LAnklePitch: -44.67
-      LAnkleRoll: 16.43
-      RHipYawPitch: -2.0
-      RHipRoll: 17.54
-      RHipPitch: -1.76
-      RKneePitch: 3.34
-      RAnklePitch: -4.76
-      RAnkleRoll: -18.5
-      LShoulderPitch: -68.7682393593689
-      LShoulderRoll: 28.25941906044261
-      LElbowYaw: -0.793435755123701
-      LElbowRoll: -1.4917542958658
-      RShoulderPitch: -69.388297592601
-      RShoulderRoll: 38.17633749315222
-      RElbowYaw: -0.96440905042746
-      RElbowRoll: -1.93601712024011
+  # - name: hold left up 2
+  #   frames: 10
+  #   joints:
+  #     HeadYaw: 0.612831893090224
+  #     HeadPitch: -22.4978798523823
+  #     LHipYawPitch: -2.0
+  #     LHipRoll: -18.00
+  #     LHipPitch: -4.58
+  #     LKneePitch: 43.51
+  #     LAnklePitch: -44.67
+  #     LAnkleRoll: 16.43
+  #     RHipYawPitch: -2.0
+  #     RHipRoll: 17.54
+  #     RHipPitch: -1.76
+  #     RKneePitch: 3.34
+  #     RAnklePitch: -4.76
+  #     RAnkleRoll: -16.5
+  #     LShoulderPitch: -68.7682393593689
+  #     LShoulderRoll: 28.25941906044261
+  #     LElbowYaw: -0.793435755123701
+  #     LElbowRoll: -1.4917542958658
+  #     RShoulderPitch: -69.388297592601
+  #     RShoulderRoll: 38.17633749315222
+  #     RElbowYaw: -0.96440905042746
+  #     RElbowRoll: -1.93601712024011
   - name: go left forward 1
     frames: 2
     joints:
@@ -297,7 +297,7 @@ keyframes:
       LElbowYaw: -0.793435755123701
       LElbowRoll: -1.4917542958658
       RShoulderPitch: -89.388297592601
-      RShoulderRoll: 30.17633749315222
+      RShoulderRoll: 36.17633749315222
       RElbowYaw: -0.96440905042746
       RElbowRoll: -1.93601712024011
   - name: go left forward 2
@@ -317,11 +317,11 @@ keyframes:
       RKneePitch: 3.34
       RAnklePitch: -1.76
       RAnkleRoll: -18.81
-      LShoulderPitch: -58.7682393593689
+      LShoulderPitch: -88.7682393593689
       LShoulderRoll: 38.25941906044261
       LElbowYaw: -0.793435755123701
       LElbowRoll: -1.4917542958658
-      RShoulderPitch: -59.388297592601
+      RShoulderPitch: -89.388297592601
       RShoulderRoll: 30.17633749315222
       RElbowYaw: -0.96440905042746
       RElbowRoll: -1.93601712024011
@@ -342,11 +342,11 @@ keyframes:
       RKneePitch: 3.34
       RAnklePitch: -1.76
       RAnkleRoll: -18.81
-      LShoulderPitch: -58.7682393593689
+      LShoulderPitch: -78.7682393593689
       LShoulderRoll: 38.25941906044261
       LElbowYaw: -0.793435755123701
       LElbowRoll: -1.4917542958658
-      RShoulderPitch: -59.388297592601
+      RShoulderPitch: -79.388297592601
       RShoulderRoll: 36.17633749315222
       RElbowYaw: -0.96440905042746
       RElbowRoll: -1.93601712024011
@@ -451,7 +451,7 @@ keyframes:
       RElbowYaw: -0.96440905042746
       RElbowRoll: -1.93601712024011
   - name: go normal stand
-    frames: 100
+    frames: 80
     joints: 
       HeadYaw: 0.612831893090224
       HeadPitch: -22.4978798523823
@@ -467,11 +467,11 @@ keyframes:
       RKneePitch: 49.7491308198919
       RAnklePitch: -24.7830681958245
       RAnkleRoll: 0.00240422658784449
-      LShoulderPitch: -88.7682393593689
+      LShoulderPitch: -58.7682393593689
       LShoulderRoll: 8.25941906044261
       LElbowYaw: -0.793435755123701
       LElbowRoll: -1.4917542958658
-      RShoulderPitch: -89.388297592601
+      RShoulderPitch: -59.388297592601
       RShoulderRoll: 8.17633749315222
       RElbowYaw: -0.96440905042746
       RElbowRoll: -1.93601712024011
