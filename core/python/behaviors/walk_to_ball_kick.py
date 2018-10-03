@@ -77,17 +77,18 @@ def NGB(goal, ball):
 
 class Aligned(Event):
   """Aligning ball, goal and robot"""
-  def __init__(self, ball, goal):
+  def __init__(self, ball, goal, tolerance):
     super(Aligned, self).__init__()
     self.ball = ball
     self.goal = goal
+    self.tolerance = tolerance
 
   def ready(self):
-    return (abs(self.ball.visionBearing) < 0.1 and abs(self.goal.visionBearing) < 0.1)
+    return (abs(self.ball.visionBearing) < self.tolerance and abs(self.goal.visionBearing) < self.tolerance)
 
-def A(ball, goal):
+def A(ball, goal, tolerance = 0.1):
   """Ball, Goal, Robot aligned"""
-  return Aligned(ball, goal)
+  return Aligned(ball, goal, tolerance)
 
 class CheckDribble(Event):
   """Check whether or not robot should Dribble"""
@@ -199,7 +200,7 @@ class GoToBall(Node):
     bearing = self.ball.visionBearing
     distance = self.ball.visionDistance
     elevation = core.RAD_T_DEG * self.ball.visionElevation
-    print("Elevation: %.3f\t" % elevation)
+    ####print("Elevation: %.3f\t" % elevation)
     commands.setHeadPanTilt(bearing, -elevation, 1.5)
     if dt == 0:
       theta_cont = self.k_t[0] * bearing + self.k_t[1] * self.theta_integral
@@ -220,7 +221,7 @@ class GoToBall(Node):
       else:
         # print("theta_cont = %.5f, dist_cont = %.5f\n" %(theta_cont, dist_cont))
         commands.setWalkVelocity(dist_cont, 0.0, theta_cont)
-    print("Bearing = %.5f, distance = %.5f\n" %(bearing, distance))
+    ####print("Bearing = %.5f, distance = %.5f\n" %(bearing, distance))
     self.theta_prev = bearing
     self.dist_prev = distance
     self.time_last = self.time_current
@@ -324,7 +325,7 @@ class Align(Node):
       if ((delta_bearing - self.theta_prev_delta)/dt) > 20.0:
         y_cont = 0.0
       delta_derivative = (delta_bearing - self.theta_prev_delta) / dt
-    print("goal distance = %.5f , delta_b = %.5f , derivative delta = %.5f , int theta delta = %.5f\n" %(self.goal.visionDistance, delta_bearing, delta_derivative, self.theta_integral_delta))
+    ####print("goal distance = %.5f , delta_b = %.5f , derivative delta = %.5f , int theta delta = %.5f\n" %(self.goal.visionDistance, delta_bearing, delta_derivative, self.theta_integral_delta))
     commands.setWalkVelocity(dist_cont, y_cont, theta_cont)
     self.theta_prev_ball = bearing_ball
     self.theta_prev_delta = delta_bearing
@@ -386,7 +387,7 @@ class Dribble(Node):
       if ((delta_bearing - self.theta_prev_delta)/dt) > 20.0:
         y_cont = 0.0
       delta_derivative = (delta_bearing - self.theta_prev_delta) / dt
-    print("goal distance = %.5f , delta_b = %.5f , derivative delta = %.5f , int theta delta = %.5f\n" %(self.goal.visionDistance, delta_bearing, delta_derivative, self.theta_integral_delta))
+    ####print("goal distance = %.5f , delta_b = %.5f , derivative delta = %.5f , int theta delta = %.5f\n" %(self.goal.visionDistance, delta_bearing, delta_derivative, self.theta_integral_delta))
     commands.setWalkVelocity(dist_cont, y_cont, theta_cont)
     self.theta_prev_ball = bearing_ball
     self.theta_prev_delta = delta_bearing
@@ -394,13 +395,15 @@ class Dribble(Node):
     self.time_last = self.time_current
 
 class Stand(Node):
-    def run(self):
-        commands.stand()
-        commands.setHeadPanTilt(0.0,0.0,1.5)
+  def run(self):
+    commands.stand()
+    commands.setHeadPanTilt(0.0,0.0,1.5)
+    if (self.getTime() > 2.0):
+      self.finish()
 
 class PositionForKick(Node):
   """Dribble ball to within 1.0 m from the goal"""
-    def __init__(self, ball):
+  def __init__(self, ball):
     super(PositionForKick, self).__init__()
   #  self.ball = ball
   #  self.goal = goal
@@ -456,22 +459,23 @@ class PositionForKick(Node):
     #self.theta_prev_delta = delta_bearing
     #self.dist_prev = distance
     #self.time_last = self.time_current
-    commands.setWalkVelocity(0, 0.1, 0)
+    commands.setWalkVelocity(0, 0.15, 0)
     commands.stand()
-
     self.finish()
+
+    #print("I've moved!\n")
+    #if (self.getFrames() > 10):
+    #  self.finish()
 
 class Kick(Node):
   """Kick"""
-  def __init__(self, ball, goal):
-    super(Kick, self).__init__()
-    self.ball = ball
-    self.goal = goal
   def run(self):
+    print ("I'm trying to kick?\n")
     if self.getFrames() <= 3:
       memory.walk_request.noWalk()
       memory.kick_request.setFwdKick()
     if self.getFrames() > 10 and not memory.kick_request.kick_running_:
+      print("About to finish\n")
       self.finish()
 
 class Playing(LoopingStateMachine):
@@ -495,12 +499,11 @@ class Playing(LoopingStateMachine):
     wait = Stand()
     align100 = Align(ball,goal,100.0)
 
-    alignForKick = Align(ball,goal,60.0)
+    alignForKick = Align(ball,goal,10.0)
     positionForKick = PositionForKick(ball)
-    dummyKick = Stand()
 
     # dribble = Dribble()
-    # kick = Kick()
+    kick = Kick()
 
     # Keep turning head and turning in place till ball is found and then go to ball
     self.add_transition(rdy,C,moveHeadLeft,C,moveHeadRight,C,turnInPlace,C,moveHeadLeft)
@@ -519,13 +522,14 @@ class Playing(LoopingStateMachine):
 
     # If the ball and goal are aligned with the robot, proceed to stopping, judging distance and dribbling/shooting
     self.add_transition(align300,A(ball,goal),dribble)
-    self.add_transition(dribble,A(ball,goal).negation(),align100)
+    self.add_transition(dribble,A(ball,goal,0.2).negation(),align100)
     self.add_transition(align100,A(ball,goal),dribble)
+    #self.add_transition(align100,NGB(ball,goal),align300)
     self.add_transition(dribble,D(ball,goal,1200.0).negation(),wait)
     self.add_transition(wait,D(ball,goal,1200.0),dribble)
 
     # After it's dribbled, align between ball and goal again and then shift left
-    self.add_transition(wait,D(ball,goal,1200.0).negation(),alignForKick)
-    self.add_transition(alignForKick, CL(ball, 60.0), positionForKick)
-    self.add_transition(positionForKick, C, dummyKick)
+    self.add_transition(wait,C,alignForKick)
+    self.add_transition(alignForKick, A(ball,goal), positionForKick)
+    self.add_transition(positionForKick, C, kick)
     # self.add_transition(dribble,D(ball,goal).negation(),shoot)
