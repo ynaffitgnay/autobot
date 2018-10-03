@@ -400,10 +400,66 @@ class Stand(Node):
 
 class PositionForKick(Node):
   """Dribble ball to within 1.0 m from the goal"""
-  def __init__(self, ball, goal):
+    def __init__(self, ball):
     super(PositionForKick, self).__init__()
-    self.ball = ball
-    self.goal = goal
+  #  self.ball = ball
+  #  self.goal = goal
+  #  self.dist = dist
+  #  #self.k_t = (0.7, 0.01, 0.1)
+  #  #self.k_d = (0.001, 0.0001, 0.0001)
+  #  self.k_y = (0.8, 0.001, 0.001)
+  #  #self.theta_integral_ball = 0.0
+  #  #self.theta_prev_ball = 0.0
+  #  #self.theta_integral_delta = 0.0
+  #  #self.theta_prev_delta = 0.0
+  #  #self.dist_integral = 0.0
+  #  #self.dist_prev = 0.0
+  #  self.y_integral_ball
+  #  
+  #def calc_integral(self, dt):
+  #  self.theta_integral_ball = self.theta_integral_ball + dt*(self.ball.visionBearing)
+  #  self.theta_integral_delta = self.theta_integral_delta + dt*(self.ball.visionBearing - self.goal.visionBearing)
+  #  self.dist_integral = self.dist_integral + dt*(self.ball.visionDistance - self.dist)
+  #  if abs(self.theta_integral_ball) >= 15.0:
+  #    self.theta_integral_ball = 15.0*np.sign(self.theta_integral_ball)
+  #  if abs(self.theta_integral_delta) >= 15.0:
+  #    self.theta_integral_delta = 15.0*np.sign(self.theta_integral_delta)
+  #  if abs(self.dist_integral) >= 100.0:
+  #    self.dist_integral = 100.0*np.sign(self.dist_integral)
+
+  def run(self):
+    #dt = 1.0/30.0 #self.time_current - self.time_last
+    #bearing_ball = self.ball.visionBearing
+    #bearing_goal = self.goal.visionBearing
+    #delta_bearing = bearing_ball - bearing_goal
+    #distance = self.ball.visionDistance
+    #elevation = core.RAD_T_DEG * self.ball.visionElevation
+    #commands.setHeadPanTilt(bearing_ball,-15.0,1.5)
+    #if dt == 0:
+    #  theta_cont = self.k_t[0] * bearing_ball + self.k_t[1] * self.theta_integral_ball
+    #  dist_cont = self.k_d[0] * (distance - self.dist) + self.k_d[1] * self.dist_integral
+    #  y_cont = self.k_y[0] * delta_bearing + self.k_y[1] * self.theta_integral_delta
+    #  delta_derivative = 0.0
+    #else:
+    #  theta_cont = self.k_t[0] * bearing_ball + self.k_t[1] * self.theta_integral_ball + self.k_t[2] *(bearing_ball - self.theta_prev_ball) / dt
+    #  dist_cont = self.k_d[0] * (distance - self.dist) + self.k_d[1] * self.dist_integral + self.k_d[2] *(distance - self.dist_prev) / dt
+    #  y_cont = self.k_y[0] * delta_bearing + self.k_y[1] * self.theta_integral_delta + self.k_y[2] *(delta_bearing - self.theta_prev_delta) / dt
+    #  if ((bearing_ball - self.theta_prev_ball)/dt) > 20.0:
+    #    theta_cont = 0.0
+    #    dist_cont = 0.0
+    #  if ((delta_bearing - self.theta_prev_delta)/dt) > 20.0:
+    #    y_cont = 0.0
+    #  delta_derivative = (delta_bearing - self.theta_prev_delta) / dt
+    #print("goal distance = %.5f , delta_b = %.5f , derivative delta = %.5f , int theta delta = %.5f\n" %(self.goal.visionDistance, delta_bearing, delta_derivative, self.theta_integral_delta))
+    #commands.setWalkVelocity(dist_cont, y_cont, theta_cont)
+    #self.theta_prev_ball = bearing_ball
+    #self.theta_prev_delta = delta_bearing
+    #self.dist_prev = distance
+    #self.time_last = self.time_current
+    commands.setWalkVelocity(0, 0.1, 0)
+    commands.stand()
+
+    self.finish()
 
 class Kick(Node):
   """Kick"""
@@ -439,6 +495,10 @@ class Playing(LoopingStateMachine):
     wait = Stand()
     align100 = Align(ball,goal,100.0)
 
+    alignForKick = Align(ball,goal,60.0)
+    positionForKick = PositionForKick(ball)
+    dummyKick = Stand()
+
     # dribble = Dribble()
     # kick = Kick()
 
@@ -463,4 +523,9 @@ class Playing(LoopingStateMachine):
     self.add_transition(align100,A(ball,goal),dribble)
     self.add_transition(dribble,D(ball,goal,1200.0).negation(),wait)
     self.add_transition(wait,D(ball,goal,1200.0),dribble)
+
+    # After it's dribbled, align between ball and goal again and then shift left
+    self.add_transition(wait,D(ball,goal,1200.0).negation(),alignForKick)
+    self.add_transition(alignForKick, CL(ball, 60.0), positionForKick)
+    self.add_transition(positionForKick, C, dummyKick)
     # self.add_transition(dribble,D(ball,goal).negation(),shoot)
