@@ -36,40 +36,53 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
   BallCandidate* newCand = nullptr;
   int i = 0;
   for (auto blob : blobs) {
-    if (blob.color == c_ORANGE) { //maybe update pixel ratio here too!!
+    if (blob.color == c_ORANGE) { 
+      //std::cout << "frame: " << fid << " oBlob: " << i++ << " avgX: " << blob.avgX << " avgY: " << blob.avgY << " ToTaL: " << blob.total 
+      //          << " xi: " << blob.xi << " yi: " << blob.yi << " xf: " << blob.xf << " yf: "
+      //          << blob.yf << " pRatio: " << blob.correctPixelRatio << " pDensity: "
+      //          << blob.pixelDensity << std::endl;
+
       orangeBlob = &blob;
 
       // Now some heuristics
-      if (orangeBlob->total < 8) {
+      if (orangeBlob->total < 8) { // && orangeBlob->yf > 100) {
+        //std::cout << "Eliminated for being too small\n";
         break;
       }
 
       if (camera_ == Camera::TOP) {
-        if (orangeBlob->total > 900) {
+        if (orangeBlob->total > 1000) {
+          //std::cout << "Eliminated for being too big in top camera\n";
           continue;
         }
       }
       
       float ratioHighFactor = 1.45;
-      float ratioLowFactor = 0.65;
+      float ratioLowFactorForClose = 0.4;///0.65;
+      float ratioLowFactorForFar = 0.1;
       
       // Check that the ratio makes sense
-      if (orangeBlob->correctPixelRatio != 0 &&
-          (orangeBlob->correctPixelRatio > ratioHighFactor ||
-           orangeBlob->correctPixelRatio < ratioLowFactor)) {
+      if (orangeBlob->correctPixelRatio > ratioHighFactor ||
+          (orangeBlob->correctPixelRatio < ratioLowFactorForClose &&
+           ((camera_ == Camera::BOTTOM) ||
+            (camera_ == Camera::TOP && orangeBlob->yf > 100))) ||
+          orangeBlob->correctPixelRatio < ratioLowFactorForFar) {
+        //std::cout << "Eliminated for ratio\n";
         continue;
       }
 
       if (!checkBottomColor(orangeBlob)) {
+        //std::cout << "Eliminated for no green under ball\n";
         continue;
       }
       
       
       // Make sure that the center of the object (check a couple of points around the middle) are orange
       // (rule out the white folder with orange)
-      if (!checkCenter(orangeBlob)) {
-        continue;
-      }
+      //if (!checkCenter(orangeBlob)) {
+      //  //std::cout << "Eliminated for non-orange center\n";
+      //  continue;
+      //}
       
       // Make sure no other blob within (factor) of size is located at the same position
 
@@ -93,22 +106,26 @@ void BallDetector::findBall(std::vector<Blob>& blobs, std::vector<BallCandidate*
       newCand->valid = true;
 
       // Allow factor of 3
-      float expectedPixels = 3 * (39.5 - (4.43 * (RAD_T_DEG * newCand->elevation)) + (0.308 * pow((RAD_T_DEG * newCand->elevation), 2)));
+      float expectedPixels = 3.5 * (39.5 - (4.43 * (RAD_T_DEG * newCand->elevation)) + (0.308 * pow((RAD_T_DEG * newCand->elevation), 2)));
       if (orangeBlob->total > expectedPixels) {
+        //std::cout << "Eliminated for being too large\n";
         delete newCand;
         continue;
       }
       
       ballCands.push_back(newCand);
-      
+
+      // Since we only choose the first ball as the best ball candidate, don't consider any other balls
+      return;
     }    
   }
 }
 
 bool BallDetector::checkBottomColor(Blob * orangeBlob) {
-  if (camera_ == Camera::BOTTOM) {
-    return checkSideColors(orangeBlob);
-  }
+  //if (camera_ == Camera::BOTTOM) {
+  //  return checkSideColors(orangeBlob);
+  //}
+  
   float rad = ((float)(orangeBlob->avgX - orangeBlob->xi) + (float)(orangeBlob->xf - orangeBlob->avgX) + (float)(orangeBlob->avgY - orangeBlob->yi) + (float)(orangeBlob->yf - orangeBlob->avgY)) / 4.0;
     
   // Make sure the ground below ball is green
@@ -147,7 +164,7 @@ bool BallDetector::checkBottomColor(Blob * orangeBlob) {
   }
   
   // if white, check the sides
-  if (floorColor == c_WHITE) {
+  if (floorColor == c_WHITE || floorColor == c_ROBOT_WHITE) {
     return checkSideColors(orangeBlob);
 
     // Todo: what if the ball is horizontally on a white line?
@@ -206,16 +223,62 @@ bool BallDetector::checkSideColors(Blob * orangeBlob) {
     rFloorColor = getSegImg()[floorY * iparams_.width + i];
   }
     
-  // Check either side of the ball
+  // Check above the ball if it's on a white line and you are looking down at it
   if (rFloorColor != c_FIELD_GREEN && lFloorColor != c_FIELD_GREEN) {
-    return false;
+    if ((rFloorColor == c_WHITE || lFloorColor == c_WHITE || rFloorColor == c_ROBOT_WHITE || lFloorColor == c_ROBOT_WHITE) &&
+        (camera_ == Camera::BOTTOM || (camera_ == Camera::TOP && orangeBlob->yf > 100))) {
+      return checkAboveLine(orangeBlob);
+    } else {
+      return false;
+    }
   }
   
   return true;
 }
 
-bool BallDetector::checkNextToLine(Blob * orangeBlob) {
-  return checkSideColors(orangeBlob);
+// Call with bottom camera on top of white OR top camera has certain elevation?
+bool BallDetector::checkAboveLine(Blob * orangeBlob) {
+  float rad = ((float)(orangeBlob->avgX - orangeBlob->xi) + (float)(orangeBlob->xf - orangeBlob->avgX) + (float)(orangeBlob->avgY - orangeBlob->yi) + (float)(orangeBlob->yf - orangeBlob->avgY)) / 4.0;
+    
+  // Make sure the ground below ball is green
+  int topY = (orangeBlob->yi + 4);
+  // just in case, make sure the value is even
+  topY += (topY % 2);
+
+  if (topY < 0) {
+    return false;
+  }
+
+
+  int topX = orangeBlob->avgX;
+  // Make sure that you are checking a valid point in the segmented image
+  if (topX % 4 != 0) topX += (4 - (topX % 4));
+  // Don't go out of bounds of the picture
+  if (topX >= iparams_.width) {
+    topX -= 4;
+  }
+  
+  unsigned char topColor = getSegImg()[topY * iparams_.width + topX];
+
+  int finalY = topY - rad;
+  
+  for (int i = topY; i >= finalY; i-=2) {
+    // At the edges, the orange can appear pink, or the carpet can appear blue
+    if ((topColor != c_UNDEFINED && topColor != c_PINK && topColor != c_BLUE)) {
+      break;
+    }
+
+    if (i < 0) {
+      return false;
+    }
+
+    topColor = getSegImg()[i * iparams_.width + topX];
+  }
+  
+  if (topColor != c_FIELD_GREEN) {
+    return false;
+  }
+  return true;
 }
 
 bool BallDetector::checkCenter(Blob * orangeBlob) {

@@ -260,7 +260,7 @@ void BeaconDetector::chooseBestBeacons(std::vector<std::vector<WorldObject> >& b
       object.visionBearing = bestBeacon.visionBearing;
       object.seen = true;
       object.fromTopCamera = camera_ == Camera::TOP;
-      std::cout << "Adding: " << getName(bestBeacon.type) << " Vision Distance: " <<  bestBeacon.visionDistance << std::endl;
+      // std::cout << "Adding: " << getName(bestBeacon.type) << " Vision Distance: " <<  bestBeacon.visionDistance << std::endl;
       tlog(30, "saw %s at (%i,%i) with calculated distance %2.4f", getName(bestBeacon.type), object.imageCenterX, object.imageCenterY, object.visionDistance);
     }
   }

@@ -90,18 +90,24 @@ void Classifier::makeBlobs(std::vector<Blob>& blobs) {
   std::vector<VisionPointAlt> runs;
   std::vector<std::vector<VisionPointAlt*>> parents;
   std::vector<VisionPointAlt*>::iterator parentIt;
-  constructRuns(runs);
-  mergeRuns(runs);
-  makeParentLists(runs,parents);
   unsigned char c;
   uint16_t xi, xf, dx, yi, yf, dy, widthStart, widthEnd, avgX, avgY, total;
   float meanX, meanY, pixelRatio, pixelDensity;
+
+  // Get the run-length encoding for the frame and compress paths
+  constructRuns(runs);
+  mergeRuns(runs);
+  makeParentLists(runs,parents);
+  
+  // Make blobs from runs
   for (int i = 0; i < parents.size(); ++i)
   {
-    if (parents.at(i).size() < 4)
+    // Allow smaller orange blobs (for small, far away balls)
+    if ((parents.at(i).front()->color != c_ORANGE && parents.at(i).size() < 8) || parents.at(i).size() < 3)
     {
       continue;
     }
+    
     total = 0;
     xi = parents.at(i).front()->xi;
     xf = parents.at(i).front()->xf;
@@ -143,6 +149,8 @@ void Classifier::makeBlobs(std::vector<Blob>& blobs) {
 }
 
 void Classifier::makeParentLists(std::vector<VisionPointAlt>& runs, std::vector<std::vector<VisionPointAlt*>>& parents) {
+  if (runs.size() <= 0) return;
+  
   std::vector<VisionPointAlt>::iterator iter = runs.begin();
   std::vector<std::vector<VisionPointAlt*>>::iterator parentIt;
   bool found = false;
@@ -205,7 +213,8 @@ void Classifier::mergeRuns(std::vector<VisionPointAlt>& runs) {
   int vpa_num = runs.size();
   int cRow = 0;
   int pvRow;
-  
+
+  if (runs.size() <= 0) return;
 
   // Iterators to a list of runs in the row above the current run
   std::vector<VisionPointAlt>::iterator iter = runs.begin();

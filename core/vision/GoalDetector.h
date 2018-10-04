@@ -3,7 +3,9 @@
 
 #pragma once
 
+#include <vector>
 #include <vision/ObjectDetector.h>
+#include <vision/structures/Blob.h>
 
 class TextLogger;
 
@@ -15,6 +17,7 @@ class GoalDetector : public ObjectDetector {
   void findGoals(std::vector<Blob>& blobs);
   unsigned char* getSegImg();
  private:
+  bool goalSkewedPos(Blob* goalBlob);
   TextLogger* textlogger;
 };
 #endif

@@ -141,9 +141,21 @@ void ImageProcessor::processFrame(){
 
   // Populate world objects with the best ball candidate
   bestBall = getBestBallCandidate();
-  
+  if (bestBall) {
+    // std::cout << "Ball distance: " << bestBall->visionDistance << ", Ball bearing: " << bestBall->visionBearing << std::endl;
+  }
+
   beacon_detector_->findBeacons(blobs_);
   goal_detector_->findGoals(blobs_);
+
+  // auto& ball = vblocks_.world_object->objects_[WO_BALL];
+  // auto& goal = vblocks_.world_object->objects_[WO_UNKNOWN_GOAL];
+  // if(goal.seen){
+  //   std::cout << "Goal distance: " << goal.visionDistance << ", Goal bearing: " << goal.visionBearing << ", Goal orientation: " << goal.orientation << "\t";
+  // }
+  // if(ball.seen){
+  //   std::cout << "Ball distance: " << ball.visionDistance << ", Ball bearing: " << ball.visionBearing << std::endl;
+  // }
 }
 
 int ImageProcessor::getTeamColor() {
@@ -163,7 +175,7 @@ float ImageProcessor::getHeadChange() const {
 std::vector<BallCandidate*> ImageProcessor::getBallCandidates() {
   std::vector<BallCandidate*> ballCands = std::vector<BallCandidate*>();
   ball_detector_->findBall(blobs_, ballCands);
-  //return std::vector<BallCandidate*>();
+
   return ballCands;
 }
 
@@ -171,11 +183,17 @@ BallCandidate* ImageProcessor::getBestBallCandidate() {
   std::vector<BallCandidate*> ballCands = getBallCandidates();
   BallCandidate* bestCand = nullptr;
   // now put some heuristics in here to get the best one. for now just choose the first one.
+
+  // Assuming that the bottom frame gets processed first.
   if (ballCands.size() == 0) {
-    vblocks_.world_object->objects_[WO_BALL].seen = false;
+    if (camera_ == Camera::BOTTOM) {
+      vblocks_.world_object->objects_[WO_BALL].seen = false;
+    } else if (camera_ == Camera::TOP && !vblocks_.world_object->objects_[WO_BALL].seen) {
+      vblocks_.world_object->objects_[WO_BALL].seen = false;
+    }
     return bestCand;
   }
-
+  
   // FOR NOW: return the first one in the list
   bestCand = ballCands.at(0);
 
@@ -188,11 +206,9 @@ BallCandidate* ImageProcessor::getBestBallCandidate() {
   ball.visionElevation = bestCand->elevation;
   ball.seen = true;
 
-  ball.fromTopCamera = camera_ == Camera::TOP;
+  ball.fromTopCamera = (camera_ == Camera::TOP);
   tlog(30, "saw %s at (%i,%i) with calculated distance %2.4f", getName(WO_BALL), ball.imageCenterX, ball.imageCenterY, ball.visionDistance);
-  
 
-  // go through and delete all the ones that aren't the best?
   return bestCand;
 }
 
