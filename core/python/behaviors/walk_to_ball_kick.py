@@ -58,32 +58,6 @@ def NB(ball):
   """No ball found"""
   return NegationEvent(BallSeen(ball))
 
-class BallCentered(Event):
-  """Event that fires if Ball is centered"""
-  def __init__(self, ball, thresh):
-    super(BallCentered, self).__init__()
-    self.ball = ball
-    self.thresh = thresh
-  def ready(self):
-    return abs(self.ball.visionBearing) < self.thresh
-
-def BC(ball, thresh = 0.1):
-  """Ball centered"""
-  return BallCentered(ball, thresh)
-
-class BallClose(Event):
-  """Event that fires if Ball is close"""
-  def __init__(self, ball, dist):
-    super(BallClose, self).__init__()
-    self.ball = ball
-    self.dist = dist
-  def ready(self):
-    return abs(self.ball.visionDistance) < self.dist
-
-def CL(ball, dist = 100.0):
-  """Ball is close, dist distance away """
-  return BallClose(ball, dist)
-
 class GoalBallSeen(Event):
   """Event that fires if goal and ball are seen in the same frame"""
   def __init__(self, goal, ball):
@@ -134,26 +108,6 @@ def D(ball, goal, dist = 1200.0):
   """Ball, Goal, Robot aligned"""
   return CheckDribble(ball, goal, dist)
 
-class KickTime(Event):
-  """Aligning ball, goal and robot"""
-  def __init__(self, ball, goal, dist):
-    super(ScoredGoal, self).__init__()
-    self.ball = ball
-    self.goal = goal
-    self.dist = dist
-
-  def ready(self):
-    # ballBearing = self.ball.visionBearing
-    ballDistance = self.ball.visionDistance
-    # goalBearing = self.goal.visionBearing
-    goalDistance = self.goal.visionDistance
-    theta = self.goal.orientation
-    return abs(ballDistance - goalDistance) < self.dist
-
-def K(ball, goal, dist = 1300.0):
-  """Goal scored"""
-  return KickTime(ball, goal, dist)
-
 class GetReady(Node):
   def run(self):
     commands.stand()
@@ -185,17 +139,17 @@ class MoveHeadRight(Node):
     if self.getTime() > 1.2:
       self.finish()
 
-class LookDown(Node):
-  """Search for the ball to the right"""
-  def run(self):
-    commands.setHeadPanTilt(0.0,-45.0,1.5)
-    if self.getTime() > 2.5:
-      self.finish()
-
 class TurnInPlace(Node):
   """Turn in place if ball not found"""
   def run(self):
     commands.setWalkVelocity(0.0,0.0,-0.4)
+    if self.getTime() > 2.5:
+      self.finish()
+
+class LookDown(Node):
+  """Search for the ball to the right"""
+  def run(self):
+    commands.setHeadPanTilt(0.0,-45.0,1.5)
     if self.getTime() > 2.5:
       self.finish()
 
@@ -316,8 +270,6 @@ class Align(Node):
     self.theta_prev_delta = 0.0
     self.dist_integral = 0.0
     self.dist_prev = 0.0
-    self.time_last = time.clock()
-    self.time_current = time.clock()
 
   def calc_integral(self, dt):
     self.theta_integral_ball = self.theta_integral_ball + dt*(self.ball.visionBearing)
@@ -331,8 +283,7 @@ class Align(Node):
       self.dist_integral = 100.0*np.sign(self.dist_integral)
 
   def run(self):
-    self.time_current = time.clock()
-    dt = 1.0/30.0 #self.time_current - self.time_last
+    dt = 1.0/30.0
     self.calc_integral(dt)
     bearing_ball = self.ball.visionBearing
     bearing_goal = self.goal.visionBearing
@@ -355,12 +306,10 @@ class Align(Node):
       if ((delta_bearing - self.theta_prev_delta)/dt) > 20.0:
         y_cont = 0.0
       delta_derivative = (delta_bearing - self.theta_prev_delta) / dt
-    ####print("goal distance = %.5f , delta_b = %.5f , derivative delta = %.5f , int theta delta = %.5f\n" %(self.goal.visionDistance, delta_bearing, delta_derivative, self.theta_integral_delta))
     commands.setWalkVelocity(dist_cont, y_cont, theta_cont)
     self.theta_prev_ball = bearing_ball
     self.theta_prev_delta = delta_bearing
     self.dist_prev = distance
-    self.time_last = self.time_current
 
 class Stand(Node):
   def run(self):
@@ -380,8 +329,6 @@ class PositionForKick(Node):
     self.theta_prev_ball = 0.0
     self.dist_integral = 0.0
     self.dist_prev = 0.0
-    self.time_last = time.clock()
-    self.time_current = time.clock()
 
   def calc_integral(self, dt):
     self.theta_integral_ball = self.theta_integral_ball + dt*(self.ball.visionBearing - self.bearing)
@@ -392,8 +339,7 @@ class PositionForKick(Node):
       self.dist_integral = 100.0*np.sign(self.dist_integral)
 
   def run(self):
-    self.time_current = time.clock()
-    dt = 1.0/30.0 #self.time_current - self.time_last
+    dt = 1.0/30.0
     self.calc_integral(dt)
     err_bearing = self.ball.visionBearing - self.bearing
     distance = self.ball.visionDistance
@@ -411,43 +357,9 @@ class PositionForKick(Node):
       if ((err_bearing - self.theta_prev_ball)/dt) > 20.0:
         y_cont = 0.0
       delta_derivative = (err_bearing - self.theta_prev_ball) / dt
-    print("y_cont = %.5f , dist_cont = %.5f , error bearing = %.5f\n" %(y_cont, dist_cont, err_bearing))
     commands.setWalkVelocity(dist_cont, y_cont, 0.0)
     self.theta_prev_ball = err_bearing
     self.dist_prev = distance
-    self.time_last = self.time_current
-  # def __init__(self, ball, bearing):
-  #   super(PositionForKick, self).__init__()
-  #   self.ball = ball
-  #   self.bearing = bearing
-  #   self.k_y = (0.8, 0.001, 0.001)
-  #   self.theta_integral_ball = 0.0
-  #   self.theta_err_prev = 0.0
-  #   self.time_last = time.clock()
-  #   self.time_current = time.clock()
-
-  # def calc_integral(self, dt):
-  #   self.theta_integral_ball = self.theta_integral_ball + dt*(self.ball.visionBearing - self.bearing)
-  #   if abs(self.theta_integral_ball) >= 15.0:
-  #     self.theta_integral_ball = 15.0*np.sign(self.theta_integral_ball)
-
-  # def run(self):
-  #   dt = 1.0/30.0 #self.time_current - self.time_last
-  #   self.calc_integral(dt)
-  #   err_bearing = self.ball.visionBearing - self.bearing
-  #   elevation = core.RAD_T_DEG * self.ball.visionElevation
-  #   commands.setHeadPanTilt(0.0,-45.0,1.5)
-  #   if dt == 0:
-  #     y_cont = self.k_y[0] * err_bearing + self.k_y[1] * self.theta_integral_ball
-  #     delta_derivative = 0.0
-  #   else:
-  #     y_cont = self.k_y[0] * err_bearing + self.k_y[1] * self.theta_integral_ball + self.k_y[2] *(err_bearing - self.theta_err_prev) / dt
-  #     if ((err_bearing - self.theta_err_prev)/dt) > 20.0:
-  #       y_cont = 0.0
-  #     delta_derivative = (err_bearing - self.theta_err_prev) / dt
-  #   commands.setWalkVelocity(0.0, y_cont, 0.0)
-  #   self.theta_err_prev = self.ball.visionBearing - self.bearing
-  #   self.time_last = self.time_current
 
 class Kick(Node):
   """Kick"""
@@ -456,7 +368,6 @@ class Kick(Node):
       memory.walk_request.noWalk()
       memory.kick_request.setFwdKick()
     if self.getFrames() > 10 and not memory.kick_request.kick_running_:
-      print("Fishing kick\n")
       self.finish()
 
 class Playing(LoopingStateMachine):
@@ -495,7 +406,7 @@ class Playing(LoopingStateMachine):
     self.add_transition(goToBall,NB(ball),moveHeadLeft)
 
     # After Robot reaches near the ball, maintain distance to ball and find the goal
-    self.add_transition(goToBall,CL(ball,200.0),moveHeadLeftGoal,C,moveHeadRightGoal,C,lookDown,C,turnAroundBall,C,moveHeadLeftGoal)
+    self.add_transition(goToBall,BD(ball,200.0),moveHeadLeftGoal,C,moveHeadRightGoal,C,lookDown,C,turnAroundBall,C,moveHeadLeftGoal)
     self.add_transition(moveHeadLeftGoal,GB(goal,ball),align200)
     self.add_transition(moveHeadRightGoal,GB(goal,ball),align200)
     self.add_transition(lookDown,GB(goal,ball),align200)
@@ -507,7 +418,6 @@ class Playing(LoopingStateMachine):
     self.add_transition(align200,A(ball,goal),dribble)
     self.add_transition(dribble,A(ball,goal,0.2).negation(),align50)
     self.add_transition(align50,A(ball,goal),dribble)
-    #self.add_transition(align50,NGB(ball,goal),align200)
     self.add_transition(dribble,D(ball,goal,1300.0).negation(),wait)
     self.add_transition(wait,D(ball,goal,1300.0),dribble)
 
@@ -517,6 +427,4 @@ class Playing(LoopingStateMachine):
     self.add_transition(positionForKick, BB(ball,0.28), stand)
     self.add_transition(stand, T(1.0), kick)
     self.add_transition(kick, C, stand_again)
-    # self.add_transition(stand_again, A(ball,goal), align200)
     self.add_transition(stand_again, T(3.0), rdy)
-    # self.add_transition(dribble,D(ball,goal).negation(),shoot)
