@@ -84,7 +84,6 @@ class Aligned(Event):
     self.tolerance = tolerance
 
   def ready(self):
-    print("goal dist: %.3f\n" % (self.goal.visionDistance))
     if (self.goal.visionDistance < 780.0):
       return (abs(self.ball.visionBearing < self.tolerance))
     return (abs(self.ball.visionBearing) < self.tolerance and abs(self.goal.visionBearing) < self.tolerance)
@@ -183,7 +182,6 @@ class GoToBall(Node):
     bearing = self.ball.visionBearing
     distance = self.ball.visionDistance
     elevation = core.RAD_T_DEG * self.ball.visionElevation
-    ####print("Elevation: %.3f\t" % elevation)
     commands.setHeadPanTilt(bearing, -elevation, 1.5)
     if dt == 0:
       theta_cont = self.k_t[0] * bearing + self.k_t[1] * self.theta_integral
@@ -194,17 +192,13 @@ class GoToBall(Node):
     
     if abs(bearing) >=0.3:
       # Control only the heading of the robot and not the velocity
-      # print("Bearing only = %.5f, theta_cont = %.5f\n" %(bearing, theta_cont))
       commands.setWalkVelocity(0.0, 0.0, 0.4*np.sign(bearing))
     else:
       # Control both heading and velocity
       if abs(distance) >= 600.0:
-        # print("Bearing = %.5f, distance = %.5f, theta_cont = %.5f\n" %(bearing, distance, theta_cont))
         commands.setWalkVelocity(1.0, 0.0, theta_cont)
       else:
-        # print("theta_cont = %.5f, dist_cont = %.5f\n" %(theta_cont, dist_cont))
         commands.setWalkVelocity(dist_cont, 0.0, theta_cont)
-    ####print("Bearing = %.5f, distance = %.5f\n" %(bearing, distance))
     self.theta_prev = bearing
     self.dist_prev = distance
     self.time_last = self.time_current
