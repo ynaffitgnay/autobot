@@ -90,6 +90,7 @@ void LocalizationModule::processFrame() {
     // Compute the relative position of the ball from vision readings
     auto relBall = Point2D::getPointFromPolar(ball.visionDistance, ball.visionBearing);
 
+    
     // Compute the global position of the ball based on our assumed position and orientation
     auto globalBall = relBall.relativeToGlobal(self.loc, self.orientation);
 
