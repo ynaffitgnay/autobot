@@ -90,7 +90,8 @@ void LocalizationModule::processFrame() {
     // Compute the relative position of the ball from vision readings
     auto relBall = Point2D::getPointFromPolar(ball.visionDistance, ball.visionBearing);
 
-    
+    Eigen::Vector2f pos;
+    pos = rangeToPos(ball.visionBearing,ball.visionDistance);
     // Compute the global position of the ball based on our assumed position and orientation
     auto globalBall = relBall.relativeToGlobal(self.loc, self.orientation);
 
@@ -111,4 +112,10 @@ void LocalizationModule::processFrame() {
     ball.distance = 10000.0f;
     ball.bearing = 0.0f;
   }
+}
+
+
+Eigen::Vector2f LocalizationModule::rangeToPos(float bearing, float distance) {
+  Eigen::Vector2f pos(distance*cos(bearing)/10.0,-distance*sin(bearing)/10.0);
+  return pos;
 }

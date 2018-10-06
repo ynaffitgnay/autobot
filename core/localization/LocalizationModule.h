@@ -3,11 +3,21 @@
 #include <Module.h>
 #include <memory/MemoryCache.h>
 #include <localization/LocalizationParams.h>
+#include <Eigen/Dense>
+#include "math/EKF.h"
 
 class ParticleFilter;
 class Point2D;
 
 class LocalizationModule : public Module {
+  struct BallLoc {
+    Eigen::Vector4f mu_hat;
+    Eigen::Matrix4f sig_hat;
+    Eigen::Vector4f mu_bar;
+    Eigen::Matrix4f sig_bar;
+    Eigen::Matrix2f Q;
+    Eigen::Matrix4f R;
+  }; 
   public:
     LocalizationModule();
     ~LocalizationModule();
@@ -28,4 +38,7 @@ class LocalizationModule : public Module {
     TextLogger*& tlogger_;
     LocalizationParams params_;
     ParticleFilter* pfilter_;
+
+    Eigen::Vector2f rangeToPos(float bearing, float distance);
+
 };
