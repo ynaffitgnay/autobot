@@ -20,20 +20,19 @@ public:
   EKF();
 
 
-  void runFilter(Eigen::Vector4f oldMean,Eigen::Matrix4f oldCov,Eigen::Vector4f ut,
-                    Eigen::Vector2f zt, Eigen::Matrix4f A, Eigen::Matrix4f B, Matrix24f C,
-                    Eigen::Matrix2f Q, Eigen::Matrix4f R, Eigen::Vector4f& mu_hat, 
-                    Eigen::Matrix4f& sig_hat);
+  void runFilter(Eigen::Vector4f& mu_hat, Eigen::Matrix4f& sig_hat,Eigen::Vector4f& ut,
+                    Eigen::Vector2f& zt, Eigen::Matrix4f& A, Eigen::Matrix4f& B, Matrix24f C,
+                    Eigen::Matrix2f& Q, Eigen::Matrix4f& R);
+  void predictionStep(Eigen::Vector4f& mu_hat,Eigen::Matrix4f& sig_hat,Eigen::Vector4f& ut,
+                      Eigen::Matrix4f& A, Eigen::Matrix4f& B, Eigen::Matrix4f& R,
+                      Eigen::Vector4f& mu_bar, Eigen::Matrix4f& sig_bar);
 
-private:
+  void updateStep(Eigen::Vector4f& mu_bar, Eigen::Matrix4f& sig_bar, Matrix24f C, 
+                  Eigen::Vector2f& zt, Eigen::Vector2f& z_bar, Eigen::Matrix2f& Q,
+                  Eigen::Vector4f& mu_hat, Eigen::Matrix4f& sig_hat);
 
-  void predictionStep(Eigen::Vector4f oldMean,Eigen::Matrix4f oldCov,Eigen::Vector4f ut,
-                        Eigen::Matrix4f A, Eigen::Matrix4f B, Eigen::Matrix4f R,
-                        Eigen::Vector4f& mu_bar, Eigen::Matrix4f& sig_bar);
+// private:
 
-  void updateStep(Eigen::Vector4f mu_bar, Eigen::Matrix4f sig_bar, Matrix24f C, 
-                     Eigen::Vector2f zt, Eigen::Vector2f z_bar, Eigen::Matrix2f Q,
-                     Eigen::Vector4f& mu_hat, Eigen::Matrix4f& sig_hat);
 
 };
 

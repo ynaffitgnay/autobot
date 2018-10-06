@@ -8,17 +8,22 @@
 
 class ParticleFilter;
 class Point2D;
-
-class LocalizationModule : public Module {
-  struct BallLoc {
+struct BallLoc {
+    Eigen::Matrix2f Q;
+    Eigen::Matrix4f A;
+    Eigen::Matrix4f B;
+    Matrix24f C;
+    Eigen::Matrix4f R;
     Eigen::Vector4f mu_hat;
     Eigen::Matrix4f sig_hat;
     Eigen::Vector4f mu_bar;
     Eigen::Matrix4f sig_bar;
-    Eigen::Matrix2f Q;
-    Eigen::Matrix4f R;
-  }; 
+};
+
+class LocalizationModule : public Module {
   public:
+    BallLoc ball_loc_;
+    double last_time_;
     LocalizationModule();
     ~LocalizationModule();
     void specifyMemoryDependency();
@@ -38,7 +43,11 @@ class LocalizationModule : public Module {
     TextLogger*& tlogger_;
     LocalizationParams params_;
     ParticleFilter* pfilter_;
+    EKF* ekfilter_;
 
     Eigen::Vector2f rangeToPos(float bearing, float distance);
+    Eigen::Vector2f posToRange(float x, float y);
 
 };
+
+
