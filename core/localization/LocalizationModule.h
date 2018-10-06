@@ -16,8 +16,6 @@ struct BallLoc {
     Eigen::Matrix4f R;
     Eigen::Vector4f mu_hat;
     Eigen::Matrix4f sig_hat;
-    Eigen::Vector4f mu_bar;
-    Eigen::Matrix4f sig_bar;
 };
 
 class LocalizationModule : public Module {

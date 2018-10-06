@@ -23,13 +23,6 @@ LocalizationModule::LocalizationModule() : tlogger_(textlogger), ekfilter_(new E
                       0,20,0,0,
                       0,0,10,0,
                       0,0,0,20;
-
-  ball_loc_.mu_bar << 0,0,0,0;
-
-  ball_loc_.sig_bar << 10,0,0,0,
-                      0,20,0,0,
-                      0,0,10,0,
-                      0,0,0,20;
   ball_loc_.A << 1,0.33,0,0,
                 0,1,0,0,
                 0,0,1,0.33,
@@ -40,7 +33,7 @@ LocalizationModule::LocalizationModule() : tlogger_(textlogger), ekfilter_(new E
                 0,0,0,0;
   ball_loc_.C << 1,0,0,0,
                 0,0,1,0;
-  last_time_ = cache_.frame_info->seconds_since_start;
+  last_time_ = -1.0;
 }
 
 LocalizationModule::~LocalizationModule() {
@@ -120,59 +113,57 @@ void LocalizationModule::processFrame() {
   auto sloc = cache_.localization_mem->player_;
   self.loc = sloc;
 
-  double dt = time - last_time_;
+  double dt = (last_time_ < 0) ? 1.0/30.0 : (time - last_time_);
+  printf("dt = %.2f\t, last_time_ = %f\n",dt, last_time_);
+
   //TODO: modify this block to use your Kalman filter implementation
-  if(ball.seen) {
-    // Compute the relative position of the ball from vision readings
-    auto relBall = Point2D::getPointFromPolar(ball.visionDistance, ball.visionBearing);
+  ball_loc_.A << 1,dt,0,0,
+                 0,1,0,0,
+                 0,0,1,dt,
+                 0,0,0,1;
+  auto relBall = Point2D::getPointFromPolar(ball.visionDistance, ball.visionBearing);
 
-    Eigen::Vector2f pos;
-    pos = rangeToPos(ball.visionBearing,ball.visionDistance);
-    ball_loc_.A << 1,dt,0,0,
-                   0,1,0,0,
-                   0,0,1,dt,
-                   0,0,0,1;
+  Eigen::Vector2f pos;
+  pos = rangeToPos(ball.visionBearing,ball.visionDistance);
 
-    Eigen::Vector4f ut(0,0,0,0);
-    ekfilter_->predictionStep(ball_loc_.mu_hat, ball_loc_.sig_hat, ut, ball_loc_.A, ball_loc_.B, ball_loc_.R, ball_loc_.mu_bar, ball_loc_.sig_bar);
-    Eigen::Vector2f z_bar = ball_loc_.C*ball_loc_.mu_bar;
-    ekfilter_->updateStep(ball_loc_.mu_bar, ball_loc_.sig_bar, ball_loc_.C, pos, z_bar, ball_loc_.Q, ball_loc_.mu_hat, ball_loc_.sig_hat);
-    printf("X hat = %.3f\t, Vx hat = %.3f\t, Y hat = %.3f\t, Vy hat = %.3f\n",ball_loc_.mu_hat(0),ball_loc_.mu_hat(1),ball_loc_.mu_hat(2),ball_loc_.mu_hat(3));
-    printf("Px = %.3f\t, Pvx = %.3f\t, Py = %.3f\t, Pvy = %.3f\n",ball_loc_.mu_hat(0),ball_loc_.mu_hat(1),ball_loc_.mu_hat(2),ball_loc_.mu_hat(3));
+  Eigen::Vector4f ut(0,0,0,0);
+  ekfilter_->runKF(ball_loc_.mu_hat, ball_loc_.sig_hat, ut, pos, ball_loc_.A, ball_loc_.B, ball_loc_.C, ball_loc_.Q, ball_loc_.R, ball.seen);
+  // if(ball.seen) {
+  //   // Compute the relative position of the ball from vision readings
+  //   // ekfilter_->updateStep(ball_loc_.mu_bar, ball_loc_.sig_bar, ball_loc_.C, pos, z_bar, ball_loc_.Q, ball_loc_.mu_hat, ball_loc_.sig_hat);
+    
+  //   // Compute the global position of the ball based on our assumed position and orientation
+    // ball.absVel = fill this in
 
+  //   // Update the localization memory objects with localization calculations
+  //   // so that they are drawn in the World window
+  // } 
+  auto globalBall = relBall.relativeToGlobal(self.loc, self.orientation);
 
-    // Compute the global position of the ball based on our assumed position and orientation
-    auto globalBall = relBall.relativeToGlobal(self.loc, self.orientation);
+  // Compute the global position of the ball based on our assumed position and orientation
+  Eigen::Vector2f range = posToRange(ball_loc_.mu_hat(0),ball_loc_.mu_hat(2));
 
-    // Compute the global position of the ball based on our assumed position and orientation
-    Eigen::Vector2f range = posToRange(ball_loc_.mu_hat(0),ball_loc_.mu_hat(2));
+  // Update the ball in the WorldObject block so that it can be accessed in python
+  ball.loc = globalBall;
+  ball.distance = range(0);
+  ball.bearing = range(1);
+  cache_.localization_mem->state[0] = ball.loc.x;
+  cache_.localization_mem->state[1] = ball.loc.y;
+  cache_.localization_mem->covariance = decltype(cache_.localization_mem->covariance)::Identity() * 10000;
+  // //TODO: How do we handle not seeing the ball?
+  // else {
+  //   ball_loc_.A << 1,dt,0,0,
+  //                  0,1,0,0,
+  //                  0,0,1,dt,
+  //                  0,0,0,1;
 
-    // Update the ball in the WorldObject block so that it can be accessed in python
-    ball.loc = globalBall;
-    ball.distance = range(0);
-    ball.bearing = range(1);
-    //ball.absVel = fill this in
-
-    // Update the localization memory objects with localization calculations
-    // so that they are drawn in the World window
-    cache_.localization_mem->state[0] = ball.loc.x;
-    cache_.localization_mem->state[1] = ball.loc.y;
-    cache_.localization_mem->covariance = decltype(cache_.localization_mem->covariance)::Identity() * 10000;
-  } 
-  //TODO: How do we handle not seeing the ball?
-  else {
-    ball_loc_.A << 1,dt,0,0,
-                   0,1,0,0,
-                   0,0,1,dt,
-                   0,0,0,1;
-
-    Eigen::Vector4f ut(0,0,0,0);
-    ekfilter_->predictionStep(ball_loc_.mu_hat, ball_loc_.sig_hat, ut, ball_loc_.A, ball_loc_.B, ball_loc_.R, ball_loc_.mu_hat, ball_loc_.sig_hat);
-    printf("No measurement: X hat = %.3f\t, Vx hat = %.3f\t, Y hat = %.3f\t, Vy hat = %.3f\n",ball_loc_.mu_hat(0),ball_loc_.mu_hat(1),ball_loc_.mu_hat(2),ball_loc_.mu_hat(3));
-    printf("No measurement: Px = %.3f\t, Pvx = %.3f\t, Py = %.3f\t, Pvy = %.3f\n",ball_loc_.mu_hat(0),ball_loc_.mu_hat(1),ball_loc_.mu_hat(2),ball_loc_.mu_hat(3));
-    // ball.distance = 10000.0f;
-    // ball.bearing = 0.0f;
-  }
+  //   Eigen::Vector4f ut(0,0,0,0);
+  //   ekfilter_->predictionStep(ball_loc_.mu_hat, ball_loc_.sig_hat, ut, ball_loc_.A, ball_loc_.B, ball_loc_.R, ball_loc_.mu_hat, ball_loc_.sig_hat);
+  //   printf("No measurement: X hat = %.3f\t, Vx hat = %.3f\t, Y hat = %.3f\t, Vy hat = %.3f\n",ball_loc_.mu_hat(0),ball_loc_.mu_hat(1),ball_loc_.mu_hat(2),ball_loc_.mu_hat(3));
+  //   printf("No measurement: Px = %.3f\t, Pvx = %.3f\t, Py = %.3f\t, Pvy = %.3f\n",ball_loc_.mu_hat(0),ball_loc_.mu_hat(1),ball_loc_.mu_hat(2),ball_loc_.mu_hat(3));
+  //   // ball.distance = 10000.0f;
+  //   // ball.bearing = 0.0f;
+  // }
   last_time_ = cache_.frame_info->seconds_since_start;
 }
 

@@ -20,9 +20,9 @@ public:
   EKF();
 
 
-  void runFilter(Eigen::Vector4f& mu_hat, Eigen::Matrix4f& sig_hat,Eigen::Vector4f& ut,
+  void runKF(Eigen::Vector4f& mu_hat, Eigen::Matrix4f& sig_hat,Eigen::Vector4f& ut,
                     Eigen::Vector2f& zt, Eigen::Matrix4f& A, Eigen::Matrix4f& B, Matrix24f C,
-                    Eigen::Matrix2f& Q, Eigen::Matrix4f& R);
+                    Eigen::Matrix2f& Q, Eigen::Matrix4f& R, bool useMeas);
   void predictionStep(Eigen::Vector4f& mu_hat,Eigen::Matrix4f& sig_hat,Eigen::Vector4f& ut,
                       Eigen::Matrix4f& A, Eigen::Matrix4f& B, Eigen::Matrix4f& R,
                       Eigen::Vector4f& mu_bar, Eigen::Matrix4f& sig_bar);
