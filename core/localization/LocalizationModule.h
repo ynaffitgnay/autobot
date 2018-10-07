@@ -5,17 +5,18 @@
 #include <localization/LocalizationParams.h>
 #include <Eigen/Dense>
 #include "math/EKF.h"
+#include "math/MatrixDefinitions.h"
 
 class ParticleFilter;
 class Point2D;
 struct BallLoc {
-    Eigen::Matrix2f Q;
-    Eigen::Matrix4f A;
-    Eigen::Matrix4f B;
-    Matrix24f C;
-    Eigen::Matrix4f R;
-    Eigen::Vector4f mu_hat;
-    Eigen::Matrix4f sig_hat;
+    MatrixQf Q;
+    MatrixAf A;
+    MatrixBf B;
+    MatrixCf C;
+    MatrixRf R;
+    VectorMuf mu_hat;
+    MatrixSigf sig_hat;
 };
 
 class LocalizationModule : public Module {
@@ -36,6 +37,8 @@ class LocalizationModule : public Module {
     
     void moveBall(const Point2D& position);
     void movePlayer(const Point2D& position, float orientation);
+
+
   protected:
     MemoryCache cache_;
     TextLogger*& tlogger_;

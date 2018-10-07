@@ -4,6 +4,7 @@
 #include <cmath>
 #include <iostream>
 #include <Eigen/Dense>
+#include "MatrixDefinitions.h"
 
 typedef Eigen::Matrix<float,2,4> Matrix24f;
 typedef Eigen::Matrix<float,4,2> Matrix42f;
@@ -20,16 +21,16 @@ public:
   EKF();
 
 
-  void runKF(Eigen::Vector4f& mu_hat, Eigen::Matrix4f& sig_hat,Eigen::Vector4f& ut,
-                    Eigen::Vector2f& zt, Eigen::Matrix4f& A, Eigen::Matrix4f& B, Matrix24f C,
-                    Eigen::Matrix2f& Q, Eigen::Matrix4f& R, bool useMeas);
-  void predictionStep(Eigen::Vector4f& mu_hat,Eigen::Matrix4f& sig_hat,Eigen::Vector4f& ut,
-                      Eigen::Matrix4f& A, Eigen::Matrix4f& B, Eigen::Matrix4f& R,
-                      Eigen::Vector4f& mu_bar, Eigen::Matrix4f& sig_bar);
+  void runKF(VectorMuf& mu_hat, MatrixSigf& sig_hat,VectorUtf& ut,
+             VectorZtf& zt, MatrixAf& A, MatrixBf& B, MatrixCf C,
+             MatrixQf& Q, MatrixRf& R, bool useMeas);
+  void predictionStep(VectorMuf& mu_hat,MatrixSigf& sig_hat, VectorUtf& ut,
+                      MatrixAf& A, MatrixBf& B, MatrixRf& R,
+                      VectorMuf& mu_bar, MatrixSigf& sig_bar);
 
-  void updateStep(Eigen::Vector4f& mu_bar, Eigen::Matrix4f& sig_bar, Matrix24f C, 
-                  Eigen::Vector2f& zt, Eigen::Vector2f& z_bar, Eigen::Matrix2f& Q,
-                  Eigen::Vector4f& mu_hat, Eigen::Matrix4f& sig_hat);
+  void updateStep(VectorMuf& mu_bar, MatrixSigf& sig_bar, MatrixCf C, 
+                  VectorZtf& zt, VectorZtf& z_bar, MatrixQf& Q,
+                  VectorMuf& mu_hat, MatrixSigf& sig_hat);
 
 // private:
 
