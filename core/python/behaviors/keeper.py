@@ -21,40 +21,69 @@ import UTdebug
 class BlockLeft(Node):
     def run(self):
         UTdebug.log(15, "Blocking left")
-        print("Left")
-        #newPose = util.deepcopy(cfgpose.sittingPoseV3)
+        
+        commands.setStiffness(cfgstiff.One)
         newPose = dict()
-        newPose[core.LShoulderRoll] = 70
-        newPose[core.LElbowYaw] = -85
-        return pose.ToPoseMoveHead(tilt = 0.0, pose = newPose)
+        newPose[core.RShoulderRoll] = 70
+        newPose[core.RShoulderPitch] = -95
+        newPose[core.RElbowRoll] = -1
+
+        # Reset Left arm to neutral
+        newPose[core.LShoulderRoll] = 3
+        newPose[core.LShoulderPitch] = -100
+        newPose[core.LElbowRoll] = 0
+        return pose.ToPoseMoveHead(pose=newPose, tilt=-15, time = 1.0)
 
 class BlockRight(Node):
     def run(self):
         UTdebug.log(15, "Blocking right")
-        print("Right")
-        #newPose = util.deepcopy(cfgpose.sittingPoseV3)
+
+        commands.setStiffness(cfgstiff.One)
         newPose = dict()
-        newPose[core.RShoulderRoll] = 70
-        newPose[core.RElbowYaw] = -85
-        return pose.ToPoseMoveHead(tilt = 0.0, pose = newPose)
+        newPose[core.LShoulderRoll] = 70
+        newPose[core.LShoulderPitch] = -95
+        newPose[core.LElbowRoll] = -1
+        
+        # Reset right arm to neutral
+        newPose[core.RShoulderRoll] = 3
+        newPose[core.RShoulderPitch] = -100
+        newPose[core.RElbowRoll] = 0
+        return pose.ToPoseMoveHead(pose=newPose, tilt=-15, time=1.0)
 
 class BlockCenter(Node):
     def run(self):
         UTdebug.log(15, "Blocking center")
-
+        
+        commands.setStiffness(cfgstiff.One)
+        newPose = dict()
+        newPose[core.LShoulderRoll] = 9.95
+        newPose[core.LShoulderPitch] = -3.85
+        newPose[core.LElbowRoll] = -1
+        newPose[core.RShoulderRoll] = 9.95
+        newPose[core.RShoulderPitch] = -3.85
+        newPose[core.RElbowRoll] = -1
+        return pose.ToPoseMoveHead(pose=newPose, tilt=-15, time=1.0)
 
 class Blocker(Node):
     def run(self):
-        newPose = dict()
-        newPose[core.LShoulderRoll] = 0
-        newPose[core.LElbowYaw] = 0
-        newPose[core.RShoulderRoll] = 0
-        newPose[core.RElbowYaw] = 0
         ball = mem_objects.world_objects[core.WO_BALL]
-        #commands.setHeadPan(ball.bearing, 0.1)
+        commands.setHeadPan(ball.bearing, 0.1)
+        print("Ball distance: %f Ball bearing: %f X,Y vel: %f, %f" % (ball.distance,ball.bearing,ball.relVel.x,ball.relVel.y))
         if ball.distance < 500:
+            # ball moving away from the robot, reset to regular position
+            if (ball.relVel.x >= 0):
+                newPose = dict()
+                newPose[core.LShoulderRoll] = 3
+                newPose[core.LShoulderPitch] = -100
+                newPose[core.LElbowRoll] = 0
+                newPose[core.RShoulderRoll] = 3
+                newPose[core.RShoulderPitch] = -100
+                newPose[core.RElbowRoll] = 0
+                pose.ToPoseMoveHead(pose=newPose, tilt=-15, time=1.0)
+                return
+            ## can do if xvel < yvel && xvel < 1, etc.
+            ## maybe look at distance between robot and goal? 
             UTdebug.log(15, "Ball is close, blocking!")
-            print("Ball distance: %f Ball bearing: %f X,Y vel: %f, %f" % (ball.distance,ball.bearing,ball.relVel.x,ball.relVel.y))
             if ball.bearing > 30 * core.DEG_T_RAD:
                 choice = "left"
             elif ball.bearing < -30 * core.DEG_T_RAD:
@@ -71,7 +100,6 @@ class Playing(LoopingStateMachine):
                   "right": BlockRight(),
                   "center": BlockCenter()
                   }
-        sit = pose.Sit()
         for name in blocks:
             b = blocks[name]
-            self.add_transition(blocker, S(name), b, T(2), sit, T(0.5), blocker)
+            self.add_transition(blocker, S(name), b, T(2), blocker)

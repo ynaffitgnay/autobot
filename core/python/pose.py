@@ -206,25 +206,3 @@ class BlockLeft(Task):
       cfgpose.sittingPoseNoArms, 2.0,
       cfgpose.standingPose, 2.0
     ))
-
-#class BlockRightJustArms(Task):
-#  def __init__(self, time = 3.0):
-#    super(BlockRightJustArms, self).__init__(time=time)
-#    kick_request.setNoKick()
-#    walk_request.noWalk()
-#    kick_request.kick_running_ = False
-#    behavior_mam.keeperDiving = core.Dive.NONE
-#    #self.setSubtask(PoseSequence(
-#    #  cfgpose.blockright, 1.0,
-#    #  cfgpose.blockright, self.time, 
-#    #  cfgpose.sittingPoseNoArms, 2.0,
-#    #  cfgpose.standingPose, 2.0
-#    #))
-#
-#  def run(self):
-#    pose = util.deepcopy(cfgpose.sittingPoseV3)
-#    pose[core.RShoulderRoll] = 12
-#    pose[core.RElbowYaw] = -85
-#    return ToPoseMoveHead(tilt = 0.0, pose = pose)
-#    
-
