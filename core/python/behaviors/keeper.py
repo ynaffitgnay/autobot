@@ -32,6 +32,7 @@ class Blocker(Node):
         commands.setHeadPan(ball.bearing, 0.1)
         if ball.distance < 500:
             UTdebug.log(15, "Ball is close, blocking!")
+            print("Ball distance: %f Ball bearing: %f X,Y vel: %f, %f" % (ball.distance,ball.bearing,ball.relVel.x,ball.relVel.y))
             if ball.bearing > 30 * core.DEG_T_RAD:
                 choice = "left"
             elif ball.bearing < -30 * core.DEG_T_RAD:
@@ -50,4 +51,4 @@ class Playing(LoopingStateMachine):
                   }
         for name in blocks:
             b = blocks[name]
-            self.add_transition(blocker, S(name), b, T(5), blocker)
+            self.add_transition(blocker, S(name), b, T(1), blocker)

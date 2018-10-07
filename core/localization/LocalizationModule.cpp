@@ -114,7 +114,7 @@ void LocalizationModule::processFrame() {
   self.loc = sloc;
 
   double dt = (last_time_ < 0) ? 1.0/30.0 : (time - last_time_);
-  printf("dt = %.2f\t, last_time_ = %f\n",dt, last_time_);
+  // printf("dt = %.2f\t, last_time_ = %f\n",dt, last_time_);
 
   //TODO: modify this block to use your Kalman filter implementation
   ball_loc_.A << 1,dt,0,0,
@@ -133,12 +133,15 @@ void LocalizationModule::processFrame() {
   //   // ekfilter_->updateStep(ball_loc_.mu_bar, ball_loc_.sig_bar, ball_loc_.C, pos, z_bar, ball_loc_.Q, ball_loc_.mu_hat, ball_loc_.sig_hat);
     
   //   // Compute the global position of the ball based on our assumed position and orientation
-    // ball.absVel = fill this in
 
   //   // Update the localization memory objects with localization calculations
   //   // so that they are drawn in the World window
   // } 
+  // std::cout << ball_loc_.mu_hat(1) << ", " << ball_loc_.mu_hat(3) << std::endl;
+  ball.relVel.x = ball_loc_.mu_hat(1);
+  ball.relVel.y = ball_loc_.mu_hat(3);
   auto globalBall = relBall.relativeToGlobal(self.loc, self.orientation);
+  // ball.absVel = 0
 
   // Compute the global position of the ball based on our assumed position and orientation
   Eigen::Vector2f range = posToRange(ball_loc_.mu_hat(0),ball_loc_.mu_hat(2));

@@ -28,14 +28,14 @@ void EKF::runKF(Eigen::Vector4f& mu_hat, Eigen::Matrix4f& sig_hat,Eigen::Vector4
     predictionStep(mu_hat, sig_hat, ut, A, B, R, mu_bar, sig_bar);
     Eigen::Vector2f z_bar = C*mu_bar;
     updateStep(mu_bar, sig_bar, C, zt, z_bar, Q, mu_hat, sig_hat);
-    printf("X hat = %.3f\t, Vx hat = %.3f\t, Y hat = %.3f\t, Vy hat = %.3f\n",mu_hat(0),mu_hat(1),mu_hat(2),mu_hat(3));
-    printf("Px = %.3f\t, Pvx = %.3f\t, Py = %.3f\t, Pvy = %.3f\n",sig_hat(0,0),sig_hat(1,1),sig_hat(2,2),sig_hat(3,3));
+    // printf("X hat = %.3f\t, Vx hat = %.3f\t, Y hat = %.3f\t, Vy hat = %.3f\n",mu_hat(0),mu_hat(1),mu_hat(2),mu_hat(3));
+    // printf("Px = %.3f\t, Pvx = %.3f\t, Py = %.3f\t, Pvy = %.3f\n",sig_hat(0,0),sig_hat(1,1),sig_hat(2,2),sig_hat(3,3));
 
   }
   else{
     predictionStep(mu_hat, sig_hat, ut, A, B, R, mu_hat, sig_hat);
-    printf("X hat = %.3f\t, Vx hat = %.3f\t, Y hat = %.3f\t, Vy hat = %.3f\n",mu_hat(0),mu_hat(1),mu_hat(2),mu_hat(3));
-    printf("Px = %.3f\t, Pvx = %.3f\t, Py = %.3f\t, Pvy = %.3f\n",sig_hat(0,0),sig_hat(1,1),sig_hat(2,2),sig_hat(3,3));
+    // printf("X hat = %.3f\t, Vx hat = %.3f\t, Y hat = %.3f\t, Vy hat = %.3f\n",mu_hat(0),mu_hat(1),mu_hat(2),mu_hat(3));
+    // printf("Px = %.3f\t, Pvx = %.3f\t, Py = %.3f\t, Pvy = %.3f\n",sig_hat(0,0),sig_hat(1,1),sig_hat(2,2),sig_hat(3,3));
 
   }
 
