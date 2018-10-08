@@ -37,6 +37,9 @@ class LocalizationModule : public Module {
     
     void moveBall(const Point2D& position);
     void movePlayer(const Point2D& position, float orientation);
+    void calculateMuBar(VectorMuf& mu_hat, VectorUtf& ut, VectorMuf& mu_bar);
+    void calculateGandH(VectorMuf& mu_bar, MatrixAf& G, MatrixCf& H);
+    void calculateMeasPred(VectorMuf& mu_bar, VectorZtf& h);
 
 
   protected:

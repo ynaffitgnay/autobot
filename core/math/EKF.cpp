@@ -5,6 +5,51 @@ EKF::EKF() {
 
 }
 
+void EKF::runEKF(VectorMuf& mu_hat, MatrixSigf& sig_hat,VectorUtf& ut, VectorZtf& zt,
+                 std::function <void(VectorMuf&, VectorUtf&, VectorMuf&)> calcMuBar,
+                 std::function <void(VectorMuf&, MatrixAf&, MatrixCf&)> calcGH,
+                 std::function <void(VectorMuf&, VectorZtf&)> calcMeasPred,
+                 MatrixQf& Q, MatrixRf& R, bool useMeas) {
+
+    // n is size of state Eigen::Vector
+    // m is size of control Eigen::Vector
+    // k is the size of the measurement Eigen::Vector
+    // where R is the covariance of a Gaussian modelling
+    // the randomness in the state transition
+  // predictionStep(mu_hat,sig_hat,ut,A,B,R,mu_bar,sig_bar);
+  // updateStep(mu_bar,sig_bar,C,zt,C*mu_bar,Q,mu_hat,sig_hat);
+
+    // where C is from z = Cx+del_t
+    // del_t is gaussian with mean zero and cov Q
+
+  //Tunable? C Q R
+
+  VectorMuf mu_bar;
+  MatrixSigf sig_bar;
+  MatrixAf G;
+  MatrixCf H;
+  
+  calcMuBar(mu_hat, ut, mu_bar);
+  calcGH(mu_bar, G, H);
+  sig_bar = G * sig_hat * G.transpose() + R;
+  
+  
+  if (useMeas) {
+    MatrixKf K = sig_bar * H.transpose() * (H * sig_bar * H.transpose() + Q).inverse();
+    VectorZtf h;
+    calcMeasPred(mu_bar, h);
+    mu_hat = mu_bar + K * (zt - h);
+
+    MatrixSigf IMatrix = (K * H).Identity();
+    sig_hat = (IMatrix - K * H) * sig_bar;
+    
+  } else {
+    mu_hat = mu_bar;
+    sig_hat = sig_bar;
+  }
+}
+
+
 void EKF::runKF(VectorMuf& mu_hat, MatrixSigf& sig_hat,VectorUtf& ut,
                 VectorZtf& zt, MatrixAf& A, MatrixBf& B, MatrixCf C,
                 MatrixQf& Q, MatrixRf& R, bool useMeas) {
@@ -44,8 +89,6 @@ void EKF::runKF(VectorMuf& mu_hat, MatrixSigf& sig_hat,VectorUtf& ut,
 }
 
 
-
-
 void EKF::predictionStep(VectorMuf& mu_hat,MatrixSigf& sig_hat, VectorUtf& ut,
                          MatrixAf& A, MatrixBf& B, MatrixRf& R,
                          VectorMuf& mu_bar, MatrixSigf& sig_bar) {
@@ -56,9 +99,9 @@ void EKF::predictionStep(VectorMuf& mu_hat,MatrixSigf& sig_hat, VectorUtf& ut,
 void EKF::updateStep(VectorMuf& mu_bar, MatrixSigf& sig_bar, MatrixCf C, 
                      VectorZtf& zt, VectorZtf& z_bar, MatrixQf& Q,
                      VectorMuf& mu_hat, MatrixSigf& sig_hat) {
-  Matrix42f K = sig_bar*C.transpose()*(C*sig_bar*C.transpose() + Q).inverse();
+  MatrixKf K = sig_bar*C.transpose()*(C*sig_bar*C.transpose() + Q).inverse();
   mu_hat = mu_bar + K*(zt-C*mu_bar);
-  Eigen::Matrix4f IMatrix = (K*C).Identity();
+  MatrixSigf IMatrix = (K*C).Identity();
   sig_hat = (IMatrix - K*C)*sig_bar*(IMatrix - K*C).transpose()+K*Q*K.transpose();
 }
 

@@ -126,8 +126,23 @@ void LocalizationModule::processFrame() {
   Eigen::Vector2f pos;
   pos = rangeToPos(ball.visionBearing,ball.visionDistance);
 
+  // See if EKF works:
+  VectorMuf mu_hat = ball_loc_.mu_hat;
+  MatrixSigf sig_hat = ball_loc_.sig_hat;
   Eigen::Vector4f ut(0,0,0,0);
+
+  ekfilter_->runEKF(mu_hat, sig_hat, ut, pos,
+                    std::bind(&LocalizationModule::calculateMuBar, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
+                    std::bind(&LocalizationModule::calculateGandH, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
+                    std::bind(&LocalizationModule::calculateMeasPred, this, std::placeholders::_1, std::placeholders::_2),
+                    ball_loc_.Q, ball_loc_.R, ball.seen);
+  
   ekfilter_->runKF(ball_loc_.mu_hat, ball_loc_.sig_hat, ut, pos, ball_loc_.A, ball_loc_.B, ball_loc_.C, ball_loc_.Q, ball_loc_.R, ball.seen);
+
+  std::cout << "EKF results: (" << mu_hat(0) << ", " << mu_hat(2) << ")\n";
+  std::cout << "KF results: (" << ball_loc_.mu_hat(0) << ", " << ball_loc_.mu_hat(2) << ")\n";
+
+
   // if(ball.seen) {
   //   // Compute the relative position of the ball from vision readings
   //   // ekfilter_->updateStep(ball_loc_.mu_bar, ball_loc_.sig_bar, ball_loc_.C, pos, z_bar, ball_loc_.Q, ball_loc_.mu_hat, ball_loc_.sig_hat);
@@ -179,4 +194,23 @@ Eigen::Vector2f LocalizationModule::rangeToPos(float bearing, float distance) {
 Eigen::Vector2f LocalizationModule::posToRange(float x, float y) {
   Eigen::Vector2f range( sqrt(x*x + y*y), atan2f(y, x));
   return range;
+}
+
+
+void LocalizationModule::calculateMuBar(VectorMuf& mu_hat, VectorUtf& ut, VectorMuf& mu_bar) {
+  //TODO: UPDATE THIS SO THAT IT ACTUALLY UPDATES MU_BAR BASED ON g(u_t, mu_(t-1))
+  mu_bar = ball_loc_.A * mu_hat + ball_loc_.B * ut;
+}
+
+void LocalizationModule::calculateGandH(VectorMuf& mu_bar, MatrixAf& G, MatrixCf& H) {
+  //TODO: plug mu_bar into the jacobian for G_t to get G
+  G = ball_loc_.A;
+
+  //TODO: plub mu_bar into the jacobian for H_t to get H
+  H = ball_loc_.C;
+}
+
+void LocalizationModule::calculateMeasPred(VectorMuf& mu_bar, VectorZtf& h) {
+  //TODO: UPDATE THIS SO THAT IT ACTUALLY CALCULATES h(mu_bar)
+  h = ball_loc_.C * mu_bar;
 }

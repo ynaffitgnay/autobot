@@ -20,7 +20,12 @@ public:
    */
   EKF();
 
-
+  void runEKF(VectorMuf& mu_hat, MatrixSigf& sig_hat,VectorUtf& ut, VectorZtf& zt,
+              std::function <void(VectorMuf&, VectorUtf&, VectorMuf&)> calcMuBar,
+              std::function <void(VectorMuf&, MatrixAf&, MatrixCf&)> calcGH,
+              std::function <void(VectorMuf&, VectorZtf&)> calcMeasPred,
+              MatrixQf& Q, MatrixRf& R, bool useMeas);
+  
   void runKF(VectorMuf& mu_hat, MatrixSigf& sig_hat,VectorUtf& ut,
              VectorZtf& zt, MatrixAf& A, MatrixBf& B, MatrixCf C,
              MatrixQf& Q, MatrixRf& R, bool useMeas);
