@@ -92,6 +92,7 @@ void EKF::runKF(VectorMuf& mu_hat, MatrixSigf& sig_hat,VectorUtf& ut,
 void EKF::predictionStep(VectorMuf& mu_hat,MatrixSigf& sig_hat, VectorUtf& ut,
                          MatrixAf& A, MatrixBf& B, MatrixRf& R,
                          VectorMuf& mu_bar, MatrixSigf& sig_bar) {
+  
   mu_bar = A*mu_hat + B*ut;
   sig_bar = A*sig_hat*A.transpose() + R;
 }

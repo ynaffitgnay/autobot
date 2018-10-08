@@ -200,17 +200,21 @@ Eigen::Vector2f LocalizationModule::posToRange(float x, float y) {
 void LocalizationModule::calculateMuBar(VectorMuf& mu_hat, VectorUtf& ut, VectorMuf& mu_bar) {
   //TODO: UPDATE THIS SO THAT IT ACTUALLY UPDATES MU_BAR BASED ON g(u_t, mu_(t-1))
   mu_bar = ball_loc_.A * mu_hat + ball_loc_.B * ut;
+  // mu_bar = sin(mu_hat+ut); // Nonlinear State Trasnsition
 }
 
 void LocalizationModule::calculateGandH(VectorMuf& mu_bar, MatrixAf& G, MatrixCf& H) {
   //TODO: plug mu_bar into the jacobian for G_t to get G
-  G = ball_loc_.A;
+  G = ball_loc_.A; // Linear Case
 
   //TODO: plub mu_bar into the jacobian for H_t to get H
-  H = ball_loc_.C;
+  // H = ball_loc_.C; // Linear Case
+  H << mu_bar(0)/sqrt(mu_bar(0)*mu_bar(0) + mu_bar(2)*mu_bar(2)), 0.0, mu_bar(2)/sqrt(mu_bar(0)*mu_bar(0) + mu_bar(2)*mu_bar(2)),0.0,
+      -mu_bar(2)/(mu_bar(0)*mu_bar(0) + mu_bar(2)*mu_bar(2)), 0.0, mu_bar(0)/(mu_bar(0)*mu_bar(0) + mu_bar(2)*mu_bar(2)), 0.0; // Nonlinear Case: bearing and distance measurements
 }
 
 void LocalizationModule::calculateMeasPred(VectorMuf& mu_bar, VectorZtf& h) {
   //TODO: UPDATE THIS SO THAT IT ACTUALLY CALCULATES h(mu_bar)
-  h = ball_loc_.C * mu_bar;
+  // h = ball_loc_.C * mu_bar; // Linear Case
+  h << atan2f(mu_bar(2),mu_bar(0)),sqrt(mu_bar(0)*mu_bar(0) + mu_bar(2)*mu_bar(2)); // Nonlinear case: bearing and distance measurements
 }
