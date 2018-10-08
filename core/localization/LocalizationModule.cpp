@@ -17,7 +17,7 @@ LocalizationModule::LocalizationModule() : tlogger_(textlogger), ekfilter_(new E
                 0,0,10,0,
                 0,0,0,10;
 
-  ball_loc_.mu_hat << 0,0,0,0;
+  ball_loc_.mu_hat << 1,0,1,0;
 
   ball_loc_.sig_hat << 10,0,0,0,
                       0,20,0,0,
@@ -131,16 +131,16 @@ void LocalizationModule::processFrame() {
   MatrixSigf sig_hat = ball_loc_.sig_hat;
   Eigen::Vector4f ut(0,0,0,0);
 
-  ekfilter_->runEKF(mu_hat, sig_hat, ut, pos,
+  ekfilter_->runEKF(ball_loc_.mu_hat, ball_loc_.sig_hat, ut, pos,
                     std::bind(&LocalizationModule::calculateMuBar, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
                     std::bind(&LocalizationModule::calculateGandH, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
                     std::bind(&LocalizationModule::calculateMeasPred, this, std::placeholders::_1, std::placeholders::_2),
                     ball_loc_.Q, ball_loc_.R, ball.seen);
   
-  ekfilter_->runKF(ball_loc_.mu_hat, ball_loc_.sig_hat, ut, pos, ball_loc_.A, ball_loc_.B, ball_loc_.C, ball_loc_.Q, ball_loc_.R, ball.seen);
+  // ekfilter_->runKF(ball_loc_.mu_hat, ball_loc_.sig_hat, ut, pos, ball_loc_.A, ball_loc_.B, ball_loc_.C, ball_loc_.Q, ball_loc_.R, ball.seen);
 
-  std::cout << "EKF results: (" << mu_hat(0) << ", " << mu_hat(2) << ")\n";
-  std::cout << "KF results: (" << ball_loc_.mu_hat(0) << ", " << ball_loc_.mu_hat(2) << ")\n";
+  // std::cout << "EKF results: (" << mu_hat(0) << ", " << mu_hat(2) << ")\n";
+  // std::cout << "KF results: (" << ball_loc_.mu_hat(0) << ", " << ball_loc_.mu_hat(2) << ")\n";
 
 
   // if(ball.seen) {
@@ -200,21 +200,26 @@ Eigen::Vector2f LocalizationModule::posToRange(float x, float y) {
 void LocalizationModule::calculateMuBar(VectorMuf& mu_hat, VectorUtf& ut, VectorMuf& mu_bar) {
   //TODO: UPDATE THIS SO THAT IT ACTUALLY UPDATES MU_BAR BASED ON g(u_t, mu_(t-1))
   mu_bar = ball_loc_.A * mu_hat + ball_loc_.B * ut;
+  // printf("After calcMuBar: %f, %f, %f, %f\n", mu_bar(0), mu_bar(1),mu_bar(2),mu_bar(3));
   // mu_bar = sin(mu_hat+ut); // Nonlinear State Trasnsition
 }
 
-void LocalizationModule::calculateGandH(VectorMuf& mu_bar, MatrixAf& G, MatrixCf& H) {
+void LocalizationModule::calculateGandH(VectorMuf& mu_bar, MatrixAGf& A_or_G, MatrixCHf& C_or_H) {
   //TODO: plug mu_bar into the jacobian for G_t to get G
-  G = ball_loc_.A; // Linear Case
+
+  A_or_G = ball_loc_.A; // Linear Case
 
   //TODO: plub mu_bar into the jacobian for H_t to get H
   // H = ball_loc_.C; // Linear Case
-  H << mu_bar(0)/sqrt(mu_bar(0)*mu_bar(0) + mu_bar(2)*mu_bar(2)), 0.0, mu_bar(2)/sqrt(mu_bar(0)*mu_bar(0) + mu_bar(2)*mu_bar(2)),0.0,
+  C_or_H << mu_bar(0)/sqrt(mu_bar(0)*mu_bar(0) + mu_bar(2)*mu_bar(2)), 0.0, mu_bar(2)/sqrt(mu_bar(0)*mu_bar(0) + mu_bar(2)*mu_bar(2)),0.0,
       -mu_bar(2)/(mu_bar(0)*mu_bar(0) + mu_bar(2)*mu_bar(2)), 0.0, mu_bar(0)/(mu_bar(0)*mu_bar(0) + mu_bar(2)*mu_bar(2)), 0.0; // Nonlinear Case: bearing and distance measurements
+  // printf("AFter getAGCH: %f, %f, %f, %f\n", A_or_G(0,0), A_or_G(0,1),C_or_H(0,0),C_or_H(0,1));
 }
 
-void LocalizationModule::calculateMeasPred(VectorMuf& mu_bar, VectorZtf& h) {
+void LocalizationModule::calculateMeasPred(VectorMuf& mu_bar, VectorZtf& z_bar) {
   //TODO: UPDATE THIS SO THAT IT ACTUALLY CALCULATES h(mu_bar)
-  // h = ball_loc_.C * mu_bar; // Linear Case
-  h << atan2f(mu_bar(2),mu_bar(0)),sqrt(mu_bar(0)*mu_bar(0) + mu_bar(2)*mu_bar(2)); // Nonlinear case: bearing and distance measurements
+  // z_bar = ball_loc_.C * mu_bar; // Linear Case
+
+  z_bar << atan2f(mu_bar(2),mu_bar(0)),sqrt(mu_bar(0)*mu_bar(0) + mu_bar(2)*mu_bar(2)); // Nonlinear case: bearing and distance measurements
+  // printf("After calcZBar: %f, %f, %f, %f\n", z_bar(0), z_bar(1));
 }

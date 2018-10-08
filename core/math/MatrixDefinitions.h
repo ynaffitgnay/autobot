@@ -24,7 +24,7 @@ constexpr int measureK = 2;
 
 
 
-typedef Eigen::Matrix<float,stateN,stateN> MatrixAf;
+typedef Eigen::Matrix<float,stateN,stateN> MatrixAGf;
 
 typedef Eigen::Matrix<float,stateN,controlM> MatrixBf;
 
@@ -38,7 +38,7 @@ typedef Eigen::Matrix<float,controlM,1> VectorUtf;
 
 typedef Eigen::Matrix<float,measureK,1> VectorZtf;
 
-typedef Eigen::Matrix<float,measureK,stateN> MatrixCf;
+typedef Eigen::Matrix<float,measureK,stateN> MatrixCHf;
 
 typedef Eigen::Matrix<float,stateN,measureK> MatrixKf;
 

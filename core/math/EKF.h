@@ -22,20 +22,24 @@ public:
 
   void runEKF(VectorMuf& mu_hat, MatrixSigf& sig_hat,VectorUtf& ut, VectorZtf& zt,
               std::function <void(VectorMuf&, VectorUtf&, VectorMuf&)> calcMuBar,
-              std::function <void(VectorMuf&, MatrixAf&, MatrixCf&)> calcGH,
+              std::function <void(VectorMuf&, MatrixAGf&, MatrixCHf&)> calcGH,
               std::function <void(VectorMuf&, VectorZtf&)> calcMeasPred,
               MatrixQf& Q, MatrixRf& R, bool useMeas);
   
-  void runKF(VectorMuf& mu_hat, MatrixSigf& sig_hat,VectorUtf& ut,
-             VectorZtf& zt, MatrixAf& A, MatrixBf& B, MatrixCf C,
-             MatrixQf& Q, MatrixRf& R, bool useMeas);
+  // void runKF(VectorMuf& mu_hat, MatrixSigf& sig_hat,VectorUtf& ut,
+  //            VectorZtf& zt, MatrixAGf& A, MatrixBf& B, MatrixCHf C,
+  //            MatrixQf& Q, MatrixRf& R, bool useMeas);
   void predictionStep(VectorMuf& mu_hat,MatrixSigf& sig_hat, VectorUtf& ut,
-                      MatrixAf& A, MatrixBf& B, MatrixRf& R,
-                      VectorMuf& mu_bar, MatrixSigf& sig_bar);
+                      MatrixAGf& A_or_G, MatrixCHf& C_or_H, MatrixRf& R,
+                      VectorMuf& mu_bar, MatrixSigf& sig_bar,
+                      std::function <void(VectorMuf&, VectorUtf&, VectorMuf&)> calcMuBar,
+                      std::function <void(VectorMuf&, MatrixAGf&, MatrixCHf&)> getAandCorGandH
+                      );
 
-  void updateStep(VectorMuf& mu_bar, MatrixSigf& sig_bar, MatrixCf C, 
-                  VectorZtf& zt, VectorZtf& z_bar, MatrixQf& Q,
-                  VectorMuf& mu_hat, MatrixSigf& sig_hat);
+  void updateStep(VectorMuf& mu_bar, MatrixSigf& sig_bar, MatrixCHf C_or_H, 
+                  VectorZtf& zt, MatrixQf& Q,
+                  VectorMuf& mu_hat, MatrixSigf& sig_hat,
+                  std::function <void(VectorMuf&, VectorZtf&)> calcMeasPred);
 
 // private:
 
