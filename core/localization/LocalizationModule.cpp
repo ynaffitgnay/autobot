@@ -17,7 +17,7 @@ LocalizationModule::LocalizationModule() : tlogger_(textlogger), ekfilter_(new E
                 0,0,10,0,
                 0,0,0,10;
 
-  ball_loc_.mu_hat << 1,0,1,0;
+  ball_loc_.mu_hat << 50,0,50,0;
 
   ball_loc_.sig_hat << 10,0,0,0,
                       0,20,0,0,
@@ -114,7 +114,7 @@ void LocalizationModule::processFrame() {
   self.loc = sloc;
 
   double dt = (last_time_ < 0) ? 1.0/30.0 : (time - last_time_);
-  // printf("dt = %.2f\t, last_time_ = %f\n",dt, last_time_);
+  // printf("dt = %.4f\t, last_time_ = %f\n",dt, last_time_);
 
   //TODO: modify this block to use your Kalman filter implementation
   ball_loc_.A << 1,dt,0,0,
@@ -124,7 +124,8 @@ void LocalizationModule::processFrame() {
   auto relBall = Point2D::getPointFromPolar(ball.visionDistance, ball.visionBearing);
 
   Eigen::Vector2f pos;
-  pos = rangeToPos(ball.visionBearing,ball.visionDistance);
+  // pos = rangeToPos(ball.visionBearing,ball.visionDistance); // For linear KF only
+  pos << ball.visionBearing,ball.visionDistance; // For Nonlinear case: bearing and distance measurements
 
   // See if EKF works:
   VectorMuf mu_hat = ball_loc_.mu_hat;
@@ -192,7 +193,7 @@ Eigen::Vector2f LocalizationModule::rangeToPos(float bearing, float distance) {
 }
 
 Eigen::Vector2f LocalizationModule::posToRange(float x, float y) {
-  Eigen::Vector2f range( sqrt(x*x + y*y), atan2f(y, x));
+  Eigen::Vector2f range( 10.0*sqrt(x*x + y*y), atan2f(y, x));
   return range;
 }
 
@@ -200,8 +201,8 @@ Eigen::Vector2f LocalizationModule::posToRange(float x, float y) {
 void LocalizationModule::calculateMuBar(VectorMuf& mu_hat, VectorUtf& ut, VectorMuf& mu_bar) {
   //TODO: UPDATE THIS SO THAT IT ACTUALLY UPDATES MU_BAR BASED ON g(u_t, mu_(t-1))
   mu_bar = ball_loc_.A * mu_hat + ball_loc_.B * ut;
-  // printf("After calcMuBar: %f, %f, %f, %f\n", mu_bar(0), mu_bar(1),mu_bar(2),mu_bar(3));
-  // mu_bar = sin(mu_hat+ut); // Nonlinear State Trasnsition
+  // printf("muBar: %f, %f, %f, %f\n", mu_bar(0), mu_bar(1),mu_bar(2),mu_bar(3));
+  // mu_bar = sin(mu_hat+ut); // Ficticious Nonlinear State Trasnsition
 }
 
 void LocalizationModule::calculateGandH(VectorMuf& mu_bar, MatrixAGf& A_or_G, MatrixCHf& C_or_H) {
@@ -210,16 +211,16 @@ void LocalizationModule::calculateGandH(VectorMuf& mu_bar, MatrixAGf& A_or_G, Ma
   A_or_G = ball_loc_.A; // Linear Case
 
   //TODO: plub mu_bar into the jacobian for H_t to get H
-  // H = ball_loc_.C; // Linear Case
-  C_or_H << mu_bar(0)/sqrt(mu_bar(0)*mu_bar(0) + mu_bar(2)*mu_bar(2)), 0.0, mu_bar(2)/sqrt(mu_bar(0)*mu_bar(0) + mu_bar(2)*mu_bar(2)),0.0,
-      -mu_bar(2)/(mu_bar(0)*mu_bar(0) + mu_bar(2)*mu_bar(2)), 0.0, mu_bar(0)/(mu_bar(0)*mu_bar(0) + mu_bar(2)*mu_bar(2)), 0.0; // Nonlinear Case: bearing and distance measurements
+  // C_or_H = ball_loc_.C; // Linear Case
+  C_or_H << -mu_bar(2)/(mu_bar(0)*mu_bar(0) + mu_bar(2)*mu_bar(2)), 0.0, mu_bar(0)/(mu_bar(0)*mu_bar(0) + mu_bar(2)*mu_bar(2)), 0.0,
+      10.0*mu_bar(0)/sqrt(mu_bar(0)*mu_bar(0) + mu_bar(2)*mu_bar(2)), 0.0, 10.0*mu_bar(2)/sqrt(mu_bar(0)*mu_bar(0) + mu_bar(2)*mu_bar(2)),0.0; // Nonlinear Case: bearing and distance measurements
   // printf("AFter getAGCH: %f, %f, %f, %f\n", A_or_G(0,0), A_or_G(0,1),C_or_H(0,0),C_or_H(0,1));
 }
 
 void LocalizationModule::calculateMeasPred(VectorMuf& mu_bar, VectorZtf& z_bar) {
   //TODO: UPDATE THIS SO THAT IT ACTUALLY CALCULATES h(mu_bar)
+  
   // z_bar = ball_loc_.C * mu_bar; // Linear Case
 
-  z_bar << atan2f(mu_bar(2),mu_bar(0)),sqrt(mu_bar(0)*mu_bar(0) + mu_bar(2)*mu_bar(2)); // Nonlinear case: bearing and distance measurements
-  // printf("After calcZBar: %f, %f, %f, %f\n", z_bar(0), z_bar(1));
+  z_bar << atan2f(mu_bar(2),mu_bar(0)),10.0*sqrt(mu_bar(0)*mu_bar(0) + mu_bar(2)*mu_bar(2)); // Nonlinear case: bearing and distance measurements
 }

@@ -9,6 +9,7 @@ import commands
 import mem_objects
 import task, util
 import head
+import math
 from task import Task, MultiTask
 import cfgpose, cfgstiff
 import pose
@@ -32,7 +33,7 @@ class BlockLeft(Node):
         newPose[core.LShoulderRoll] = 3
         newPose[core.LShoulderPitch] = -100
         newPose[core.LElbowRoll] = 0
-        return pose.ToPoseMoveHead(pose=newPose, tilt=-15, time = 1.0)
+        return pose.ToPoseMoveHead(pose=newPose, tilt=-15, time =0.1)
 
 class BlockRight(Node):
     def run(self):
@@ -48,12 +49,12 @@ class BlockRight(Node):
         newPose[core.RShoulderRoll] = 3
         newPose[core.RShoulderPitch] = -100
         newPose[core.RElbowRoll] = 0
-        return pose.ToPoseMoveHead(pose=newPose, tilt=-15, time=1.0)
+        return pose.ToPoseMoveHead(pose=newPose, tilt=-15, time=0.1)
 
 class BlockCenter(Node):
     def run(self):
         UTdebug.log(15, "Blocking center")
-        
+
         commands.setStiffness(cfgstiff.One)
         newPose = dict()
         newPose[core.LShoulderRoll] = 9.95
@@ -62,35 +63,41 @@ class BlockCenter(Node):
         newPose[core.RShoulderRoll] = 9.95
         newPose[core.RShoulderPitch] = -3.85
         newPose[core.RElbowRoll] = -1
-        return pose.ToPoseMoveHead(pose=newPose, tilt=-15, time=1.0)
+        return pose.ToPoseMoveHead(pose=newPose, tilt=-15, time=0.1)
 
 class Blocker(Node):
     def run(self):
         ball = mem_objects.world_objects[core.WO_BALL]
-        commands.setHeadPan(ball.bearing, 0.1)
-        print("Ball distance: %f Ball bearing: %f X,Y vel: %f, %f" % (ball.distance,ball.bearing,ball.relVel.x,ball.relVel.y))
-        if ball.distance < 500:
+        commands.setHeadPan(0.0, 1.0)
+        # print("Ball distance: %f Ball bearing: %f\n" % (ball.distance,ball.bearing))
+        vel_mag = math.sqrt(ball.relVel.x*ball.relVel.x + ball.relVel.y*ball.relVel.y)
+        x_ball = ball.distance*math.cos(ball.bearing)/10.0
+        y_ball = ball.distance*math.sin(ball.bearing)/10.0
+        print("X: %f, Y: %f, Vmag: %f, Vx: %f, Vy: %f" % (x_ball, y_ball, vel_mag, ball.relVel.x, ball.relVel.y))
+        if vel_mag > 3.0 and ball.relVel.x < 0.0 and ball.seen:
             # ball moving away from the robot, reset to regular position
-            if (ball.relVel.x >= 0):
-                newPose = dict()
-                newPose[core.LShoulderRoll] = 3
-                newPose[core.LShoulderPitch] = -100
-                newPose[core.LElbowRoll] = 0
-                newPose[core.RShoulderRoll] = 3
-                newPose[core.RShoulderPitch] = -100
-                newPose[core.RElbowRoll] = 0
-                pose.ToPoseMoveHead(pose=newPose, tilt=-15, time=1.0)
-                return
+            y_intercept = -ball.relVel.y*x_ball/ball.relVel.x + y_ball
+            print("Y intercept: %f" % y_intercept)
             ## can do if xvel < yvel && xvel < 1, etc.
             ## maybe look at distance between robot and goal? 
             UTdebug.log(15, "Ball is close, blocking!")
-            if ball.bearing > 30 * core.DEG_T_RAD:
+            if y_intercept < -15.0:
                 choice = "left"
-            elif ball.bearing < -30 * core.DEG_T_RAD:
+            elif ball.bearing > 15.0:
                 choice = "right"
             else:
                 choice = "center"
             self.postSignal(choice)
+        commands.setStiffness(cfgstiff.One)
+        newPose = dict()
+        newPose[core.LShoulderRoll] = 15.0
+        newPose[core.LShoulderPitch] = -100
+        newPose[core.LElbowRoll] = 0
+        newPose[core.RShoulderRoll] = 15.0
+        newPose[core.RShoulderPitch] = -100
+        newPose[core.RElbowRoll] = 0
+        pose.ToPoseMoveHead(pose=newPose, tilt=-15, time=0.1)
+        print("Hands down\n")
 
 
 class Playing(LoopingStateMachine):

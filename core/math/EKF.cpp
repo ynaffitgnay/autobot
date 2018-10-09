@@ -86,6 +86,8 @@ void EKF::predictionStep(VectorMuf& mu_hat,MatrixSigf& sig_hat, VectorUtf& ut,
                          std::function <void(VectorMuf&, MatrixAGf&, MatrixCHf&)> getAandCorGandH
                          ) {
   
+  // printf("muHat: %f, %f, %f, %f\n", mu_hat(0), mu_hat(1),mu_hat(2),mu_hat(3));
+  // printf("PHat: %f, %f, %f, %f\n", sig_hat(0,0), sig_hat(1,1),sig_hat(2,2),sig_hat(3,3));
   calcMuBar(mu_hat, ut, mu_bar);
   getAandCorGandH(mu_bar, A_or_G, C_or_H);
   sig_bar = A_or_G * sig_hat * A_or_G.transpose() + R;
@@ -96,7 +98,7 @@ void EKF::updateStep(VectorMuf& mu_bar, MatrixSigf& sig_bar, MatrixCHf C_or_H,
                      VectorMuf& mu_hat, MatrixSigf& sig_hat,
                      std::function <void(VectorMuf&, VectorZtf&)> calcMeasPred
                      ) {
-  MatrixKf K = sig_bar*C_or_H.transpose()*(C_or_H*sig_bar*C_or_H.transpose() + Q).inverse();
+  MatrixKf K = sig_bar*(C_or_H.transpose())*(C_or_H*sig_bar*C_or_H.transpose() + Q).inverse();
   VectorZtf z_bar;
   calcMeasPred(mu_bar,z_bar); // for non-linear z_bar is h(mu_bar) for linear it's C*mu_bar
   mu_hat = mu_bar + K*(zt-z_bar); 
