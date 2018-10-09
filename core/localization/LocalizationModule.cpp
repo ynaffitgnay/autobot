@@ -9,13 +9,13 @@
 
 // Boilerplate
 LocalizationModule::LocalizationModule() : tlogger_(textlogger), ekfilter_(new EKF()), pfilter_(new ParticleFilter(cache_, tlogger_)) {
-  ball_loc_.Q << 5,0,
-                0,5;
+  ball_loc_.Q << 0.001,0,
+                0,30;
 
-  ball_loc_.R << 10,0,0,0,
-                0,10,0,0,
-                0,0,10,0,
-                0,0,0,10;
+  ball_loc_.R << 1,0,0,0,
+                0,2,0,0,
+                0,0,1,0,
+                0,0,0,2;
 
   ball_loc_.mu_hat << 50,0,50,0;
 
@@ -126,7 +126,7 @@ void LocalizationModule::processFrame() {
   Eigen::Vector2f pos;
   // pos = rangeToPos(ball.visionBearing,ball.visionDistance); // For linear KF only
   pos << ball.visionBearing,ball.visionDistance; // For Nonlinear case: bearing and distance measurements
-
+  // printf("Bearing: %.5f\t, Distance: %.4f\n",ball.visionBearing,ball.visionDistance);
   // See if EKF works:
   VectorMuf mu_hat = ball_loc_.mu_hat;
   MatrixSigf sig_hat = ball_loc_.sig_hat;

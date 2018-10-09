@@ -86,8 +86,8 @@ void EKF::predictionStep(VectorMuf& mu_hat,MatrixSigf& sig_hat, VectorUtf& ut,
                          std::function <void(VectorMuf&, MatrixAGf&, MatrixCHf&)> getAandCorGandH
                          ) {
   
-  // printf("muHat: %f, %f, %f, %f\n", mu_hat(0), mu_hat(1),mu_hat(2),mu_hat(3));
-  // printf("PHat: %f, %f, %f, %f\n", sig_hat(0,0), sig_hat(1,1),sig_hat(2,2),sig_hat(3,3));
+  // printf("muHat, Phat: %f, %f, %f, %f, %f, %f, %f, %f\n", mu_hat(0), mu_hat(1),mu_hat(2),mu_hat(3), sig_hat(0,0), sig_hat(1,1),sig_hat(2,2),sig_hat(3,3));
+  // printf("PHat: \n",);
   calcMuBar(mu_hat, ut, mu_bar);
   getAandCorGandH(mu_bar, A_or_G, C_or_H);
   sig_bar = A_or_G * sig_hat * A_or_G.transpose() + R;
