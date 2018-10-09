@@ -90,14 +90,14 @@ class Blocker(Node):
             self.postSignal(choice)
         commands.setStiffness(cfgstiff.One)
         newPose = dict()
-        newPose[core.LShoulderRoll] = 15.0
+        newPose[core.LShoulderRoll] = 3
         newPose[core.LShoulderPitch] = -100
         newPose[core.LElbowRoll] = 0
-        newPose[core.RShoulderRoll] = 15.0
+        newPose[core.RShoulderRoll] = 3
         newPose[core.RShoulderPitch] = -100
         newPose[core.RElbowRoll] = 0
-        pose.ToPoseMoveHead(pose=newPose, tilt=-15, time=0.1)
         print("Hands down\n")
+        return pose.ToPoseMoveHead(pose=newPose, tilt=-15, time=0.1)
 
 
 class Playing(LoopingStateMachine):
