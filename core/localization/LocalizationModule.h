@@ -23,6 +23,7 @@ class LocalizationModule : public Module {
   public:
     BallLoc ball_loc_;
     double last_time_;
+    double occluded_time;
     LocalizationModule();
     ~LocalizationModule();
     void specifyMemoryDependency();

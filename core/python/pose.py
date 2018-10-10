@@ -49,9 +49,9 @@ class ToPose(Task):
     return posetimes
 
 class ToPoseMoveHead(MultiTask):
-  def __init__(self, pose, tilt = 0.0, time = 2.0):
+  def __init__(self, pose, tilt = 0.0, pan = 0.0, time = 2.0):
     self.bpose = ToPose(pose = pose, time = time)
-    self.mhead = head.MoveHead(tilt = tilt, time = time)
+    self.mhead = head.MoveHead(tilt = tilt, pan = pan, time = time)
     super(ToPoseMoveHead, self).__init__(self.bpose, self.mhead)
 
 class PoseSequence(Task):

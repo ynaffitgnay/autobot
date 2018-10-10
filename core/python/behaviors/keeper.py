@@ -18,11 +18,25 @@ from memory import walk_request, walk_response, kick_request, joint_commands, be
 from state_machine import Node, S, C, T, LoopingStateMachine, Event
 import UTdebug
 
+# class BallSeen(Event):
+#   """Event that fires if Ball is seen"""
+#   def __init__(self, ball):
+#     super(BallSeen, self).__init__()
+#     self.ball = ball
+#   def ready(self):
+#     return self.ball.seen
+
+# def B(ball):
+#   """Ball found"""
+#   return BallSeen(ball)
+
 class BlockLeft(Node):
   def run(self):
     UTdebug.log(15, "Blocking left")
     
+    ball = mem_objects.world_objects[core.WO_BALL]
     commands.setStiffness(cfgstiff.OneArmsOnly)
+    commands.setHeadPan(ball.bearing, 0.2)
     newPose = dict()
     newPose[core.LShoulderRoll] = 70
     newPose[core.LShoulderPitch] = -95
@@ -34,13 +48,15 @@ class BlockLeft(Node):
     newPose[core.RElbowRoll] = 0
     newPose[core.RHipPitch] = -46.5
     newPose[core.LHipPitch] = -46.5
-    return pose.ToPoseMoveHead(pose=newPose, tilt=-15, time=0.1)
+    return pose.ToPoseMoveHead(pose=newPose, tilt=-15, pan = ball.bearing, time=0.1)
 
 class BlockRight(Node):
   def run(self):
     UTdebug.log(15, "Blocking right")
 
+    ball = mem_objects.world_objects[core.WO_BALL]
     commands.setStiffness(cfgstiff.OneArmsOnly)
+    commands.setHeadPan(ball.bearing, 0.2)
     newPose = dict()
     newPose[core.RShoulderRoll] = 70
     newPose[core.RShoulderPitch] = -95
@@ -52,13 +68,15 @@ class BlockRight(Node):
     newPose[core.LElbowRoll] = 0
     newPose[core.RHipPitch] = -46.5
     newPose[core.LHipPitch] = -46.5
-    return pose.ToPoseMoveHead(pose=newPose, tilt=-15, time=0.1)
+    return pose.ToPoseMoveHead(pose=newPose, tilt=-15, pan = ball.bearing, time=0.1)
 
 class BlockCenter(Node):
   def run(self):
     UTdebug.log(15, "Blocking center")
 
+    ball = mem_objects.world_objects[core.WO_BALL]
     commands.setStiffness(cfgstiff.OneArmsOnly)
+    commands.setHeadPan(ball.bearing, 0.2)
     newPose = dict()
     newPose[core.LShoulderRoll] = 9.95
     newPose[core.LShoulderPitch] = -3.85
@@ -68,14 +86,16 @@ class BlockCenter(Node):
     newPose[core.RElbowRoll] = -1
     newPose[core.RHipPitch] = -46.5
     newPose[core.LHipPitch] = -46.5
-    return pose.ToPoseMoveHead(pose=newPose, tilt=-15, time=0.25)
+    return pose.ToPoseMoveHead(pose=newPose, tilt=-15, pan = ball.bearing, time=0.25)
 
 class DontBlock(Node):
   """Ball missed dont block"""
   def run(self):
     UTdebug.log(15, "Not Blocking")
 
+    ball = mem_objects.world_objects[core.WO_BALL]
     commands.setStiffness(cfgstiff.OneArmsOnly)
+    commands.setHeadPan(ball.bearing, 0.2)
     newPose = dict()
     newPose[core.LShoulderRoll] = 15
     newPose[core.LShoulderPitch] = -100
@@ -85,15 +105,28 @@ class DontBlock(Node):
     newPose[core.RElbowRoll] = 0
     newPose[core.RHipPitch] = -46.5
     newPose[core.LHipPitch] = -46.5
-    return pose.ToPoseMoveHead(pose=newPose, tilt=-15, time=0.5)
+    return pose.ToPoseMoveHead(pose=newPose, tilt=-15, pan = ball.bearing, time=0.5)
 
+# class MoveHeadLeft(Node):
+#   """Search for the ball to the left"""
+#   def run(self):
+#     commands.setHeadPanTilt(core.DEG_T_RAD*85.0,-15.0,1.0)
+#     if self.getTime() > 1.2:
+#       self.finish()
+
+# class MoveHeadRight(Node):
+#   """Search for the ball to the right"""
+#   def run(self):
+#     commands.setHeadPanTilt(-core.DEG_T_RAD*85.0,-15.0,1.0)
+#     if self.getTime() > 1.2:
+#       self.finish()
 
 class Blocker(Node):
   def run(self):
     # if not ball.seen, move the head back to the center
     ball = mem_objects.world_objects[core.WO_BALL]
     if not ball.seen:
-      commands.setHeadPan(ball.bearing, 0.2)
+      commands.setHeadPan(0.0, 0.2)
     else:
       commands.setHeadPan(ball.bearing, 0.2)
     # print("Ball distance: %f Ball bearing: %f\n" % (ball.distance,ball.bearing))
@@ -113,15 +146,14 @@ class Blocker(Node):
       UTdebug.log(15, "Ball is close, blocking!")
       if y_intercept > 42.0 or y_intercept < -42.0 or not ball.seen:
         choice = "miss"
-      elif y_intercept > 15.0:
+      elif y_intercept > 12.0:
         choice = "left"
-      elif y_intercept < -15.0:
+      elif y_intercept < -12.0:
         choice = "right"
-      elif y_intercept <= 15.0 and y_intercept >= -15.0:
+      elif y_intercept <= 12.0 and y_intercept >= -12.0:
         choice = "center"
       self.postSignal(choice)
       return
-
 
 class Playing(LoopingStateMachine):
   def setup(self):

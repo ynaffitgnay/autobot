@@ -34,6 +34,7 @@ LocalizationModule::LocalizationModule() : tlogger_(textlogger), ekfilter_(new E
   ball_loc_.C << 1,0,0,0,
                 0,0,1,0;
   last_time_ = -1.0;
+  occluded_time = 0.0;
 }
 
 LocalizationModule::~LocalizationModule() {
@@ -114,7 +115,10 @@ void LocalizationModule::processFrame() {
   self.loc = sloc;
 
   double dt = (last_time_ < 0) ? 1.0/30.0 : (time - last_time_);
-  // printf("dt = %.4f\t, last_time_ = %f\n",dt, last_time_);
+  // printf("dt = %.4f\t, last_time_ = %f, Occluded time = %f\n",dt, last_time_, occluded_time);
+  if(!ball.seen){
+    occluded_time += dt;
+  }
 
   //TODO: modify this block to use your Kalman filter implementation
   ball_loc_.A << 1,dt,0,0,
@@ -122,6 +126,8 @@ void LocalizationModule::processFrame() {
                  0,0,1,dt,
                  0,0,0,1;
   auto relBall = Point2D::getPointFromPolar(ball.visionDistance, ball.visionBearing);
+
+  // printf("RelBall X: %f RelBall Y: %f\n", relBall.x,relBall.y);
 
   Eigen::Vector2f pos;
   // pos = rangeToPos(ball.visionBearing,ball.visionDistance); // For linear KF only
@@ -154,6 +160,17 @@ void LocalizationModule::processFrame() {
   //   // so that they are drawn in the World window
   // } 
   // std::cout << ball_loc_.mu_hat(1) << ", " << ball_loc_.mu_hat(3) << std::endl;
+  if(occluded_time >= 2.0){
+    ball_loc_.mu_hat(0) = relBall.x/10.0;
+    ball_loc_.mu_hat(1) = 0.0;
+    ball_loc_.mu_hat(2) = relBall.y/10.0;
+    ball_loc_.mu_hat(3) = 0.0;
+    ball_loc_.sig_hat << 10,0,0,0,
+                          0,20,0,0,
+                          0,0,10,0,
+                          0,0,0,20;
+    occluded_time = 0.0;
+  }
   ball.relVel.x = ball_loc_.mu_hat(1);
   ball.relVel.y = ball_loc_.mu_hat(3);
   auto globalBall = relBall.relativeToGlobal(self.loc, self.orientation);
