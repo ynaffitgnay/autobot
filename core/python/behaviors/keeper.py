@@ -144,13 +144,13 @@ class Blocker(Node):
       ## can do if xvel < yvel && xvel < 1, etc.
       ## maybe look at distance between robot and goal? 
       UTdebug.log(15, "Ball is close, blocking!")
-      if y_intercept > 42.0 or y_intercept < -42.0 or not ball.seen:
+      if y_intercept > 42.0 or y_intercept < -40.0 or not ball.seen:
         choice = "miss"
-      elif y_intercept > 12.0:
+      elif y_intercept > 13.5:
         choice = "left"
-      elif y_intercept < -12.0:
+      elif y_intercept < -13.5:
         choice = "right"
-      elif y_intercept <= 12.0 and y_intercept >= -12.0:
+      elif y_intercept <= 13.5 and y_intercept >= -13.5:
         choice = "center"
       self.postSignal(choice)
       return
