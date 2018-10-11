@@ -22,7 +22,7 @@ struct BallLoc {
 class LocalizationModule : public Module {
   public:
     BallLoc ball_loc_;
-    double last_time_;
+    double last_time_; // To calculate delta_t
     double occluded_time;
     LocalizationModule();
     ~LocalizationModule();

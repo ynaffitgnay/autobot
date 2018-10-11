@@ -15,9 +15,6 @@ typedef Eigen::Matrix<float,4,2> Matrix42f;
 class EKF
 {
 public:
-  /** 
-   * Default constructor. 
-   */
   EKF();
 
   void runEKF(VectorMuf& mu_hat, MatrixSigf& sig_hat,VectorUtf& ut, VectorZtf& zt,
@@ -25,10 +22,7 @@ public:
               std::function <void(VectorMuf&, MatrixAGf&, MatrixCHf&)> calcGH,
               std::function <void(VectorMuf&, VectorZtf&)> calcMeasPred,
               MatrixQf& Q, MatrixRf& R, bool useMeas);
-  
-  // void runKF(VectorMuf& mu_hat, MatrixSigf& sig_hat,VectorUtf& ut,
-  //            VectorZtf& zt, MatrixAGf& A, MatrixBf& B, MatrixCHf C,
-  //            MatrixQf& Q, MatrixRf& R, bool useMeas);
+
   void predictionStep(VectorMuf& mu_hat,MatrixSigf& sig_hat, VectorUtf& ut,
                       MatrixAGf& A_or_G, MatrixCHf& C_or_H, MatrixRf& R,
                       VectorMuf& mu_bar, MatrixSigf& sig_bar,
@@ -40,9 +34,6 @@ public:
                   VectorZtf& zt, MatrixQf& Q,
                   VectorMuf& mu_hat, MatrixSigf& sig_hat,
                   std::function <void(VectorMuf&, VectorZtf&)> calcMeasPred);
-
-// private:
-
 
 };
 

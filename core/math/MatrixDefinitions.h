@@ -3,26 +3,9 @@
 
 #include <Eigen/Dense>
 
-
-
-
-// template <typename T, size_t N>
-// inline constexpr size_t dim(T(&)[N])
-// {
-//     return N;
-// }
-
-// template <typename T> 
-// inline constexpr T get_val(T v) {
-//   return v;
-// }
-
-
 constexpr int stateN = 4;
 constexpr int controlM = 4;
 constexpr int measureK = 2;
-
-
 
 typedef Eigen::Matrix<float,stateN,stateN> MatrixAGf;
 

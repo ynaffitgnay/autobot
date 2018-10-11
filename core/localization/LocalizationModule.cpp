@@ -9,20 +9,25 @@
 
 // Boilerplate
 LocalizationModule::LocalizationModule() : tlogger_(textlogger), ekfilter_(new EKF()), pfilter_(new ParticleFilter(cache_, tlogger_)) {
+  // The ball was kept stationary to calculate Q value
   ball_loc_.Q << 0.001,0,
                 0,30;
 
+  // This value was 
   ball_loc_.R << 1,0,0,0,
                 0,2,0,0,
                 0,0,1,0,
                 0,0,0,2;
 
+  // The initial state distribution was chosen randomly
   ball_loc_.mu_hat << 50,0,50,0;
 
   ball_loc_.sig_hat << 10,0,0,0,
                       0,20,0,0,
                       0,0,10,0,
                       0,0,0,20;
+
+  // The state transition matrix is initialized here and updated according to delta_t at all times
   ball_loc_.A << 1,0.33,0,0,
                 0,1,0,0,
                 0,0,1,0.33,
@@ -31,9 +36,14 @@ LocalizationModule::LocalizationModule() : tlogger_(textlogger), ekfilter_(new E
                 0,0,0,0,
                 0,0,0,0,
                 0,0,0,0;
+  // Only for linear: x and y measurement
   ball_loc_.C << 1,0,0,0,
                 0,0,1,0;
+
+  // Initialized at negative value and updated every frame
   last_time_ = -1.0;
+
+  // The kalman filter is re-initialized when the ball is not seen for some time
   occluded_time = 0.0;
 }
 
@@ -115,28 +125,28 @@ void LocalizationModule::processFrame() {
   self.loc = sloc;
 
   double dt = (last_time_ < 0) ? 1.0/30.0 : (time - last_time_);
-  // printf("dt = %.4f\t, last_time_ = %f, Occluded time = %f\n",dt, last_time_, occluded_time);
   if(!ball.seen){
-    occluded_time += dt;
+    occluded_time += dt; // Update time for which ball is not seen
   }
 
-  //TODO: modify this block to use your Kalman filter implementation
   ball_loc_.A << 1,dt,0,0,
                  0,1,0,0,
                  0,0,1,dt,
                  0,0,0,1;
   auto relBall = Point2D::getPointFromPolar(ball.visionDistance, ball.visionBearing);
 
-  // printf("RelBall X: %f RelBall Y: %f\n", relBall.x,relBall.y);
 
   Eigen::Vector2f pos;
+  
+  // Linear case: x and y measurements
   // pos = rangeToPos(ball.visionBearing,ball.visionDistance); // For linear KF only
-  pos << ball.visionBearing,ball.visionDistance; // For Nonlinear case: bearing and distance measurements
-  // printf("Bearing: %.5f\t, Distance: %.4f\n",ball.visionBearing,ball.visionDistance);
-  // See if EKF works:
+
+  // Nonlinear case: bearing and distance measurements
+  pos << ball.visionBearing,ball.visionDistance; // for EKF
+
   VectorMuf mu_hat = ball_loc_.mu_hat;
   MatrixSigf sig_hat = ball_loc_.sig_hat;
-  Eigen::Vector4f ut(0,0,0,0);
+  Eigen::Vector4f ut(0,0,0,0); // There is no control input in this system
 
   ekfilter_->runEKF(ball_loc_.mu_hat, ball_loc_.sig_hat, ut, pos,
                     std::bind(&LocalizationModule::calculateMuBar, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
@@ -144,23 +154,7 @@ void LocalizationModule::processFrame() {
                     std::bind(&LocalizationModule::calculateMeasPred, this, std::placeholders::_1, std::placeholders::_2),
                     ball_loc_.Q, ball_loc_.R, ball.seen);
   
-  // ekfilter_->runKF(ball_loc_.mu_hat, ball_loc_.sig_hat, ut, pos, ball_loc_.A, ball_loc_.B, ball_loc_.C, ball_loc_.Q, ball_loc_.R, ball.seen);
-
-  // std::cout << "EKF results: (" << mu_hat(0) << ", " << mu_hat(2) << ")\n";
-  // std::cout << "KF results: (" << ball_loc_.mu_hat(0) << ", " << ball_loc_.mu_hat(2) << ")\n";
-
-
-  // if(ball.seen) {
-  //   // Compute the relative position of the ball from vision readings
-  //   // ekfilter_->updateStep(ball_loc_.mu_bar, ball_loc_.sig_bar, ball_loc_.C, pos, z_bar, ball_loc_.Q, ball_loc_.mu_hat, ball_loc_.sig_hat);
-    
-  //   // Compute the global position of the ball based on our assumed position and orientation
-
-  //   // Update the localization memory objects with localization calculations
-  //   // so that they are drawn in the World window
-  // } 
-  // std::cout << ball_loc_.mu_hat(1) << ", " << ball_loc_.mu_hat(3) << std::endl;
-  if(occluded_time >= 2.0){
+  if(occluded_time >= 2.0){ // If ball not seen for 2 sec, re-initialize state and covariance
     ball_loc_.mu_hat(0) = relBall.x/10.0;
     ball_loc_.mu_hat(1) = 0.0;
     ball_loc_.mu_hat(2) = relBall.y/10.0;
@@ -171,10 +165,10 @@ void LocalizationModule::processFrame() {
                           0,0,0,20;
     occluded_time = 0.0;
   }
-  ball.relVel.x = ball_loc_.mu_hat(1);
-  ball.relVel.y = ball_loc_.mu_hat(3);
+
+  ball.relVel.x = ball_loc_.mu_hat(1); // Fill in the x velocity
+  ball.relVel.y = ball_loc_.mu_hat(3); // Fill in the y velocity
   auto globalBall = relBall.relativeToGlobal(self.loc, self.orientation);
-  // ball.absVel = 0
 
   // Compute the global position of the ball based on our assumed position and orientation
   Eigen::Vector2f range = posToRange(ball_loc_.mu_hat(0),ball_loc_.mu_hat(2));
@@ -186,20 +180,6 @@ void LocalizationModule::processFrame() {
   cache_.localization_mem->state[0] = ball.loc.x;
   cache_.localization_mem->state[1] = ball.loc.y;
   cache_.localization_mem->covariance = decltype(cache_.localization_mem->covariance)::Identity() * 10000;
-  // //TODO: How do we handle not seeing the ball?
-  // else {
-  //   ball_loc_.A << 1,dt,0,0,
-  //                  0,1,0,0,
-  //                  0,0,1,dt,
-  //                  0,0,0,1;
-
-  //   Eigen::Vector4f ut(0,0,0,0);
-  //   ekfilter_->predictionStep(ball_loc_.mu_hat, ball_loc_.sig_hat, ut, ball_loc_.A, ball_loc_.B, ball_loc_.R, ball_loc_.mu_hat, ball_loc_.sig_hat);
-  //   printf("No measurement: X hat = %.3f\t, Vx hat = %.3f\t, Y hat = %.3f\t, Vy hat = %.3f\n",ball_loc_.mu_hat(0),ball_loc_.mu_hat(1),ball_loc_.mu_hat(2),ball_loc_.mu_hat(3));
-  //   printf("No measurement: Px = %.3f\t, Pvx = %.3f\t, Py = %.3f\t, Pvy = %.3f\n",ball_loc_.mu_hat(0),ball_loc_.mu_hat(1),ball_loc_.mu_hat(2),ball_loc_.mu_hat(3));
-  //   // ball.distance = 10000.0f;
-  //   // ball.bearing = 0.0f;
-  // }
   last_time_ = cache_.frame_info->seconds_since_start;
 }
 
@@ -210,34 +190,33 @@ Eigen::Vector2f LocalizationModule::rangeToPos(float bearing, float distance) {
 }
 
 Eigen::Vector2f LocalizationModule::posToRange(float x, float y) {
+  // Calculates 
   Eigen::Vector2f range( 10.0*sqrt(x*x + y*y), atan2f(y, x));
   return range;
 }
 
 
 void LocalizationModule::calculateMuBar(VectorMuf& mu_hat, VectorUtf& ut, VectorMuf& mu_bar) {
-  //TODO: UPDATE THIS SO THAT IT ACTUALLY UPDATES MU_BAR BASED ON g(u_t, mu_(t-1))
+  //g(u_t, mu_(t-1)): Propagation step
   mu_bar = ball_loc_.A * mu_hat + ball_loc_.B * ut;
-  // printf("muBar: %f, %f, %f, %f\n", mu_bar(0), mu_bar(1),mu_bar(2),mu_bar(3));
   // mu_bar = sin(mu_hat+ut); // Ficticious Nonlinear State Trasnsition
 }
 
 void LocalizationModule::calculateGandH(VectorMuf& mu_bar, MatrixAGf& A_or_G, MatrixCHf& C_or_H) {
-  //TODO: plug mu_bar into the jacobian for G_t to get G
+// Get partial derivative of the state transition and observation function
+  A_or_G = ball_loc_.A; // Linear Case for both KF and EKF
 
-  A_or_G = ball_loc_.A; // Linear Case
-
-  //TODO: plub mu_bar into the jacobian for H_t to get H
-  // C_or_H = ball_loc_.C; // Linear Case
+  // C_or_H = ball_loc_.C; // Linear Case for KF
   C_or_H << -mu_bar(2)/(mu_bar(0)*mu_bar(0) + mu_bar(2)*mu_bar(2)), 0.0, mu_bar(0)/(mu_bar(0)*mu_bar(0) + mu_bar(2)*mu_bar(2)), 0.0,
       10.0*mu_bar(0)/sqrt(mu_bar(0)*mu_bar(0) + mu_bar(2)*mu_bar(2)), 0.0, 10.0*mu_bar(2)/sqrt(mu_bar(0)*mu_bar(0) + mu_bar(2)*mu_bar(2)),0.0; // Nonlinear Case: bearing and distance measurements
-  // printf("AFter getAGCH: %f, %f, %f, %f\n", A_or_G(0,0), A_or_G(0,1),C_or_H(0,0),C_or_H(0,1));
 }
 
 void LocalizationModule::calculateMeasPred(VectorMuf& mu_bar, VectorZtf& z_bar) {
-  //TODO: UPDATE THIS SO THAT IT ACTUALLY CALCULATES h(mu_bar)
+// CALCULATES h(mu_bar)
   
-  // z_bar = ball_loc_.C * mu_bar; // Linear Case
+  // Linear x and y measurement for KF
+  // z_bar = ball_loc_.C * mu_bar;
 
-  z_bar << atan2f(mu_bar(2),mu_bar(0)),10.0*sqrt(mu_bar(0)*mu_bar(0) + mu_bar(2)*mu_bar(2)); // Nonlinear case: bearing and distance measurements
+  // Nonlinear bearing and distance measurement for EKF
+  z_bar << atan2f(mu_bar(2),mu_bar(0)),10.0*sqrt(mu_bar(0)*mu_bar(0) + mu_bar(2)*mu_bar(2));
 }
