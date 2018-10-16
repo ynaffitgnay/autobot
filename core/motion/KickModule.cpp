@@ -22,7 +22,7 @@ void KickModule::initSpecificModule() {
   // to load the kick on demand. Since kicks load quickly and happen
   // relatively infrequently this should not add too much overhead to the kick
   // behavior.
-  auto file = cache_.memory->data_path_ + "/kicks/test_kick.yaml";
+  auto file = cache_.memory->data_path_ + "/kicks/default.yaml";
   sequence_ = new KeyframeSequence();
   printf("Loading kick sequence from '%s'...", file.c_str());
   fflush(stdout);
@@ -43,7 +43,7 @@ void KickModule::start() {
   cache_.kick_request->kick_running_ = true;
   keyframe_ = 0;
   frames_ = 0;
-  auto file = cache_.memory->data_path_ + "/kicks/test_kick.yaml";
+  auto file = cache_.memory->data_path_ + "/kicks/default.yaml";
   #ifdef HACK
   sequence_ = new KeyframeSequence();
   printf("Loading kick sequence from '%s'...", file.c_str());
@@ -110,7 +110,7 @@ void KickModule::processFrame() {
 
 
 void KickModule::initStiffness() {
-  // std::cout << "init stiffness!" << std::endl;
+
   for (int i=0; i < NUM_JOINTS; i++)
     cache_.joint_command->stiffness_[i] = 1.0;
   cache_.joint_command->send_stiffness_ = true;
