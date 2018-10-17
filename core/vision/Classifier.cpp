@@ -103,7 +103,7 @@ void Classifier::makeBlobs(std::vector<Blob>& blobs) {
   for (int i = 0; i < parents.size(); ++i)
   {
     // Allow smaller orange blobs (for small, far away balls)
-    if ((parents.at(i).front()->color != c_ORANGE && parents.at(i).size() < 8) || parents.at(i).size() < 3)
+    if ((parents.at(i).front()->color != c_ORANGE && parents.at(i).size() < 5) || parents.at(i).size() < 3)
     {
       continue;
     }

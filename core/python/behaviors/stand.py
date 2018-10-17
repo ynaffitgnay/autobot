@@ -15,7 +15,7 @@ from state_machine import Node, C, T, StateMachine
 class Playing(StateMachine):
     class Stand(Node):
         def run(self):
-            commands.setHeadPanTilt(0.0,-45.0,1.0)
+            commands.setHeadPanTilt(0.0,-15.0,1.0)
             commands.stand()
             ball = memory.world_objects.getObjPtr(core.WO_BALL)
             print("ball bearing: %.3f\n" % ball.visionBearing)
