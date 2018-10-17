@@ -1,9 +1,13 @@
+#ifndef PARTICLE_FILTER_H
+#define PARTICLE_FILTER_H
+
 #pragma once
 
 #include <math/Pose2D.h>
 #include <memory/MemoryCache.h>
 #include <memory/LocalizationBlock.h>
 #include <localization/Logging.h>
+#include <memory/WorldObjectBlock.h>
 
 class ParticleFilter {
   public:
@@ -14,6 +18,13 @@ class ParticleFilter {
     inline const std::vector<Particle>& particles() const {
       return cache_.localization_mem->particles;
     }
+    std::map<WorldObjectType,Pose2D> beacons_ = {
+    { WO_BEACON_YELLOW_BLUE, Pose2D(1500.0,1000.0,0.0) },
+    { WO_BEACON_BLUE_YELLOW, Pose2D(1500.0,1000.0,0.0) },
+    { WO_BEACON_YELLOW_PINK, Pose2D(1500.0,1000.0,0.0) },
+    { WO_BEACON_PINK_YELLOW, Pose2D(1500.0,1000.0,0.0) },
+    { WO_BEACON_BLUE_PINK, Pose2D(1500.0,1000.0,0.0) },
+    { WO_BEACON_PINK_BLUE, Pose2D(1500.0,1000.0,0.0) }};
 
   protected:
     inline std::vector<Particle>& particles() {
@@ -26,4 +37,8 @@ class ParticleFilter {
 
     mutable Pose2D mean_;
     mutable bool dirty_;
+    void propagationStep(Pose2D& disp);
+    void updateStep();
 };
+
+#endif
