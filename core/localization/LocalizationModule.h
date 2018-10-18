@@ -9,6 +9,7 @@
 
 class ParticleFilter;
 class Point2D;
+
 struct BallLoc {
     MatrixQf Q;
     MatrixAGf A;

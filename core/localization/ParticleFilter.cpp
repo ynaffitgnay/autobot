@@ -4,23 +4,40 @@
 #include <common/Random.h>
 
 ParticleFilter::ParticleFilter(MemoryCache& cache, TextLogger*& tlogger) 
-  : cache_(cache), tlogger_(tlogger), dirty_(true) {
+  : cache_(cache), tlogger_(tlogger), dirty_(true), kmeans_(new KMeans(cache, tlogger, 4)) {
+}
+
+ParticleFilter::~ParticleFilter() {
+  delete kmeans_;
 }
 
 void ParticleFilter::init(Point2D loc, float orientation) {
   mean_.translation = loc;
   mean_.rotation = orientation;
 
-  // Generate random particles for demonstration
   particles().resize(100);
   auto frame = cache_.frame_info->frame_id;
   for(auto& p : particles()) {
-    p.x = Random::inst().sampleU(-2000.0,2000.0); //static_cast<int>(frame * 5), 250);
-    p.y = Random::inst().sampleU(-1550.0,1550.0); // 0., 250);
-    p.t = Random::inst().sampleU(0.0, 2*M_PI);  //0., M_PI / 4);
+    p.x = Random::inst().sampleU(-2500.0,2500.0);
+    p.y = Random::inst().sampleU(-1250.0,1250.0);
+    p.t = Random::inst().sampleU(0.0, 2*M_PI);  
     p.w = Random::inst().sampleU();
   }
 }
+
+void ParticleFilter::reset(Point2D loc, float orientation) {
+  mean_.translation = loc;
+  mean_.rotation = orientation;
+
+  auto frame = cache_.frame_info->frame_id;
+  for(auto& p : particles()) {
+    p.x = Random::inst().sampleU(-2500.0,2500.0);
+    p.y = Random::inst().sampleU(-1250.0,1250.0);
+    p.t = Random::inst().sampleU(0.0, 2*M_PI);  
+    p.w = Random::inst().sampleU();
+  }
+}
+
 
 void ParticleFilter::processFrame() {
   // Indicate that the cached mean needs to be updated
@@ -37,6 +54,9 @@ void ParticleFilter::processFrame() {
 
   // // Check if resample
   // resampleStep();
+
+  // Call k means on particles
+  
 
 }
 

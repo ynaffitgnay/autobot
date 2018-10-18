@@ -6,13 +6,16 @@
 #include <math/Pose2D.h>
 #include <memory/MemoryCache.h>
 #include <memory/LocalizationBlock.h>
-#include <localization/Logging.h>
 #include <memory/WorldObjectBlock.h>
+#include <localization/Logging.h>
+#include <localization/KMeans.h>
 
 class ParticleFilter {
   public:
     ParticleFilter(MemoryCache& cache, TextLogger*& tlogger);
+    ~ParticleFilter();
     void init(Point2D loc, float orientation);
+    void reset(Point2D loc, float orientation);
     void processFrame();
     const Pose2D& pose() const;
     inline const std::vector<Particle>& particles() const {
@@ -34,6 +37,7 @@ class ParticleFilter {
   private:
     MemoryCache& cache_;
     TextLogger*& tlogger_;
+    KMeans* kmeans_;
 
     mutable Pose2D mean_;
     mutable bool dirty_;

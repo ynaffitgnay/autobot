@@ -1,3 +1,6 @@
+#ifndef PARTICLE_H
+#define PARTICLE_H
+
 #pragma once
 
 struct Particle {
@@ -7,3 +10,5 @@ struct Particle {
     t, // Theta (Orientation)
     w; // Weight
 };
+
+#endif
