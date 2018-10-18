@@ -56,6 +56,9 @@ void ParticleFilter::processFrame() {
   // resampleStep();
 
   // Call k means on particles
+  Point2D locationDummy;
+  float orientationDummy;
+  kmeans_->runKMeans(particles(), locationDummy, orientationDummy); 
   
 
 }

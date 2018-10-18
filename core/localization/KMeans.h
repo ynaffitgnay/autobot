@@ -11,8 +11,8 @@
 
 struct Cluster {
   //int id;
-  std::vector<Particle*> particles;
-  float mean;
+  std::vector<const Particle*> particles;
+  Particle centroid;
   float variance;
 };
   
@@ -25,9 +25,9 @@ class KMeans {
   private:
     MemoryCache& cache_;
     TextLogger*& tlogger_;
-    void assignParticles(std::vector<std::vector<Particle*>>& clusters);
-    void updateClusters(std::vector<std::vector<Particle*>>& clusters);
-    
+    bool reassignParticles(std::vector<Cluster>& clusters);
+    void updateClusters(std::vector<Cluster>& clusters);
+    void assignVariances(std::vector<Cluster>& clusters);
 };
   
 #endif
