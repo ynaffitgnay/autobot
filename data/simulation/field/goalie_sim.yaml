@@ -22,58 +22,58 @@ objects:
   bconfig:
     placements_:
       0:
-        x: 947.22
-        y: 941.425
+        x: 875.996
+        y: -255.515
         orientation: 0
         height: 0
       1:
-        x: 139.592
-        y: -709.231
-        orientation: 174
+        x: 758.832
+        y: 108.771
+        orientation: -78
         height: 0
       2:
-        x: 791.631
-        y: -1333
+        x: 26.4465
+        y: 913
         orientation: 0
         height: 0
       3:
-        x: 82.8164
-        y: 1102
+        x: 577.541
+        y: -1303
         orientation: 0
         height: 0
       4:
-        x: 835.093
-        y: 1139
+        x: 300.748
+        y: 1169
         orientation: 0
         height: 0
       5:
-        x: 1460.9
-        y: -1098
+        x: 1018.73
+        y: 1175
         orientation: 0
         height: 0
       6:
-        x: 138.9
-        y: 1476
+        x: 1174.9
+        y: -811
         orientation: 0
         height: 0
       7:
-        x: 143.134
-        y: -1103
+        x: 124.911
+        y: -1240
         orientation: 0
         height: 0
       8:
-        x: 1203.9
-        y: -1129
+        x: 700.071
+        y: -218
         orientation: 0
         height: 0
       9:
-        x: 968.249
-        y: -1325
+        x: 480.286
+        y: -243
         orientation: 0
         height: 0
       10:
-        x: 212.869
-        y: 214
+        x: 1434.94
+        y: -20
         orientation: 0
         height: 0
 ...
