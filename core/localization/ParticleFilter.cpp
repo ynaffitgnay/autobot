@@ -49,8 +49,8 @@ void ParticleFilter::processFrame() {
   log(41, "Updating particles from odometry: %2.f,%2.f @ %2.2f", disp.translation.x, disp.translation.y, disp.rotation * RAD_T_DEG);
   
 
-  // propagationStep();
-  // updateStep();
+  propagationStep(disp);
+  updateStep();
 
   // // Check if resample
   // resampleStep();
@@ -79,16 +79,16 @@ const Pose2D& ParticleFilter::pose() const {
   return mean_;
 }
 
-void ParticleFilter::propagationStep(Pose2D& disp){
+void ParticleFilter::propagationStep(const Pose2D& disp){
   // Equivalent to line 4 where we get proposed state based on particles and control input
   // We might need to account for noise in the disp
   for(auto& p : particles()) {
     // Get the belief
-    printf("Before propagation:\n\tp.x: %f p.y: %f p.t: %f\n",p.x,p.y,p.t);
+    // printf("Before propagation:\n\tp.x: %f p.y: %f p.t: %f\n",p.x,p.y,p.t);
     p.x += disp.translation.x;
     p.y += disp.translation.y;
     p.t += disp.rotation;
-    printf("Propposed after propagation:\n\tp.x: %f p.y: %f p.t: %f\n",p.x,p.y,p.t);
+    // printf("Propposed after propagation:\n\tp.x: %f p.y: %f p.t: %f\n",p.x,p.y,p.t);
 
     
   }
@@ -99,11 +99,11 @@ void ParticleFilter::updateStep(){
     auto& beacon_current = cache_.world_object->objects_[it->first];
     for(auto& p : particles()) {
       // Get the importance
-      printf("Before importance weighting:\n\tp.w, p.x: %f p.y: %f p.t: %f\n",p.w,p.x,p.y,p.t);
+      // printf("Before importance weighting:\n\tp.w: %f, p.x: %f p.y: %f p.t: %f\n",p.w,p.x,p.y,p.t);
       p.w *= exp(-pow(sqrt(pow(p.x - it->second.translation.x, 2) + pow(p.y - it->second.translation.y,2)) - beacon_current.visionDistance,2)/(2 * 100.0));
       // TODO: Need to check the sign and range of global orientation and the visionBearing so that they can be added
       p.w *= exp(-pow(atan2f(it->second.translation.x-p.y,it->second.translation.y-p.x) - beacon_current.visionBearing,2)/(2 * 0.2));
-      printf("After importance weighting:\n\tp.w, p.x: %f p.y: %f p.t: %f\n",p.w,p.x,p.y,p.t);
+      // printf("After importance weighting:\n\tp.w: %f, p.x: %f p.y: %f p.t: %f\n",p.w,p.x,p.y,p.t);
     }
   }
 }

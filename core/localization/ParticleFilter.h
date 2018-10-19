@@ -41,7 +41,7 @@ class ParticleFilter {
 
     mutable Pose2D mean_;
     mutable bool dirty_;
-    void propagationStep(Pose2D& disp);
+    void propagationStep(const Pose2D& disp);
     void updateStep();
 };
 
