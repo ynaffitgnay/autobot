@@ -15,7 +15,8 @@ void ParticleFilter::init(Point2D loc, float orientation) {
   mean_.translation = loc;
   mean_.rotation = orientation;
 
-  particles().resize(100);
+  int M = 800;  // Number of particles
+  particles().resize(M);
   auto frame = cache_.frame_info->frame_id;
   for(auto& p : particles()) {
     p.x = Random::inst().sampleU(-2500.0,2500.0);
@@ -53,14 +54,12 @@ void ParticleFilter::processFrame() {
   updateStep();
 
   // // Check if resample
-  // resampleStep();
+  particles() = resampleStep();
 
-  // Call k means on particles
-  Point2D locationDummy;
-  float orientationDummy;
-  kmeans_->runKMeans(particles(), locationDummy, orientationDummy); 
-  
-
+  // // Call k means on particles
+  // Point2D locationDummy;
+  // float orientationDummy;
+  // kmeans_->runKMeans(particles(), locationDummy, orientationDummy); 
 }
 
 const Pose2D& ParticleFilter::pose() const {
@@ -89,21 +88,63 @@ void ParticleFilter::propagationStep(const Pose2D& disp){
     p.y += disp.translation.y;
     p.t += disp.rotation;
     // printf("Propposed after propagation:\n\tp.x: %f p.y: %f p.t: %f\n",p.x,p.y,p.t);
-
-    
   }
 }
 
 void ParticleFilter::updateStep(){
-  for(std::map<WorldObjectType,Pose2D>::iterator it=beacons_.begin(); it!=beacons_.end(); ++it){
-    auto& beacon_current = cache_.world_object->objects_[it->first];
-    for(auto& p : particles()) {
-      // Get the importance
+  float weights_sum = 0.0;;
+  for(auto& p : particles()) {
+    for(std::map<WorldObjectType,Pose2D>::iterator it=beacons_.begin(); it!=beacons_.end(); ++it){
+      auto& beacon_current = cache_.world_object->objects_[it->first];
       // printf("Before importance weighting:\n\tp.w: %f, p.x: %f p.y: %f p.t: %f\n",p.w,p.x,p.y,p.t);
-      p.w *= exp(-pow(sqrt(pow(p.x - it->second.translation.x, 2) + pow(p.y - it->second.translation.y,2)) - beacon_current.visionDistance,2)/(2 * 100.0));
+      p.w *= exp(-pow(sqrt(pow(p.x - it->second.translation.x, 2) + pow(p.y - it->second.translation.y,2)) - beacon_current.visionDistance,2)/(2 * 100.0))/sqrt(2*M_PI*100.0*100.0);
       // TODO: Need to check the sign and range of global orientation and the visionBearing so that they can be added
-      p.w *= exp(-pow(atan2f(it->second.translation.x-p.y,it->second.translation.y-p.x) - beacon_current.visionBearing,2)/(2 * 0.2));
+      p.w *= exp(-pow(atan2f(it->second.translation.x-p.y,it->second.translation.y-p.x) - beacon_current.visionBearing,2)/(2 * 0.2))/sqrt(2*M_PI*0.2*0.2);
       // printf("After importance weighting:\n\tp.w: %f, p.x: %f p.y: %f p.t: %f\n",p.w,p.x,p.y,p.t);
     }
+    weights_sum += p.w;
+  }
+  for(auto& p : particles()){
+    p.w /= weights_sum;
   }
 }
+
+bool ParticleFilter::checkResample(){
+  float sum_weights_squared = 0.0;
+  for(auto& p : particles()) {
+    sum_weights_squared += p.w*p.w;
+  }
+  float N_eff = 1/sum_weights_squared;
+  return N_eff < particles().size()/2.0;
+}
+
+std::vector<Particle> ParticleFilter::resampleStep(){
+  int M = particles().size();
+  std::vector<Particle> resampled_particles;
+  float r = Random::inst().sampleU(0.0, 1.0)/M;
+  float c = particles()[0].w;
+  float u;
+  int i = 0;
+  for(int m = 0; m < M; m++){
+    u = r + (m-1)/M;
+    while(u > c){
+      i++;
+      c += particles()[i].w;
+    }
+    particles().at(i).w = 1/M;
+    resampled_particles.push_back(particles().at(i));
+  }
+  return resampled_particles;
+}
+
+// function i=sysresample(q)
+// qc=cumsum(q); M=length(q);
+// u=([0:M-1]+rand(1))/M;
+// i=zeros(0,M); k=1;
+// for j=0:M
+//   while (qc(k)<u(j))
+//     k=k+1;
+//   end
+//   i(j)=k;
+// end
+// end

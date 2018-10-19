@@ -43,6 +43,8 @@ class ParticleFilter {
     mutable bool dirty_;
     void propagationStep(const Pose2D& disp);
     void updateStep();
+    bool checkResample();
+    std::vector<Particle> resampleStep();
 };
 
 #endif
