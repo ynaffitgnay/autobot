@@ -4,6 +4,7 @@
 #include <float.h>
 #include <stdio.h>
 #include <cmath>
+#include <Eigen/LU>
 
 KMeans::KMeans(MemoryCache& cache, TextLogger*& tlogger, int k)
   : cache_(cache), tlogger_(tlogger), k_(k) {
@@ -162,5 +163,23 @@ void KMeans::updateClusters(std::vector<Cluster>& clusters) {
 
 void KMeans::assignVariances(std::vector<Cluster>& clusters) {
   // calculate the variance for each cluster
+  typedef Eigen::Matrix<float,3,3> Matrix3f;
+
+  for (int clusterIdx = 0; clusterIdx < k_; ++clusterIdx) {
+    Matrix3f covarianceMat = Matrix3f::Zero(); // new covariance matrix for each cluster
+    std::vector<float> mean = {clusters.at(clusterIdx).centroid.x, clusters.at(clusterIdx).centroid.y, clusters.at(clusterIdx).centroid.t};
+    for (int i = 0; i < 3; ++i) {
+      for (int j = 0; j < 3; ++j) {
+        std::vector<const Particle*>::const_iterator it;
+        for (it = clusters.at(clusterIdx).particles.begin(); it != clusters.at(clusterIdx).particles.end(); ++it) {
+          std::vector<float> particle = {(*it)->x,(*it)->y,(*it)->t};
+          covarianceMat(i,j) += ((particle[i] - mean[i]) * (particle[j] - mean[j]));
+        }
+        covarianceMat(i,j) /= (clusters.at(clusterIdx).particles.size() - 1);
+      }
+    }
+    // Now calculate the determinant
+    clusters.at(clusterIdx).variance = covarianceMat.determinant();
+  }
   
 }
