@@ -93,6 +93,7 @@ void LocalizationModule::initFromMemory() {
 void LocalizationModule::initFromWorld() {
   reInit();
   auto& self = cache_.world_object->objects_[cache_.robot_state->WO_SELF];
+  printf("initializing particle filter");
   pfilter_->init(self.loc, self.orientation);
 }
 
