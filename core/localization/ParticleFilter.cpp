@@ -23,7 +23,7 @@ void ParticleFilter::init(Point2D loc, float orientation) {
     p.y = Random::inst().sampleU(-1250.0,1250.0);
     p.t = Random::inst().sampleU(0.0, 2*M_PI);  
     p.w = 1.0/M;
-    printf("Weight: %f\n",p.w);
+    //printf("Weight: %f\n",p.w);
   }
 }
 
@@ -59,9 +59,9 @@ void ParticleFilter::processFrame() {
   particles() = resampleStep();
 
   // // Call k means on particles
-  // Point2D locationDummy;
-  // float orientationDummy;
-  // kmeans_->runKMeans(particles(), locationDummy, orientationDummy); 
+  Point2D locationDummy;
+  float orientationDummy;
+  kmeans_->runKMeans(particles(), locationDummy, orientationDummy); 
 }
 
 const Pose2D& ParticleFilter::pose() const {
@@ -85,11 +85,11 @@ void ParticleFilter::propagationStep(const Pose2D& disp){
   // We might need to account for noise in the disp
   for(auto& p : particles()) {
     // Get the belief
-    printf("Before propagation:\n\tParticles Size: %d p.w: %f p.x: %f p.y: %f p.t: %f\n",particles().size(), p.w, p.x,p.y,p.t);
+    //printf("Before propagation:\n\tParticles Size: %d p.w: %f p.x: %f p.y: %f p.t: %f\n",particles().size(), p.w, p.x,p.y,p.t);
     p.x += disp.translation.x;
     p.y += disp.translation.y;
     p.t += disp.rotation;
-    printf("Propposed after propagation:\n\tParticles Size: %d p.w: %f p.x: %f p.y: %f p.t: %f\n",particles().size(), p.w, p.x,p.y,p.t);
+    //printf("Propposed after propagation:\n\tParticles Size: %d p.w: %f p.x: %f p.y: %f p.t: %f\n",particles().size(), p.w, p.x,p.y,p.t);
   }
 }
 
@@ -98,8 +98,8 @@ void ParticleFilter::updateStep(){
   for(auto& p : particles()) {
     for(std::map<WorldObjectType,Pose2D>::iterator it=beacons_.begin(); it!=beacons_.end(); ++it){
       auto& beacon_current = cache_.world_object->objects_[it->first];
-      printf("\nBeacon: %s\n", getName(it->first));
-      printf("Before importance weighting:\n\tp.w: %f, p.x: %f p.y: %f p.t: %f\n",p.w,p.x,p.y,p.t);
+      //printf("\nBeacon: %s\n", getName(it->first));
+      //printf("Before importance weighting:\n\tp.w: %f, p.x: %f p.y: %f p.t: %f\n",p.w,p.x,p.y,p.t);
       p.w *= exp(-pow(sqrt(pow(p.x - it->second.translation.x, 2) + pow(p.y - it->second.translation.y,2)) - beacon_current.visionDistance,2)/(2 * 100.0))/sqrt(2*M_PI*100.0*100.0);
       // TODO: Need to check the sign and range of global orientation and the visionBearing so that they can be added
       p.w *= exp(-pow(atan2f(it->second.translation.x-p.y,it->second.translation.y-p.x) - beacon_current.visionBearing,2)/(2 * 0.2))/sqrt(2*M_PI*0.2*0.2);
@@ -108,7 +108,7 @@ void ParticleFilter::updateStep(){
   }
   for(auto& p : particles()){
     p.w /= weights_sum;
-    printf("After importance weighting:\n\tp.w: %f, p.x: %f p.y: %f p.t: %f\n",p.w,p.x,p.y,p.t);
+    //printf("After importance weighting:\n\tp.w: %f, p.x: %f p.y: %f p.t: %f\n",p.w,p.x,p.y,p.t);
   }
 }
 
