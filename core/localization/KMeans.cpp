@@ -10,7 +10,7 @@ KMeans::KMeans(MemoryCache& cache, TextLogger*& tlogger, int k)
   : cache_(cache), tlogger_(tlogger), k_(k) {
 }
 
-void KMeans::runKMeans(const std::vector<Particle>& observations, Point2D& loc, float& orientation) {
+Pose2D KMeans::runKMeans(const std::vector<Particle>& observations) {
   std::set<int> indices;
   std::vector<Cluster> clusters;
 
@@ -29,10 +29,6 @@ void KMeans::runKMeans(const std::vector<Particle>& observations, Point2D& loc, 
     }
 
     indices.insert(randIdx);
-  }
-
-  for (auto& index : indices) {
-    std::cout << "Index: " << index << std::endl;
   }
 
   for (const int& index : indices) {
@@ -97,10 +93,14 @@ void KMeans::runKMeans(const std::vector<Particle>& observations, Point2D& loc, 
       bestCluster = &cluster;
     }
   }
+  
+  Pose2D clusterLoc = Pose2D();
 
-  loc.x = bestCluster->centroid.x;
-  loc.y = bestCluster->centroid.y;
-  orientation = bestCluster->centroid.t;
+  clusterLoc.translation.x = bestCluster->centroid.x;
+  clusterLoc.translation.y = bestCluster->centroid.y;
+  clusterLoc.rotation = bestCluster->centroid.t;
+
+  return clusterLoc;
 }
 
 // Return false if no particles reassigned!

@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <math/Geometry.h>
+#include <math/Pose2D.h>
 #include <memory/MemoryCache.h>
 #include <memory/LocalizationBlock.h>
 #include <localization/Logging.h>
@@ -20,7 +21,7 @@ class KMeans {
   public:
     KMeans(MemoryCache& cache, TextLogger*& tlogger, int k);
     int k_;
-    void runKMeans(const std::vector<Particle>& observations, Point2D& loc, float& orientation);
+    Pose2D runKMeans(const std::vector<Particle>& observations);
 
   private:
     MemoryCache& cache_;
