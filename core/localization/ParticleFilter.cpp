@@ -128,24 +128,29 @@ void ParticleFilter::updateStep(){
         // printf("Before importance weighting:\n\tp.w: %f, p.x: %f p.y: %f p.t: %f\n",p.w,p.x,p.y,p.t);
         double mean_dist = beacon_current.visionDistance;
         double var_dist = (mean_dist/10.0)*(mean_dist/10.0);
-        p.w *= exp(-pow(part_dist-mean_dist,2)/(2 * var_dist))/sqrt(2*M_PI*var_dist);
+        double dist_weight = exp(-pow(part_dist-mean_dist,2)/(2 * var_dist))/sqrt(2*M_PI*var_dist);
         // printf("After importance calc 1:\n\tp.w: %f, p.x: %f p.y: %f p.t: %f\n",p.w,p.x,p.y,p.t);
         // TODO: Need to check the sign and range of global orientation and the visionBearing so that they can be added
         double part_global_bearing = p.t;  //alpha
         // printf("Part Global Bearing: %f p.t: %f\n", part_global_bearing,p.t);
         double part_beacon_sep = atan2f(it->second.translation.y-p.y,it->second.translation.x-p.x);  // beta
         // double beacon_bear = atan2f(it->second.translation.y,it->second.translation.x);  // beta        
-        // double mean_bear = beacon_current.visionBearing;  //theta
+        double mean_bear = beacon_current.visionBearing;  //theta
         double x_bear = part_beacon_sep - part_global_bearing;  //phi
         // printf("Beta: %f Alpha: %f\n", part_beacon_sep,part_global_bearing);
-        // double var_bear = 0.5*0.5;
+        double var_bear = 0.1*0.1;
         // double bear_weight = (exp(-pow(x_bear-mean_bear,2)/(2 * var_bear))/sqrt(2*M_PI*var_bear));
         // printf("Particle Bearing: %f Vision Bearing: %f\n",x_bear,mean_bear);
         // printf("After importance calc 2:\n\tp.w: %f, p.x: %f p.y: %f p.t: %f\n",p.w,p.x,p.y,p.t);
-        // p.w *= dist_weight * (0.05 + bear_weight);
+        double bear_weight;
         if (x_bear > M_PI/2.0 || x_bear < -M_PI/2.0) {
           p.t = -p.t;
+          bear_weight = (exp(-pow(x_bear-mean_bear,2)/(2 * var_bear))/sqrt(2*M_PI*var_bear))*0.1;
+        } else {
+          bear_weight = (exp(-pow(x_bear-mean_bear,2)/(2 * var_bear))/sqrt(2*M_PI*var_bear));
         }
+        p.w *= dist_weight * (0.1 + bear_weight);
+
       }
     }
     weights_sum += p.w;
