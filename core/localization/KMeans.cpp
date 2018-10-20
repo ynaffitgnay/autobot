@@ -89,7 +89,7 @@ Pose2D KMeans::runKMeans(const std::vector<Particle>& observations) {
 
   const Cluster* bestCluster;
   for (const Cluster& cluster : clusters) {
-    if (cluster.variance < minVariance && cluster.particles.size() > (0.1 * (float)numObs)) {
+    if (cluster.variance < minVariance && cluster.particles.size() > (0.2 * (float)numObs)) {
       bestCluster = &cluster;
     }
   }
@@ -155,7 +155,7 @@ void KMeans::updateClusters(std::vector<Cluster>& clusters) {
     numParticles = cluster.particles.size();
 
     if (!numParticles) {
-      std::cout << "AHHH !! No particles in this cluster??\n";
+      std::cout << "AHHH !! No particles in this cluster??\n\n\n\n\n\n";
       //exit(1);
       continue;
     }
