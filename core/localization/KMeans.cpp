@@ -31,6 +31,10 @@ void KMeans::runKMeans(const std::vector<Particle>& observations, Point2D& loc, 
     indices.insert(randIdx);
   }
 
+  for (auto& index : indices) {
+    std::cout << "Index: " << index << std::endl;
+  }
+
   for (const int& index : indices) {
     Cluster newCluster;
     newCluster.centroid.x = observations.at(index).x;
@@ -40,6 +44,7 @@ void KMeans::runKMeans(const std::vector<Particle>& observations, Point2D& loc, 
     clusters.push_back(newCluster);
   }
 
+  //int count = 0;
   // Now determine the initial cluster each particle should go into
   for (const Particle& particle : observations) {
     float minMeansSquared = FLT_MAX;
@@ -47,6 +52,11 @@ void KMeans::runKMeans(const std::vector<Particle>& observations, Point2D& loc, 
 
     for (int i = 0; i < k_; ++i) {
       float meansSquared = 0;
+
+      //std::cout << "particle.x: " << particle.x << " clusters.at(i).centroid.x: " <<
+      //  clusters.at(i).centroid.x << " (particle.x - clusters.at(i).centroid.x): " <<
+      //  (particle.x - clusters.at(i).centroid.x) << " pow((particle.x - clusters.at(i).centroid.x), 2): " <<
+      //  pow((particle.x - clusters.at(i).centroid.x), 2) << std::endl;
       
       meansSquared += pow((particle.x - clusters.at(i).centroid.x), 2);
       meansSquared += pow((particle.y - clusters.at(i).centroid.y), 2);
@@ -56,10 +66,14 @@ void KMeans::runKMeans(const std::vector<Particle>& observations, Point2D& loc, 
         minMeansSquared = meansSquared;
         minCluster = i;
       }
+
+      //std::cout << "meansSquared of cluster " << i << " is " << meansSquared << std::endl;
     }
+
+    //std::cout << "minCluster of particle " << count++ << " is " << minCluster << "\n\n\n" << std::endl;
     
     if (minCluster == -1) {
-        std::cout << "AAAAAAHHH THIS SHOULDN'T HAPPEN\n";
+        std::cout << "AAAAAAHHH THIS SHOULDN'T HAPPEN (particle not assigned to any cluster)\n";
         exit(1);
     }
 
@@ -142,7 +156,8 @@ void KMeans::updateClusters(std::vector<Cluster>& clusters) {
 
     if (!numParticles) {
       std::cout << "AHHH !! No particles in this cluster??\n";
-      exit(1);
+      //exit(1);
+      continue;
     }
     
     totalX = 0;
@@ -168,6 +183,14 @@ void KMeans::assignVariances(std::vector<Cluster>& clusters) {
   for (int clusterIdx = 0; clusterIdx < k_; ++clusterIdx) {
     Matrix3f covarianceMat = Matrix3f::Zero(); // new covariance matrix for each cluster
     std::vector<float> mean = {clusters.at(clusterIdx).centroid.x, clusters.at(clusterIdx).centroid.y, clusters.at(clusterIdx).centroid.t};
+
+    // Assign maximum variance to empty clusters
+    if (!clusters.at(clusterIdx).particles.size()) {
+      std::cout << "No particles in this cluster!\n";
+      clusters.at(clusterIdx).variance = FLT_MAX;
+      continue;
+    }
+    
     for (int i = 0; i < 3; ++i) {
       for (int j = 0; j < 3; ++j) {
         std::vector<const Particle*>::const_iterator it;

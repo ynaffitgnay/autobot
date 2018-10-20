@@ -23,7 +23,6 @@ void ParticleFilter::init(Point2D loc, float orientation) {
     p.y = Random::inst().sampleU(-1250.0,1250.0);
     p.t = Random::inst().sampleU(0.0, 2*M_PI);  
     p.w = 1.0/M;
-    // printf("Weight: %f\n",p.w);
   }
 }
 
@@ -59,9 +58,10 @@ void ParticleFilter::processFrame() {
   particles() = resampleStep();
 
   // // Call k means on particles
-  // Point2D locationDummy;
-  // double orientationDummy;
-  // kmeans_->runKMeans(particles(), locationDummy, orientationDummy); 
+
+  Point2D locationDummy;
+  float orientationDummy;
+  kmeans_->runKMeans(particles(), locationDummy, orientationDummy); 
 }
 
 const Pose2D& ParticleFilter::pose() const {
@@ -97,6 +97,7 @@ void ParticleFilter::propagationStep(const Pose2D& disp){
     p.y += y_shift;
     p.t += theta_shift;
     printf("Propposed after propagation:\n\tParticles Size: %d p.w: %f p.x: %f p.y: %f p.t: %f\n",particles().size(), p.w, p.x,p.y,p.t);
+
   }
 }
 
