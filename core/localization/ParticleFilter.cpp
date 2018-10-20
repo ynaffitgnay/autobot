@@ -15,7 +15,7 @@ void ParticleFilter::init(Point2D loc, float orientation) {
   mean_.translation = loc;
   mean_.rotation = orientation;
 
-  int M = 100;  // Number of particles
+  int M = 200;  // Number of particles
   particles().resize(M);
   auto frame = cache_.frame_info->frame_id;
   for(auto& p : particles()) {
@@ -29,7 +29,7 @@ void ParticleFilter::init(Point2D loc, float orientation) {
 void ParticleFilter::reset(Point2D loc, float orientation) {
   mean_.translation = loc;
   mean_.rotation = orientation;
-  int M = 100;  // Number of particles
+  int M = 200;  // Number of particles
   auto frame = cache_.frame_info->frame_id;
   for(auto& p : particles()) {
     p.x = Random::inst().sampleU(-2500.0,2500.0);
@@ -68,8 +68,10 @@ const Pose2D& ParticleFilter::pose() const {
   if(dirty_) {
     // Compute the mean pose estimate
     mean_ = Pose2D();
+    // printf("Getting mean\n");
     using T = decltype(mean_.translation);
     for(const auto& p : particles()) {
+      // printf("\tAdding particle at [%f,%f,%f] with weight: %f\n", p.x,p.y,p.t,p.w);
       mean_.translation += T(p.x,p.y);
       mean_.rotation += p.t;
     }
@@ -87,16 +89,16 @@ void ParticleFilter::propagationStep(const Pose2D& disp){
     // Get the belief
     float stdevX = 20.0;
     float stdevY = 20.0;
-    float stdevTh = 0.2;
+    float stdevTh = 0.05;
     float x_shift = Random::inst().sampleN(disp.translation.x, stdevX);
     float y_shift = Random::inst().sampleN(disp.translation.y, stdevY);
     float theta_shift = Random::inst().sampleN(disp.rotation, stdevTh);
-    printf("Disp mean: [%f,%f,%f] Disp dist result: [%f,%f,%f]\n",disp.translation.x,disp.translation.y,disp.rotation,x_shift,y_shift,theta_shift);
-    printf("Before propagation:\n\tParticles Size: %d p.w: %f p.x: %f p.y: %f p.t: %f\n",particles().size(), p.w, p.x,p.y,p.t);
-    p.x += x_shift;
-    p.y += y_shift;
-    p.t += theta_shift;
-    printf("Propposed after propagation:\n\tParticles Size: %d p.w: %f p.x: %f p.y: %f p.t: %f\n",particles().size(), p.w, p.x,p.y,p.t);
+    // printf("Disp mean: [%f,%f,%f] Disp dist result: [%f,%f,%f]\n",disp.translation.x,disp.translation.y,disp.rotation,x_shift,y_shift,theta_shift);
+    // printf("Before propagation:\n\tParticles Size: %d p.w: %f p.x: %f p.y: %f p.t: %f\n",particles().size(), p.w, p.x,p.y,p.t);
+    p.x += x_shift+(disp.translation.x)*cos(p.t)+(disp.translation.y)*(cos(p.t+(M_PI/2.0)));
+    p.y += y_shift+(disp.translation.x)*sin(p.t)+(disp.translation.y)*(sin(p.t+(M_PI/2.0)));
+    p.t += theta_shift+disp.rotation;
+    // printf("Proposed after propagation:\n\tParticles Size: %d p.w: %f p.x: %f p.y: %f p.t: %f\n",particles().size(), p.w, p.x,p.y,p.t);
 
   }
 }
@@ -108,27 +110,35 @@ void ParticleFilter::updateStep(){
       auto& beacon_current = cache_.world_object->objects_[it->first];
       if (beacon_current.seen) {
         double part_dist = sqrt(pow(p.x - it->second.translation.x, 2) + pow(p.y - it->second.translation.y,2));
-        printf("\nBeacon: %s Particle Distance: %f Vision Distance: %f\n", getName(it->first),part_dist,beacon_current.visionDistance);
-        printf("Before importance weighting:\n\tp.w: %f, p.x: %f p.y: %f p.t: %f\n",p.w,p.x,p.y,p.t);
+        // printf("\nBeacon: %s Particle Distance: %f Vision Distance: %f\n", getName(it->first),part_dist,beacon_current.visionDistance);
+        // printf("X squared: %f Y squared: %f\n", pow(p.x-it->second.translation.x,2),pow(p.y-it->second.translation.y,2));
+        // printf("X part: %f Beacon x: %f Y part: %f, Beacon y: %f\n",p.x,it->second.translation.x, p.y, it->second.translation.y);
+        // printf("Before importance weighting:\n\tp.w: %f, p.x: %f p.y: %f p.t: %f\n",p.w,p.x,p.y,p.t);
         double mean_dist = beacon_current.visionDistance;
         double var_dist = (mean_dist/10.0)*(mean_dist/10.0);
         p.w *= exp(-pow(part_dist-mean_dist,2)/(2 * var_dist))/sqrt(2*M_PI*var_dist);
-        printf("After importance calc 1:\n\tp.w: %f, p.x: %f p.y: %f p.t: %f\n",p.w,p.x,p.y,p.t);
+        // printf("After importance calc 1:\n\tp.w: %f, p.x: %f p.y: %f p.t: %f\n",p.w,p.x,p.y,p.t);
         // TODO: Need to check the sign and range of global orientation and the visionBearing so that they can be added
-        double part_bear = atan2f(it->second.translation.x-p.y,it->second.translation.y-p.x);
-        double mean_bear = beacon_current.visionBearing;
-        double var_bear = 0.3*0.3;
-        p.w *= exp(-pow(part_bear-mean_bear,2)/(2 * var_bear))/sqrt(2*M_PI*var_bear);
-        printf("Particle Bearing: %f Vision Bearing: %f\n", getName(it->first),part_bear,mean_bear);
-        printf("After importance calc 2:\n\tp.w: %f, p.x: %f p.y: %f p.t: %f\n",p.w,p.x,p.y,p.t);
+        // double part_global_bearing = p.t;  //alpha
+        // printf("Part Global Bearing: %f p.t: %f\n", part_global_bearing,p.t);
+        // double part_beacon_sep = atan2f(it->second.translation.y-p.y,it->second.translation.x-p.x);  // beta
+        // double beacon_bear = atan2f(it->second.translation.y,it->second.translation.x);  // beta        
+        // double mean_bear = beacon_current.visionBearing;  //theta
+        // double x_bear = part_beacon_sep - part_global_bearing;  //phi
+        // printf("Beta: %f Alpha: %f\n", part_beacon_sep,part_global_bearing);
+        // double var_bear = 0.5*0.5;
+        // double bear_weight = (exp(-pow(x_bear-mean_bear,2)/(2 * var_bear))/sqrt(2*M_PI*var_bear));
+        // printf("Particle Bearing: %f Vision Bearing: %f\n",x_bear,mean_bear);
+        // printf("After importance calc 2:\n\tp.w: %f, p.x: %f p.y: %f p.t: %f\n",p.w,p.x,p.y,p.t);
+        // p.w *= dist_weight * (0.05 + bear_weight);
       }
     }
     weights_sum += p.w;
-    printf("Sum: %f\n", weights_sum);
+    // printf("Sum: %f\n", weights_sum);
   }
   for(auto& p : particles()){
     p.w /= weights_sum;
-    printf("After re-weighting:\n\tWeight sum: %f p.w: %f, p.x: %f p.y: %f p.t: %f\n",weights_sum, p.w,p.x,p.y,p.t);
+    // printf("After re-weighting:\n\tWeight sum: %f p.w: %f, p.x: %f p.y: %f p.t: %f\n",weights_sum, p.w,p.x,p.y,p.t);
   }
 }
 
@@ -150,7 +160,7 @@ std::vector<Particle> ParticleFilter::resampleStep(){
   int i = 0;
   for(int m = 0; m < M; m++){
     u = r + (double(m)-1.0)/double(M);
-    printf("U: %f R: %f m: %d i: %d c: %f\n",u,r,m,i,c);
+    // printf("U: %f R: %f m: %d i: %d c: %f\n",u,r,m,i,c);
     while(u > c){
       i++;
       c += particles()[i].w;
