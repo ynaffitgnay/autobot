@@ -59,25 +59,37 @@ void ParticleFilter::processFrame() {
 
   // // Call k means on particles
 
-  Point2D locationDummy;
-  float orientationDummy;
-  kmeans_->runKMeans(particles(), locationDummy, orientationDummy); 
+  // Point2D locationDummy;
+  // float orientationDummy;
+  // kmeans_->runKMeans(particles(), locationDummy, orientationDummy); 
 }
 
 const Pose2D& ParticleFilter::pose() const {
   if(dirty_) {
-    // Compute the mean pose estimate
-    mean_ = Pose2D();
-    // printf("Getting mean\n");
-    using T = decltype(mean_.translation);
-    for(const auto& p : particles()) {
-      // printf("\tAdding particle at [%f,%f,%f] with weight: %f\n", p.x,p.y,p.t,p.w);
-      mean_.translation += T(p.x,p.y);
-      mean_.rotation += p.t;
-    }
-    if(particles().size() > 0)
-      mean_ /= static_cast<double>(particles().size());
-    dirty_ = false;
+    // // Compute the mean pose estimate
+    // double x_sum;
+    // double y_sum;
+    // double th_sum;
+    // double x_avg;
+    // double y_avg;
+    // double th_avg;
+    // // printf("Getting mean\n");
+    // using T = decltype(mean_.translation);
+    // for(const auto& p : particles()) {
+    //   // printf("\tAdding particle at [%f,%f,%f] with weight: %f\n", p.x,p.y,p.t,p.w);
+    //   x_sum += p.x;
+    //   y_sum += p.y;
+    //   th_sum += p.t;
+    // }
+    // if(particles().size() > 0) {
+    //   x_avg = x_sum/static_cast<double>(particles().size());
+    //   y_avg = y_sum/static_cast<double>(particles().size());
+    //   th_avg = th_sum/static_cast<double>(particles().size());
+    // }
+    // mean_.translation = T(x_avg,y_avg);
+    // mean_.rotation = th_avg;
+    // dirty_ = false;
+    mean_ = kmeans_->runKMeans(particles()); 
   }
   return mean_;
 }
@@ -119,18 +131,21 @@ void ParticleFilter::updateStep(){
         p.w *= exp(-pow(part_dist-mean_dist,2)/(2 * var_dist))/sqrt(2*M_PI*var_dist);
         // printf("After importance calc 1:\n\tp.w: %f, p.x: %f p.y: %f p.t: %f\n",p.w,p.x,p.y,p.t);
         // TODO: Need to check the sign and range of global orientation and the visionBearing so that they can be added
-        // double part_global_bearing = p.t;  //alpha
+        double part_global_bearing = p.t;  //alpha
         // printf("Part Global Bearing: %f p.t: %f\n", part_global_bearing,p.t);
-        // double part_beacon_sep = atan2f(it->second.translation.y-p.y,it->second.translation.x-p.x);  // beta
+        double part_beacon_sep = atan2f(it->second.translation.y-p.y,it->second.translation.x-p.x);  // beta
         // double beacon_bear = atan2f(it->second.translation.y,it->second.translation.x);  // beta        
         // double mean_bear = beacon_current.visionBearing;  //theta
-        // double x_bear = part_beacon_sep - part_global_bearing;  //phi
+        double x_bear = part_beacon_sep - part_global_bearing;  //phi
         // printf("Beta: %f Alpha: %f\n", part_beacon_sep,part_global_bearing);
         // double var_bear = 0.5*0.5;
         // double bear_weight = (exp(-pow(x_bear-mean_bear,2)/(2 * var_bear))/sqrt(2*M_PI*var_bear));
         // printf("Particle Bearing: %f Vision Bearing: %f\n",x_bear,mean_bear);
         // printf("After importance calc 2:\n\tp.w: %f, p.x: %f p.y: %f p.t: %f\n",p.w,p.x,p.y,p.t);
         // p.w *= dist_weight * (0.05 + bear_weight);
+        if (x_bear > M_PI/2.0 || x_bear < -M_PI/2.0) {
+          p.t = -p.t;
+        }
       }
     }
     weights_sum += p.w;

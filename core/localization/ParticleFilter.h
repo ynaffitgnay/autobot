@@ -17,6 +17,7 @@ class ParticleFilter {
     void init(Point2D loc, float orientation);
     void reset(Point2D loc, float orientation);
     void processFrame();
+    KMeans* kmeans_;
     const Pose2D& pose() const;
     inline const std::vector<Particle>& particles() const {
       return cache_.localization_mem->particles;
@@ -37,7 +38,6 @@ class ParticleFilter {
   private:
     MemoryCache& cache_;
     TextLogger*& tlogger_;
-    KMeans* kmeans_;
 
     mutable Pose2D mean_;
     mutable bool dirty_;
