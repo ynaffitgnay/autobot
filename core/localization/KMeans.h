@@ -19,8 +19,9 @@ struct Cluster {
   
 class KMeans {
   public:
-    KMeans(MemoryCache& cache, TextLogger*& tlogger, int k);
+    KMeans(MemoryCache& cache, TextLogger*& tlogger, int k, float threshold);
     int k_;
+    float thresholdFactor_;
     Pose2D runKMeans(const std::vector<Particle>& observations);
 
   private:

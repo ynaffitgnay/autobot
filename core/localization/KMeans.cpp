@@ -6,8 +6,8 @@
 #include <cmath>
 #include <Eigen/LU>
 
-KMeans::KMeans(MemoryCache& cache, TextLogger*& tlogger, int k)
-  : cache_(cache), tlogger_(tlogger), k_(k) {
+KMeans::KMeans(MemoryCache& cache, TextLogger*& tlogger, int k, float threshold)
+  : cache_(cache), tlogger_(tlogger), k_(k), thresholdFactor_(threshold) {
 }
 
 Pose2D KMeans::runKMeans(const std::vector<Particle>& observations) {
@@ -89,7 +89,7 @@ Pose2D KMeans::runKMeans(const std::vector<Particle>& observations) {
 
   const Cluster* bestCluster;
   for (const Cluster& cluster : clusters) {
-    if (cluster.variance < minVariance && cluster.particles.size() > ((float)numObs / 10)) {
+    if (cluster.variance < minVariance && cluster.particles.size() > ((float)numObs / thresholdFactor_)) {
       bestCluster = &cluster;
     }
   }

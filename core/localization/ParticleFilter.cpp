@@ -4,7 +4,7 @@
 #include <common/Random.h>
 
 ParticleFilter::ParticleFilter(MemoryCache& cache, TextLogger*& tlogger) 
-  : cache_(cache), tlogger_(tlogger), dirty_(true), kmeans_(new KMeans(cache, tlogger, 8)), M_(200), alpha_slow_(0.01), alpha_fast_(0.8) {
+  : cache_(cache), tlogger_(tlogger), dirty_(true), kmeans_(new KMeans(cache, tlogger, 8, 10)), M_(200), alpha_slow_(0.01), alpha_fast_(0.8) {
 }
 
 ParticleFilter::~ParticleFilter() {
@@ -25,19 +25,6 @@ void ParticleFilter::init(Point2D loc, float orientation) {
     p.w = 1.0/M_;
   }
 }
-
-void ParticleFilter::reset(Point2D loc, float orientation) {
-  mean_.translation = loc;
-  mean_.rotation = orientation;
-  auto frame = cache_.frame_info->frame_id;
-  for(auto& p : particles()) {
-    p.x = Random::inst().sampleU(-2500.0,2500.0);
-    p.y = Random::inst().sampleU(-1250.0,1250.0);
-    p.t = Random::inst().sampleU(0.0, 2*M_PI);  
-    p.w = 1.0/M_;
-  }
-}
-
 
 void ParticleFilter::processFrame() {
   // Indicate that the cached mean needs to be updated
