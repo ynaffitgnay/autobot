@@ -49,8 +49,9 @@ void ParticleFilter::processFrame() {
   // printf("X = %f\t, Y = %f\t, theta = %f\n",disp.translation.x,disp.translation.y,disp.rotation);
   log(41, "Updating particles from odometry: %2.f,%2.f @ %2.2f", disp.translation.x, disp.translation.y, disp.rotation * RAD_T_DEG);
   
-
-  propagationStep(disp);
+  if (disp.translation.x || disp.translation.y || disp.rotation) {
+    propagationStep(disp);
+  }
   updateStep();
   printf("\n\n");
 
