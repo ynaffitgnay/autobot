@@ -4,7 +4,7 @@
 #include <common/Random.h>
 
 ParticleFilter::ParticleFilter(MemoryCache& cache, TextLogger*& tlogger) 
-  : cache_(cache), tlogger_(tlogger), dirty_(true), kmeans_(new KMeans(cache, tlogger, 4)) {
+  : cache_(cache), tlogger_(tlogger), dirty_(true), kmeans_(new KMeans(cache, tlogger, 4)), M_(200), alpha_slow_(0.05), alpha_fast_(0.9) {
 }
 
 ParticleFilter::~ParticleFilter() {
@@ -14,28 +14,27 @@ ParticleFilter::~ParticleFilter() {
 void ParticleFilter::init(Point2D loc, float orientation) {
   mean_.translation = loc;
   mean_.rotation = orientation;
-
-  int M = 200;  // Number of particles
-  particles().resize(M);
+  w_slow_ = 0.0;
+  w_fast_ = 0.0;
+  particles().resize(M_);
   auto frame = cache_.frame_info->frame_id;
   for(auto& p : particles()) {
     p.x = Random::inst().sampleU(-2500.0,2500.0);
     p.y = Random::inst().sampleU(-1250.0,1250.0);
     p.t = Random::inst().sampleU(0.0, 2*M_PI);  
-    p.w = 1.0/M;
+    p.w = 1.0/M_;
   }
 }
 
 void ParticleFilter::reset(Point2D loc, float orientation) {
   mean_.translation = loc;
   mean_.rotation = orientation;
-  int M = 200;  // Number of particles
   auto frame = cache_.frame_info->frame_id;
   for(auto& p : particles()) {
     p.x = Random::inst().sampleU(-2500.0,2500.0);
     p.y = Random::inst().sampleU(-1250.0,1250.0);
     p.t = Random::inst().sampleU(0.0, 2*M_PI);  
-    p.w = 1.0/M;
+    p.w = 1.0/M_;
   }
 }
 
@@ -157,10 +156,16 @@ void ParticleFilter::updateStep(){
     weights_sum += p.w;
     // printf("Sum: %f\n", weights_sum);
   }
+  double w_avg = 0;
   for(auto& p : particles()){
     p.w /= weights_sum;
+    w_avg += p.w/(double)M_;
     // printf("After re-weighting:\n\tWeight sum: %f p.w: %f, p.x: %f p.y: %f p.t: %f\n",weights_sum, p.w,p.x,p.y,p.t);
   }
+
+  w_slow_ += alpha_slow_*(w_avg - w_slow_);
+  w_fast_ += alpha_fast_*(w_avg - w_fast_);
+
 }
 
 bool ParticleFilter::checkResample(){
@@ -173,20 +178,27 @@ bool ParticleFilter::checkResample(){
 }
 
 std::vector<Particle> ParticleFilter::resampleStep(){
-  int M = particles().size();
   std::vector<Particle> resampled_particles;
-  double r = Random::inst().sampleU(0.0, 1.0/M);
+  double r = Random::inst().sampleU(0.0, 1.0/M_);
   double c = particles()[0].w;
   double u;
+  double resample_prob = (1.0 - (w_fast_ / w_slow_ ) > 0.0) ? 1.0 - (w_fast_ / w_slow_ ) : 0;
+  printf("w_fast_: %f w_slow_: %f quotient: %f\n", w_fast_,w_slow_,w_fast_/w_slow_);
   int i = 0;
-  for(int m = 0; m < M; m++){
-    u = r + (double(m)-1.0)/double(M);
+  for(int m = 0; m < M_; m++){
+    u = r + (double(m)-1.0)/double(M_);
     // printf("U: %f R: %f m: %d i: %d c: %f\n",u,r,m,i,c);
     while(u > c){
       i++;
       c += particles()[i].w;
     }
-    particles().at(i).w = 1.0/M;
+    if(m > (1-resample_prob)*M_ - 1) {
+      printf("m: %d resample_prob: %f cast if statement value: %d\n", m, resample_prob,(int)(resample_prob*M_) - 1);
+      particles().at(i).x = Random::inst().sampleU(-2500.0,2500.0);
+      particles().at(i).y = Random::inst().sampleU(-1250.0,1250.0);
+      particles().at(i).t = Random::inst().sampleU(0.0, 2*M_PI);
+    }
+    particles().at(i).w = 1.0/M_;
     resampled_particles.push_back(particles().at(i));
   }
   return resampled_particles;

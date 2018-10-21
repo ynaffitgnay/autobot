@@ -69,7 +69,7 @@ Pose2D KMeans::runKMeans(const std::vector<Particle>& observations) {
     //std::cout << "minCluster of particle " << count++ << " is " << minCluster << "\n\n\n" << std::endl;
     
     if (minCluster == -1) {
-        std::cout << "AAAAAAHHH THIS SHOULDN'T HAPPEN (particle not assigned to any cluster)\n";
+        // std::cout << "AAAAAAHHH THIS SHOULDN'T HAPPEN (particle not assigned to any cluster)\n";
         exit(1);
     }
 
@@ -129,7 +129,7 @@ bool KMeans::reassignParticles(std::vector<Cluster>& clusters) {
       }
       
       if (minCluster == -1) {
-          std::cout << "AAAAAAHHH THIS SHOULDN'T HAPPEN\n";
+          // std::cout << "AAAAAAHHH THIS SHOULDN'T HAPPEN\n";
           exit(1);
       }
 
@@ -155,7 +155,7 @@ void KMeans::updateClusters(std::vector<Cluster>& clusters) {
     numParticles = cluster.particles.size();
 
     if (!numParticles) {
-      std::cout << "AHHH !! No particles in this cluster??\n\n\n\n\n\n";
+      // std::cout << "AHHH !! No particles in this cluster??\n\n\n\n\n\n";
       //exit(1);
       continue;
     }
@@ -186,7 +186,7 @@ void KMeans::assignVariances(std::vector<Cluster>& clusters) {
 
     // Assign maximum variance to empty clusters
     if (!clusters.at(clusterIdx).particles.size()) {
-      std::cout << "No particles in this cluster!\n";
+      // std::cout << "No particles in this cluster!\n";
       clusters.at(clusterIdx).variance = FLT_MAX;
       continue;
     }

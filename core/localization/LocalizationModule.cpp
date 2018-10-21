@@ -126,7 +126,7 @@ void LocalizationModule::processFrame() {
   self.loc = pfilter_->pose().translation;
   self.orientation = pfilter_->pose().rotation;
   log(40, "Localization Update: x=%2.f, y=%2.f, theta=%2.2f", self.loc.x, self.loc.y, self.orientation * RAD_T_DEG);
-  printf("Localization Update: x=%2.f, y=%2.f, theta=%2.2f", self.loc.x, self.loc.y, self.orientation * RAD_T_DEG);
+  // printf("Localization Update: x=%2.f, y=%2.f, theta=%2.2f", self.loc.x, self.loc.y, self.orientation * RAD_T_DEG);
 
   // Retrieve the robot's current location from localization memory
   // and store it back into world objects
