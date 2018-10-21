@@ -26,6 +26,7 @@ WorldObject::WorldObject() {
   imageCenterY=0;
   fieldLineIndex = -1;
   fromTopCamera = false;
+  localized = false;
 }
 
 WorldObject::WorldObject(WorldObjectType type) : WorldObject() {
