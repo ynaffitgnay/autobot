@@ -128,7 +128,13 @@ class GoToCenter(Node):
     self.theta_prev = bearing
     self.dist_prev = distance
     self.time_last = self.time_current
+    if abs(self.robotDist) < 50.0:
+      self.finish()
 
+class Stand(Node):
+  def run(self):
+    commands.stand()
+    commands.setHeadPanTilt(0.0,0.0,1.5)
 
 class Playing(LoopingStateMachine):
   def setup(self):
@@ -138,8 +144,11 @@ class Playing(LoopingStateMachine):
     moveHeadLeft = MoveHeadLeft()
     moveHeadRight = MoveHeadRight()
     turnInPlace = TurnInPlace()
+    stand1 = Stand()
+    stand2 = Stand()
     self.add_transition(rdy,C,moveHeadLeft,C,moveHeadRight,C,turnInPlace,C,moveHeadLeft)
     self.add_transition(moveHeadLeft,Loc(robot),goToCenter)
     self.add_transition(moveHeadRight,Loc(robot),goToCenter)
     self.add_transition(turnInPlace,Loc(robot),goToCenter)
     self.add_transition(goToCenter,NotLoc(robot),moveHeadLeft)
+    self.add_transition(goToCenter,C,stand1,T(10.0),stand2,NotLoc(robot),moveHeadLeft)
