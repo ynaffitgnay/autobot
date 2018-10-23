@@ -44,7 +44,6 @@ void ParticleFilter::processFrame() {
   updateLocalized();
   printf("Localized: %d",robot_localized_);
   printf("\n\n");
-
 }
 
 void ParticleFilter::updateLocalized() {
