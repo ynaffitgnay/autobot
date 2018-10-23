@@ -4,7 +4,7 @@
 #include <common/Random.h>
 
 ParticleFilter::ParticleFilter(MemoryCache& cache, TextLogger*& tlogger) 
-  : cache_(cache), tlogger_(tlogger), dirty_(true), kmeans_(new KMeans(cache, tlogger, 8, 10)), M_(200), alpha_slow_(0.01), alpha_fast_(0.5),robot_localized_(false) {
+  : cache_(cache), tlogger_(tlogger), dirty_(true), kmeans_(new KMeans(cache, tlogger, 8, 10)), M_(200), alpha_slow_(0.01), alpha_fast_(0.8),robot_localized_(false) {
 }
 
 ParticleFilter::~ParticleFilter() {
@@ -82,13 +82,13 @@ void ParticleFilter::propagationStep(const Pose2D& disp) {
     float stdevY = 20.0; 
     float stdevTh = 0.05; 
     // printf("Before propagation:\n\tParticles Size: %d p.w: %f p.x: %f p.y: %f p.t: %f\n",particles().size(), p.w, p.x,p.y,p.t);
-    if (std::abs(disp.rotation) < 0.05) {
+    if (std::abs(disp.rotation) < 0.01) {
       stdevTh = 0.02;
     }
-    if (std::abs(disp.translation.x) < 1.0) {
+    if (std::abs(disp.translation.x) < 0.75) {
       stdevX = 10.0;
     }
-    if (std::abs(disp.translation.y) < 1.0) {
+    if (std::abs(disp.translation.y) < 0.75) {
       stdevY = 10.0;
     }
     float x_shift = Random::inst().sampleN(disp.translation.x, stdevX);
@@ -126,7 +126,7 @@ void ParticleFilter::updateStep(){
         double bear_weight;
         if (x_bear > M_PI  || x_bear < -M_PI) {
           p.t = -p.t;
-          bear_weight = (exp(-pow(x_bear - mean_bear,2) / (2 * var_bear)) / sqrt(2 * M_PI * var_bear)) * 0.1;
+          bear_weight = (exp(-pow(x_bear - mean_bear,2) / (2 * var_bear)) / sqrt(2 * M_PI * var_bear));//0.1;
         } else {
           bear_weight = (exp(-pow(x_bear - mean_bear,2) / (2 * var_bear)) / sqrt(2 * M_PI * var_bear));
         }
@@ -179,7 +179,7 @@ std::vector<Particle> ParticleFilter::resampleStep(){
     }
     //printf("no cast: %f, cast: %f\n\n", (1.0 - resample_prob)*M_, (1.0 - resample_prob)*(float)M_);
     double rand_prob = Random::inst().sampleU(0.0, 1.0);
-    if (rand_prob < resample_prob && rand_injected < (0.25 * (double)M_)) {
+    if (rand_prob < resample_prob && rand_injected < ((double)M_) / 3.0) {
       ++rand_injected;
       // printf("m: %d resample_prob: %f random_prob: %f\n", m, resample_prob,rand_prob);
       particles().at(i).x = Random::inst().sampleU(-2500.0,2500.0);

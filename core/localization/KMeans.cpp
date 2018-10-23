@@ -140,7 +140,7 @@ bool KMeans::reassignParticles(std::vector<Cluster>& clusters) {
     }
     ++clusterIdx;
   }
-
+  
   for (int i = 0; i < k_; ++i) {
     clusters.at(i).particles = newClusterAssignments.at(i);
   }
