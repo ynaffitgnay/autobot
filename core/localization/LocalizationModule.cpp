@@ -125,6 +125,7 @@ void LocalizationModule::processFrame() {
   pfilter_->processFrame();  
   self.loc = pfilter_->pose().translation;
   self.orientation = pfilter_->pose().rotation;
+  self.localized = pfilter_->getLocalized();
   log(40, "Localization Update: x=%2.f, y=%2.f, theta=%2.2f", self.loc.x, self.loc.y, self.orientation * RAD_T_DEG);
   // printf("Localization Update: x=%2.f, y=%2.f, theta=%2.2f", self.loc.x, self.loc.y, self.orientation * RAD_T_DEG);
 
