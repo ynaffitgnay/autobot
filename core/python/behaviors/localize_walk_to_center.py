@@ -46,28 +46,16 @@ class GetReady(Node):
     if self.getTime() > 2.5:
       self.finish()
 
-class MoveHeadLeft(Node):
-  """Search for the ball to the left"""
-  def __init__(self, tilt):
-    super(MoveHeadLeft, self).__init__()
-    self.tilt = tilt
-  def run(self):
-    commands.setWalkVelocity(0.0,0.0,0.0)
-    commands.setHeadPanTilt(core.DEG_T_RAD*85.0,self.tilt,1.0)
-    commands.setHeadTilt(self.tilt)
-    if self.getTime() > 1.2:
-      self.finish()
-
-class MoveHeadRight(Node):
+class MoveHead(Node):
   """Search for the ball to the right"""
-  def __init__(self, tilt):
-    super(MoveHeadRight, self).__init__()
+  def __init__(self, pan, tilt):
+    super(MoveHead, self).__init__()
+    self.pan = pan
     self.tilt = tilt
   def run(self):
     commands.setWalkVelocity(0.0,0.0,0.0)
-    commands.setHeadPanTilt(-core.DEG_T_RAD*85.0,self.tilt,1.0)
-    commands.setHeadTilt(self.tilt)
-    if self.getTime() > 1.2:
+    commands.setHeadPanTilt(-core.DEG_T_RAD*self.pan,self.tilt,2.0)
+    if self.getTime() > 2.5:
       self.finish()
 
 class TurnInPlace(Node):
@@ -81,65 +69,186 @@ class GoToCenter(Node):
   """Face the ball"""
   def __init__(self, robot, dist):
     super(GoToCenter, self).__init__()
-    self.loc = robot.loc
-    self.orientation = robot.orientation
+    self.robot = robot
     self.dist = dist
-    self.k_t = (0.7, 0.01, 0.1)
-    self.k_d = (0.001, 0.0001, 0.0001)
-    self.theta_integral = 0.0
-    self.theta_prev = 0.0
+    self.frames_off_center = 0
+    self.k_t = (0.1, 0.01, 0.1)
+    self.k_d = (0.01, 0.0001, 0.001)
+    self.center_integral = 0.0
+    self.center_prev = 0.0
     self.dist_integral = 0.0
     self.dist_prev = 0.0
     self.time_last = time.clock()
     self.time_current = time.clock()
 
   def calc_integral(self, dt):
-    self.theta_integral = self.theta_integral + dt*(self.orientation)
-    self.dist_integral = self.dist_integral + dt*(self.robotDist - self.dist)
-    if abs(self.theta_integral) >= 15.0:
-      self.theta_integral = 15.0*np.sign(self.theta_integral)
+    distance = np.sqrt(np.power(self.robot.loc.x,2)+np.power(self.robot.loc.y,2))
+    bearing = np.arctan2(self.robot.loc.y,self.robot.loc.x) - self.robot.orientation
+    center = -np.sign(bearing)*(np.pi - np.abs(bearing))
+
+    self.center_integral = self.center_integral + dt*center
+    self.dist_integral = self.dist_integral + dt*(distance - self.dist)
+
+    if abs(self.center_integral) >= 15.0:
+      self.center_integral = 15.0*np.sign(self.center_integral)
     if abs(self.dist_integral) >= 100.0:
       self.dist_integral = 100.0*np.sign(self.dist_integral)
 
   def run(self):
-    self.robotDist = np.sqrt(np.power(self.loc.x,2)+np.power(self.loc.y,2))
-    self.bearing = np.arctan2(0.0-self.loc.y,0.0-self.loc.x)-self.orientation
-    if (self.bearing + 2 * np.pi < abs(self.bearing)):
-      self.bearing = self.bearing + 2 * np.pi    
     self.time_current = time.clock()
     dt = self.time_current - self.time_last
-    self.calc_integral(dt)
     
-    bearing = self.bearing
-    distance = self.robotDist
+    distance = np.sqrt(np.power(self.robot.loc.x,2)+np.power(self.robot.loc.y,2))
+    bearing = np.arctan2(self.robot.loc.y,self.robot.loc.x) - self.robot.orientation
+    center = -np.sign(bearing)*(np.pi - np.abs(bearing))
+
+    if (np.pi - abs(center)) < 0.1:
+      center = np.sign(self.center_prev) * abs(center)
+
+    self.calc_integral(dt)
+    print("Loc x: %f, Loc y: %f"%(self.robot.loc.x, self.robot.loc.y))
+    # print("atan: %f, orientation: %f"%(core.RAD_T_DEG * np.arctan2(self.robot.loc.y,self.robot.loc.x),core.RAD_T_DEG * self.robot.orientation))
+    # if (self.bearing + 2 * np.pi < abs(self.bearing)):
+    #   self.bearing = self.bearing + 2 * np.pi
+
     elevation = 5.0
-    commands.setHeadPanTilt(bearing, -elevation, 1.5)
+    commands.setHeadPanTilt(0.0, -elevation, 1.5)
+
     if dt == 0:
-      theta_cont = self.k_t[0] * bearing + self.k_t[1] * self.theta_integral
+      theta_cont = self.k_t[0] * center + self.k_t[1] * self.center_integral
       dist_cont = self.k_d[0] * (distance - self.dist) + self.k_d[1] * self.dist_integral
     else:
-      theta_cont = self.k_t[0] * bearing + self.k_t[1] * self.theta_integral + self.k_t[2] *(bearing - self.theta_prev) / dt
+      theta_cont = self.k_t[0] * center + self.k_t[1] * self.center_integral + self.k_t[2] * (center - self.center_prev) / dt
       dist_cont = self.k_d[0] * (distance - self.dist) + self.k_d[1] * self.dist_integral + self.k_d[2] *(distance - self.dist_prev) / dt
+    print("center: %f, center_integral: %f, center derivative: %f" %(center, self.k_t[1] * self.center_integral, self.k_t[2]*(center - self.center_prev) / dt))
     
-    if abs(bearing) >=0.3:
+    if ((center - self.center_prev) / dt) > 10.0:
+        theta_cont = 0.0
+    if ((distance - self.dist_prev) / dt) > 10.0:
+        dist_cont = 0.0
+    if abs(center) > 0.3:
+      self.frames_off_center += 1
       # Control only the heading of the robot and not the velocity
-      commands.setWalkVelocity(0.0, 0.0, 0.4*np.sign(bearing))
+      # print("center > 0.3: Theta cont: %f"%(0.1*np.sign(center)))
+      if (self.frames_off_center > 5):
+        commands.setWalkVelocity(0.0, 0.0, 0.1*np.sign(center))
     else:
-      # Control both heading and velocity
+      self.frames_off_center = 0
+    # Control both heading and velocity
       if abs(distance) >= 600.0:
-        commands.setWalkVelocity(1.0, 0.0, theta_cont)
+        print("distance > 600.0, center: %f, Theta cont: %f"%(center,theta_cont))
+        commands.setWalkVelocity(0.6, 0.0, theta_cont)
       else:
+        print("distance < 600.0, %f center: %f, Theta cont: %f, dist cont: %f"%(distance, center,theta_cont, dist_cont))
         commands.setWalkVelocity(dist_cont, 0.0, theta_cont)
-    self.theta_prev = bearing
+    self.center_prev = center
     self.dist_prev = distance
     self.time_last = self.time_current
-    if abs(self.robotDist) < 50.0:
+    if abs(distance - self.dist) < 50.0:
+      self.finish()
+
+class XYControl(Node):
+  """Face the ball"""
+  def __init__(self, robot, dist):
+    super(XYControl, self).__init__()
+    self.robot = robot
+    self.dist = dist
+    self.frames_off_center = 0
+    self.k_t = (0.1, 0.01, 0.1)
+    self.k_d = (0.01, 0.0001, 0.001)
+    self.center_integral = 0.0
+    self.center_prev = 0.0
+    self.dist_integral = 0.0
+    self.dist_prev = 0.0
+    self.time_last = time.clock()
+    self.time_current = time.clock()
+
+  def calc_integral(self, dt):
+    distance = np.sqrt(np.power(self.robot.loc.x,2)+np.power(self.robot.loc.y,2))
+    bearing = np.arctan2(self.robot.loc.y,self.robot.loc.x) - self.robot.orientation
+    center = -np.sign(bearing)*(np.pi - np.abs(bearing))
+
+    self.center_integral = self.center_integral + dt*center
+    self.dist_integral = self.dist_integral + dt*(distance - self.dist)
+
+    if abs(self.center_integral) >= 15.0:
+      self.center_integral = 15.0*np.sign(self.center_integral)
+    if abs(self.dist_integral) >= 100.0:
+      self.dist_integral = 100.0*np.sign(self.dist_integral)
+
+  def run(self):
+    self.time_current = time.clock()
+    dt = self.time_current - self.time_last
+    
+    distance = np.sqrt(np.power(self.robot.loc.x,2)+np.power(self.robot.loc.y,2))
+    bearing = np.arctan2(self.robot.loc.y,self.robot.loc.x) - self.robot.orientation
+    center = -np.sign(bearing)*(np.pi - np.abs(bearing))
+
+    if (np.pi - abs(center)) < 0.1:
+      center = np.sign(self.center_prev) * abs(center)
+
+    self.calc_integral(dt)
+    print("Loc x: %f, Loc y: %f"%(self.robot.loc.x, self.robot.loc.y))
+    # print("atan: %f, orientation: %f"%(core.RAD_T_DEG * np.arctan2(self.robot.loc.y,self.robot.loc.x),core.RAD_T_DEG * self.robot.orientation))
+    # if (self.bearing + 2 * np.pi < abs(self.bearing)):
+    #   self.bearing = self.bearing + 2 * np.pi
+
+    elevation = 5.0
+    commands.setHeadPanTilt(0.0, -elevation, 1.5)
+
+    if dt == 0:
+      theta_cont = self.k_t[0] * center + self.k_t[1] * self.center_integral
+      dist_cont = self.k_d[0] * (distance - self.dist) + self.k_d[1] * self.dist_integral
+    else:
+      theta_cont = self.k_t[0] * center + self.k_t[1] * self.center_integral + self.k_t[2] * (center - self.center_prev) / dt
+      dist_cont = self.k_d[0] * (distance - self.dist) + self.k_d[1] * self.dist_integral + self.k_d[2] *(distance - self.dist_prev) / dt
+    print("center: %f, center_integral: %f, center derivative: %f" %(center, self.k_t[1] * self.center_integral, self.k_t[2]*(center - self.center_prev) / dt))
+    
+    if ((center - self.center_prev) / dt) > 10.0:
+        theta_cont = 0.0
+    if ((distance - self.dist_prev) / dt) > 10.0:
+        dist_cont = 0.0
+    if abs(center) > 0.3:
+      self.frames_off_center += 1
+      # Control only the heading of the robot and not the velocity
+      # print("center > 0.3: Theta cont: %f"%(0.1*np.sign(center)))
+      if (self.frames_off_center > 5):
+        commands.setWalkVelocity(0.0, 0.0, 0.1*np.sign(center))
+    else:
+      self.frames_off_center = 0
+    # Control both heading and velocity
+      if abs(distance) >= 600.0:
+        print("distance > 600.0, center: %f, Theta cont: %f"%(center,theta_cont))
+        commands.setWalkVelocity(0.6, 0.0, theta_cont)
+      else:
+        print("distance < 600.0, %f center: %f, Theta cont: %f, dist cont: %f"%(distance, center,theta_cont, dist_cont))
+        commands.setWalkVelocity(dist_cont, 0.0, theta_cont)
+    self.center_prev = center
+    self.dist_prev = distance
+    self.time_last = self.time_current
+    if abs(distance - self.dist) < 50.0:
       self.finish()
 
 class Stand(Node):
   def run(self):
     commands.stand()
     commands.setHeadPanTilt(0.0,0.0,1.5)
+
+class LookAtBeacon(Node):
+  """Look at beacon bearing avg if seen"""
+  def __init__(self, by_beacon, yb_beacon, yp_beacon, py_beacon, bp_beacon, pb_beacon):
+    super(BeaconCount, self).__init__()
+    self.by_beacon = by_beacon
+    self.yb_beacon = yb_beacon
+    self.yp_beacon = yp_beacon
+    self.py_beacon = py_beacon
+    self.bp_beacon = bp_beacon
+    self.pb_beacon = pb_beacon
+  def run(self):
+    commands.stand()
+    if self.by_beacon.seen:
+      bearing = self.by_beacon.visionBearing
+    commands.setHeadPanTilt(bearing,0.0,1.5)
 
 class Playing(LoopingStateMachine):
   def setup(self):
@@ -152,14 +261,15 @@ class Playing(LoopingStateMachine):
     pb_beacon = memory.world_objects.getObjPtr(core.WO_BEACON_PINK_BLUE);
     goToCenter = GoToCenter(robot, 0.0)
     rdy = GetReady()
-    moveHeadLeft = MoveHeadLeft(-5.0)
-    moveHeadRight = MoveHeadRight(-5.0)
+    moveHeadLeft = MoveHead(110.0,-5.0)
+    moveHeadRight = MoveHead(-110.0,-5.0)
     turnInPlace = TurnInPlace()
     stand1 = Stand()
     stand2 = Stand()
-    self.add_transition(rdy,C,moveHeadLeft,C,moveHeadRight,C,turnInPlace,C,moveHeadLeft)
-    self.add_transition(moveHeadLeft,BN(by_beacon, yb_beacon, yp_beacon, py_beacon, bp_beacon, pb_beacon),goToCenter)
-    self.add_transition(moveHeadRight,BN(by_beacon, yb_beacon, yp_beacon, py_beacon, bp_beacon, pb_beacon),goToCenter)
-    self.add_transition(turnInPlace,BN(by_beacon, yb_beacon, yp_beacon, py_beacon, bp_beacon, pb_beacon),goToCenter)
-    self.add_transition(goToCenter,NBN(by_beacon, yb_beacon, yp_beacon, py_beacon, bp_beacon, pb_beacon),moveHeadLeft)
-    self.add_transition(goToCenter,C,stand1,T(10.0),stand2,NBN(by_beacon, yb_beacon, yp_beacon, py_beacon, bp_beacon, pb_beacon),moveHeadLeft)
+    self.add_transition(rdy,C,moveHeadLeft,C,moveHeadRight,C,goToCenter)
+    self.add_transition(goToCenter,T(5.0),moveHeadLeft)
+    # self.add_transition(moveHeadLeft,BN(by_beacon, yb_beacon, yp_beacon, py_beacon, bp_beacon, pb_beacon),goToCenter)
+    # self.add_transition(moveHeadRight,BN(by_beacon, yb_beacon, yp_beacon, py_beacon, bp_beacon, pb_beacon),goToCenter)
+    # self.add_transition(turnInPlace,BN(by_beacon, yb_beacon, yp_beacon, py_beacon, bp_beacon, pb_beacon),goToCenter)
+    # self.add_transition(goToCenter,NBN(by_beacon, yb_beacon, yp_beacon, py_beacon, bp_beacon, pb_beacon),moveHeadLeft)
+    # self.add_transition(goToCenter,C,stand1,T(10.0),stand2,NBN(by_beacon, yb_beacon, yp_beacon, py_beacon, bp_beacon, pb_beacon),moveHeadLeft)

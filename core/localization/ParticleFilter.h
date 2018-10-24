@@ -52,6 +52,7 @@ class ParticleFilter {
     void updateStep();
     bool checkResample();
     std::vector<Particle> resampleStep();
+    double normDist(double x, double mu, double sig_sq);
 };
 
 #endif
