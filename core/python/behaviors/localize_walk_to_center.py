@@ -55,7 +55,7 @@ class MoveHead(Node):
   def run(self):
     commands.setWalkVelocity(0.0,0.0,0.0)
     commands.setHeadPanTilt(-core.DEG_T_RAD*self.pan,self.tilt,3.0)
-    if self.getTime() > 3.5:
+    if self.getTime() > 4.0:
       self.finish()
 
 class TurnInPlace(Node):
@@ -130,28 +130,36 @@ class GoToCenter(Node):
     # print("center_deriv: %f, dsit deriv: %f" %(((center - self.center_prev) / dt), ((distance - self.dist_prev) / dt)))
     if ((center - self.center_prev) / dt) > 5.0:
         theta_cont = 0.0
-    if abs(center) > 0.5:
+
+    if (distance < 400.0 and abs(center) > 0.5) or abs(center) > 0.8:
       self.frames_off_center += 1
       # Control only the heading of the robot and not the velocity
       # print("center > 0.3: Theta cont: %f"%(0.1*np.sign(center)))
       if (self.frames_off_center > 5):
-        commands.setWalkVelocity(0.0, 0.0, 0.1*np.sign(center))
+        print("Turn toward center")
+        commands.setWalkVelocity(0.0, 0.0, 0.3*np.sign(center))
     else:
       self.frames_off_center = 0
     # Control both heading and velocity
-      if abs(distance) >= 600.0:
+      if abs(distance) >= 400.0:
         print("d > 600.0, Loc x,y: %f, %f, center: %f, Theta cont: %f"%(self.robot.loc.x, self.robot.loc.y,center,theta_cont))
-        commands.setWalkVelocity(0.3, 0.0, theta_cont)
+        commands.setWalkVelocity(0.4, 0.0, 0.0)
       else:
         print("d < 600.0, %f, Loc x,y: %f, %f, center: %f, Theta cont: %f, dist cont: %f"%(distance,self.robot.loc.x, self.robot.loc.y, center,theta_cont, dist_cont))
-        commands.setWalkVelocity(abs(dist_cont), 0.0, theta_cont)
+        commands.setWalkVelocity(0.2, 0.0, 0.0)
     self.center_prev = center
     self.dist_prev = distance
     self.time_last = self.time_current
-    if abs(distance - self.dist) < 0.0:
+    if abs(distance - self.dist) < 30.0:
+      print("Thinks at center!")
       self.finish()
 
 class Stand(Node):
+  def run(self):
+    commands.stand()
+    commands.setHeadPanTilt(0.0,0.0,1.5)
+
+class Walk(Node):
   def run(self):
     commands.stand()
     commands.setHeadPanTilt(0.0,0.0,1.5)
@@ -189,7 +197,7 @@ class Playing(LoopingStateMachine):
     stand1 = Stand()
     stand2 = Stand()
     self.add_transition(rdy,C,moveHeadLeft,C,moveHeadRight,C,goToCenter)
-    self.add_transition(goToCenter,T(5.0),moveHeadLeft)
+    self.add_transition(goToCenter,T(3.0),moveHeadLeft)
     # self.add_transition(goToCenter,NBN(by_beacon,yb_beacon,yp_beacon,py_beacon,bp_beacon,pb_beacon),turnInPlace,C,moveHeadLeft)
     # self.add_transition(goToCenter,S("move"),moveHeadLeft)
     # self.add_transition(moveHeadLeft,BN(by_beacon, yb_beacon, yp_beacon, py_beacon, bp_beacon, pb_beacon),goToCenter)

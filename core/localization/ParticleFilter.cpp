@@ -113,7 +113,7 @@ void ParticleFilter::updateStep(){
         beacons_list_.insert(it->first);
         double part_dist = sqrt(pow(p.x - it->second.translation.x, 2) + pow(p.y - it->second.translation.y,2));
         double mean_dist = beacon_current.visionDistance;
-        double var_dist = (mean_dist/10.0)*(mean_dist/10.0);
+        double var_dist = (mean_dist/5.0)*(mean_dist/5.0);
         double dist_weight = normDist(part_dist,mean_dist,var_dist);
         // printf("After importance calc 1:\n\tp.w: %f, p.x: %f p.y: %f p.t: %f\n",p.w,p.x,p.y,p.t);
 
@@ -123,7 +123,7 @@ void ParticleFilter::updateStep(){
         double mean_bear = beacon_current.visionBearing;  //theta
         double x_bear = part_beacon_sep - part_global_bearing;  //phi
         // printf("Beta: %f Alpha: %f\n", part_beacon_sep,part_global_bearing);
-        double var_bear = 0.1 * 0.1;
+        double var_bear = 0.2 * 0.2;
         if (x_bear > M_PI  || x_bear < -M_PI) {
           p.t = -p.t;
           x_bear = part_beacon_sep - p.t;
