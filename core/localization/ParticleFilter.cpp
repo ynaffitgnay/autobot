@@ -21,7 +21,7 @@ void ParticleFilter::init(Point2D loc, float orientation) {
   for(auto& p : particles()) {
     p.x = Random::inst().sampleU(-2500.0,2500.0);
     p.y = Random::inst().sampleU(-1250.0,1250.0);
-    p.t = Random::inst().sampleU(0.0, 2*M_PI);  
+    p.t = Random::inst().sampleU(-M_PI, M_PI);  
     p.w = 1.0/M_;
   }
 }
@@ -40,16 +40,17 @@ void ParticleFilter::processFrame() {
   // }
   updateStep();
   // Check if resample
-  particles() = resampleStep();
+  if(checkResample()){
+    particles() = resampleStep();
+  }
   updateLocalized();
-  printf("Localized: %d",robot_localized_);
-  printf("\n\n");
-
+  // printf("Localized: %d",robot_localized_);
+  // printf("\n\n");
 }
 
 void ParticleFilter::updateLocalized() {
   float fun_threshold = 0.50;
-  printf("w_fast: %f w_slow: %f ratio: %f\n", w_fast_,w_slow_,w_fast_/w_slow_);
+  // printf("w_fast: %f w_slow: %f ratio: %f\n", w_fast_,w_slow_,w_fast_/w_slow_);
   if (w_fast_/w_slow_ > fun_threshold) {
     // Might need to be some more conditions to prevent jittering
     if (beacons_list_.size() >= 2) {
@@ -103,18 +104,18 @@ void ParticleFilter::propagationStep(const Pose2D& disp) {
 }
 
 void ParticleFilter::updateStep(){
-  double weights_sum = 0.0;
+  int num_unreliable = 0;
   for(auto& p : particles()) {
+    double bear_weight = 0.0;
     for(std::map<WorldObjectType,Pose2D>::iterator it=beacons_.begin(); it!=beacons_.end(); ++it){
       auto& beacon_current = cache_.world_object->objects_[it->first];
       if (beacon_current.seen) {
         beacons_list_.insert(it->first);
         double part_dist = sqrt(pow(p.x - it->second.translation.x, 2) + pow(p.y - it->second.translation.y,2));
         double mean_dist = beacon_current.visionDistance;
-        double var_dist = (mean_dist/10.0)*(mean_dist/10.0);
-        double dist_weight = exp(-pow(part_dist-mean_dist,2)/(2 * var_dist))/sqrt(2*M_PI*var_dist);
+        double var_dist = (mean_dist/5.0)*(mean_dist/5.0);
+        double dist_weight = normDist(part_dist,mean_dist,var_dist);
         // printf("After importance calc 1:\n\tp.w: %f, p.x: %f p.y: %f p.t: %f\n",p.w,p.x,p.y,p.t);
-
 
         double part_global_bearing = p.t;  //alpha
         // printf("Part Global Bearing: %f p.t: %f\n", part_global_bearing,p.t);
@@ -122,26 +123,43 @@ void ParticleFilter::updateStep(){
         double mean_bear = beacon_current.visionBearing;  //theta
         double x_bear = part_beacon_sep - part_global_bearing;  //phi
         // printf("Beta: %f Alpha: %f\n", part_beacon_sep,part_global_bearing);
-        double var_bear = 0.15 * 0.15;
-        double bear_weight;
+        double var_bear = 0.2 * 0.2;
         if (x_bear > M_PI  || x_bear < -M_PI) {
           p.t = -p.t;
-          bear_weight = (exp(-pow(x_bear - mean_bear,2) / (2 * var_bear)) / sqrt(2 * M_PI * var_bear));//0.1;
-        } else {
-          bear_weight = (exp(-pow(x_bear - mean_bear,2) / (2 * var_bear)) / sqrt(2 * M_PI * var_bear));
+          x_bear = part_beacon_sep - p.t;
         }
+        bear_weight = normDist(x_bear,mean_bear,var_bear);
 
-
-        p.w *= dist_weight * (0.1 + bear_weight);
-      } 
+        // if (beacon_count > 1) {
+        p.w *= dist_weight * bear_weight;
+        // } else {
+        //   p.w *= dist_weight;
+        //   num_unreliable++;
+        // }
+      }
     }
-    weights_sum += p.w;
-    // printf("Sum: %f\n", weights_sum);
   }
+  // if (num_unreliable/M_ > 0.90) {
+  //   printf("Too many (%d) unreliable particles. Probably only seeing one beacon\n", num_unreliable);
+  // } else {
+  //   printf("Unreliable particles: %d Probably seeing multiple beacons\n", num_unreliable);
+  // }
+
+  // printf("w_avg: %f, w_fast_: %f w_slow_: %f quotient: %f\n", w_avg, w_fast_,w_slow_,w_fast_/w_slow_);
+}
+
+double ParticleFilter::normDist(double x, double mu, double sig_sq) {
+  return (exp(-pow(x - mu,2) / (2 * sig_sq)) / sqrt(2 * M_PI * sig_sq));
+}
+
+bool ParticleFilter::checkResample(){
+  // W slow and fast calculation
   double w_avg = 0;
+  double weights_sum = 0;
+  double sum_weights_squared = 0.0;
   for(auto& p : particles()){
+    weights_sum += p.w;
     w_avg += (p.w / (double)M_);
-    p.w /= weights_sum;
     // printf("After re-weighting:\n\tWeight sum: %f p.w: %f, p.x: %f p.y: %f p.t: %f\n",weights_sum, p.w,p.x,p.y,p.t);
   }
 
@@ -149,46 +167,88 @@ void ParticleFilter::updateStep(){
   w_slow_ += alpha_slow_ * (w_avg - w_slow_);
   w_fast_ += alpha_fast_ * (w_avg - w_fast_);
 
-  // printf("w_avg: %f, w_fast_: %f w_slow_: %f quotient: %f\n", w_avg, w_fast_,w_slow_,w_fast_/w_slow_);
-}
 
-bool ParticleFilter::checkResample(){
-  double sum_weights_squared = 0.0;
+  if(weights_sum == 0.0) return true;
   for(auto& p : particles()) {
+    // printf("weights: %f\n",p.w);
+    p.w /= weights_sum;
     sum_weights_squared += p.w*p.w;
   }
+  if(sum_weights_squared < 0.000001) return true;
   double N_eff = 1/sum_weights_squared;
-  return N_eff < particles().size()/2.0;
+  // printf("Entered check sample\n");
+  return (N_eff < (M_/3.0));
 }
 
 std::vector<Particle> ParticleFilter::resampleStep(){
-  std::vector<Particle> resampled_particles;
+  // printf("entered resample step\n");
+  std::vector<Particle> resampled_particles(M_);
   double r = Random::inst().sampleU(0.0, 1.0 / M_);
-  double c = particles()[0].w;
+  double c = particles().at(0).w;
   double u;
   double resample_prob = std::max((1.0 - (w_fast_ / w_slow_)), 0.0);
   int rand_injected = 0;
+  int area_injected = 0;
   //printf("w_fast_: %f w_slow_: %f quotient: %f\n", w_fast_,w_slow_,w_fast_/w_slow_);
   int i = 0;
+  bool noob = false;
+  double stdev_x = 10.0;
+  double stdev_y = 10.0;
+  double stdev_th = 0.01;
+  double mu_x = mean_.translation.x;
+  double mu_y = mean_.translation.y;
+  double mu_th = mean_.rotation;
+
+  double N_eff;
+
   for(int m = 0; m < M_; m++){
     u = r + (double(m) - 1.0) / double(M_);
     // printf("U: %f R: %f m: %d i: %d c: %f\n",u,r,m,i,c);
     while(u > c){
-      i++;
-      c += particles()[i].w;
+      ++i;
+      if(i >= M_){
+        noob = true;
+        break;
+      }
+      // printf("i = %d ", i);
+      c += particles().at(i).w;
     }
-    //printf("no cast: %f, cast: %f\n\n", (1.0 - resample_prob)*M_, (1.0 - resample_prob)*(float)M_);
+
+    if(noob){
+      break;
+    }
+
+    // printf("no cast: %f, cast: %f\n\n", (1.0 - resample_prob)*M_, (1.0 - resample_prob)*(float)M_);
     double rand_prob = Random::inst().sampleU(0.0, 1.0);
-    if (rand_prob < resample_prob && rand_injected < ((double)M_) / 3.0) {
-      ++rand_injected;
-      // printf("m: %d resample_prob: %f random_prob: %f\n", m, resample_prob,rand_prob);
-      particles().at(i).x = Random::inst().sampleU(-2500.0,2500.0);
-      particles().at(i).y = Random::inst().sampleU(-1250.0,1250.0);
-      particles().at(i).t = Random::inst().sampleU(0.0, 2*M_PI);
+    if (rand_prob < resample_prob && rand_injected < (0.25 * (double)M_)) {
+      if (area_injected < (0.20 * (double)M_)) {
+        ++rand_injected;
+        ++area_injected;
+        particles().at(i).x = stdev_x*Random::inst().sampleN(0.0,1.0) + mu_x;
+        particles().at(i).y = stdev_y*Random::inst().sampleN(0.0,1.0) + mu_y;
+        particles().at(i).t = stdev_th*Random::inst().sampleN(0.0,1.0) + mu_th;
+      } else{
+        // printf("m: %d resample_prob: %f random_prob: %f\n", m, resample_prob,rand_prob);
+        ++rand_injected;
+        particles().at(i).x = Random::inst().sampleU(-2500.0,2500.0);
+        particles().at(i).y = Random::inst().sampleU(-1250.0,1250.0);
+        particles().at(i).t = Random::inst().sampleU(-M_PI, M_PI);
+      }
     }
     particles().at(i).w = 1.0 / M_;
-    resampled_particles.push_back(particles().at(i));
+    resampled_particles.at(m) = particles().at(i);
   }
-  printf("Random particles injected: %d\n", rand_injected);
+  if(noob){
+    resampled_particles.clear();
+    resampled_particles.resize(M_);
+    for(auto& p : resampled_particles) {
+      p.x = Random::inst().sampleU(-2500.0,2500.0);
+      p.y = Random::inst().sampleU(-1250.0,1250.0);
+      p.t = Random::inst().sampleU(-M_PI, M_PI);  
+      p.w = 1.0/M_;
+    }
+  }
+  // printf("Random particles injected: %d\n", rand_injected);
   return resampled_particles;
 }
+

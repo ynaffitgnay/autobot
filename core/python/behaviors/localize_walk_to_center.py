@@ -226,6 +226,7 @@ class GoToCenter(Node):
           if (abs(self.robot.orientation) > 0.1):
             # don't pan while trying to go to center
             self.dont_turn_toward_center = True
+
             #self.total_time = (self.time_to_walk + self.time_for_panning + 1)
             self.frames_away_from_front += 1
 
@@ -235,8 +236,8 @@ class GoToCenter(Node):
               
           else:
             self.frames_away_from_front = 0
-            #self.total_time = 0.0
 
+            #self.total_time = 0.0
             commands.setWalkVelocity(-0.01 * self.robot.loc.x, -0.01 * self.robot.loc.y, 0.0)
           
               

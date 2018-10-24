@@ -6,6 +6,7 @@
 #include <Eigen/Dense>
 #include "math/EKF.h"
 #include "math/MatrixDefinitions.h"
+#include <math/Pose2D.h>
 
 class ParticleFilter;
 class Point2D;
@@ -53,6 +54,10 @@ class LocalizationModule : public Module {
 
     Eigen::Vector2f rangeToPos(float bearing, float distance);
     Eigen::Vector2f posToRange(float x, float y);
+
+    std::vector<Pose2D> pose_list_;
+    int pose_index_;
+    Pose2D avgLocVals(Pose2D pose);
 
 };
 
