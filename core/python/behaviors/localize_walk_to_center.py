@@ -93,7 +93,8 @@ class GoToCenter(Node):
     self.time_to_walk = 4.0
     self.frames_away_from_front = 0
     self.dont_turn_toward_center = False
-
+    self.turned_toward_front = False
+    self.turned_toward_center = False
 
     self.by_beacon = by_beacon
     self.yb_beacon = yb_beacon
@@ -122,6 +123,8 @@ class GoToCenter(Node):
     dt = self.time_current - self.time_last
 
     if (dt > 1.0):
+      self.turned_toward_front = False
+      self.turned_toward_center = False
       dt = 0.0
 
     if (self.total_time == 0.0):
@@ -204,9 +207,10 @@ class GoToCenter(Node):
       if ((center - self.center_prev) / dt) > 5.0:
           theta_cont = 0.0
       
-      #if ((distance < 660.0 and abs(center) > 0.4) or abs(center) > 0.8) and not self.dont_turn_toward_center:
-      if (distance > 660.0 and abs(center) > 0.6):
+      if (distance > 660.0 and abs(center) > 0.5):
         self.frames_off_center += 1
+        self.turned_toward_center = True
+        self.turned_toward_front = False
         # Control only the heading of the robot and not the velocity
         # print("center > 0.3: Theta cont: %f"%(0.1*np.sign(center)))
         if (self.frames_off_center > 5):
@@ -216,19 +220,18 @@ class GoToCenter(Node):
         self.frames_off_center = 0
         
         # Control both heading and velocity
-        if abs(distance) >= 660.0:
-          print("d > 660.0, %f Loc x,y: %f, %f, center: %f, Theta cont: %f"%(distance, self.robot.loc.x, self.robot.loc.y,center,theta_cont))
+        if abs(distance) >= 500.0:# and self.turned_toward_center:
+          print("d > 500.0, %f Loc x,y: %f, %f, center: %f, Theta cont: %f"%(distance, self.robot.loc.x, self.robot.loc.y,center,theta_cont))
           commands.setWalkVelocity(0.5, 0.0, 0.0)
         else:
           commands.setHeadPanTilt(0.0,0.0,1.5)
           #bearing_forward = np.arctan2(0.0-self.robot.loc.y,1500.0-self.robot.loc.x) - self.robot.orientation
           # distance = np.sqrt(np.power(self.robot.loc.x,2)+np.power(self.robot.loc.y,2))
-          if (abs(self.robot.orientation) > 0.1):
+          if (abs(self.robot.orientation) > 0.2):
             # don't pan while trying to go to center
-            self.dont_turn_toward_center = True
-
-            #self.total_time = (self.time_to_walk + self.time_for_panning + 1)
             self.frames_away_from_front += 1
+            self.turned_toward_front = True
+            self.turned_toward_center = False
 
             if (self.frames_away_from_front > 5):
               print("Turn toward front. d: %f, Loc x,y: %f, %f, center: %f"%(distance, self.robot.loc.x, self.robot.loc.y,center))
@@ -236,10 +239,8 @@ class GoToCenter(Node):
               
           else:
             self.frames_away_from_front = 0
-
-            #self.total_time = 0.0
             commands.setWalkVelocity(-0.01 * self.robot.loc.x, -0.01 * self.robot.loc.y, 0.0)
-          
+            print("x cont: %f, y cont: %f"%(-0.01 * self.robot.loc.x, -0.007 * self.robot.loc.y))
               
           #if (not self.by_beacon.seen and not self.yb_beacon and abs(self.by_beacon.visionBearing) < 0.1):
           #  setWalkVelocity(0.0,0.0,np.sign(self.by_beacon.visionBearing))
@@ -253,12 +254,11 @@ class GoToCenter(Node):
       self.dist_prev = distance
       self.time_last = self.time_current
       
-      if abs(distance - self.dist) < 30.0:
+      if abs(distance - self.dist) < 25.0:
         self.frames_at_center += 1
         print("Thinks at center!!!!!")
-        if (self.frames_at_center > 5):
+        if (self.frames_at_center > 3):
           self.total_time = 0.0
-          self.dont_turn_toward_center = False
           self.finish()
       else:
         self.frames_at_center = 0
@@ -311,4 +311,4 @@ class Playing(LoopingStateMachine):
     # self.add_transition(moveHeadRight,BN(by_beacon, yb_beacon, yp_beacon, py_beacon, bp_beacon, pb_beacon),goToCenter)
     # self.add_transition(turnInPlace,BN(by_beacon, yb_beacon, yp_beacon, py_beacon, bp_beacon, pb_beacon),goToCenter)
     # self.add_transition(goToCenter,NBN(by_beacon, yb_beacon, yp_beacon, py_beacon, bp_beacon, pb_beacon),moveHeadLeft)
-    self.add_transition(goToCenter,C,stand1,T(2.0),goToCenter)#,T(10.0),stand2,NBN(by_beacon, yb_beacon, yp_beacon, py_beacon, bp_beacon, pb_beacon),moveHeadLeft)
+    self.add_transition(goToCenter,C,stand1,T(10.0),goToCenter)#,T(10.0),stand2,NBN(by_beacon, yb_beacon, yp_beacon, py_beacon, bp_beacon, pb_beacon),moveHeadLeft)
