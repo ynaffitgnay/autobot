@@ -45,6 +45,7 @@ LocalizationModule::LocalizationModule() : tlogger_(textlogger), ekfilter_(new E
 
   // The kalman filter is re-initialized when the ball is not seen for some time
   occluded_time = 0.0;
+  pose_index_ = 0;
 }
 
 LocalizationModule::~LocalizationModule() {
@@ -93,6 +94,7 @@ void LocalizationModule::initFromMemory() {
 void LocalizationModule::initFromWorld() {
   reInit();
   auto& self = cache_.world_object->objects_[cache_.robot_state->WO_SELF];
+  printf("initializing particle filter");
   pfilter_->init(self.loc, self.orientation);
 }
 
@@ -114,15 +116,43 @@ void LocalizationModule::movePlayer(const Point2D& position, float orientation) 
   // simulator window.
 }
 
+Pose2D LocalizationModule::avgLocVals(Pose2D pose) {
+  int window_size = 10;
+  double x_sum;
+  double y_sum;
+  double th_sum;
+  if (pose_list_.size() <= window_size) {
+    pose_list_.push_back(pose);
+  } else {
+    pose_list_.at(pose_index_++ % window_size) = pose; 
+  }
+  for (auto& p : pose_list_) {
+      x_sum += p.translation.x;
+      y_sum += p.translation.y;
+      th_sum += p.rotation;
+  }
+  Pose2D ret_pose = Pose2D();
+  ret_pose.translation.x = x_sum/(double)pose_list_.size();
+  ret_pose.translation.y = y_sum/(double)pose_list_.size();
+  ret_pose.rotation = th_sum/(double)pose_list_.size();
+  return ret_pose;
+}
+
 void LocalizationModule::processFrame() {
   double time = cache_.frame_info->seconds_since_start;
   auto& ball = cache_.world_object->objects_[WO_BALL];
   auto& self = cache_.world_object->objects_[cache_.robot_state->WO_SELF];
 
-  // Retrieve the robot's current location from localization memory
-  // and store it back into world objects
-  auto sloc = cache_.localization_mem->player_;
-  self.loc = sloc;
+  // Process the current frame and retrieve our location/orientation estimate
+  // from the particle filter
+  pfilter_->processFrame(); 
+  Pose2D pose_avg; 
+  pose_avg = avgLocVals(pfilter_->pose());
+  self.loc = pose_avg.translation;
+  self.orientation = pose_avg.rotation;
+
+  self.localized = pfilter_->getLocalized();
+  log(40, "Localization Update: x=%2.f, y=%2.f, theta=%2.2f", self.loc.x, self.loc.y, self.orientation * RAD_T_DEG);
 
   double dt = (last_time_ < 0) ? 1.0/30.0 : (time - last_time_);
   if(!ball.seen){

@@ -5,6 +5,7 @@
 
 #include <vision/ObjectDetector.h>
 
+
 class TextLogger;
 
 /// @ingroup vision
