@@ -40,7 +40,6 @@ Pose2D KMeans::runKMeans(const std::vector<Particle>& observations) {
     clusters.push_back(newCluster);
   }
 
-  //int count = 0;
   // Now determine the initial cluster each particle should go into
   for (const Particle& particle : observations) {
     float minMeansSquared = FLT_MAX;
@@ -48,11 +47,6 @@ Pose2D KMeans::runKMeans(const std::vector<Particle>& observations) {
 
     for (int i = 0; i < k_; ++i) {
       float meansSquared = 0;
-
-      //std::cout << "particle.x: " << particle.x << " clusters.at(i).centroid.x: " <<
-      //  clusters.at(i).centroid.x << " (particle.x - clusters.at(i).centroid.x): " <<
-      //  (particle.x - clusters.at(i).centroid.x) << " pow((particle.x - clusters.at(i).centroid.x), 2): " <<
-      //  pow((particle.x - clusters.at(i).centroid.x), 2) << std::endl;
       
       meansSquared += pow((particle.x - clusters.at(i).centroid.x), 2);
       meansSquared += pow((particle.y - clusters.at(i).centroid.y), 2);
@@ -62,14 +56,9 @@ Pose2D KMeans::runKMeans(const std::vector<Particle>& observations) {
         minMeansSquared = meansSquared;
         minCluster = i;
       }
-
-      //std::cout << "meansSquared of cluster " << i << " is " << meansSquared << std::endl;
     }
-
-    //std::cout << "minCluster of particle " << count++ << " is " << minCluster << "\n\n\n" << std::endl;
     
     if (minCluster == -1) {
-        // std::cout << "AAAAAAHHH THIS SHOULDN'T HAPPEN (particle not assigned to any cluster)\n";
         exit(1);
     }
 
@@ -150,13 +139,11 @@ bool KMeans::reassignParticles(std::vector<Cluster>& clusters) {
 
 void KMeans::updateClusters(std::vector<Cluster>& clusters) {
   int numParticles;
-  float totalX, totalY, totalT;//, avgX, avgY, avgT;
+  float totalX, totalY, totalT;
   for (Cluster& cluster : clusters) {
     numParticles = cluster.particles.size();
 
     if (!numParticles) {
-      // std::cout << "AHHH !! No particles in this cluster??\n\n\n\n\n\n";
-      //exit(1);
       continue;
     }
     
@@ -186,7 +173,6 @@ void KMeans::assignVariances(std::vector<Cluster>& clusters) {
 
     // Assign maximum variance to empty clusters
     if (!clusters.at(clusterIdx).particles.size()) {
-      // std::cout << "No particles in this cluster!\n";
       clusters.at(clusterIdx).variance = FLT_MAX;
       continue;
     }
@@ -204,5 +190,4 @@ void KMeans::assignVariances(std::vector<Cluster>& clusters) {
     // Now calculate the determinant
     clusters.at(clusterIdx).variance = covarianceMat.determinant();
   }
-  
 }

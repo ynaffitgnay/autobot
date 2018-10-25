@@ -150,16 +150,9 @@ void LocalizationModule::processFrame() {
   pose_avg = avgLocVals(pfilter_->pose());
   self.loc = pose_avg.translation;
   self.orientation = pose_avg.rotation;
-  // self.loc = pfilter_->pose().translation;
-  // self.orientation = pfilter_->pose().rotation;
+
   self.localized = pfilter_->getLocalized();
   log(40, "Localization Update: x=%2.f, y=%2.f, theta=%2.2f", self.loc.x, self.loc.y, self.orientation * RAD_T_DEG);
-  // printf("Localization Update: x=%2.f, y=%2.f, theta=%2.2f", self.loc.x, self.loc.y, self.orientation * RAD_T_DEG);
-
-  // Retrieve the robot's current location from localization memory
-  // and store it back into world objects
-  // auto sloc = cache_.localization_mem->player_;
-  // self.loc = sloc;
 
   double dt = (last_time_ < 0) ? 1.0/30.0 : (time - last_time_);
   if(!ball.seen){

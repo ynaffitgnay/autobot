@@ -11,7 +11,6 @@
 #include <memory/WorldObjectBlock.h>
 
 struct Cluster {
-  //int id;
   std::vector<const Particle*> particles;
   Particle centroid;
   float variance;

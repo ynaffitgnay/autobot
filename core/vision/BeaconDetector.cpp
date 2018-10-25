@@ -24,10 +24,6 @@ void BeaconDetector::findBeacons(std::vector<Blob>& blobs) {
   std::vector<WorldObject> pb_beacons;
   std::vector<std::vector<WorldObject> > beacon_list;
   for (int i = 0; i < blobs.size(); i++) {
-    // auto position = cmatrix_.getWorldPosition(blobs.at(i).avgX, blobs.at(i).avgY, 150); 
-    // auto visionDistance = cmatrix_.groundDistance(position);
-    // auto visionBearing = cmatrix_.bearing(position);
-    // std::cout << "Saw " << i << " at [" << blobs.at(i).avgX << " ," << blobs.at(i).avgY << "] with calculated distance " << visionDistance << std::endl;
     switch (blobs.at(i).color)
     {  
       case c_BLUE : 
@@ -221,10 +217,6 @@ bool BeaconDetector::objectValidInWorld(WorldObject& object, Blob& topBlob, Blob
   // We want the width the camera believes the beacon is to be comparable with what the pixels tell us the width is
   if (((std::abs(1-topratioWidth) < ratioThresh)+ (std::abs(1-topratioHeight) < ratioThresh) + (std::abs(1-bottomratioWidth) < ratioThresh) + (std::abs(1-bottomratioHeight) < ratioThresh)) >= 3) 
   {
-    // if (object.visionDistance > 4000){
-    //   return false;
-    // }
-
     // We'll use this confidence later when comparing possible beacons to try to use the best fit. This handles the upside down beacons very well.
     object.visionConfidence = std::abs(1-topratioWidth)+ std::abs(1-topratioWidth) + std::abs(1-bottomratioWidth) + std::abs(1-bottomratioHeight);
     return true;
