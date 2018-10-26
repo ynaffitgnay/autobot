@@ -4,7 +4,7 @@
 #include <common/Random.h>
 
 ParticleFilter::ParticleFilter(MemoryCache& cache, TextLogger*& tlogger) 
-  : cache_(cache), tlogger_(tlogger), dirty_(true), kmeans_(new KMeans(cache, tlogger, 8, 10)), M_(300), alpha_slow_(0.01), alpha_fast_(0.5),robot_localized_(false) {
+  : cache_(cache), tlogger_(tlogger), dirty_(true), kmeans_(new KMeans(cache, tlogger, 8, 10)), M_(200), alpha_slow_(0.01), alpha_fast_(0.5),robot_localized_(false) {
 
 }
 
@@ -20,8 +20,8 @@ void ParticleFilter::init(Point2D loc, float orientation) {
   particles().resize(M_);
   auto frame = cache_.frame_info->frame_id;
   for(auto& p : particles()) {
-    p.x = Random::inst().sampleU(-2500.0,2500.0);
-    p.y = Random::inst().sampleU(-1250.0,1250.0);
+    p.x = Random::inst().sampleU(1500.0,2500.0);
+    p.y = Random::inst().sampleU(-500.0,500.0);
     p.t = Random::inst().sampleU(-M_PI, M_PI);  
     p.w = 1.0/M_;
   }
