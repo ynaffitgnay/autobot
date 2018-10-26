@@ -66,7 +66,13 @@ bool ParticleFilter::getLocalized() {
 
 const Pose2D& ParticleFilter::pose() const {
   if(dirty_) {
-    mean_ = kmeans_->runKMeans(particles()); 
+    Pose2D newPose = kmeans_->runKMeans(particles());
+    if (!(newPose.translation.x == -15000.0 &&
+        newPose.translation.y == -15000.0 &&
+          newPose.rotation == -15000.0))
+    {
+      mean_ = newPose;
+    }
   }
   return mean_;
 }
@@ -163,58 +169,69 @@ bool ParticleFilter::checkResample(){
 
 std::vector<Particle> ParticleFilter::resampleStep(){
   std::vector<Particle> resampled_particles(M_);
-  double r = Random::inst().sampleU(0.0, 1.0 / M_);
-  double c = particles().at(0).w;
-  double u;
-  double resample_prob = std::max((1.0 - (w_fast_ / w_slow_)), 0.0);
-  int rand_injected = 0;
-  int area_injected = 0;
-
-  int i = 0;
   bool noob = false;
-  double stdev_x = 10.0;
-  double stdev_y = 10.0;
-  double stdev_th = 0.01;
-  double mu_x = mean_.translation.x;
-  double mu_y = mean_.translation.y;
-  double mu_th = mean_.rotation;
+  if (particles().size() == 0)
+  {
+    //std::cout << "No particles to resample from!" << std::endl;
+    noob = true;
+  }
 
-  double N_eff;
-
-  for(int m = 0; m < M_; m++){
-    u = r + (double(m) - 1.0) / double(M_);
-
-    while(u > c){
-      ++i;
-      if(i >= M_){
-        noob = true;
+  if (!noob)
+  {
+    double r = Random::inst().sampleU(0.0, 1.0 / M_);
+    double c = particles().at(0).w;
+    double u;
+    double resample_prob = std::max((1.0 - (w_fast_ / w_slow_)), 0.0);
+    int rand_injected = 0;
+    int area_injected = 0;
+    
+    int i = 0;
+    //bool noob = false;
+    double stdev_x = 10.0;
+    double stdev_y = 10.0;
+    double stdev_th = 0.01;
+    double mu_x = mean_.translation.x;
+    double mu_y = mean_.translation.y;
+    double mu_th = mean_.rotation;
+    
+    double N_eff;
+    
+    for(int m = 0; m < M_; m++){
+      u = r + (double(m) - 1.0) / double(M_);
+    
+      while(u > c){
+        ++i;
+        if(i >= M_){
+          noob = true;
+          break;
+        }
+        c += particles().at(i).w;
+      }
+    
+      if(noob){
         break;
       }
-      c += particles().at(i).w;
-    }
-
-    if(noob){
-      break;
-    }
-
-    double rand_prob = Random::inst().sampleU(0.0, 1.0);
-    if (rand_prob < resample_prob && rand_injected < (0.25 * (double)M_)) {
-      if (area_injected < (0.20 * (double)M_)) {
-        ++rand_injected;
-        ++area_injected;
-        particles().at(i).x = stdev_x*Random::inst().sampleN(0.0,1.0) + mu_x;
-        particles().at(i).y = stdev_y*Random::inst().sampleN(0.0,1.0) + mu_y;
-        particles().at(i).t = stdev_th*Random::inst().sampleN(0.0,1.0) + mu_th;
-      } else{
-        ++rand_injected;
-        particles().at(i).x = Random::inst().sampleU(-2500.0,2500.0);
-        particles().at(i).y = Random::inst().sampleU(-1250.0,1250.0);
-        particles().at(i).t = Random::inst().sampleU(-M_PI, M_PI);
+    
+      double rand_prob = Random::inst().sampleU(0.0, 1.0);
+      if (rand_prob < resample_prob && rand_injected < (0.25 * (double)M_)) {
+        if (area_injected < (0.20 * (double)M_)) {
+          ++rand_injected;
+          ++area_injected;
+          particles().at(i).x = stdev_x*Random::inst().sampleN(0.0,1.0) + mu_x;
+          particles().at(i).y = stdev_y*Random::inst().sampleN(0.0,1.0) + mu_y;
+          particles().at(i).t = stdev_th*Random::inst().sampleN(0.0,1.0) + mu_th;
+        } else{
+          ++rand_injected;
+          particles().at(i).x = Random::inst().sampleU(-2500.0,2500.0);
+          particles().at(i).y = Random::inst().sampleU(-1250.0,1250.0);
+          particles().at(i).t = Random::inst().sampleU(-M_PI, M_PI);
+        }
       }
+      particles().at(i).w = 1.0 / M_;
+      resampled_particles.at(m) = particles().at(i);
     }
-    particles().at(i).w = 1.0 / M_;
-    resampled_particles.at(m) = particles().at(i);
   }
+  
   if(noob){
     resampled_particles.clear();
     resampled_particles.resize(M_);
