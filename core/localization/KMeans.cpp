@@ -17,6 +17,17 @@ Pose2D KMeans::runKMeans(const std::vector<Particle>& observations) {
   int numObs = observations.size();
   float minVariance = FLT_MAX;
 
+  Pose2D emptyPose = Pose2D();
+  emptyPose.translation.x = -15000.0;
+  emptyPose.translation.y = -15000.0;
+  emptyPose.rotation = -15000.0;
+  
+  if (numObs == 0)
+  {
+    std::cout << "No particles to determine pose!" << std::endl;
+    return emptyPose;
+  }
+
   // Initialize clusters using Forgy method (randomly choose k points from vector)
   for (int i = 0; i < k_; ++i)
   {
@@ -76,11 +87,16 @@ Pose2D KMeans::runKMeans(const std::vector<Particle>& observations) {
   // now choose the vector with the lowest variance with enough particles
   assignVariances(clusters);
 
-  const Cluster* bestCluster;
+  const Cluster* bestCluster = NULL;
   for (const Cluster& cluster : clusters) {
     if (cluster.variance < minVariance && cluster.particles.size() > ((float)numObs / thresholdFactor_)) {
       bestCluster = &cluster;
     }
+  }
+
+  if (bestCluster == NULL || minVariance == FLT_MAX)
+  {
+    return emptyPose;
   }
   
   Pose2D clusterLoc = Pose2D();
@@ -98,6 +114,12 @@ bool KMeans::reassignParticles(std::vector<Cluster>& clusters) {
   std::vector<Cluster>::iterator clusterIt;
   int clusterIdx = 0;
   std::vector<std::vector<const Particle*>> newClusterAssignments(k_);
+
+  if (clusters.size() != k_)
+  {
+    std::cout << "Not k clusters!" << std::endl;
+    return !noneReassigned;
+  }
 
   for (clusterIt = clusters.begin(); clusterIt != clusters.end(); ++clusterIt) {
     for (auto& particlePtr : clusterIt->particles) {
@@ -169,6 +191,15 @@ void KMeans::assignVariances(std::vector<Cluster>& clusters) {
 
   for (int clusterIdx = 0; clusterIdx < k_; ++clusterIdx) {
     Matrix3f covarianceMat = Matrix3f::Zero(); // new covariance matrix for each cluster
+
+    if (clusters.size() != k_) {
+      std::cout << "Wrong number of clusters!" << std::endl;
+      for (auto& cluster : clusters) {
+        cluster.variance = FLT_MAX;
+      }
+      return;  
+    }
+    
     std::vector<float> mean = {clusters.at(clusterIdx).centroid.x, clusters.at(clusterIdx).centroid.y, clusters.at(clusterIdx).centroid.t};
 
     // Assign maximum variance to empty clusters
