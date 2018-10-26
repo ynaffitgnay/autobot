@@ -10,11 +10,12 @@ import mem_objects
 import task, util
 import head
 import math
+import random
 from task import Task, MultiTask
 import cfgpose, cfgstiff
 import pose
 #from pose import ToPoseMoveHead
-from memory import walk_request, walk_response, kick_request, joint_commands, behavior_mem, joint_angles
+from memory import walk_request, walk_response, kick_request, joint_commands, behavior_mem, joint_angles, world_objects
 from state_machine import Node, S, C, T, LoopingStateMachine, Event
 import UTdebug
 
@@ -34,26 +35,26 @@ class BlockLeft(Node):
   def run(self):
     UTdebug.log(15, "Blocking left")
 
-    return pose.BlockLeft()
+    return #pose.BlockLeft()
 
 class BlockRight(Node):
   def run(self):
     UTdebug.log(15, "Blocking right")
   
-    return pose.BlockRight()
+    return #pose.BlockRight()
 
 class BlockCenter(Node):
   def run(self):
     UTdebug.log(15, "Blocking center")
     
-    return pose.Squat(time=1.0)
+    return# pose.Squat(time=1.0)
 
 class Reset(Node):
   """Go back to normal"""
   def run(self):
     UTdebug.log(15,"Resetting keeper")
 
-    return pose.Sit()
+    return #pose.Sit()
 
 
 class DontBlock(Node):
@@ -73,21 +74,44 @@ class DontBlock(Node):
     newPose[core.RElbowRoll] = 0
     newPose[core.RHipPitch] = -46.5
     newPose[core.LHipPitch] = -46.5
-    return pose.ToPoseMoveHead(pose=newPose, tilt=-15, pan = ball.bearing, time=0.5)
+    return #pose.ToPoseMoveHead(pose=newPose, tilt=-15, pan = ball.bearing, time=0.5)
 
-# class MoveHeadLeft(Node):
-#   """Search for the ball to the left"""
-#   def run(self):
-#     commands.setHeadPanTilt(core.DEG_T_RAD*85.0,-15.0,1.0)
-#     if self.getTime() > 1.2:
-#       self.finish()
+class GetReady(Node):
+  def run(self):
+    # commands.stand()
+    commands.setHeadPanTilt(0.0,0.0,1.5)
+    if self.getTime() > 2.5:
+      self.finish()
 
-# class MoveHeadRight(Node):
-#   """Search for the ball to the right"""
-#   def run(self):
-#     commands.setHeadPanTilt(-core.DEG_T_RAD*85.0,-15.0,1.0)
-#     if self.getTime() > 1.2:
-#       self.finish()
+class MoveHead(Node):
+  """General Move Head node"""
+  def __init__(self, pan, tilt, time):
+    super(MoveHead, self).__init__()
+    self.pan = pan
+    self.tilt = tilt
+    self.time = time
+  def run(self):
+    # commands.setWalkVelocity(0.0,0.0,0.0)
+    commands.setHeadPanTilt(core.DEG_T_RAD*self.pan,self.tilt,self.time)
+    commands.setHeadTilt(self.tilt)
+    if self.getTime() > (self.time + 0.3):
+      self.finish()
+
+class CheckIfLocalized(Node):
+  def run(self):
+
+    commands.setHeadPanTilt(0.0,-10.0,1.0)
+    robot = world_objects.getObjPtr(core.WO_TEAM5)
+    check = random.randint(0,100)
+    print("Check number: %d" % check)
+    if (check % 2) > 0:
+      print("Lost")
+      self.postSignal("lost")
+      return
+    else:
+      print("Localized")
+      self.postSignal("localized")
+      return
 
 class Blocker(Node):
 
@@ -121,19 +145,59 @@ class Blocker(Node):
         choice = "right"
       elif y_intercept <= 13.5 and y_intercept >= -13.5:
         choice = "center"
-      self.postSignal(choice)
+    elif ball.seen:
+      choice = "moveBall"
+      print("Move ball signal")
+    else:  
       return
+    self.postSignal(choice)
+    return
+
+class MoveBtwBall(Node):
+  def run(self):
+    ball = mem_objects.world_objects[core.WO_BALL]
+    robot = world_objects.getObjPtr(core.WO_TEAM5)
+    print("Ball dist: %f Ball bear: %f\n" % (ball.distance, ball.bearing))
+    print("Robot pose: [%f,%f,%f]\n" %(robot.loc.x,robot.loc.y,robot.orientation*core.RAD_T_DEG))
+    
+    # TODO: Change this to be a check of the state of localization
+    check = random.randint(0,100)
+    print("Move check number: %d" % check)
+    
+
+    if self.getTime() > 2.0:
+      if check < 90:
+        signal = "localized"
+      else:
+        signal = "lost"
+      self.postSignal(signal)
+
+
 
 class Playing(LoopingStateMachine):
   def setup(self):
     ball = mem_objects.world_objects[core.WO_BALL]
     blocker = Blocker()
+    lookStraight = MoveHead(0.0,-10.0,1.0)
+    moveHeadLeft = MoveHead(85.0,-10.0,1.0)
+    moveHeadRight = MoveHead(-85.0,-10.0,1.0)
+    reset = Reset()
+    rdy = GetReady()
+    moveBtwBall = MoveBtwBall()
+    checkLoc = CheckIfLocalized()
     blocks = {"left": BlockLeft(),
               "right": BlockRight(),
               "center": BlockCenter(),
               "miss": DontBlock()
               }
-    reset = Reset()
+    locState = {"lost": moveHeadLeft,"localized": blocker}
+    self.add_transition(rdy,C,checkLoc)
+    for state in locState:
+      s = locState[state]
+      self.add_transition(checkLoc, S(state), s)
+      self.add_transition(moveBtwBall, S(state),s)
     for name in blocks:
       b = blocks[name]
       self.add_transition(blocker, S(name), b, T(4.0), reset, T(3.0), blocker)
+    self.add_transition(blocker, S("moveBall"), moveBtwBall)
+    self.add_transition(moveHeadLeft,C,moveHeadRight,C,checkLoc)
