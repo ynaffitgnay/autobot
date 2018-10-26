@@ -33,60 +33,28 @@ import UTdebug
 class BlockLeft(Node):
   def run(self):
     UTdebug.log(15, "Blocking left")
-    
-    ball = mem_objects.world_objects[core.WO_BALL]
-    commands.setStiffness(cfgstiff.OneArmsOnly)
-    commands.setHeadPan(ball.bearing, 0.2)
-    newPose = dict()
-    newPose[core.LShoulderRoll] = 70
-    newPose[core.LShoulderPitch] = -95
-    newPose[core.LElbowRoll] = -1
-    
-    # Reset right arm to neutral
-    newPose[core.RShoulderRoll] = 15
-    newPose[core.RShoulderPitch] = -100
-    newPose[core.RElbowRoll] = 0
-    newPose[core.RHipPitch] = -46.5
-    newPose[core.LHipPitch] = -46.5
-    return pose.ToPoseMoveHead(pose=newPose, tilt=-15, pan = ball.bearing, time=0.1)
+
+    return pose.BlockLeft()
 
 class BlockRight(Node):
   def run(self):
     UTdebug.log(15, "Blocking right")
-
-    ball = mem_objects.world_objects[core.WO_BALL]
-    commands.setStiffness(cfgstiff.OneArmsOnly)
-    commands.setHeadPan(ball.bearing, 0.2)
-    newPose = dict()
-    newPose[core.RShoulderRoll] = 70
-    newPose[core.RShoulderPitch] = -95
-    newPose[core.RElbowRoll] = -1
-
-    # Reset Left arm to neutral
-    newPose[core.LShoulderRoll] = 15
-    newPose[core.LShoulderPitch] = -100
-    newPose[core.LElbowRoll] = 0
-    newPose[core.RHipPitch] = -46.5
-    newPose[core.LHipPitch] = -46.5
-    return pose.ToPoseMoveHead(pose=newPose, tilt=-15, pan = ball.bearing, time=0.1)
+  
+    return pose.BlockRight()
 
 class BlockCenter(Node):
   def run(self):
     UTdebug.log(15, "Blocking center")
+    
+    return pose.Squat(time=1.0)
 
-    ball = mem_objects.world_objects[core.WO_BALL]
-    commands.setStiffness(cfgstiff.OneArmsOnly)
-    commands.setHeadPan(ball.bearing, 0.2)
-    newPose = dict()
-    newPose[core.LShoulderRoll] = 9.95
-    newPose[core.LShoulderPitch] = -3.85
-    newPose[core.LElbowRoll] = -1
-    newPose[core.RShoulderRoll] = 9.95
-    newPose[core.RShoulderPitch] = -3.85
-    newPose[core.RElbowRoll] = -1
-    newPose[core.RHipPitch] = -46.5
-    newPose[core.LHipPitch] = -46.5
-    return pose.ToPoseMoveHead(pose=newPose, tilt=-15, pan = ball.bearing, time=0.25)
+class Reset(Node):
+  """Go back to normal"""
+  def run(self):
+    UTdebug.log(15,"Resetting keeper")
+
+    return pose.Sit()
+
 
 class DontBlock(Node):
   """Ball missed dont block"""
@@ -122,6 +90,7 @@ class DontBlock(Node):
 #       self.finish()
 
 class Blocker(Node):
+
   def run(self):
     # if not ball.seen, move the head back to the center
     ball = mem_objects.world_objects[core.WO_BALL]
@@ -164,7 +133,7 @@ class Playing(LoopingStateMachine):
               "center": BlockCenter(),
               "miss": DontBlock()
               }
-    reset = DontBlock()
+    reset = Reset()
     for name in blocks:
       b = blocks[name]
-      self.add_transition(blocker, S(name), b, T(2), reset, T(3.0), blocker)
+      self.add_transition(blocker, S(name), b, T(4.0), reset, T(3.0), blocker)

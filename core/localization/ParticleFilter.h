@@ -22,12 +22,12 @@ class ParticleFilter {
       return cache_.localization_mem->particles;
     }
     std::map<WorldObjectType,Pose2D> beacons_ = {
-    { WO_BEACON_YELLOW_BLUE, Pose2D(0.0, 1500.0,-1000.0) },
-    { WO_BEACON_BLUE_YELLOW, Pose2D(0.0, 1500.0,1000.0) },
-    { WO_BEACON_YELLOW_PINK, Pose2D(0.0, -1500.0,-1000.0) },
-    { WO_BEACON_PINK_YELLOW, Pose2D(0.0, -1500.0,1000.0) },
-    { WO_BEACON_BLUE_PINK, Pose2D(0.0, 0.0, 1000.0) },
-    { WO_BEACON_PINK_BLUE, Pose2D(0.0, 0.0,-1000.0) }};
+    { WO_BEACON_YELLOW_BLUE, Pose2D(0.0, -200.0,-1000.0) },
+    { WO_BEACON_BLUE_YELLOW, Pose2D(0.0, -500.0,-1000.0) },
+    { WO_BEACON_YELLOW_PINK, Pose2D(0.0, 800.0,-1000.0) },
+    { WO_BEACON_PINK_YELLOW, Pose2D(0.0, 500.0,-1000.0) },
+    { WO_BEACON_BLUE_PINK, Pose2D(0.0, 300.0, 1000.0) },
+    { WO_BEACON_PINK_BLUE, Pose2D(0.0, 0.0, 1000.0) }};
 
   protected:
     inline std::vector<Particle>& particles() {
