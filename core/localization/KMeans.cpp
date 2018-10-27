@@ -90,12 +90,14 @@ Pose2D KMeans::runKMeans(const std::vector<Particle>& observations) {
   const Cluster* bestCluster = NULL;
   for (const Cluster& cluster : clusters) {
     if (cluster.variance < minVariance && cluster.particles.size() > ((float)numObs / thresholdFactor_)) {
+      minVariance = cluster.variance;
       bestCluster = &cluster;
     }
   }
 
   if (bestCluster == NULL || minVariance == FLT_MAX)
   {
+    std::cout << "No bestCluster\n";
     return emptyPose;
   }
   
