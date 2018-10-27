@@ -7,7 +7,7 @@
 #include <memory/MemoryCache.h>
 #include <memory/LocalizationBlock.h>
 #include <localization/Logging.h>
-#include <localization/Particle.h>
+#include <common/Particle.h>
 #include <memory/WorldObjectBlock.h>
 
 struct Cluster {

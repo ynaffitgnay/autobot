@@ -9,6 +9,7 @@
 #include <memory/WorldObjectBlock.h>
 #include <localization/Logging.h>
 #include <localization/KMeans.h>
+#include <common/Particle.h>
 
 class ParticleFilter {
   public:
