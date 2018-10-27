@@ -5,7 +5,6 @@
 
 ParticleFilter::ParticleFilter(MemoryCache& cache, TextLogger*& tlogger) 
   : cache_(cache), tlogger_(tlogger), dirty_(true), kmeans_(new KMeans(cache, tlogger, 8, 10)), M_(200), alpha_slow_(0.01), alpha_fast_(0.5),robot_localized_(false) {
-
 }
 
 ParticleFilter::~ParticleFilter() {
@@ -43,25 +42,6 @@ void ParticleFilter::processFrame() {
   if(checkResample()){
     particles() = resampleStep();
   }
-}
-
-void ParticleFilter::updateLocalized() {
-  float fun_threshold = 0.50;
-  
-  if (w_fast_/w_slow_ > fun_threshold) {
-    // Might need to be some more conditions to prevent jittering
-    if (beacons_list_.size() >= 2) {
-      robot_localized_ = true;
-    }
-  } else {
-    // Might need to be some more conditions to prevent jittering
-    robot_localized_ = false;
-    beacons_list_.clear();
-  }
-}
-
-bool ParticleFilter::getLocalized() {
-  return robot_localized_;
 }
 
 const Pose2D& ParticleFilter::pose() const {

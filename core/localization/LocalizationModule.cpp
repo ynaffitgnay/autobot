@@ -151,7 +151,6 @@ void LocalizationModule::processFrame() {
   self.loc = pose_avg.translation;
   self.orientation = pose_avg.rotation;
 
-  self.localized = pfilter_->getLocalized();
   log(40, "Localization Update: x=%2.f, y=%2.f, theta=%2.2f", self.loc.x, self.loc.y, self.orientation * RAD_T_DEG);
 
   double dt = (last_time_ < 0) ? 1.0/30.0 : (time - last_time_);

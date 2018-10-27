@@ -12,7 +12,7 @@ KMeans::KMeans(MemoryCache& cache, TextLogger*& tlogger, int k, float threshold)
 
 Pose2D KMeans::runKMeans(const std::vector<Particle>& observations) {
   std::set<int> indices;
-  std::vector<Cluster> clusters;
+  std::vector<Cluster> clusters(k_);
 
   int numObs = observations.size();
   float minVariance = FLT_MAX;
@@ -27,62 +27,25 @@ Pose2D KMeans::runKMeans(const std::vector<Particle>& observations) {
     std::cout << "No particles to determine pose!" << std::endl;
     return emptyPose;
   }
-
-  // Initialize clusters using Forgy method (randomly choose k points from vector)
-  for (int i = 0; i < k_; ++i)
-  {
-    int randIdx = rand() % numObs;
-    
-    std::set<int>::const_iterator it = indices.find(randIdx);
-    while (it != indices.end()) {
-      randIdx = rand() % numObs;
-      it = indices.find(randIdx);
-    }
-
-    indices.insert(randIdx);
-  }
-
-  for (const int& index : indices) {
-    Cluster newCluster;
-    newCluster.centroid.x = observations.at(index).x;
-    newCluster.centroid.y = observations.at(index).y;
-    newCluster.centroid.t = observations.at(index).t;
-
-    clusters.push_back(newCluster);
-  }
-
-  // Now determine the initial cluster each particle should go into
+  
+  // Initialize clusters using random partition method
   for (const Particle& particle : observations) {
-    float minMeansSquared = FLT_MAX;
-    int minCluster = -1;
-
-    for (int i = 0; i < k_; ++i) {
-      float meansSquared = 0;
-      
-      meansSquared += pow((particle.x - clusters.at(i).centroid.x), 2);
-      meansSquared += pow((particle.y - clusters.at(i).centroid.y), 2);
-      meansSquared += pow((particle.t - clusters.at(i).centroid.t), 2);
-
-      if (meansSquared < minMeansSquared) {
-        minMeansSquared = meansSquared;
-        minCluster = i;
-      }
-    }
-    
-    if (minCluster == -1) {
-        exit(1);
-    }
-
-    clusters.at(minCluster).particles.push_back(&particle);
+    int clusterIdx = rand() % k_;
+    clusters.at(clusterIdx).particles.push_back(&particle);
   }
 
   updateClusters(clusters);
 
+  int count = 0;
+  
   // while not converged: assign particles then updateclusters
   while (reassignParticles(clusters))
   {
+    ++count;
     updateClusters(clusters);
   }
+
+  //std::cout << "Iterations until convergence: " << count << std::endl;
 
   // now choose the vector with the lowest variance with enough particles
   assignVariances(clusters);

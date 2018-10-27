@@ -17,7 +17,6 @@ class ParticleFilter {
     ~ParticleFilter();
     void init(Point2D loc, float orientation);
     void processFrame();
-    bool getLocalized();
     const Pose2D& pose() const;
     inline const std::vector<Particle>& particles() const {
       return cache_.localization_mem->particles;
@@ -48,7 +47,6 @@ class ParticleFilter {
     std::set<WorldObjectType> beacons_list_;
     mutable Pose2D mean_;
     mutable bool dirty_;
-    void updateLocalized();
     void propagationStep(const Pose2D& disp);
     void updateStep();
     bool checkResample();
