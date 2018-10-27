@@ -36,15 +36,12 @@ void ParticleFilter::processFrame() {
 
   log(41, "Updating particles from odometry: %2.f,%2.f @ %2.2f", disp.translation.x, disp.translation.y, disp.rotation * RAD_T_DEG);
   propagationStep(disp);
-  cache_.localization_mem->particles = particles();
   
   updateStep();
-  cache_.localization_mem->particles = particles();
   
   // Check if resample
   if(checkResample()){
     particles() = resampleStep();
-    cache_.localization_mem->particles = particles();
   }
 }
 
