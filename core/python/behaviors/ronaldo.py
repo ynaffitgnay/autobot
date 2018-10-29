@@ -16,14 +16,6 @@ import cfgstiff
 from task import Task
 from state_machine import Node, C, T, S, LoopingStateMachine, StateMachine, EventNode, Event, NegationEvent
 
-class BallSeen(Event):
-  """Event that fires if Ball is seen"""
-  def __init__(self, ball):
-    super(BallSeen, self).__init__()
-    self.ball = ball
-  def ready(self):
-    return self.ball.seen
-
 class ObjectSeen(Event):
   """Event that fires when all the objects passed to this event are seen in the current frame"""
   def __init__(self,*objects):
@@ -179,10 +171,12 @@ class GoToBall(Node):
     self.theta_prev = bearing
     self.dist_prev = distance
     self.time_last = self.time_current
+    if abs(distance - self.dist) < 50.0:
+      self.finish()
 
 class TurnAroundBall(Node):
   """Circle the ball while searching for the goal"""
-  def __init__(self, ball, dist):
+  def __init__(self, ball, dist, dir):
     super(TurnAroundBall, self).__init__()
     self.ball = ball
     self.k_t = (0.7, 0.01, 0.1)
@@ -192,6 +186,7 @@ class TurnAroundBall(Node):
     self.theta_prev = 0.0
     self.dist_integral = 0.0
     self.dist_prev = 0.0
+    self.dir = dir
     self.time_last = time.clock()
     self.time_current = time.clock()
 
@@ -217,12 +212,12 @@ class TurnAroundBall(Node):
     else:
       theta_cont = self.k_t[0] * bearing + self.k_t[1] * self.theta_integral + self.k_t[2] *(bearing - self.theta_prev) / dt
       dist_cont = self.k_d[0] * (distance - self.dist) + self.k_d[1] * self.dist_integral + self.k_d[2] *(distance - self.dist_prev) / dt
-    commands.setWalkVelocity(dist_cont, 0.6, theta_cont)
+    commands.setWalkVelocity(dist_cont, 0.6 * self.dir, theta_cont)
     self.theta_prev = bearing
     self.dist_prev = distance
     self.time_last = self.time_current
     if self.getTime() > 2.0:
-      self.finish()
+        self.finish()
 
 class Align(Node):
   """Turn around the ball to find the goal"""
@@ -345,9 +340,16 @@ class Playing(LoopingStateMachine):
   def setup(self):
     ball = memory.world_objects.getObjPtr(core.WO_BALL)
     goal = memory.world_objects.getObjPtr(core.WO_UNKNOWN_GOAL)
+    by = memory.world_objects.getObjPtr(core.WO_BEACON_BLUE_YELLOW)
+    yb = memory.world_objects.getObjPtr(core.WO_BEACON_YELLOW_BLUE)
+    yp = memory.world_objects.getObjPtr(core.WO_BEACON_YELLOW_PINK)
+    py = memory.world_objects.getObjPtr(core.WO_BEACON_PINK_YELLOW)
+    bp = memory.world_objects.getObjPtr(core.WO_BEACON_BLUE_PINK)
+    pb = memory.world_objects.getObjPtr(core.WO_BEACON_PINK_BLUE)
 
     rdy = GetReady()
     lookStraight = MoveHead(0.0,-10.0,1.0)
+    lookUp = MoveHead(0.0,-5.0,1.0)
     moveHeadLeft = MoveHead(85.0,-15.0,1.0)
     moveHeadRight = MoveHead(-85.0,-45.0,1.0)
     turnInPlace = TurnInPlace()
@@ -355,9 +357,10 @@ class Playing(LoopingStateMachine):
 
     moveHeadLeftGoal = MoveHead(85.0,0.0,1.0)
     moveHeadRightGoal = MoveHead(-85.0,0.0,1.0)
-    turnAroundBall = TurnAroundBall(ball,200.0)
+    turnAroundBallLeft = TurnAroundBall(ball,200.0,1.0)
+    turnAroundBallRight = TurnAroundBall(ball,200.0,-1.0)
     lookDown = MoveHead(0.0,-45.0,1.5)
-    align200 = Align(ball,goal,200.0, -15.0)  
+    align200 = Align(ball,goal,200.0, -15.0)
 
     dribble = Align(ball,goal,-200.0, -20.0)
     wait = Stand()
@@ -382,25 +385,26 @@ class Playing(LoopingStateMachine):
 
 
     # After Robot reaches near the ball, maintain distance to ball and find the goal
-    self.add_transition(goToBall,BD(ball,50.0),moveHeadLeftGoal,C,moveHeadRightGoal,C,lookDown,C,turnAroundBall,C,moveHeadLeftGoal)
-    self.add_transition(moveHeadLeftGoal,O(goal,ball),align200)
-    self.add_transition(moveHeadRightGoal,O(goal,ball),align200)
-    self.add_transition(lookDown,O(goal,ball),align200)
-    self.add_transition(turnAroundBall,O(goal,ball),align200)
-    self.add_transition(align200,NO(goal,ball),turnAroundBall)
-    self.add_transition(turnAroundBall,NO(ball),rdy)
+    self.add_transition(goToBall,C,lookUp)
+    self.add_transition(lookUp,O(ball,pb),turnAroundBallRight)
+    self.add_transition(lookUp,O(ball,bp),turnAroundBallRight)
+    self.add_transition(lookUp,O(ball,yb),turnAroundBallLeft)
+    self.add_transition(lookUp,O(ball,by),turnAroundBallLeft)
+    self.add_transition(turnAroundBallRight,O(goal,ball),align200)
+    self.add_transition(turnAroundBallLeft,O(goal,ball),align200)
+    self.add_transition(align200,NO(goal,ball),lookUp)
 
-    # If the ball and goal are aligned with the robot, proceed to stopping, judging distance and dribbling/shooting
-    self.add_transition(align200,A(ball,goal),dribble)
-    self.add_transition(dribble,A(ball,goal,0.2).negation(),align50)
-    self.add_transition(align50,A(ball,goal),dribble)
-    self.add_transition(dribble,D(ball,goal,1300.0).negation(),wait)
-    self.add_transition(wait,D(ball,goal,1300.0),dribble)
+    # # If the ball and goal are aligned with the robot, proceed to stopping, judging distance and dribbling/shooting
+    # self.add_transition(align200,A(ball,goal),dribble)
+    # self.add_transition(dribble,A(ball,goal,0.2).negation(),align50)
+    # self.add_transition(align50,A(ball,goal),dribble)
+    # self.add_transition(dribble,D(ball,goal,1300.0).negation(),wait)
+    # self.add_transition(wait,D(ball,goal,1300.0),dribble)
 
-    # After it's dribbled, align between ball and goal again and then shift left
-    self.add_transition(wait,T(1.0),alignForKick)
-    self.add_transition(alignForKick, BD(ball,150.0), positionForKick)
-    self.add_transition(positionForKick, BB(ball,0.28), stand)
-    self.add_transition(stand, T(1.0), kick)
-    self.add_transition(kick, C, stand_again)
-    self.add_transition(stand_again, T(3.0), rdy)
+    # # After it's dribbled, align between ball and goal again and then shift left
+    # self.add_transition(wait,T(1.0),alignForKick)
+    # self.add_transition(alignForKick, BD(ball,150.0), positionForKick)
+    # self.add_transition(positionForKick, BB(ball,0.28), stand)
+    # self.add_transition(stand, T(1.0), kick)
+    # self.add_transition(kick, C, stand_again)
+    # self.add_transition(stand_again, T(3.0), rdy)
