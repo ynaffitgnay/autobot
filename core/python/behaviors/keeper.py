@@ -47,7 +47,7 @@ class BlockCenter(Node):
   def run(self):
     UTdebug.log(15, "Blocking center")
     
-    return# pose.Squat(time=1.0)
+    return pose.Squat(time=3.0)
 
 class Reset(Node):
   """Go back to normal"""
@@ -77,10 +77,35 @@ class DontBlock(Node):
     return #pose.ToPoseMoveHead(pose=newPose, tilt=-15, pan = ball.bearing, time=0.5)
 
 class GetReady(Node):
+  def __init__(self):
+    super(GetReady, self).__init__()
+    # robot = world_objects.getObjPtr(core.WO_TEAM5)
+    # goalieStartX = robot.loc.x
+    # goalieStartY = robot.loc.y
+    # self.goalieStartX = goalieStartX
+    # self.goalieStartY = goalieStartY
+    self.initial = False
   def run(self):
-    # commands.stand()
+    robot = world_objects.getObjPtr(core.WO_TEAM5)
+    xRobo = robot.loc.x
+    yRobo = robot.loc.y
+    
+    gb_line_obj = world_objects.getObjPtr(core.WO_OWN_PENALTY)
+    if gb_line_obj.seen:
+      gb_line_seg = gb_line_obj.lineLoc
+      gb_line_cent = gb_line_seg.getCenter()
+      gb_line_dist = gb_line_seg.getDistanceTo(gb_line_cent)
+      gb_robo_dist = gb_line_seg.getPointOnSegmentClosestTo(robot.loc)
+      print("Line seen: %d Center at [%f, %f] with distace: %f, but robot at [%f, %f] dist to closest point is: %f" % (gb_line_obj.seen,gb_line_cent.x,gb_line_cent.y,gb_line_dist,xRobo,yRobo,gb_robo_dist))
+
+    commands.stand()
     commands.setHeadPanTilt(0.0,0.0,1.5)
-    if self.getTime() > 2.5:
+    if xRobo < 200.0:
+      commands.setWalkVelocity(0.3,0.0,0.0)
+    else:
+      commands.setWalkVelocity(0.0,0.0,0.0)
+    if self.getTime() >5.0:
+      commands.setWalkVelocity(0.0,0.0,0.0)
       self.finish()
 
 class MoveHead(Node):
@@ -91,7 +116,7 @@ class MoveHead(Node):
     self.tilt = tilt
     self.time = time
   def run(self):
-    # commands.setWalkVelocity(0.0,0.0,0.0)
+    commands.setWalkVelocity(0.0,0.0,0.0)
     commands.setHeadPanTilt(core.DEG_T_RAD*self.pan,self.tilt,self.time)
     commands.setHeadTilt(self.tilt)
     if self.getTime() > (self.time + 0.3):
@@ -128,7 +153,7 @@ class Blocker(Node):
     y_ball = ball.distance*math.sin(ball.bearing)/10.0
     delta_t = 2.0
     v_thresh = -(x_ball / delta_t)
-    print("X: %f, Y: %f, VThresh: %f, VMag: %f, Vx: %f, Vy: %f" % (x_ball, y_ball, v_thresh, v_mag, ball.relVel.x, ball.relVel.y))
+    # print("X: %f, Y: %f, VThresh: %f, VMag: %f, Vx: %f, Vy: %f" % (x_ball, y_ball, v_thresh, v_mag, ball.relVel.x, ball.relVel.y))
     if ball.relVel.x < v_thresh and ball.seen and ball.relVel.x < 0.0:
       # ball moving away from the robot, reset to regular position
       print("Current Vx: %f, Current Vy: %f, x ball: %f, y ball: %f" % (ball.relVel.x, ball.relVel.y, x_ball, y_ball))
@@ -145,24 +170,41 @@ class Blocker(Node):
         choice = "right"
       elif y_intercept <= 13.5 and y_intercept >= -13.5:
         choice = "center"
+      self.postSignal(choice)
+      return
     elif ball.seen:
       choice = "moveBall"
-      print("Move ball signal")
+      # print("Move ball signal")
+      self.postSignal(choice)
+      return
     else:  
       return
-    self.postSignal(choice)
-    return
+    
 
 class MoveBtwBall(Node):
+  def __init__(self):
+    super(MoveBtwBall, self).__init__()
+
   def run(self):
     ball = mem_objects.world_objects[core.WO_BALL]
     robot = world_objects.getObjPtr(core.WO_TEAM5)
-    print("Ball dist: %f Ball bear: %f\n" % (ball.distance, ball.bearing))
-    print("Robot pose: [%f,%f,%f]\n" %(robot.loc.x,robot.loc.y,robot.orientation*core.RAD_T_DEG))
+
+    gb_line_obj = mem_objects.world_objects[core.WO_OWN_PENALTY]
+    # if gb_line_obj.seen:
+    #   gb_line_seg = gb_line_obj.lineLoc
+    #   gb_line_cent = gb_line_seg.getCenter()
+    #   gb_line_dist = gb_line_seg.getDistanceTo(gb_line_cent)
+    #   gb_robo_dist = gb_line_seg.getPointOnSegmentClosestTo(robot.loc)
+    # print("Line seen: %d " % gb_line_obj.seen) # Center at [%f, %f] with distace: %f, but robot at [%f, %f] dist to closest point is: %f" % (gb_line_obj.seen,gb_line_cent.x,gb_line_cent.y,gb_line_dist,xRobo,yRobo,gb_robo_dist))
+
+    if ball.seen:
+      commands.setHeadPan(ball.bearing, 0.2)
+    # print("Ball dist: %f Ball bear: %f\n" % (ball.distance, ball.bearing))
+    # print("Robot pose: [%f,%f,%f]\n" %(robot.loc.x,robot.loc.y,robot.orientation*core.RAD_T_DEG))
     
     # TODO: Change this to be a check of the state of localization
     check = random.randint(0,100)
-    print("Move check number: %d" % check)
+    # print("Move check number: %d" % check)
     
 
     if self.getTime() > 2.0:
@@ -177,10 +219,11 @@ class MoveBtwBall(Node):
 class Playing(LoopingStateMachine):
   def setup(self):
     ball = mem_objects.world_objects[core.WO_BALL]
+    robot = world_objects.getObjPtr(core.WO_TEAM5)
     blocker = Blocker()
-    lookStraight = MoveHead(0.0,-10.0,1.0)
-    moveHeadLeft = MoveHead(85.0,-10.0,1.0)
-    moveHeadRight = MoveHead(-85.0,-10.0,1.0)
+    lookStraight = MoveHead(0.0,-10.0,1.5)
+    moveHeadLeft = MoveHead(85.0,-10.0,1.5)
+    moveHeadRight = MoveHead(-85.0,-10.0,3.0)
     reset = Reset()
     rdy = GetReady()
     moveBtwBall = MoveBtwBall()

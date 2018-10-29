@@ -19,8 +19,8 @@ void ParticleFilter::init(Point2D loc, float orientation) {
   particles().resize(M_);
   auto frame = cache_.frame_info->frame_id;
   for(auto& p : particles()) {
-    p.x = Random::inst().sampleU(1500.0,2500.0);
-    p.y = Random::inst().sampleU(-500.0,500.0);
+    p.x = Random::inst().sampleU(1200.0,1500.0);
+    p.y = Random::inst().sampleU(-650.0,650.0);
     p.t = Random::inst().sampleU(-M_PI, M_PI);  
     p.w = 1.0/M_;
   }
@@ -93,6 +93,7 @@ void ParticleFilter::updateStep(){
     for(std::map<WorldObjectType,Pose2D>::iterator it=beacons_.begin(); it!=beacons_.end(); ++it){
       auto& beacon_current = cache_.world_object->objects_[it->first];
       if (beacon_current.seen) {
+        // printf("Saw %s at [%f, %f] with distance: %f and bearing: %f\n",getName(it->first),it->second.translation.x, it->second.translation.y,beacon_current.visionDistance,beacon_current.visionBearing*180.0/M_PI);
         beacons_list_.insert(it->first);
         double part_dist = sqrt(pow(p.x - it->second.translation.x, 2) + pow(p.y - it->second.translation.y,2));
         double mean_dist = beacon_current.visionDistance;
@@ -105,7 +106,7 @@ void ParticleFilter::updateStep(){
         double mean_bear = beacon_current.visionBearing;  //theta
         double x_bear = part_beacon_sep - part_global_bearing;  //phi
 
-        double var_bear = 0.2 * 0.2;
+        double var_bear = 0.1 * 0.1;
         if (x_bear > M_PI  || x_bear < -M_PI) {
           p.t = -p.t;
           x_bear = part_beacon_sep - p.t;
@@ -202,8 +203,8 @@ std::vector<Particle> ParticleFilter::resampleStep(){
           particles().at(i).t = stdev_th*Random::inst().sampleN(0.0,1.0) + mu_th;
         } else{
           ++rand_injected;
-          particles().at(i).x = Random::inst().sampleU(-2500.0,2500.0);
-          particles().at(i).y = Random::inst().sampleU(-1250.0,1250.0);
+          particles().at(i).x = Random::inst().sampleU(1200.0,1500.0);
+          particles().at(i).y = Random::inst().sampleU(-650.0,650.0);
           particles().at(i).t = Random::inst().sampleU(-M_PI, M_PI);
         }
       }
@@ -216,8 +217,8 @@ std::vector<Particle> ParticleFilter::resampleStep(){
     resampled_particles.clear();
     resampled_particles.resize(M_);
     for(auto& p : resampled_particles) {
-      p.x = Random::inst().sampleU(-2500.0,2500.0);
-      p.y = Random::inst().sampleU(-1250.0,1250.0);
+      p.x = Random::inst().sampleU(1200.0,1500.0);
+      p.y = Random::inst().sampleU(-650.0,650.0);
       p.t = Random::inst().sampleU(-M_PI, M_PI);  
       p.w = 1.0/M_;
     }

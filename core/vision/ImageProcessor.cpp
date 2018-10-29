@@ -2,6 +2,7 @@
 #include <vision/Classifier.h>
 #include <vision/GoalDetector.h>
 #include <vision/BeaconDetector.h>
+#include <vision/LineDetector.h>
 #include <vision/BallDetector.h>
 #include <vision/Logging.h>
 #include <vision/structures/Blob.h>
@@ -18,6 +19,7 @@ ImageProcessor::ImageProcessor(VisionBlocks& vblocks, const ImageParams& iparams
   goal_detector_ = std::make_unique<GoalDetector>(DETECTOR_PASS_ARGS);
   ball_detector_ = std::make_unique<BallDetector>(DETECTOR_PASS_ARGS);
   beacon_detector_ = std::make_unique<BeaconDetector>(DETECTOR_PASS_ARGS);
+  line_detector_ = std::make_unique<LineDetector>(DETECTOR_PASS_ARGS);
   calibration_ = std::make_unique<RobotCalibration>();
 }
 
@@ -31,6 +33,7 @@ void ImageProcessor::init(TextLogger* tl){
   goal_detector_ ->init(tl);
   ball_detector_->init(tl);
   beacon_detector_->init(tl);
+  line_detector_->init(tl);
 }
 
 unsigned char* ImageProcessor::getImg() {
@@ -126,6 +129,9 @@ void ImageProcessor::processFrame(){
   
   // clear out the blobs for a new frame
   std::vector<Blob>().swap(blobs_);
+
+
+
   if(vblocks_.robot_state->WO_SELF == WO_TEAM_COACH && camera_ == Camera::BOTTOM) return;
   tlog(30, "Process Frame camera %i", camera_);
 
@@ -139,6 +145,16 @@ void ImageProcessor::processFrame(){
   color_segmenter_->makeBlobs(blobs_);
   std::sort(blobs_.begin(), blobs_.end(), sortBlobAreaPredicate);
 
+  if (camera_ == Camera::BOTTOM) {
+    line_detector_->findPenaltyLine(blobs_);
+  }
+
+  if (vblocks_.world_object->objects_[WO_OWN_PENALTY].seen) {
+    printf("Saw the penalty box\n");
+  } else {
+    // printf("Saw no penalty box\n");
+  }
+
   // Populate world objects with the best ball candidate
   bestBall = getBestBallCandidate();
   if (bestBall) {
@@ -147,6 +163,7 @@ void ImageProcessor::processFrame(){
 
   beacon_detector_->findBeacons(blobs_);
   goal_detector_->findGoals(blobs_);
+
 
   // auto& ball = vblocks_.world_object->objects_[WO_BALL];
   // auto& goal = vblocks_.world_object->objects_[WO_UNKNOWN_GOAL];

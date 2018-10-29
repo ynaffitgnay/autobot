@@ -174,15 +174,15 @@ class Squat(Task):
     super(Squat, self).__init__(time=time)
     self.setChain([ 
       PoseSequence(
-        cfgpose.goalieSquatPart1, 0.4,
-        cfgpose.goalieSquatPart2, 0.2,
+        cfgpose.goalieSquatPart1, 1.4,
+        cfgpose.goalieSquatPart2, 1.2,
         cfgpose.goalieSquatPart2, time,
-        cfgpose.goalieSquat5, 0.2,
-        cfgpose.goalieSquat5, 0.3,
-        cfgpose.goalieSquatPart2, 0.3,
-        cfgpose.goalieSquatGetup15, 0.4,
-        cfgpose.goalieSquatGetup2, 0.6,
-        cfgpose.goalieSquatGetup7, 0.3
+        cfgpose.goalieSquat5, 1.2,
+        cfgpose.goalieSquat5, 1.3,
+        cfgpose.goalieSquatPart2, 1.3,
+        cfgpose.goalieSquatGetup15, 1.4,
+        cfgpose.goalieSquatGetup2, 1.6,
+        cfgpose.goalieSquatGetup7, 1.3
       ),
       Stand()
     ])

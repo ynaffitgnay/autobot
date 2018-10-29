@@ -152,7 +152,6 @@ void LocalizationModule::processFrame() {
   self.orientation = pose_avg.rotation;
 
   log(40, "Localization Update: x=%2.f, y=%2.f, theta=%2.2f", self.loc.x, self.loc.y, self.orientation * RAD_T_DEG);
-
   double dt = (last_time_ < 0) ? 1.0/30.0 : (time - last_time_);
   if(!ball.seen){
     occluded_time += dt; // Update time for which ball is not seen

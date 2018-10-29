@@ -242,17 +242,31 @@ void Classifier::mergeRuns(std::vector<VisionPointAlt>& runs) {
   // Second pass
   iter = runs.begin();
   for(iter; iter !=runs.end(); iter++) {
-    if (iter->color != c_UNDEFINED && iter->color != c_FIELD_GREEN && iter->color != c_WHITE) {
-      // Just running through the clean up the parent pointers for disjoint parent chains
-      iter->parent = findParent(*iter);
+    if(camera_ == Camera::BOTTOM) {
+      if (iter->color != c_UNDEFINED && iter->color != c_FIELD_GREEN) {
+        // Just running through the clean up the parent pointers for disjoint parent chains
+        iter->parent = findParent(*iter);
+      }
+    } else if(camera_ == Camera::TOP) {
+      if (iter->color != c_UNDEFINED && iter->color != c_FIELD_GREEN && iter->color != c_WHITE) {
+        // Just running through the clean up the parent pointers for disjoint parent chains
+        iter->parent = findParent(*iter);
+      }
     }
   }
 }
 
 void Classifier::checkAdj(VisionPointAlt& node, std::vector<VisionPointAlt>::iterator row_begin, std::vector<VisionPointAlt>::iterator row_end) {
-  if (node.color == c_UNDEFINED || node.color == c_FIELD_GREEN || node.color == c_WHITE) {
-    node.parent = nullptr;
-    return;
+  if(camera_ == Camera::BOTTOM) {
+    if (node.color == c_UNDEFINED || node.color == c_FIELD_GREEN) {
+      node.parent = nullptr;
+      return;
+    }
+  } else if(camera_ == Camera::TOP) {
+    if (node.color == c_UNDEFINED || node.color == c_FIELD_GREEN || node.color == c_WHITE) {
+      node.parent = nullptr;
+      return;
+    }
   }
   for(row_begin; row_begin != row_end; row_begin++) {
     if (row_begin->color == node.color)
