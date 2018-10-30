@@ -11,6 +11,7 @@ import task, util
 import head
 import math
 import random
+import numpy as np
 from task import Task, MultiTask
 import cfgpose, cfgstiff
 import pose
@@ -19,17 +20,6 @@ from memory import walk_request, walk_response, kick_request, joint_commands, be
 from state_machine import Node, S, C, T, LoopingStateMachine, Event
 import UTdebug
 
-# class BallSeen(Event):
-#   """Event that fires if Ball is seen"""
-#   def __init__(self, ball):
-#     super(BallSeen, self).__init__()
-#     self.ball = ball
-#   def ready(self):
-#     return self.ball.seen
-
-# def B(ball):
-#   """Ball found"""
-#   return BallSeen(ball)
 
 class BlockLeft(Node):
   def run(self):
@@ -77,34 +67,10 @@ class DontBlock(Node):
     return #pose.ToPoseMoveHead(pose=newPose, tilt=-15, pan = ball.bearing, time=0.5)
 
 class GetReady(Node):
-  def __init__(self):
-    super(GetReady, self).__init__()
-    # robot = world_objects.getObjPtr(core.WO_TEAM5)
-    # goalieStartX = robot.loc.x
-    # goalieStartY = robot.loc.y
-    # self.goalieStartX = goalieStartX
-    # self.goalieStartY = goalieStartY
-    self.initial = False
   def run(self):
-    robot = world_objects.getObjPtr(core.WO_TEAM5)
-    xRobo = robot.loc.x
-    yRobo = robot.loc.y
-    
-    gb_line_obj = world_objects.getObjPtr(core.WO_OWN_PENALTY)
-    if gb_line_obj.seen:
-      gb_line_seg = gb_line_obj.lineLoc
-      gb_line_cent = gb_line_seg.getCenter()
-      gb_line_dist = gb_line_seg.getDistanceTo(gb_line_cent)
-      gb_robo_dist = gb_line_seg.getPointOnSegmentClosestTo(robot.loc)
-      print("Line seen: %d Center at [%f, %f] with distace: %f, but robot at [%f, %f] dist to closest point is: %f" % (gb_line_obj.seen,gb_line_cent.x,gb_line_cent.y,gb_line_dist,xRobo,yRobo,gb_robo_dist))
-
     commands.stand()
     commands.setHeadPanTilt(0.0,0.0,1.5)
-    if xRobo < 200.0:
-      commands.setWalkVelocity(0.3,0.0,0.0)
-    else:
-      commands.setWalkVelocity(0.0,0.0,0.0)
-    if self.getTime() >5.0:
+    if self.getTime() > 2.0:
       commands.setWalkVelocity(0.0,0.0,0.0)
       self.finish()
 
@@ -123,20 +89,46 @@ class MoveHead(Node):
       self.finish()
 
 class CheckIfLocalized(Node):
+  def __init__(self, localized):
+    super(CheckIfLocalized, self).__init__()
+    self.localized = localized
   def run(self):
 
     commands.setHeadPanTilt(0.0,-10.0,1.0)
     robot = world_objects.getObjPtr(core.WO_TEAM5)
-    check = random.randint(0,100)
-    print("Check number: %d" % check)
-    if (check % 2) > 0:
-      print("Lost")
-      self.postSignal("lost")
-      return
-    else:
+    self.checkLocalized(robot)
+    if self.localized:
       print("Localized")
       self.postSignal("localized")
       return
+    else:
+      print("Lost")
+      self.postSignal("lost")
+      return
+
+  def checkLocalized(self,robot):
+    xGlobal = robot.loc.x
+    yGlobal = robot.loc.y
+    thGlobal = robot.orientation
+
+    if thGlobal < -np.pi/2.0 or thGlobal > np.pi/2.0:
+      #facing toward the goal, not localized
+      self.localized = False
+      return
+    else:
+      # facing correct general direction
+      if xGlobal < 1000.0:
+        # outside the top of the goalbox, not localized
+        self.localized = False
+        return
+      else:
+        if yGlobal > 700.0 or yGlobal < -700.0:
+          # outside the left of right of the goalbox, not localized
+          self.localized = False
+          return
+    # within bounds, close enough to localized
+    self.localized = True
+    return
 
 class Blocker(Node):
 
@@ -182,37 +174,142 @@ class Blocker(Node):
     
 
 class MoveBtwBall(Node):
-  def __init__(self):
+  def __init__(self,localized):
     super(MoveBtwBall, self).__init__()
-
+    self.goalieStartX = 0.0
+    self.goalieStartY = 0.0
+    self.localized = localized
+    self.initialized = False
+    self.radius = 500.0
+    self.roboDesiredX = 0.0
+    self.roboDesiredY = 0.0
+    self.roboDesiredTh = 0.0
   def run(self):
-    ball = mem_objects.world_objects[core.WO_BALL]
     robot = world_objects.getObjPtr(core.WO_TEAM5)
+    self.checkLocalized(robot)
 
-    gb_line_obj = mem_objects.world_objects[core.WO_OWN_PENALTY]
-    # if gb_line_obj.seen:
-    #   gb_line_seg = gb_line_obj.lineLoc
-    #   gb_line_cent = gb_line_seg.getCenter()
-    #   gb_line_dist = gb_line_seg.getDistanceTo(gb_line_cent)
-    #   gb_robo_dist = gb_line_seg.getPointOnSegmentClosestTo(robot.loc)
-    # print("Line seen: %d " % gb_line_obj.seen) # Center at [%f, %f] with distace: %f, but robot at [%f, %f] dist to closest point is: %f" % (gb_line_obj.seen,gb_line_cent.x,gb_line_cent.y,gb_line_dist,xRobo,yRobo,gb_robo_dist))
+    if self.localized:
+      if not self.initialized:
+        self.goalieStartX = robot.loc.x
+        self.goalieStartY = robot.loc.y
+        self.goalieStartTh = robot.orientation
+        self.initialized = True
 
-    if ball.seen:
-      commands.setHeadPan(ball.bearing, 0.2)
-    # print("Ball dist: %f Ball bear: %f\n" % (ball.distance, ball.bearing))
-    # print("Robot pose: [%f,%f,%f]\n" %(robot.loc.x,robot.loc.y,robot.orientation*core.RAD_T_DEG))
-    
-    # TODO: Change this to be a check of the state of localization
-    check = random.randint(0,100)
-    # print("Move check number: %d" % check)
-    
+      ball = mem_objects.world_objects[core.WO_BALL]
+      self.getDesiredGoaliePos(robot,ball)
 
+      self.goToDesiredPos(robot.loc.x, robot.loc.y, robot.orientation, ball)
+
+      gb_line_obj = mem_objects.world_objects[core.WO_OWN_PENALTY]
+      if gb_line_obj.seen:
+        gb_line_seg = gb_line_obj.lineLoc
+        gb_line_cent = gb_line_seg.getCenter()
+        gb_line_dist = gb_line_seg.getDistanceTo(gb_line_cent)
+        gb_robo_dist = gb_line_seg.getPointOnSegmentClosestTo(robot.loc)
+        print("Line seen: %d Center at [%f, %f] with distace: %f, but robot at [%f, %f] dist to closest point is: %f" % (gb_line_obj.seen,gb_line_cent.x,gb_line_cent.y,gb_line_dist,xRobo,yRobo,gb_robo_dist))
+
+
+      if ball.seen:
+        commands.setHeadPan(ball.bearing, 0.2)
+      # print("Ball dist: %f Ball bear: %f\n" % (ball.distance, ball.bearing))
+      # print("Robot pose: [%f,%f,%f]\n" %(robot.loc.x,robot.loc.y,robot.orientation*core.RAD_T_DEG))
+      
     if self.getTime() > 2.0:
-      if check < 90:
+      if self.localized:
         signal = "localized"
       else:
         signal = "lost"
       self.postSignal(signal)
+
+  def checkLocalized(self,robot):
+    xGlobal = robot.loc.x
+    yGlobal = robot.loc.y
+    thGlobal = robot.orientation
+
+    if thGlobal < -np.pi/2.0 or thGlobal > np.pi/2.0:
+      #facing toward the goal, not localized
+      self.localized = False
+      return
+    else:
+      # facing correct general direction
+      if xGlobal < 1000.0:
+        # outside the top of the goalbox, not localized
+        self.localized = False
+        return
+      else:
+        if yGlobal > 700.0 or yGlobal < -700.0:
+          # outside the left of right of the goalbox, not localized
+          self.localized = False
+          return
+    # within bounds, close enough to localized
+    self.localized = True
+    return
+
+
+  def goToDesiredPos(self,globX,globY,globTh,ball):
+    # TODO: Create controller for getting to the global pose from where robot is
+    return
+
+  def getDesiredGoaliePos(self,robot,ball):
+    ballRelDist = ball.distance
+    ballRelBear = ball.bearing # theta
+    roboGlobalX = robot.loc.x
+    roboGlobalY = robot.loc.y
+    roboGlobalTh = robot.orientation # phi
+    beta = np.pi - roboGlobalTh # beta
+
+    if beta > np.pi:
+      trueBeta = beta
+      beta = 2*np.pi - beta # to get the real angle of it in a single quadrant
+      if ballRelBear > 0.0:
+        # ball to the left, looking left
+        alpha = beta + ballRelBear
+        xComp = ballRelDist*np.cos(alpha)
+        yComp = ballRelDist*np.sin(alpha)
+        ballGlobalX = roboGlobalX + xComp
+        ballGlobalY = roboGlobalY - yComp
+      elif ballRelBear < 0.0:
+        # ball to the right, looking left
+        alpha = beta - ballRelBear 
+        xComp = ballRelDist*np.cos(alpha)
+        yComp = ballRelDist*np.sin(alpha)
+        ballGlobalX = roboGlobalX + xComp
+        if alpha > 0: #beta > theta so sign does not switch
+          ballGlobalY = roboGlobalY - yComp 
+        elif alpha < 0: # beta < theta so sign flips on the y axis
+          ballGlobalY = roboGlobalY + yComp
+    elif beta < np.pi:
+      if ballRelBear > 0.0:
+        # ball to the left, looking right
+        alpha = beta - ballRelBear
+        xComp = ballRelDist*np.cos(alpha)
+        yComp = ballRelDist*np.sin(alpha)
+        ballGlobalX = roboGlobalX + xComp
+        if alpha > 0: #beta > theta so sign does not switch
+          ballGlobalY = roboGlobalY - yComp 
+        elif alpha < 0: # beta < theta so sign flips on the y axis
+          ballGlobalY = roboGlobalY + yComp
+      elif ballRelBear < 0.0:
+        # ball to the right, looking right
+        alpha = ballRelBear + beta
+        xComp = ballRelDist*np.cos(alpha)
+        yComp = ballRelDist*np.sin(alpha)
+        ballGlobalX = roboGlobalX + xComp
+        ballGlobalY = roboGlobalY + yComp
+
+    goalBallXComp = ballGlobalX - self.goalieStartX 
+    goalBallYComp = ballGlobalY - self.goalieStartY
+    goalBallTh = np.arctan2(goalBallYComp,goalBallXComp)
+    self.roboDesiredX = self.goalieStartX - self.radius*np.cos(goalBallTh)
+    self.roboDesiredY = self.goalieStartY - self.radius*np.sin(goalBallTh)
+    if goalBallTh > 0:
+      self.roboDesiredTh = -np.pi + goalBallTh
+    else:
+      self.roboDesiredTh = np.pi + goalBallTh
+
+    printf("Robot should go to [%f, %f] with bearing: %f" %(roboDesiredX,roboDesiredY,roboDesiredTh))
+    return
+
 
 
 
@@ -220,14 +317,15 @@ class Playing(LoopingStateMachine):
   def setup(self):
     ball = mem_objects.world_objects[core.WO_BALL]
     robot = world_objects.getObjPtr(core.WO_TEAM5)
+    localized = False
     blocker = Blocker()
     lookStraight = MoveHead(0.0,-10.0,1.5)
     moveHeadLeft = MoveHead(85.0,-10.0,1.5)
     moveHeadRight = MoveHead(-85.0,-10.0,3.0)
     reset = Reset()
     rdy = GetReady()
-    moveBtwBall = MoveBtwBall()
-    checkLoc = CheckIfLocalized()
+    moveBtwBall = MoveBtwBall(localized)
+    checkLoc = CheckIfLocalized(localized)
     blocks = {"left": BlockLeft(),
               "right": BlockRight(),
               "center": BlockCenter(),

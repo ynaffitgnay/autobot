@@ -42,7 +42,7 @@ class BallDistance(Event):
     self.ball = ball
     self.dist = dist
   def ready(self):
-    return (self.ball.visionDistance < self.dist)
+    return (self.ball.distance < self.dist)
 
 def BD(ball, dist = 50.0):
   """Ball close enough"""
@@ -55,7 +55,7 @@ class BallBearing(Event):
     self.ball = ball
     self.bearing = bearing
   def ready(self):
-    return abs(self.ball.visionBearing - self.bearing) < 0.1
+    return abs(self.ball.bearing - self.bearing) < 0.1
 
 def BB(ball, bearing = 0.28):
   """Ball close enough"""
@@ -63,20 +63,19 @@ def BB(ball, bearing = 0.28):
 
 class Aligned(Event):
   """Aligning ball, goal and robot"""
-  def __init__(self, ball, goal, tolerance):
+  def __init__(self, ball, goal, tolerance_ball, tolerance_goal):
     super(Aligned, self).__init__()
     self.ball = ball
     self.goal = goal
-    self.tolerance = tolerance
+    self.tolerance_ball = tolerance_ball
+    self.tolerance_goal = tolerance_goal
 
   def ready(self):
-    if (self.goal.visionDistance < 780.0):
-      return (abs(self.ball.visionBearing < self.tolerance))
-    return (abs(self.ball.visionBearing) < self.tolerance and abs(self.goal.visionBearing) < self.tolerance)
+    return (abs(self.ball.bearing) < self.tolerance_ball and abs(self.goal.visionBearing) < self.tolerance_goal)
 
-def A(ball, goal, tolerance = 0.1):
+def A(ball, goal, tolerance_ball = 0.2, tolerance_goal = 0.3):
   """Ball, Goal, Robot aligned"""
-  return Aligned(ball, goal, tolerance)
+  return Aligned(ball, goal, tolerance_ball, tolerance_goal)
 
 class CheckDribble(Event):
   """Check whether or not robot should Dribble"""
@@ -87,7 +86,8 @@ class CheckDribble(Event):
     self.dist = dist
 
   def ready(self):
-    return (self.goal.visionDistance - self.ball.visionDistance) > self.dist
+    print("ball x: %f, ball y: %f, goal x: %f, goal y: %f" % (self.ball.loc.x,self.ball.loc.y,self.goal.loc.x,self.goal.loc.y))
+    return np.sqrt(np.power(self.ball.loc.x-self.goal.loc.x,2) + np.power(self.ball.loc.y-self.goal.loc.y,2)) < self.dist
 
 def D(ball, goal, dist = 1200.0):
   """Ball, Goal, Robot aligned"""
@@ -96,8 +96,8 @@ def D(ball, goal, dist = 1200.0):
 class GetReady(Node):
   def run(self):
     commands.stand()
-    commands.setHeadPanTilt(-core.DEG_T_RAD*110.0,-10.0,1.5)
-    if self.getTime() > 2.5:
+    commands.setHeadPanTilt(0.0,-5.0,1.0)
+    if self.getTime() > 1.5:
       self.finish()
 
 class MoveHead(Node):
@@ -137,8 +137,8 @@ class GoToBall(Node):
     self.time_current = time.clock()
 
   def calc_integral(self, dt):
-    self.theta_integral = self.theta_integral + dt*(self.ball.visionBearing)
-    self.dist_integral = self.dist_integral + dt*(self.ball.visionDistance - self.dist)
+    self.theta_integral = self.theta_integral + dt*(self.ball.bearing)
+    self.dist_integral = self.dist_integral + dt*(self.ball.distance - self.dist)
     if abs(self.theta_integral) >= 15.0:
       self.theta_integral = 15.0*np.sign(self.theta_integral)
     if abs(self.dist_integral) >= 100.0:
@@ -148,8 +148,8 @@ class GoToBall(Node):
     self.time_current = time.clock()
     dt = self.time_current - self.time_last
     self.calc_integral(dt)
-    bearing = self.ball.visionBearing
-    distance = self.ball.visionDistance
+    bearing = self.ball.bearing
+    distance = self.ball.distance
     elevation = core.RAD_T_DEG * self.ball.visionElevation
     commands.setHeadPanTilt(bearing, -elevation, 1.5)
     if dt == 0:
@@ -158,7 +158,6 @@ class GoToBall(Node):
     else:
       theta_cont = self.k_t[0] * bearing + self.k_t[1] * self.theta_integral + self.k_t[2] *(bearing - self.theta_prev) / dt
       dist_cont = self.k_d[0] * (distance - self.dist) + self.k_d[1] * self.dist_integral + self.k_d[2] *(distance - self.dist_prev) / dt
-    
     if abs(bearing) >=0.3:
       # Control only the heading of the robot and not the velocity
       commands.setWalkVelocity(0.0, 0.0, 0.4*np.sign(bearing))
@@ -171,7 +170,8 @@ class GoToBall(Node):
     self.theta_prev = bearing
     self.dist_prev = distance
     self.time_last = self.time_current
-    if abs(distance - self.dist) < 50.0:
+    # print("bearing: %f, distance: %f"%(self.ball.bearing, self.ball.distance))
+    if abs(distance - self.dist) < 200.0:
       self.finish()
 
 class TurnAroundBall(Node):
@@ -191,8 +191,8 @@ class TurnAroundBall(Node):
     self.time_current = time.clock()
 
   def calc_integral(self, dt):
-    self.theta_integral = self.theta_integral + dt*(self.ball.visionBearing)
-    self.dist_integral = self.dist_integral + dt*(self.ball.visionDistance - self.dist)
+    self.theta_integral = self.theta_integral + dt*(self.ball.bearing)
+    self.dist_integral = self.dist_integral + dt*(self.ball.distance - self.dist)
     if abs(self.theta_integral) >= 15.0:
       self.theta_integral = 15.0*np.sign(self.theta_integral)
     if abs(self.dist_integral) >= 100.0:
@@ -202,22 +202,20 @@ class TurnAroundBall(Node):
     self.time_current = time.clock()
     dt = self.time_current - self.time_last
     self.calc_integral(dt)
-    bearing = self.ball.visionBearing
-    distance = self.ball.visionDistance
+    bearing = self.ball.bearing
+    distance = self.ball.distance
     elevation = core.RAD_T_DEG * self.ball.visionElevation
-    commands.setHeadPanTilt(bearing,-45.0,1.5)
+    commands.setHeadPanTilt(bearing,-25.0,1.5)
     if dt == 0:
       theta_cont = self.k_t[0] * bearing + self.k_t[1] * self.theta_integral
       dist_cont = self.k_d[0] * (distance - self.dist) + self.k_d[1] * self.dist_integral
     else:
       theta_cont = self.k_t[0] * bearing + self.k_t[1] * self.theta_integral + self.k_t[2] *(bearing - self.theta_prev) / dt
       dist_cont = self.k_d[0] * (distance - self.dist) + self.k_d[1] * self.dist_integral + self.k_d[2] *(distance - self.dist_prev) / dt
-    commands.setWalkVelocity(dist_cont, 0.6 * self.dir, theta_cont)
+    commands.setWalkVelocity(dist_cont, 0.4 * self.dir, theta_cont)
     self.theta_prev = bearing
     self.dist_prev = distance
     self.time_last = self.time_current
-    if self.getTime() > 2.0:
-        self.finish()
 
 class Align(Node):
   """Turn around the ball to find the goal"""
@@ -238,9 +236,9 @@ class Align(Node):
     self.dist_prev = 0.0
 
   def calc_integral(self, dt):
-    self.theta_integral_ball = self.theta_integral_ball + dt*(self.ball.visionBearing)
-    self.theta_integral_delta = self.theta_integral_delta + dt*(self.ball.visionBearing - self.goal.visionBearing)
-    self.dist_integral = self.dist_integral + dt*(self.ball.visionDistance - self.dist)
+    self.theta_integral_ball = self.theta_integral_ball + dt*(self.ball.bearing)
+    self.theta_integral_delta = self.theta_integral_delta + dt*(self.ball.bearing - self.goal.visionBearing)
+    self.dist_integral = self.dist_integral + dt*(self.ball.distance - self.dist)
     if abs(self.theta_integral_ball) >= 15.0:
       self.theta_integral_ball = 15.0*np.sign(self.theta_integral_ball)
     if abs(self.theta_integral_delta) >= 15.0:
@@ -251,10 +249,10 @@ class Align(Node):
   def run(self):
     dt = 1.0/30.0
     self.calc_integral(dt)
-    bearing_ball = self.ball.visionBearing
+    bearing_ball = self.ball.bearing
     bearing_goal = self.goal.visionBearing
     delta_bearing = bearing_ball - bearing_goal
-    distance = self.ball.visionDistance
+    distance = self.ball.distance
     elevation = core.RAD_T_DEG * self.ball.visionElevation
     commands.setHeadPanTilt(bearing_ball,self.pan,1.5)
     if dt == 0:
@@ -276,11 +274,17 @@ class Align(Node):
     self.theta_prev_ball = bearing_ball
     self.theta_prev_delta = delta_bearing
     self.dist_prev = distance
+    # print("ball distance: %f goal distance: %f"%(self.goal.visionDistance, distance))
 
 class Stand(Node):
+  def __init__(self, time):
+    super(Stand, self).__init__()
+    self.time = time
   def run(self):
     commands.stand()
-    commands.setHeadPanTilt(0.0,0.0,1.5)
+    commands.setHeadPanTilt(0.0,0.0,self.time)
+    if self.getTime() > (self.time + 0.3):
+      self.finish()
 
 class PositionForKick(Node):
   """Dribble ball to within 1.0 m from the goal"""
@@ -297,8 +301,8 @@ class PositionForKick(Node):
     self.dist_prev = 0.0
 
   def calc_integral(self, dt):
-    self.theta_integral_ball = self.theta_integral_ball + dt*(self.ball.visionBearing - self.bearing)
-    self.dist_integral = self.dist_integral + dt*(self.ball.visionDistance - self.dist)
+    self.theta_integral_ball = self.theta_integral_ball + dt*(self.ball.bearing - self.bearing)
+    self.dist_integral = self.dist_integral + dt*(self.ball.distance - self.dist)
     if abs(self.theta_integral_ball) >= 15.0:
       self.theta_integral_ball = 15.0*np.sign(self.theta_integral_ball)
     if abs(self.dist_integral) >= 100.0:
@@ -307,8 +311,8 @@ class PositionForKick(Node):
   def run(self):
     dt = 1.0/30.0
     self.calc_integral(dt)
-    err_bearing = self.ball.visionBearing - self.bearing
-    distance = self.ball.visionDistance
+    err_bearing = self.ball.bearing - self.bearing
+    distance = self.ball.distance
     elevation = core.RAD_T_DEG * self.ball.visionElevation
     commands.setHeadPanTilt(0.0,-45.0,1.5)
     if dt == 0:
@@ -355,22 +359,27 @@ class Playing(LoopingStateMachine):
     turnInPlace = TurnInPlace()
     goToBall = GoToBall(ball, 0.0)
 
+    moveHeadLeftBeacon = MoveHead(35.0,0.0,1.0)
+    moveHeadRightBeacon = MoveHead(-35.0,0.0,1.0)
+
     moveHeadLeftGoal = MoveHead(85.0,0.0,1.0)
     moveHeadRightGoal = MoveHead(-85.0,0.0,1.0)
     turnAroundBallLeft = TurnAroundBall(ball,200.0,1.0)
     turnAroundBallRight = TurnAroundBall(ball,200.0,-1.0)
     lookDown = MoveHead(0.0,-45.0,1.5)
-    align200 = Align(ball,goal,200.0, -15.0)
+    alignm200Left = Align(ball,goal,-200.0, -15.0)
+    alignm200Right = Align(ball,goal,-200.0, -15.0)
+    dribble = Align(ball,goal,-300.0, -12.5)
 
-    dribble = Align(ball,goal,-200.0, -20.0)
-    wait = Stand()
+    # dribble = Align(ball,goal,-200.0, -20.0)
+    wait = Stand(1.0)
     align50 = Align(ball,goal,50.0,-15.0)
 
     alignForKick = Align(ball,goal, 0.0, -30.0)
-    positionForKick = PositionForKick(ball, 0.28, 140.0)
+    positionForKick = GoToBall(ball, 0.0)
 
-    stand = Stand()
-    stand_again = Stand()
+    stand = Stand(1.5)
+    stand_again = Stand(1.5)
     kick = Kick()
 
     # Keep turning head and turning in place till ball is found and then go to ball
@@ -385,26 +394,43 @@ class Playing(LoopingStateMachine):
 
 
     # After Robot reaches near the ball, maintain distance to ball and find the goal
-    self.add_transition(goToBall,C,lookUp)
-    self.add_transition(lookUp,O(ball,pb),turnAroundBallRight)
-    self.add_transition(lookUp,O(ball,bp),turnAroundBallRight)
-    self.add_transition(lookUp,O(ball,yb),turnAroundBallLeft)
-    self.add_transition(lookUp,O(ball,by),turnAroundBallLeft)
-    self.add_transition(turnAroundBallRight,O(goal,ball),align200)
-    self.add_transition(turnAroundBallLeft,O(goal,ball),align200)
-    self.add_transition(align200,NO(goal,ball),lookUp)
+    self.add_transition(goToBall,C,lookUp,C,moveHeadLeftBeacon,C,moveHeadRightBeacon,C,moveHeadLeftBeacon)
 
-    # # If the ball and goal are aligned with the robot, proceed to stopping, judging distance and dribbling/shooting
-    # self.add_transition(align200,A(ball,goal),dribble)
+    self.add_transition(lookUp,O(pb),turnAroundBallLeft)
+    self.add_transition(lookUp,O(bp),turnAroundBallLeft)
+    self.add_transition(lookUp,O(yb),turnAroundBallRight)
+    self.add_transition(lookUp,O(by),turnAroundBallRight)
+
+    self.add_transition(moveHeadLeftBeacon,O(pb),turnAroundBallLeft)
+    self.add_transition(moveHeadLeftBeacon,O(bp),turnAroundBallLeft)
+    self.add_transition(moveHeadLeftBeacon,O(yb),turnAroundBallRight)
+    self.add_transition(moveHeadLeftBeacon,O(by),turnAroundBallRight)
+
+    self.add_transition(moveHeadRightBeacon,O(pb),turnAroundBallLeft)
+    self.add_transition(moveHeadRightBeacon,O(bp),turnAroundBallLeft)
+    self.add_transition(moveHeadRightBeacon,O(yb),turnAroundBallRight)
+    self.add_transition(moveHeadRightBeacon,O(by),turnAroundBallRight)
+
+    self.add_transition(turnAroundBallRight,O(goal,ball),alignm200Right)
+    self.add_transition(turnAroundBallLeft,O(goal,ball),alignm200Left)
+    self.add_transition(alignm200Right,NO(goal,ball),turnAroundBallRight)
+    self.add_transition(alignm200Left,NO(goal,ball),turnAroundBallLeft)
+
+    # If the ball and goal are aligned with the robot, proceed to stopping, judging distance and dribbling/shooting
+    self.add_transition(alignm200Right,A(ball,goal,0.2,0.5),wait,C,dribble)
+    self.add_transition(alignm200Left,A(ball,goal,0.2,0.5),wait,C,dribble)
+    # self.add_transition(positionForKick, BB(ball,0.28), stand)
     # self.add_transition(dribble,A(ball,goal,0.2).negation(),align50)
     # self.add_transition(align50,A(ball,goal),dribble)
-    # self.add_transition(dribble,D(ball,goal,1300.0).negation(),wait)
+    self.add_transition(dribble,D(ball,goal,1000.0),stand)
+    self.add_transition(dribble,A(ball,goal,0.2,0.2).negation(),align50)
+    self.add_transition(align50,A(ball,goal,0.2,0.2),dribble)
     # self.add_transition(wait,D(ball,goal,1300.0),dribble)
 
     # # After it's dribbled, align between ball and goal again and then shift left
     # self.add_transition(wait,T(1.0),alignForKick)
     # self.add_transition(alignForKick, BD(ball,150.0), positionForKick)
-    # self.add_transition(positionForKick, BB(ball,0.28), stand)
+    self.add_transition(positionForKick, BB(ball,0.28), stand)
     # self.add_transition(stand, T(1.0), kick)
     # self.add_transition(kick, C, stand_again)
     # self.add_transition(stand_again, T(3.0), rdy)
