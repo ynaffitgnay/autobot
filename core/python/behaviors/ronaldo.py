@@ -84,12 +84,12 @@ class CheckDribble(Event):
     self.ball = ball
     self.goal = goal
     self.dist = dist
-    self.frames_at_dist = 0
 
   def ready(self):
-    # print("ball x: %f, ball y: %f, goal x: %f, goal y: %f" % (self.ball.loc.x,self.ball.loc.y,self.goal.loc.x,self.goal.loc.y))
+    # print("goal dist: %f, ball dist: %f, goal dist - ball dist: %f" % (self.ball.distance,self.goal.visionDistance,abs(self.ball.distance - self.goal.visionDistance)))
+    # print("ball vision dist: %f, goal dist - ball vision dist: %f" % (self.ball.visionDistance,abs(self.ball.visionDistance - self.goal.visionDistance)))
     # return np.sqrt(np.power(self.ball.loc.x-self.goal.loc.x,2) + np.power(self.ball.loc.y-self.goal.loc.y,2)) < self.dist
-    return abs(self.ball.distance - self.goal.distance) < self.dist
+    return abs(self.ball.visionDistance - self.goal.visionDistance) < self.dist
     #   self.frames_at_dist += 1
     # else:
     #   self.frames_at_dist = 0
@@ -218,6 +218,7 @@ class TurnAroundBall(Node):
     else:
       theta_cont = self.k_t[0] * bearing + self.k_t[1] * self.theta_integral + self.k_t[2] *(bearing - self.theta_prev) / dt
       dist_cont = self.k_d[0] * (distance - self.dist) + self.k_d[1] * self.dist_integral + self.k_d[2] *(distance - self.dist_prev) / dt
+    print("dist cont: %f, dir: %f, theta cont: %f" % (dist_cont, self.dir, theta_cont))
     commands.setWalkVelocity(dist_cont, 0.4 * self.dir, theta_cont)
     self.theta_prev = bearing
     self.dist_prev = distance
@@ -382,7 +383,7 @@ class Playing(LoopingStateMachine):
     align50 = Align(ball,goal,50.0,-15.0)
 
     alignForKick = Align(ball,goal, 0.0, -30.0)
-    positionForKick = GoToBall(ball, 0.0)
+    positionForKick = PositionForKick(ball, 0.28, 140.0)
 
     stand = Stand(1.5)
     stand_again = Stand(1.5)
@@ -423,14 +424,13 @@ class Playing(LoopingStateMachine):
     self.add_transition(alignm200Left,NO(goal,ball),turnAroundBallLeft)
 
     # If the ball and goal are aligned with the robot, proceed to stopping, judging distance and dribbling/shooting
-    self.add_transition(alignm200Right,A(ball,goal,0.2,0.5),wait,C,dribble)
-    self.add_transition(alignm200Left,A(ball,goal,0.2,0.5),wait,C,dribble)
+    self.add_transition(alignm200Right,A(ball,goal,0.2,0.5),dribble)
+    self.add_transition(alignm200Left,A(ball,goal,0.2,0.5),dribble)
     # self.add_transition(positionForKick, BB(ball,0.28), stand)
     # self.add_transition(dribble,A(ball,goal,0.2).negation(),align50)
     # self.add_transition(align50,A(ball,goal),dribble)
-    self.add_transition(dribble,T(4.0),stand,C,dribble)
-    self.add_transition(stand,D(ball,goal,1000.0),positionForKick)
-    self.add_transition(dribble,D(ball,goal,1000.0),stand)
+    self.add_transition(dribble,D(ball,goal,800.0),stand)
+    self.add_transition(stand,C,positionForKick)
     self.add_transition(dribble,A(ball,goal,0.2,0.2).negation(),align50)
     self.add_transition(align50,A(ball,goal,0.2,0.2),dribble)
     # self.add_transition(wait,D(ball,goal,1300.0),dribble)
@@ -438,7 +438,7 @@ class Playing(LoopingStateMachine):
     # # After it's dribbled, align between ball and goal again and then shift left
     # self.add_transition(wait,T(1.0),alignForKick)
     # self.add_transition(alignForKick, BD(ball,150.0), positionForKick)
-    self.add_transition(positionForKick, BB(ball,0.28), stand)
+    self.add_transition(positionForKick, BB(ball,0.28), stand_again)
     # self.add_transition(stand, T(1.0), kick)
     # self.add_transition(kick, C, stand_again)
     # self.add_transition(stand_again, T(3.0), rdy)

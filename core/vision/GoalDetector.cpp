@@ -137,7 +137,7 @@ void GoalDetector::findGoals(std::vector<Blob>& blobs) {
       goal.seen = true;
       goal.fromTopCamera = camera_ == Camera::TOP;
       tlog(30, "saw %s at (%i,%i) with calculated distance %2.4f", getName(WO_UNKNOWN_GOAL), goal.imageCenterX, goal.imageCenterY, goal.visionDistance);
-      std::cout << "Goal distance: " << goal.visionDistance << std::endl;
+      // std::cout << "Goal distance: " << goal.visionDistance << std::endl;
     }
     // Else, if aspectRatio smaller (skewed)
     //else if (aspectRatio <=1.6) {
