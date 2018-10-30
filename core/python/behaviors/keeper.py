@@ -5,6 +5,7 @@ from __future__ import division
 from __future__ import absolute_import
 
 import core
+import geometry
 import commands
 import mem_objects
 import task, util
@@ -89,13 +90,17 @@ class MoveHead(Node):
       self.finish()
 
 class CheckIfLocalized(Node):
-  def __init__(self, localized):
+  def __init__(self, localized,poseListX,poseListY,pose_index):
     super(CheckIfLocalized, self).__init__()
     self.localized = localized
+    self.poseListX = poseListX
+    self.poseListY = poseListY
+    self.pose_index = pose_index
   def run(self):
 
     commands.setHeadPanTilt(0.0,-10.0,1.0)
     robot = world_objects.getObjPtr(core.WO_TEAM5)
+    self.getSlidingCov(robot.loc.x,robot.loc.y)
     self.checkLocalized(robot)
     if self.localized:
       print("Localized")
@@ -111,6 +116,7 @@ class CheckIfLocalized(Node):
     yGlobal = robot.loc.y
     thGlobal = robot.orientation
     print("Robot checking localization. Current pose: [%f, %f] Theta: %f\n" % (xGlobal,yGlobal,thGlobal*core.RAD_T_DEG))
+    self.getSlidingCov(robot.loc.x,robot.loc.y)
     if not thGlobal < -np.pi/2.0 and not thGlobal > np.pi/2.0:
       #facing toward the goal, not localized
       self.localized = False
@@ -132,6 +138,39 @@ class CheckIfLocalized(Node):
     # within bounds, close enough to localized
     self.localized = True
     return
+
+  def getSlidingCov(self, x, y):
+    window_size = 10
+    if len(self.poseListX) <= window_size:
+      self.poseListX.append(x)
+      self.poseListY.append(y)
+    else:
+      self.poseListX[self.pose_index % window_size] = x
+      self.poseListY[self.pose_index % window_size] = y
+      self.pose_index = self.pose_index + 1
+
+    x_sum = 0.0
+    y_sum = 0.0
+    for x in self.poseListX:
+        x_sum = x_sum + x
+    for y in self.poseListY:
+        y_sum = y_sum + y
+
+    x_avg = x_sum/10.0
+    y_avg = y_sum/10.0
+
+    x_stdev_sum = 0.0
+    y_stdev_sum = 0.0
+    for x in self.poseListX:
+        x_stdev_sum = x_stdev_sum + abs(x-x_avg)
+    for y in self.poseListY:
+        y_stdev_sum = y_stdev_sum + abs(y-y_avg)
+    x_stdev_avg = x_stdev_sum/window_size
+    y_stdev_avg = y_stdev_sum/window_size
+
+    # print("Avg x stdev: %f Avg y stdev: %f\n" % (x_stdev_avg,y_stdev_avg))
+    
+    return 
 
 class Blocker(Node):
 
@@ -177,16 +216,20 @@ class Blocker(Node):
     
 
 class MoveBtwBall(Node):
-  def __init__(self,localized):
+  def __init__(self,localized,poseListX,poseListY,pose_index):
     super(MoveBtwBall, self).__init__()
     self.goalieStartX = 0.0
     self.goalieStartY = 0.0
     self.localized = localized
     self.initialized = False
-    self.radius = 500.0
+    self.radius = 300.0
     self.roboDesiredX = 0.0
     self.roboDesiredY = 0.0
     self.roboDesiredTh = 0.0
+    self.localized = localized
+    self.poseListX = poseListX
+    self.poseListY = poseListY
+    self.pose_index = pose_index
   def run(self):
     robot = world_objects.getObjPtr(core.WO_TEAM5)
     self.checkLocalized(robot)
@@ -207,10 +250,14 @@ class MoveBtwBall(Node):
       if gb_line_obj.seen:
         gb_line_seg = gb_line_obj.lineLoc
         gb_line_cent = gb_line_seg.getCenter()
-        gb_line_dist = gb_line_seg.getDistanceTo(gb_line_cent)
-        gb_robo_dist = gb_line_seg.getPointOnSegmentClosestTo(robot.loc)
-        print("Line seen: %d Center at [%f, %f] with distace: %f, but robot at [%f, %f] dist to closest point is: %f\n" % (gb_line_obj.seen,gb_line_cent.x,gb_line_cent.y,gb_line_dist,xRobo,yRobo,gb_robo_dist))
+        rel_robot = core.Point2D(0.0,0.0)
+        gb_robo_dist = gb_line_seg.getDistanceTo(rel_robot)
+        print("Line seen. Center at [%f, %f], robot at [%f, %f] dist to closest point is: %f\n" % (gb_line_cent.x,gb_line_cent.y,robot.loc.x,robot.loc.y,gb_robo_dist))
+      else:
+        print("Line not seen.\n")
 
+
+      
 
       if ball.seen:
         commands.setHeadPan(ball.bearing, 0.2)
@@ -228,7 +275,8 @@ class MoveBtwBall(Node):
     xGlobal = robot.loc.x
     yGlobal = robot.loc.y
     thGlobal = robot.orientation
-    print("Robot checking localization before movement. Current pose: [%f, %f] Theta: %f\n" % (xGlobal,yGlobal,thGlobal*core.RAD_T_DEG))
+    # print("Robot checking localization before movement. Current pose: [%f, %f] Theta: %f\n" % (xGlobal,yGlobal,thGlobal*core.RAD_T_DEG))
+    self.getSlidingCov(robot.loc.x,robot.loc.y)
     if not thGlobal < -np.pi/2.0 and not thGlobal > np.pi/2.0:
       #facing toward the goal, not localized
       print("1")
@@ -250,6 +298,39 @@ class MoveBtwBall(Node):
     # within bounds, close enough to localized
     self.localized = True
     return
+
+  def getSlidingCov(self, x, y):
+    window_size = 10
+    if len(self.poseListX) <= window_size:
+      self.poseListX.append(x)
+      self.poseListY.append(y)
+    else:
+      self.poseListX[self.pose_index % window_size] = x
+      self.poseListY[self.pose_index % window_size] = y
+      self.pose_index = self.pose_index + 1
+
+    x_sum = 0.0
+    y_sum = 0.0
+    for x in self.poseListX:
+        x_sum = x_sum + x
+    for y in self.poseListY:
+        y_sum = y_sum + y
+
+    x_avg = x_sum/10.0
+    y_avg = y_sum/10.0
+
+    x_stdev_sum = 0.0
+    y_stdev_sum = 0.0
+    for x in self.poseListX:
+        x_stdev_sum = x_stdev_sum + abs(x-x_avg)
+    for y in self.poseListY:
+        y_stdev_sum = y_stdev_sum + abs(y-y_avg)
+    x_stdev_avg = x_stdev_sum/window_size
+    y_stdev_avg = y_stdev_sum/window_size
+
+    # print("Avg x stdev: %f Avg y stdev: %f\n" % (x_stdev_avg,y_stdev_avg))
+    
+    return 
 
 
   def goToDesiredPos(self,globX,globY,globTh,ball):
@@ -306,6 +387,8 @@ class MoveBtwBall(Node):
     goalBallXComp = ballGlobalX - self.goalieStartX 
     goalBallYComp = ballGlobalY - self.goalieStartY
     goalBallTh = np.arctan2(goalBallYComp,goalBallXComp)
+    # print("Ball global pose: [%f, %f]\n" % (ballGlobalX,ballGlobalY))
+    # print("Ball to goal bearing: %f" % (goalBallTh*core.RAD_T_DEG))
     self.roboDesiredX = self.goalieStartX - self.radius*np.cos(goalBallTh)
     self.roboDesiredY = self.goalieStartY - self.radius*np.sin(goalBallTh)
     if goalBallTh > 0:
@@ -313,7 +396,7 @@ class MoveBtwBall(Node):
     else:
       self.roboDesiredTh = np.pi + goalBallTh
 
-    print("Robot should go to [%f, %f] with bearing: %f\n" %(self.roboDesiredX,self.roboDesiredY,self.roboDesiredTh))
+    # print("Robot should go to [%f, %f] with bearing: %f\n" %(self.roboDesiredX,self.roboDesiredY,self.roboDesiredTh*core.RAD_T_DEG))
     return
 
 
@@ -324,14 +407,17 @@ class Playing(LoopingStateMachine):
     ball = mem_objects.world_objects[core.WO_BALL]
     robot = world_objects.getObjPtr(core.WO_TEAM5)
     localized = False
+    poseListX = []
+    poseListY = []
+    pose_index = 0 
     blocker = Blocker()
     lookStraight = MoveHead(0.0,-10.0,1.5)
     moveHeadLeft = MoveHead(85.0,-10.0,1.5)
     moveHeadRight = MoveHead(-85.0,-10.0,3.0)
     reset = Reset()
     rdy = GetReady()
-    moveBtwBall = MoveBtwBall(localized)
-    checkLoc = CheckIfLocalized(localized)
+    moveBtwBall = MoveBtwBall(localized,poseListX,poseListY,pose_index)
+    checkLoc = CheckIfLocalized(localized,poseListX,poseListY,pose_index)
     blocks = {"left": BlockLeft(),
               "right": BlockRight(),
               "center": BlockCenter(),
