@@ -11,6 +11,7 @@ import task, util
 import head
 import math
 import random
+import numpy as np
 from task import Task, MultiTask
 import cfgpose, cfgstiff
 import pose
@@ -89,13 +90,13 @@ class MoveHead(Node):
 
 class CheckIfLocalized(Node):
   def __init__(self, localized):
-    super(MoveHead, self).__init__()
+    super(CheckIfLocalized, self).__init__()
     self.localized = localized
   def run(self):
 
     commands.setHeadPanTilt(0.0,-10.0,1.0)
     robot = world_objects.getObjPtr(core.WO_TEAM5)
-    checkLocalized(robot)
+    self.checkLocalized(robot)
     if self.localized:
       print("Localized")
       self.postSignal("localized")
@@ -185,7 +186,7 @@ class MoveBtwBall(Node):
     self.roboDesiredTh = 0.0
   def run(self):
     robot = world_objects.getObjPtr(core.WO_TEAM5)
-    checkLocalized(robot)
+    self.checkLocalized(robot)
 
     if self.localized:
       if not self.initialized:
@@ -195,17 +196,17 @@ class MoveBtwBall(Node):
         self.initialized = True
 
       ball = mem_objects.world_objects[core.WO_BALL]
-      getDesiredGoaliePos(robot,ball)
+      self.getDesiredGoaliePos(robot,ball)
 
-      goToDesiredPos(robot.loc.x, robot.loc.y, robot.orientation, ball)
+      self.goToDesiredPos(robot.loc.x, robot.loc.y, robot.orientation, ball)
 
       gb_line_obj = mem_objects.world_objects[core.WO_OWN_PENALTY]
-      # if gb_line_obj.seen:
-      #   gb_line_seg = gb_line_obj.lineLoc
-      #   gb_line_cent = gb_line_seg.getCenter()
-      #   gb_line_dist = gb_line_seg.getDistanceTo(gb_line_cent)
-      #   gb_robo_dist = gb_line_seg.getPointOnSegmentClosestTo(robot.loc)
-      # print("Line seen: %d " % gb_line_obj.seen) # Center at [%f, %f] with distace: %f, but robot at [%f, %f] dist to closest point is: %f" % (gb_line_obj.seen,gb_line_cent.x,gb_line_cent.y,gb_line_dist,xRobo,yRobo,gb_robo_dist))
+      if gb_line_obj.seen:
+        gb_line_seg = gb_line_obj.lineLoc
+        gb_line_cent = gb_line_seg.getCenter()
+        gb_line_dist = gb_line_seg.getDistanceTo(gb_line_cent)
+        gb_robo_dist = gb_line_seg.getPointOnSegmentClosestTo(robot.loc)
+        print("Line seen: %d Center at [%f, %f] with distace: %f, but robot at [%f, %f] dist to closest point is: %f" % (gb_line_obj.seen,gb_line_cent.x,gb_line_cent.y,gb_line_dist,xRobo,yRobo,gb_robo_dist))
 
 
       if ball.seen:
@@ -247,6 +248,7 @@ class MoveBtwBall(Node):
 
   def goToDesiredPos(self,globX,globY,globTh,ball):
     # TODO: Create controller for getting to the global pose from where robot is
+    return
 
   def getDesiredGoaliePos(self,robot,ball):
     ballRelDist = ball.distance
