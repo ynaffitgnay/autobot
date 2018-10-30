@@ -150,7 +150,7 @@ void ImageProcessor::processFrame(){
   }
 
   if (vblocks_.world_object->objects_[WO_OWN_PENALTY].seen) {
-    printf("Saw the penalty box\n");
+    // printf("Saw the penalty box at distance %f\n", vblocks_.world_object->objects_[WO_OWN_PENALTY].visionDistance);
   } else {
     // printf("Saw no penalty box\n");
   }
