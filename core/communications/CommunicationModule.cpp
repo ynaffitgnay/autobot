@@ -199,6 +199,8 @@ void CommunicationModule::listenToolUDP() {
       break;
     case ToolPacket::StateCameraTop: this->game_state_->setState(TOP_CAM); break;
     case ToolPacket::StateCameraBottom: this->game_state_->setState(BOTTOM_CAM); break;
+    case ToolPacket::StateAttacking: this->game_state_->setState(ATTACKING); break;
+    case ToolPacket::StateDefending: this->game_state_->setState(DEFENDING); break;
     case ToolPacket::LogSelect: {
         this->handleLoggingBlocksMessage(tp);
         this->core_->setLogSelections(tp);

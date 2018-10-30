@@ -100,29 +100,40 @@ void ButtonModule::processCenterPresses() {
     sayIP();
   } else if (center_.presses == 7) {
     game_state_->setState(TESTING);
-  } else if (center_.presses == 8 or center_.presses == 2) {
+  } else if (center_.presses == 8) {// or center_.presses == 2) {
     game_state_->isPenaltyKick = (not game_state_->isPenaltyKick);
     std::cout << "Changed isPenaltyKick to ";
     std::cout << (game_state_->isPenaltyKick ? "true" : "false") << std::endl;
     speech_->say((game_state_->isPenaltyKick ? "Penalty" : "No Penalty"));
-  } else {
-    game_state_->lastStateChangeFromButton = true;
-    if (state==PENALISED) {
-      game_state_->setState(PLAYING);
-      game_state_->lastTimeLeftPenalized = frame_info_->seconds_since_start;
-    } else if (state == TESTING) {
-      game_state_->setState(FINISHED);
-    } else if (state == TEST_ODOMETRY) {
-      game_state_->setState(FINISHED);
-    } else if (state==READY) {
-      game_state_->setState(SET);
-    } else if (state==SET) {
-      game_state_->setState(PLAYING);
-    } else if (state==PLAYING) {
-      game_state_->setState(PENALISED);
-    } else if (state==FINISHED) {
-      game_state_->setState(INITIAL);
+  } else { // center presses = 1, 2,  or more than 8?
+    if (state == ATTACKING || state == PLAYING) {
+      game_state_->setState(DEFENDING);
+      game_state_->lastStateChangeFromButton = true;
+      speech_->say("Defending");
+    } else if (state == DEFENDING) {
+      game_state_->setState(ATTACKING);
+      game_state_->lastStateChangeFromButton = true;
+      speech_->say("Attacking");
+    } else {
+      speech_->say("Confused");
     }
+    //game_state_->lastStateChangeFromButton = true;
+    //if (state==PENALISED) {
+    //  game_state_->setState(PLAYING);
+    //  game_state_->lastTimeLeftPenalized = frame_info_->seconds_since_start;
+    //} else if (state == TESTING) {
+    //  game_state_->setState(FINISHED);
+    //} else if (state == TEST_ODOMETRY) {
+    //  game_state_->setState(FINISHED);
+    //} else if (state==READY) {
+    //  game_state_->setState(SET);
+    //} else if (state==SET) {
+    //  game_state_->setState(PLAYING);
+    //} else if (state==PLAYING) {
+    //  game_state_->setState(PENALISED);
+    //} else if (state==FINISHED) {
+    //  game_state_->setState(INITIAL);
+    //}
   }
 #else
   if ((center_.presses == 3) || (center_.presses == 4)) {
@@ -138,20 +149,30 @@ void ButtonModule::processCenterPresses() {
     game_state_->setState(FINISHED);
   } else if (center_.presses == 6) {
     sayIP();
-  } else {
-    game_state_->lastStateChangeFromButton = true;
-    if (state==PENALISED) {
-      game_state_->setState(PLAYING);
-      game_state_->lastTimeLeftPenalized = frame_info_->seconds_since_start;
-    } else if (state == TESTING) {
-      game_state_->setState(FINISHED);
-    } else if (state == TEST_ODOMETRY) {
-      game_state_->setState(FINISHED);
-    } else if (state == FINISHED) {
-      game_state_->setState(PENALISED);
+  } else { // center presses = 1, 2, or more than 6
+    if (state == ATTACKING || state == PLAYING) {
+      game_state_->setState(DEFENDING);
+      game_state_->lastStateChangeFromButton = true;
+      speech_->say("Defending");
+    } else if (state == DEFENDING) {
+      game_state_->setState(ATTACKING);
+      game_state_->lastStateChangeFromButton = true;
+      speech_->say("Attacking");
     } else {
-      game_state_->setState(PENALISED);
+      speech_->say("Confused");
     }
+    //if (state==PENALISED) {
+    //  game_state_->setState(PLAYING);
+    //  game_state_->lastTimeLeftPenalized = frame_info_->seconds_since_start;
+    //} else if (state == TESTING) {
+    //  game_state_->setState(FINISHED);
+    //} else if (state == TEST_ODOMETRY) {
+    //  game_state_->setState(FINISHED);
+    //} else if (state == FINISHED) {
+    //  game_state_->setState(PENALISED);
+    //} else {
+    //  game_state_->setState(PENALISED);
+    //}    
   }
 #endif
   if (state != game_state_->state())
