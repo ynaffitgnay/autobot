@@ -150,7 +150,11 @@ void ImageProcessor::processFrame(){
   }
 
   if (vblocks_.world_object->objects_[WO_OWN_PENALTY].seen) {
-    // printf("Saw the penalty box at distance %f\n", vblocks_.world_object->objects_[WO_OWN_PENALTY].visionDistance);
+    LineSegment linseg =  vblocks_.world_object->objects_[WO_OWN_PENALTY].lineLoc;
+    Point2D gb_line_cent = linseg.getCenter();
+    Point2D robo_rel_cent(0.0,0.0);
+    float gb_line_dist = linseg.getDistanceTo(robo_rel_cent);
+    // printf("Saw the penalty box at [%f, %f] with distance %f\n", gb_line_cent.x, gb_line_cent.y, gb_line_dist);
   } else {
     // printf("Saw no penalty box\n");
   }

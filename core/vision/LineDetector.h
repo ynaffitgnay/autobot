@@ -34,7 +34,7 @@ class LineDetector : public ObjectDetector {
   // Logger
   TextLogger* textlogger;
 
-  void detBestLine(std::vector<Blob> lineCand);
+  void detBestLine(std::vector<Blob>& lineCand);
 
 };
 
