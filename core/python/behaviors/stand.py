@@ -19,8 +19,8 @@ class Stand(Node):
     self.goal = goal
 
   def run(self):
-    commands.setHeadPanTilt(0.0,-5.0,1.0)
     commands.stand()
+    commands.setHeadPanTilt(0.0,0.0,1.0)
     print("ball x: %f, ball y: %f, goal x: %f, goal y: %f" % (self.ball.loc.x,self.ball.loc.y,self.goal.loc.x,self.goal.loc.y))
     # print("ball bearing: %.3f\n" % self.ball.visionBearing)
     # if self.getTime() > 1.5:

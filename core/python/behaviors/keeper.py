@@ -110,21 +110,24 @@ class CheckIfLocalized(Node):
     xGlobal = robot.loc.x
     yGlobal = robot.loc.y
     thGlobal = robot.orientation
-
-    if thGlobal < -np.pi/2.0 or thGlobal > np.pi/2.0:
+    print("Robot checking localization. Current pose: [%f, %f] Theta: %f\n" % (xGlobal,yGlobal,thGlobal*core.RAD_T_DEG))
+    if not thGlobal < -np.pi/2.0 and not thGlobal > np.pi/2.0:
       #facing toward the goal, not localized
       self.localized = False
+      print("4")
       return
     else:
       # facing correct general direction
       if xGlobal < 1000.0:
         # outside the top of the goalbox, not localized
         self.localized = False
+        print("5")
         return
       else:
         if yGlobal > 700.0 or yGlobal < -700.0:
           # outside the left of right of the goalbox, not localized
           self.localized = False
+          print("6")
           return
     # within bounds, close enough to localized
     self.localized = True
@@ -206,7 +209,7 @@ class MoveBtwBall(Node):
         gb_line_cent = gb_line_seg.getCenter()
         gb_line_dist = gb_line_seg.getDistanceTo(gb_line_cent)
         gb_robo_dist = gb_line_seg.getPointOnSegmentClosestTo(robot.loc)
-        print("Line seen: %d Center at [%f, %f] with distace: %f, but robot at [%f, %f] dist to closest point is: %f" % (gb_line_obj.seen,gb_line_cent.x,gb_line_cent.y,gb_line_dist,xRobo,yRobo,gb_robo_dist))
+        print("Line seen: %d Center at [%f, %f] with distace: %f, but robot at [%f, %f] dist to closest point is: %f\n" % (gb_line_obj.seen,gb_line_cent.x,gb_line_cent.y,gb_line_dist,xRobo,yRobo,gb_robo_dist))
 
 
       if ball.seen:
@@ -225,9 +228,10 @@ class MoveBtwBall(Node):
     xGlobal = robot.loc.x
     yGlobal = robot.loc.y
     thGlobal = robot.orientation
-
-    if thGlobal < -np.pi/2.0 or thGlobal > np.pi/2.0:
+    print("Robot checking localization before movement. Current pose: [%f, %f] Theta: %f\n" % (xGlobal,yGlobal,thGlobal*core.RAD_T_DEG))
+    if not thGlobal < -np.pi/2.0 and not thGlobal > np.pi/2.0:
       #facing toward the goal, not localized
+      print("1")
       self.localized = False
       return
     else:
@@ -235,11 +239,13 @@ class MoveBtwBall(Node):
       if xGlobal < 1000.0:
         # outside the top of the goalbox, not localized
         self.localized = False
+        print("2")
         return
       else:
         if yGlobal > 700.0 or yGlobal < -700.0:
           # outside the left of right of the goalbox, not localized
           self.localized = False
+          print("3")
           return
     # within bounds, close enough to localized
     self.localized = True
@@ -307,7 +313,7 @@ class MoveBtwBall(Node):
     else:
       self.roboDesiredTh = np.pi + goalBallTh
 
-    printf("Robot should go to [%f, %f] with bearing: %f" %(roboDesiredX,roboDesiredY,roboDesiredTh))
+    print("Robot should go to [%f, %f] with bearing: %f\n" %(self.roboDesiredX,self.roboDesiredY,self.roboDesiredTh))
     return
 
 

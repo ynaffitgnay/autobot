@@ -84,10 +84,16 @@ class CheckDribble(Event):
     self.ball = ball
     self.goal = goal
     self.dist = dist
+    self.frames_at_dist = 0
 
   def ready(self):
-    print("ball x: %f, ball y: %f, goal x: %f, goal y: %f" % (self.ball.loc.x,self.ball.loc.y,self.goal.loc.x,self.goal.loc.y))
-    return np.sqrt(np.power(self.ball.loc.x-self.goal.loc.x,2) + np.power(self.ball.loc.y-self.goal.loc.y,2)) < self.dist
+    # print("ball x: %f, ball y: %f, goal x: %f, goal y: %f" % (self.ball.loc.x,self.ball.loc.y,self.goal.loc.x,self.goal.loc.y))
+    # return np.sqrt(np.power(self.ball.loc.x-self.goal.loc.x,2) + np.power(self.ball.loc.y-self.goal.loc.y,2)) < self.dist
+    if abs(self.ball.distance - self.goal.distance) < self.dist:
+      self.frames_at_dist += 1
+    else:
+      self.frames_at_dist = 0
+    return self.frames_at_dist >= 5
 
 def D(ball, goal, dist = 1200.0):
   """Ball, Goal, Robot aligned"""
