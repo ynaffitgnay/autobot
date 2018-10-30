@@ -86,7 +86,8 @@ class CheckDribble(Event):
     self.dist = dist
 
   def ready(self):
-    return (self.goal.visionDistance - self.ball.distance) > self.dist
+    print("ball x: %f, ball y: %f, goal x: %f, goal y: %f" % (self.ball.loc.x,self.ball.loc.y,self.goal.loc.x,self.goal.loc.y))
+    return np.sqrt(np.power(self.ball.loc.x-self.goal.loc.x,2) + np.power(self.ball.loc.y-self.goal.loc.y,2)) < self.dist
 
 def D(ball, goal, dist = 1200.0):
   """Ball, Goal, Robot aligned"""
@@ -375,7 +376,7 @@ class Playing(LoopingStateMachine):
     align50 = Align(ball,goal,50.0,-15.0)
 
     alignForKick = Align(ball,goal, 0.0, -30.0)
-    positionForKick = PositionForKick(ball, 0.28, 140.0)
+    positionForKick = GoToBall(ball, 0.0)
 
     stand = Stand(1.5)
     stand_again = Stand(1.5)
@@ -421,7 +422,7 @@ class Playing(LoopingStateMachine):
     # self.add_transition(positionForKick, BB(ball,0.28), stand)
     # self.add_transition(dribble,A(ball,goal,0.2).negation(),align50)
     # self.add_transition(align50,A(ball,goal),dribble)
-    self.add_transition(dribble,D(ball,goal,800.0).negation(),positionForKick)
+    self.add_transition(dribble,D(ball,goal,1000.0),stand)
     self.add_transition(dribble,A(ball,goal,0.2,0.2).negation(),align50)
     self.add_transition(align50,A(ball,goal,0.2,0.2),dribble)
     # self.add_transition(wait,D(ball,goal,1300.0),dribble)
@@ -430,6 +431,6 @@ class Playing(LoopingStateMachine):
     # self.add_transition(wait,T(1.0),alignForKick)
     # self.add_transition(alignForKick, BD(ball,150.0), positionForKick)
     self.add_transition(positionForKick, BB(ball,0.28), stand)
-    self.add_transition(stand, T(1.0), kick)
-    self.add_transition(kick, C, stand_again)
+    # self.add_transition(stand, T(1.0), kick)
+    # self.add_transition(kick, C, stand_again)
     # self.add_transition(stand_again, T(3.0), rdy)
