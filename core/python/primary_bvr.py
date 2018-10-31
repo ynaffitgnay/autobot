@@ -99,15 +99,15 @@ class Penalised(pose.StandStraight): pass
 class Finished(pose.Sit): pass
 class Set(pose.Sit): pass
 class Falling(Task): pass
-class Attacking(pose.Sit): pass
-class Defending(pose.Sit): pass
+class Attacking(Task): pass
+class Defending(Task): pass
 
 
 def load(bvr):
     """Import desired behavior module."""
     import importlib
     m = importlib.import_module('behaviors.' + bvr)
-    global Ready, Set, Playing, Testing
+    global Ready, Set, Playing, Testing, Attacking, Defending
     if hasattr(m, 'Ready'): Ready = m.Ready
     if hasattr(m, 'Set'): Set = m.Set
     if hasattr(m, 'Playing'): Playing = m.Playing
