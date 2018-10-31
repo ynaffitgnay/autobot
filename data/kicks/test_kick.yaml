@@ -510,7 +510,7 @@ keyframes:
   #     LHipPitch: -38.58
   #     LKneePitch: 78.51
   #     LAnklePitch: -39.67
-  #     LAnkleRoll: 16.43
+  #     LAnkleRoll: 6.43
   #     RHipYawPitch: -2.0
   #     RHipRoll: 12.54
   #     RHipPitch: -1.76
@@ -556,7 +556,7 @@ keyframes:
       HeadYaw: 0.612831893090224
       HeadPitch: -22.4978798523823
       LHipYawPitch: -2.0
-      LHipRoll: -18.00
+      LHipRoll: -12.00
       LHipPitch: -48.58
       LKneePitch: 58.51
       LAnklePitch: -14.67
@@ -584,7 +584,7 @@ keyframes:
       LHipRoll: -8.00
       LHipPitch: -48.58
       LKneePitch: 58.51
-      LAnklePitch: -14.67
+      LAnklePitch: -18.67
       LAnkleRoll: 0.43
       RHipYawPitch: -2.0
       RHipRoll: 6.54
@@ -597,7 +597,7 @@ keyframes:
       LElbowYaw: -0.793435755123701
       LElbowRoll: -1.4917542958658
       RShoulderPitch: -59.388297592601
-      RShoulderRoll: 56.17633749315222
+      RShoulderRoll: 36.17633749315222
       RElbowYaw: -0.96440905042746
       RElbowRoll: -1.93601712024011
   - name: go left side catch 3
@@ -607,12 +607,12 @@ keyframes:
       HeadPitch: -22.4978798523823
       LHipYawPitch: -2.0
       LHipRoll: -26.00
-      LHipPitch: -20.58
+      LHipPitch: -36.58
       LKneePitch: 58.51
       LAnklePitch: -24.67
       LAnkleRoll: 0.43
       RHipYawPitch: -2.0
-      RHipRoll: 4.54
+      RHipRoll: -14.54
       RHipPitch: -24.6999857747604
       RKneePitch: 49.7491308198919
       RAnklePitch: -24.7830681958245
@@ -622,23 +622,23 @@ keyframes:
       LElbowYaw: -0.793435755123701
       LElbowRoll: -1.4917542958658
       RShoulderPitch: -59.388297592601
-      RShoulderRoll: 56.17633749315222
+      RShoulderRoll: 86.17633749315222
       RElbowYaw: -0.96440905042746
       RElbowRoll: -1.93601712024011
   - name: hold left side catch 3
-    frames: 5
+    frames: 50
     joints:
       HeadYaw: 0.612831893090224
       HeadPitch: -22.4978798523823
       LHipYawPitch: -2.0
       LHipRoll: -26.00
-      LHipPitch: -20.58
+      LHipPitch: -36.58
       LKneePitch: 58.51
       LAnklePitch: -24.67
       LAnkleRoll: 0.43
       RHipYawPitch: -2.0
       RHipRoll: 4.54
-      RHipPitch: -13.76
+      RHipPitch: -18.76
       RKneePitch: 38.34
       RAnklePitch: -21.76
       RAnkleRoll: -18.81
