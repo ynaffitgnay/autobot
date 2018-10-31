@@ -4,7 +4,7 @@
 #include <common/Random.h>
 
 ParticleFilter::ParticleFilter(MemoryCache& cache, TextLogger*& tlogger) 
-  : cache_(cache), tlogger_(tlogger), dirty_(true), kmeans_(new KMeans(cache, tlogger, 4, 10)), M_(200), alpha_slow_(0.01), alpha_fast_(0.5),robot_localized_(false) {
+  : cache_(cache), tlogger_(tlogger), dirty_(true), kmeans_(new KMeans(cache, tlogger, 2, 10)), M_(200), alpha_slow_(0.01), alpha_fast_(0.5),robot_localized_(false) {
 }
 
 ParticleFilter::~ParticleFilter() {
@@ -19,7 +19,7 @@ void ParticleFilter::init(Point2D loc, float orientation) {
   particles().resize(M_);
   auto frame = cache_.frame_info->frame_id;
   for(auto& p : particles()) {
-    p.x = Random::inst().sampleU(1200.0,1500.0);
+    p.x = Random::inst().sampleU(1200.0,1800.0);
     p.y = Random::inst().sampleU(-650.0,650.0);
     p.t = Random::inst().sampleU(-M_PI, M_PI);  
     p.w = 1.0/M_;
@@ -62,8 +62,8 @@ void ParticleFilter::propagationStep(const Pose2D& disp) {
   
   for(auto& p : particles()) {
     // Get the belief
-    float stdevX = 20.0; 
-    float stdevY = 20.0; 
+    float stdevX = 20.0;
+    float stdevY = 20.0;
     float stdevTh = 0.05; 
   
     if (std::abs(disp.rotation) < 0.01) {
@@ -75,12 +75,14 @@ void ParticleFilter::propagationStep(const Pose2D& disp) {
     if (std::abs(disp.translation.y) < 0.75) {
       stdevY = 10.0;
     }
-    float x_shift = Random::inst().sampleN(disp.translation.x, stdevX);
-    float y_shift = Random::inst().sampleN(disp.translation.y, stdevY);
-    float theta_shift = Random::inst().sampleN(disp.rotation, stdevTh);
+
+    float zero = 0.0;
+    float x_shift = Random::inst().sampleN(zero, stdevX);
+    float y_shift = Random::inst().sampleN(zero, stdevY);
+    float theta_shift = Random::inst().sampleN(zero, stdevTh);
   
-    p.x += x_shift+(disp.translation.x)*cos(p.t)+(disp.translation.y)*(cos(p.t+(M_PI/2.0)));
-    p.y += y_shift+(disp.translation.x)*sin(p.t)+(disp.translation.y)*(sin(p.t+(M_PI/2.0)));
+    p.x += (x_shift+disp.translation.x)*cos(p.t)+(y_shift+disp.translation.y)*(cos(p.t+(M_PI/2.0)));
+    p.y += (x_shift+disp.translation.x)*sin(p.t)+(y_shift+disp.translation.y)*(sin(p.t+(M_PI/2.0)));
     p.t += theta_shift+disp.rotation;
   
   }
@@ -97,7 +99,7 @@ void ParticleFilter::updateStep(){
         beacons_list_.insert(it->first);
         double part_dist = sqrt(pow(p.x - it->second.translation.x, 2) + pow(p.y - it->second.translation.y,2));
         double mean_dist = beacon_current.visionDistance;
-        double var_dist = (mean_dist/5.0)*(mean_dist/5.0);
+        double var_dist = (mean_dist/20.0)*(mean_dist/20.0);
         double dist_weight = foldedNormPDF(part_dist,mean_dist,var_dist);
 
         double part_global_bearing = p.t;  //alpha
@@ -106,7 +108,7 @@ void ParticleFilter::updateStep(){
         double mean_bear = beacon_current.visionBearing;  //theta
         double x_bear = part_beacon_sep - part_global_bearing;  //phi
 
-        double var_bear = 0.1 * 0.1;
+        double var_bear = 0.03 * 0.03;
         if (x_bear > M_PI  || x_bear < -M_PI) {
           p.t = -p.t;
           x_bear = part_beacon_sep - p.t;
@@ -159,7 +161,7 @@ bool ParticleFilter::checkResample(){
   if(sum_weights_squared < 0.000001) return true;
   double N_eff = 1/sum_weights_squared;
 
-  return (N_eff < (M_/3.0));
+  return (N_eff < (M_/4.0));
 }
 
 std::vector<Particle> ParticleFilter::resampleStep(){
@@ -208,7 +210,7 @@ std::vector<Particle> ParticleFilter::resampleStep(){
       }
     
       double rand_prob = Random::inst().sampleU(0.0, 1.0);
-      if (rand_prob < resample_prob && rand_injected < (0.25 * (double)M_)) {
+      if (rand_prob < resample_prob && rand_injected < (0.05 * (double)M_)) {
         if (area_injected < (0.20 * (double)M_)) {
           ++rand_injected;
           ++area_injected;
@@ -217,7 +219,7 @@ std::vector<Particle> ParticleFilter::resampleStep(){
           particles().at(i).t = stdev_th*Random::inst().sampleN(0.0,1.0) + mu_th;
         } else{
           ++rand_injected;
-          particles().at(i).x = Random::inst().sampleU(1200.0,1500.0);
+          particles().at(i).x = Random::inst().sampleU(1200.0,1800.0);
           particles().at(i).y = Random::inst().sampleU(-650.0,650.0);
           particles().at(i).t = Random::inst().sampleU(-M_PI, M_PI);
         }
@@ -231,7 +233,7 @@ std::vector<Particle> ParticleFilter::resampleStep(){
     resampled_particles.clear();
     resampled_particles.resize(M_);
     for(auto& p : resampled_particles) {
-      p.x = Random::inst().sampleU(1200.0,1500.0);
+      p.x = Random::inst().sampleU(1200.0,1800.0);
       p.y = Random::inst().sampleU(-650.0,650.0);
       p.t = Random::inst().sampleU(-M_PI, M_PI);  
       p.w = 1.0/M_;

@@ -153,7 +153,7 @@ void LocalizationModule::processFrame() {
   // from the particle filter
   pfilter_->processFrame(); 
   Pose2D pose_avg; 
-  pose_avg = avgLocVals(pfilter_->pose());
+  pose_avg = pfilter_->pose();
   self.loc = pose_avg.translation;
   self.orientation = pose_avg.rotation;
 
