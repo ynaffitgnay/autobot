@@ -61,7 +61,7 @@ def createStateTask(state):
     if UTdebug.TRACE:
         states = ['undef', 'initial', 'ready', 'set', 'playing', 'testing',
                   'penalised', 'finished', 'falling', 'bottom', 'top', 'test',
-                  'manual']
+                  'manual', 'attacking', 'defending']
         print('Starting state:', states[state])
 
     if state == core.INITIAL:
@@ -82,6 +82,10 @@ def createStateTask(state):
         return Falling()
     if state == core.MANUAL_CONTROL:
         return ManualControl()
+    if state == core.ATTACKING:
+        return Attacking()
+    if state == core.DEFENDING:
+        return Defending()
     raise Exception("Invalid state: %i" % state)
 
 
@@ -95,6 +99,8 @@ class Penalised(pose.StandStraight): pass
 class Finished(pose.Sit): pass
 class Set(pose.Sit): pass
 class Falling(Task): pass
+class Attacking(pose.Sit): pass
+class Defending(pose.Sit): pass
 
 
 def load(bvr):
@@ -106,6 +112,8 @@ def load(bvr):
     if hasattr(m, 'Set'): Set = m.Set
     if hasattr(m, 'Playing'): Playing = m.Playing
     if hasattr(m, 'Testing'): Testing = m.Testing
+    if hasattr(m, 'Attacking'): Attacking = m.Attacking
+    if hasattr(m, 'Defending'): Defending = m.Defending
 
 
 class ManualControl(Task):
