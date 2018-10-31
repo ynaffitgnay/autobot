@@ -167,7 +167,7 @@ class CheckIfLocalized(Node):
     print("Theta avg before coordinate shift: %f" % (th_avg * core.RAD_T_DEG))
     if th_avg > np.pi:
       th_avg = th_avg - 2*np.pi
-    if (np.pi - abs(th_avg)) <= 0.1:
+    if (np.pi - abs(th_avg)) <= 0.5:
         self.localized = True
         self.initialized = True
     print("Theta avg: %f" % (th_avg*core.RAD_T_DEG))

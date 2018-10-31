@@ -485,7 +485,7 @@ keyframes:
       LHipPitch: -38.58
       LKneePitch: 78.51
       LAnklePitch: -39.67
-      LAnkleRoll: 16.43
+      LAnkleRoll: 6.43
       RHipYawPitch: -2.0
       RHipRoll: 12.54
       RHipPitch: -1.76
@@ -535,13 +535,13 @@ keyframes:
       LHipPitch: -48.58
       LKneePitch: 58.51
       LAnklePitch: -14.67
-      LAnkleRoll: 16.43
+      LAnkleRoll: 0.43
       RHipYawPitch: -2.0
       RHipRoll: 12.54
       RHipPitch: -1.76
       RKneePitch: 3.34
       RAnklePitch: -1.76
-      RAnkleRoll: -10.81
+      RAnkleRoll: -14.81
       LShoulderPitch: -38.7682393593689
       LShoulderRoll: 28.25941906044261
       LElbowYaw: -0.793435755123701
@@ -550,106 +550,156 @@ keyframes:
       RShoulderRoll: 36.17633749315222
       RElbowYaw: -0.96440905042746
       RElbowRoll: -1.93601712024011
-  - name: go left side catch 1
-    frames: 20
+  - name: hold left forward 5
+    frames: 10
+    joints:
+      HeadYaw: 0.612831893090224
+      HeadPitch: -22.4978798523823
+      LHipYawPitch: -2.0
+      LHipRoll: -18.00
+      LHipPitch: -48.58
+      LKneePitch: 58.51
+      LAnklePitch: -14.67
+      LAnkleRoll: 0.43
+      RHipYawPitch: -2.0
+      RHipRoll: 12.54
+      RHipPitch: -1.76
+      RKneePitch: 3.34
+      RAnklePitch: -1.76
+      RAnkleRoll: -14.81
+      LShoulderPitch: -38.7682393593689
+      LShoulderRoll: 28.25941906044261
+      LElbowYaw: -0.793435755123701
+      LElbowRoll: -1.4917542958658
+      RShoulderPitch: -59.388297592601
+      RShoulderRoll: 36.17633749315222
+      RElbowYaw: -0.96440905042746
+      RElbowRoll: -1.93601712024011
+  - name: go left side catch 2
+    frames: 5
+    joints:
+      HeadYaw: 0.612831893090224
+      HeadPitch: -22.4978798523823
+      LHipYawPitch: -2.0
+      LHipRoll: -8.00
+      LHipPitch: -48.58
+      LKneePitch: 58.51
+      LAnklePitch: -14.67
+      LAnkleRoll: 0.43
+      RHipYawPitch: -2.0
+      RHipRoll: 6.54
+      RHipPitch: -5.76
+      RKneePitch: 3.34
+      RAnklePitch: -1.76
+      RAnkleRoll: -14.81
+      LShoulderPitch: -38.7682393593689
+      LShoulderRoll: 28.25941906044261
+      LElbowYaw: -0.793435755123701
+      LElbowRoll: -1.4917542958658
+      RShoulderPitch: -59.388297592601
+      RShoulderRoll: 56.17633749315222
+      RElbowYaw: -0.96440905042746
+      RElbowRoll: -1.93601712024011
+  - name: go left side catch 3
+    frames: 50
     joints:
       HeadYaw: 0.612831893090224
       HeadPitch: -22.4978798523823
       LHipYawPitch: -2.0
       LHipRoll: -26.00
-      LHipPitch: -48.58
+      LHipPitch: -20.58
       LKneePitch: 58.51
-      LAnklePitch: -14.67
-      LAnkleRoll: 16.43
+      LAnklePitch: -24.67
+      LAnkleRoll: 0.43
       RHipYawPitch: -2.0
-      RHipRoll: 8.54
-      RHipPitch: -1.76
-      RKneePitch: 3.34
-      RAnklePitch: -1.76
-      RAnkleRoll: -10.81
+      RHipRoll: 4.54
+      RHipPitch: -24.6999857747604
+      RKneePitch: 49.7491308198919
+      RAnklePitch: -24.7830681958245
+      RAnkleRoll: -18.81
       LShoulderPitch: -38.7682393593689
       LShoulderRoll: 28.25941906044261
       LElbowYaw: -0.793435755123701
       LElbowRoll: -1.4917542958658
       RShoulderPitch: -59.388297592601
-      RShoulderRoll: 36.17633749315222
+      RShoulderRoll: 56.17633749315222
       RElbowYaw: -0.96440905042746
       RElbowRoll: -1.93601712024011
-  - name: hold left side catch 1
-    frames: 2000
+  - name: hold left side catch 3
+    frames: 5
     joints:
       HeadYaw: 0.612831893090224
       HeadPitch: -22.4978798523823
       LHipYawPitch: -2.0
       LHipRoll: -26.00
-      LHipPitch: -48.58
+      LHipPitch: -20.58
       LKneePitch: 58.51
-      LAnklePitch: -14.67
-      LAnkleRoll: 16.43
+      LAnklePitch: -24.67
+      LAnkleRoll: 0.43
       RHipYawPitch: -2.0
-      RHipRoll: 8.54
-      RHipPitch: -1.76
-      RKneePitch: 3.34
-      RAnklePitch: -1.76
-      RAnkleRoll: -10.81
+      RHipRoll: 4.54
+      RHipPitch: -13.76
+      RKneePitch: 38.34
+      RAnklePitch: -21.76
+      RAnkleRoll: -18.81
       LShoulderPitch: -38.7682393593689
       LShoulderRoll: 28.25941906044261
       LElbowYaw: -0.793435755123701
       LElbowRoll: -1.4917542958658
       RShoulderPitch: -59.388297592601
-      RShoulderRoll: 36.17633749315222
+      RShoulderRoll: 56.17633749315222
       RElbowYaw: -0.96440905042746
       RElbowRoll: -1.93601712024011
-  - name: go leg rebalance
-    frames: 20
-    joints:
-      HeadYaw: 0.612831893090224
-      HeadPitch: -22.4978798523823
-      LHipYawPitch: -2.0
-      LHipRoll: -6.00
-      LHipPitch: -10.58
-      LKneePitch: 23.51
-      LAnklePitch: -12.67
-      LAnkleRoll: 6.43
-      RHipYawPitch: -2.0
-      RHipRoll: 6.54
-      RHipPitch: -7.76
-      RKneePitch: 13.34
-      RAnklePitch: -9.76
-      RAnkleRoll: -5.81
-      LShoulderPitch: -58.7682393593689
-      LShoulderRoll: 48.25941906044261
-      LElbowYaw: -0.793435755123701
-      LElbowRoll: -1.4917542958658
-      RShoulderPitch: -59.388297592601
-      RShoulderRoll: 22.17633749315222
-      RElbowYaw: -0.96440905042746
-      RElbowRoll: -1.93601712024011
-  - name: hold follow through
-    frames: 20
-    joints:      
-      HeadYaw: 0.612831893090224
-      HeadPitch: -22.4978798523823
-      LHipYawPitch: -2.0
-      LHipRoll: -6.00
-      LHipPitch: -10.58
-      LKneePitch: 23.51
-      LAnklePitch: -12.67
-      LAnkleRoll: 6.43
-      RHipYawPitch: -2.0
-      RHipRoll: 6.54
-      RHipPitch: -1.76
-      RKneePitch: 13.34
-      RAnklePitch: -9.76
-      RAnkleRoll: -5.81
-      LShoulderPitch: -58.7682393593689
-      LShoulderRoll: 28.25941906044261
-      LElbowYaw: -0.793435755123701
-      LElbowRoll: -1.4917542958658
-      RShoulderPitch: -59.388297592601
-      RShoulderRoll: 22.17633749315222
-      RElbowYaw: -0.96440905042746
-      RElbowRoll: -1.93601712024011
+  # - name: go leg rebalance
+  #   frames: 20
+  #   joints:
+  #     HeadYaw: 0.612831893090224
+  #     HeadPitch: -22.4978798523823
+  #     LHipYawPitch: -2.0
+  #     LHipRoll: -6.00
+  #     LHipPitch: -10.58
+  #     LKneePitch: 23.51
+  #     LAnklePitch: -12.67
+  #     LAnkleRoll: 6.43
+  #     RHipYawPitch: -2.0
+  #     RHipRoll: 6.54
+  #     RHipPitch: -7.76
+  #     RKneePitch: 13.34
+  #     RAnklePitch: -9.76
+  #     RAnkleRoll: -5.81
+  #     LShoulderPitch: -58.7682393593689
+  #     LShoulderRoll: 48.25941906044261
+  #     LElbowYaw: -0.793435755123701
+  #     LElbowRoll: -1.4917542958658
+  #     RShoulderPitch: -59.388297592601
+  #     RShoulderRoll: 22.17633749315222
+  #     RElbowYaw: -0.96440905042746
+  #     RElbowRoll: -1.93601712024011
+  # - name: hold follow through
+  #   frames: 20
+  #   joints:      
+  #     HeadYaw: 0.612831893090224
+  #     HeadPitch: -22.4978798523823
+  #     LHipYawPitch: -2.0
+  #     LHipRoll: -6.00
+  #     LHipPitch: -10.58
+  #     LKneePitch: 23.51
+  #     LAnklePitch: -12.67
+  #     LAnkleRoll: 6.43
+  #     RHipYawPitch: -2.0
+  #     RHipRoll: 6.54
+  #     RHipPitch: -1.76
+  #     RKneePitch: 13.34
+  #     RAnklePitch: -9.76
+  #     RAnkleRoll: -5.81
+  #     LShoulderPitch: -58.7682393593689
+  #     LShoulderRoll: 28.25941906044261
+  #     LElbowYaw: -0.793435755123701
+  #     LElbowRoll: -1.4917542958658
+  #     RShoulderPitch: -59.388297592601
+  #     RShoulderRoll: 22.17633749315222
+  #     RElbowYaw: -0.96440905042746
+  #     RElbowRoll: -1.93601712024011
   - name: go normal stand
     frames: 80
     joints: 
