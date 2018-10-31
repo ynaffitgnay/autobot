@@ -9,6 +9,7 @@ import geometry
 import commands
 import mem_objects
 import task, util
+import time
 import head
 import math
 import random
@@ -230,38 +231,48 @@ class MoveBtwBall(Node):
     self.poseListX = poseListX
     self.poseListY = poseListY
     self.pose_index = pose_index
+    self.k_x = (0.001, 0.0001, 0.0001)
+    self.k_y = (0.001, 0.0001, 0.0001)
+    self.k_t = (0.7, 0.01, 0.1)
+    
+    # integrals and previouse values for the PID controllers
+    self.x_int = 0.0
+    self.x_prev = 0.0
+    self.y_int = 0.0
+    self.y_prev = 0.0
+    self.theta_int = 0.0
+    self.theta_prev = 0.0
+    
+    # Time for PID control
+    self.time_last = time.clock()
+    self.time_current = time.clock()
+
+    # Objects
+    self.gb_line_obj = mem_objects.world_objects[core.WO_OWN_PENALTY]
+    self.gb_line_seg = None
+    self.robot = world_objects.getObjPtr(core.WO_TEAM5)
+    self.ball = mem_objects.world_objects[core.WO_BALL]
+
   def run(self):
-    robot = world_objects.getObjPtr(core.WO_TEAM5)
-    self.checkLocalized(robot)
+    self.checkLocalized()
 
     if self.localized:
       if not self.initialized:
-        self.goalieStartX = robot.loc.x
-        self.goalieStartY = robot.loc.y
-        self.goalieStartTh = robot.orientation
+        self.goalieStartX = self.robot.loc.x
+        self.goalieStartY = self.robot.loc.y
+        self.goalieStartTh = self.robot.orientation
         self.initialized = True
 
-      ball = mem_objects.world_objects[core.WO_BALL]
-      self.getDesiredGoaliePos(robot,ball)
+      self.getDesiredGoaliePos()
 
-      self.goToDesiredPos(robot.loc.x, robot.loc.y, robot.orientation, ball)
-
-      gb_line_obj = mem_objects.world_objects[core.WO_OWN_PENALTY]
-      if gb_line_obj.seen:
-        gb_line_seg = gb_line_obj.lineLoc
-        gb_line_cent = gb_line_seg.getCenter()
-        rel_robot = core.Point2D(0.0,0.0)
-        gb_robo_dist = gb_line_seg.getDistanceTo(rel_robot)
-        print("Line seen. Center at [%f, %f], robot at [%f, %f] dist to closest point is: %f\n" % (gb_line_cent.x,gb_line_cent.y,robot.loc.x,robot.loc.y,gb_robo_dist))
-      else:
-        print("Line not seen.\n")
-
-
+      self.goToDesiredPos()
       
 
-      if ball.seen:
-        commands.setHeadPan(ball.bearing, 0.2)
-      # print("Ball dist: %f Ball bear: %f\n" % (ball.distance, ball.bearing))
+
+
+      # Look at the ball
+      if self.ball.seen:
+        commands.setHeadPan(self.ball.bearing, 0.2)
       # print("Robot pose: [%f,%f,%f]\n" %(robot.loc.x,robot.loc.y,robot.orientation*core.RAD_T_DEG))
       
     if self.getTime() > 2.0:
@@ -271,12 +282,12 @@ class MoveBtwBall(Node):
         signal = "lost"
       self.postSignal(signal)
 
-  def checkLocalized(self,robot):
-    xGlobal = robot.loc.x
-    yGlobal = robot.loc.y
-    thGlobal = robot.orientation
+  def checkLocalized(self):
+    xGlobal = self.robot.loc.x
+    yGlobal = self.robot.loc.y
+    thGlobal = self.robot.orientation
     # print("Robot checking localization before movement. Current pose: [%f, %f] Theta: %f\n" % (xGlobal,yGlobal,thGlobal*core.RAD_T_DEG))
-    self.getSlidingCov(robot.loc.x,robot.loc.y)
+    self.getSlidingCov(self.robot.loc.x,self.robot.loc.y)
     if not thGlobal < -np.pi/2.0 and not thGlobal > np.pi/2.0:
       #facing toward the goal, not localized
       print("1")
@@ -332,17 +343,71 @@ class MoveBtwBall(Node):
     
     return 
 
+  def calc_integral(self, dt, x, y, theta):
+    self.x_int = self.x_int + dt*(self.robot.loc.x - x)
+    self.y_int = self.y_int + dt*(y - self.robot.loc.y)
+    self.theta_int = self.theta_int + dt*(self.ball.bearing)
+    if abs(self.x_int) >= 100.0:
+      self.x_int = 100.0*np.sign(self.x_int)
+    if abs(self.y_int) >= 100.0:
+      self.y_int = 100.0*np.sign(self.y_int)
+    if abs(self.theta_int) >= 15.0:
+      self.theta_int = 15.0*np.sign(self.theta_int)
 
-  def goToDesiredPos(self,globX,globY,globTh,ball):
-    # TODO: Create controller for getting to the global pose from where robot is
+  def goToDesiredPos(self):
+    self.time_current = time.clock()
+    globX = self.robot.loc.x
+    globY = self.robot.loc.y
+    globTh = self.robot.orientation
+    dt = self.time_current - self.time_last
+    x = self.roboDesiredX
+    y = self.roboDesiredY
+    theta = self.roboDesiredTh
+    bearing = self.ball.bearing
+    self.calc_integral(dt, x, y, theta)
+    elevation = core.RAD_T_DEG * self.ball.visionElevation
+    commands.setHeadPanTilt(self.ball.bearing, -elevation, 1.5)
+    if dt == 0:
+      x_cont = self.k_x[0] * (globX - x) + self.k_x[1] * self.x_int
+      y_cont = self.k_y[0] * (y - globY) + self.k_y[1] * self.y_int
+      theta_cont = self.k_t[0] * bearing + self.k_t[1] * self.theta_int
+    else:
+      x_cont = self.k_x[0] * (globX - x) + self.k_x[1] * self.x_int + self.k_x[2] *(globX - self.x_prev) / dt
+      y_cont = self.k_y[0] * (y - globY) + self.k_y[1] * self.y_int + self.k_y[2] *(self.y_prev - globY) / dt
+      theta_cont = self.k_t[0] * bearing + self.k_t[1] * self.theta_int + self.k_t[2] *(bearing - self.theta_prev) / dt
+    
+    if abs(bearing) >=0.3:
+      # Control only the heading of the robot and not the velocity
+      commands.setWalkVelocity(0.0, 0.0, 0.4*np.sign(bearing))
+    else:
+      # Control both heading and velocity
+      if self.gb_line_obj.seen:
+        self.gb_line_seg = self.gb_line_obj.lineLoc
+        gb_line_cent = self.gb_line_seg.getCenter()
+        rel_robot = core.Point2D(0.0,0.0)
+        gb_dist_thresh = 200.0
+        gb_robo_dist = self.gb_line_seg.getDistanceTo(rel_robot)
+        print("Line seen. Center at [%f, %f], robot at [%f, %f] dist to closest point is: %f\n" % (gb_line_cent.x,gb_line_cent.y,self.robot.loc.x,self.robot.loc.y,gb_robo_dist))
+        if gb_robo_dist < gb_dist_thresh:
+          # Too close in either x or y
+          x_cont = 0.0
+      else:
+        print("Line not seen.\n")
+      commands.setWalkVelocity(x_cont, y_cont, theta_cont)
+      print("Controls: [%f, %f, %f]\n" %(x_cont, y_cont, theta_cont))
+    self.x_prev = globX - self.x_prev
+    self.y_prev = self.y_prev - globY
+    self.theta_prev = bearing
+    self.time_last = self.time_current
+
     return
 
-  def getDesiredGoaliePos(self,robot,ball):
-    ballRelDist = ball.distance
-    ballRelBear = ball.bearing # theta
-    roboGlobalX = robot.loc.x
-    roboGlobalY = robot.loc.y
-    roboGlobalTh = robot.orientation # phi
+  def getDesiredGoaliePos(self):
+    ballRelDist = self.ball.distance
+    ballRelBear = self.ball.bearing # theta
+    roboGlobalX = self.robot.loc.x
+    roboGlobalY = self.robot.loc.y
+    roboGlobalTh = self.robot.orientation # phi
     beta = np.pi - roboGlobalTh # beta
 
     if beta > np.pi:
@@ -387,8 +452,8 @@ class MoveBtwBall(Node):
     goalBallXComp = ballGlobalX - self.goalieStartX 
     goalBallYComp = ballGlobalY - self.goalieStartY
     goalBallTh = np.arctan2(goalBallYComp,goalBallXComp)
-    # print("Ball global pose: [%f, %f]\n" % (ballGlobalX,ballGlobalY))
-    # print("Ball to goal bearing: %f" % (goalBallTh*core.RAD_T_DEG))
+    print("Ball global pose: [%f, %f]\n" % (ballGlobalX,ballGlobalY))
+    print("Ball to goal bearing: %f" % (goalBallTh*core.RAD_T_DEG))
     self.roboDesiredX = self.goalieStartX - self.radius*np.cos(goalBallTh)
     self.roboDesiredY = self.goalieStartY - self.radius*np.sin(goalBallTh)
     if goalBallTh > 0:
@@ -396,16 +461,15 @@ class MoveBtwBall(Node):
     else:
       self.roboDesiredTh = np.pi + goalBallTh
 
-    # print("Robot should go to [%f, %f] with bearing: %f\n" %(self.roboDesiredX,self.roboDesiredY,self.roboDesiredTh*core.RAD_T_DEG))
+    print("Robot should go to [%f, %f] with bearing: %f\n" %(self.roboDesiredX,self.roboDesiredY,self.roboDesiredTh*core.RAD_T_DEG))
     return
-
-
 
 
 class Playing(LoopingStateMachine):
   def setup(self):
     ball = mem_objects.world_objects[core.WO_BALL]
     robot = world_objects.getObjPtr(core.WO_TEAM5)
+    
     localized = False
     poseListX = []
     poseListY = []
