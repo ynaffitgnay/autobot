@@ -156,7 +156,7 @@ void KMeans::updateClusters(std::vector<Cluster>& clusters) {
 
 void KMeans::assignVariances(std::vector<Cluster>& clusters) {
   // calculate the variance for each cluster
-  typedef Eigen::Matrix<float,3,3> Matrix3f;
+  typedef Eigen::Matrix<double,3,3> Matrix3f;
 
   for (int clusterIdx = 0; clusterIdx < k_; ++clusterIdx) {
     Matrix3f covarianceMat = Matrix3f::Zero(); // new covariance matrix for each cluster
@@ -169,7 +169,7 @@ void KMeans::assignVariances(std::vector<Cluster>& clusters) {
       return;  
     }
     
-    std::vector<float> mean = {clusters.at(clusterIdx).centroid.x, clusters.at(clusterIdx).centroid.y, (clusters.at(clusterIdx).centroid.t < 0.0) ? clusters.at(clusterIdx).centroid.t + 2 * M_PI : clusters.at(clusterIdx).centroid.t };
+    std::vector<double> mean = {clusters.at(clusterIdx).centroid.x, clusters.at(clusterIdx).centroid.y, (clusters.at(clusterIdx).centroid.t < 0.0) ? clusters.at(clusterIdx).centroid.t + 2 * M_PI : clusters.at(clusterIdx).centroid.t };
 
     // Assign maximum variance to empty clusters
     if (!clusters.at(clusterIdx).particles.size()) {
@@ -181,7 +181,7 @@ void KMeans::assignVariances(std::vector<Cluster>& clusters) {
       for (int j = 0; j < 3; ++j) {
         std::vector<const Particle*>::const_iterator it;
         for (it = clusters.at(clusterIdx).particles.begin(); it != clusters.at(clusterIdx).particles.end(); ++it) {
-          std::vector<float> particle = {(*it)->x,(*it)->y,((*it)->t < 0.0) ? (*it)->t + 2 * M_PI : (*it)->t};
+          std::vector<double> particle = {(*it)->x,(*it)->y,((*it)->t < 0.0) ? (*it)->t + 2 * M_PI : (*it)->t};
           covarianceMat(i,j) += ((particle[i] - mean[i]) * (particle[j] - mean[j]));
         }
         covarianceMat(i,j) /= (clusters.at(clusterIdx).particles.size() - 1);

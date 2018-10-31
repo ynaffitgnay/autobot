@@ -13,7 +13,7 @@
 struct Cluster {
   std::vector<const Particle*> particles;
   Particle centroid;
-  float variance;
+  double variance;
 };
   
 class KMeans {
