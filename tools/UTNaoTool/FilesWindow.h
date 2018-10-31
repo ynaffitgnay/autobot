@@ -57,6 +57,8 @@ class FilesWindow : public ConfigWindow, public Ui_UTFilesWindow {
     void setPlaying();
     void setTesting();
     void setPenalised();
+    void setAttacking();
+    void setDefending();
     void setFinished();
     void setBottomCameraBehavior();
     void setTopCameraBehavior();
