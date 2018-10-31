@@ -117,7 +117,7 @@ void LocalizationModule::movePlayer(const Point2D& position, float orientation) 
 }
 
 Pose2D LocalizationModule::avgLocVals(Pose2D pose) {
-  int window_size = 10;
+  int window_size = 1;
   double x_sum;
   double y_sum;
   double th_sum;
@@ -129,7 +129,7 @@ Pose2D LocalizationModule::avgLocVals(Pose2D pose) {
   for (auto& p : pose_list_) {
       x_sum += p.translation.x;
       y_sum += p.translation.y;
-      if (p.rotation < 0) {
+      if (p.rotation < 0.0) {
         p.rotation += 2*M_PI;
       }
       th_sum += p.rotation;
@@ -153,7 +153,7 @@ void LocalizationModule::processFrame() {
   // from the particle filter
   pfilter_->processFrame(); 
   Pose2D pose_avg; 
-  pose_avg = pfilter_->pose();
+  pose_avg = avgLocVals(pfilter_->pose());
   self.loc = pose_avg.translation;
   self.orientation = pose_avg.rotation;
 
