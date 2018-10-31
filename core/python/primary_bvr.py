@@ -99,8 +99,8 @@ class Penalised(pose.StandStraight): pass
 class Finished(pose.Sit): pass
 class Set(pose.Sit): pass
 class Falling(Task): pass
-class Attacking(Task): pass
-class Defending(Task): pass
+class Attacking(pose.Sit): pass
+class Defending(pose.Sit): pass
 
 
 def load(bvr):
