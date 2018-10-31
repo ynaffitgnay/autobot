@@ -39,7 +39,7 @@ class BlockCenter(Node):
   def run(self):
     UTdebug.log(15, "Blocking center")
     
-    return pose.Squat(time=3.0)
+    return #pose.Squat(time=3.0)
 
 class Reset(Node):
   """Go back to normal"""
@@ -144,23 +144,33 @@ class CheckIfLocalized(Node):
       self.localized = True
     return
 
-  def startLocalize(self, x, y, th):
-    window_size = 10
-    if len(self.poseListTh) <= window_size:
+  def startLocalize(self, x, y, theta):
+    window_size = 3
+    print("Theta: %f" % (theta*core.RAD_T_DEG))
+    if len(self.poseListTh) < window_size:
       self.localized = False
+      self.poseListTh.append(theta)
+      print("Pose list Theta size: %d" % len(self.poseListTh))
       return
     else:
-      self.poseListTh[self.pose_index % window_size] = Th
+      self.poseListTh[self.pose_index % window_size] = theta
       self.pose_index = self.pose_index + 1
 
     th_sum = 0.0
-    for th in range(len(self.poseListTh)):
-        th_sum = th_sum + th
+    for th in self.poseListTh:
+      if th < 0:
+        th = th + 2*np.pi
+      th_sum = th_sum + th
+    print("Theta sum: %f" % (th_sum))
 
-    th_avg = th_sum/10.0
+    th_avg = th_sum/window_size
+    print("Theta avg before coordinate shift: %f" % (th_avg * core.RAD_T_DEG))
+    if th_avg > np.pi:
+      th_avg = th_avg - 2*np.pi
     if (np.pi - abs(th_avg)) <= 0.1:
         self.localized = True
         self.initialized = True
+    print("Theta avg: %f" % (th_avg*core.RAD_T_DEG))
 
     # x_stdev_sum = 0.0
     # y_stdev_sum = 0.0
@@ -433,9 +443,9 @@ class Playing(LoopingStateMachine):
     poseListTh = []
     pose_index = 0 
     blocker = Blocker()
-    lookStraight = MoveHead(0.0,-10.0,1.5)
-    moveHeadLeft = MoveHead(85.0,-10.0,1.5)
-    moveHeadRight = MoveHead(-85.0,-10.0,3.0)
+    lookStraight = MoveHead(0.0,-10.0,2.5)
+    moveHeadLeft = MoveHead(85.0,-10.0,2.5)
+    moveHeadRight = MoveHead(-85.0,-10.0,5.0)
     reset = Reset()
     rdy = GetReady()
     moveBtwBall = MoveBtwBall(localized,poseListX,poseListY, poseListTh,pose_index)

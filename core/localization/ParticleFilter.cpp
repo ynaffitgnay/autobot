@@ -4,7 +4,7 @@
 #include <common/Random.h>
 
 ParticleFilter::ParticleFilter(MemoryCache& cache, TextLogger*& tlogger) 
-  : cache_(cache), tlogger_(tlogger), dirty_(true), kmeans_(new KMeans(cache, tlogger, 4, 10)), M_(400), alpha_slow_(0.01), alpha_fast_(0.5),robot_localized_(false) {
+  : cache_(cache), tlogger_(tlogger), dirty_(true), kmeans_(new KMeans(cache, tlogger, 4, 10)), M_(200), alpha_slow_(0.01), alpha_fast_(0.5),robot_localized_(false) {
 }
 
 ParticleFilter::~ParticleFilter() {

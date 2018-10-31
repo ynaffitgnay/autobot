@@ -121,7 +121,7 @@ Pose2D LocalizationModule::avgLocVals(Pose2D pose) {
   double x_sum;
   double y_sum;
   double th_sum;
-  if (pose_list_.size() <= window_size) {
+  if (pose_list_.size() < window_size) {
     pose_list_.push_back(pose);
   } else {
     pose_list_.at(pose_index_++ % window_size) = pose; 
@@ -129,12 +129,18 @@ Pose2D LocalizationModule::avgLocVals(Pose2D pose) {
   for (auto& p : pose_list_) {
       x_sum += p.translation.x;
       y_sum += p.translation.y;
+      if (p.rotation < 0) {
+        p.rotation += 2*M_PI;
+      }
       th_sum += p.rotation;
   }
   Pose2D ret_pose = Pose2D();
   ret_pose.translation.x = x_sum/(double)pose_list_.size();
   ret_pose.translation.y = y_sum/(double)pose_list_.size();
   ret_pose.rotation = th_sum/(double)pose_list_.size();
+  if (ret_pose.rotation > M_PI) {
+    ret_pose.rotation -= 2*M_PI;
+  }
   return ret_pose;
 }
 
