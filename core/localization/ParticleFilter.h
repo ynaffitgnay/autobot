@@ -51,7 +51,9 @@ class ParticleFilter {
     void updateStep();
     bool checkResample();
     std::vector<Particle> resampleStep();
-    double normDist(double x, double mu, double sig_sq);
+    double normPDF(double x, double mu, double sig_sq);
+    double foldedNormPDF(double x, double mu, double sig_sq);
+    double truncNormPDF(double x, double mu, double sig_sq, double a, double b);
 };
 
 #endif

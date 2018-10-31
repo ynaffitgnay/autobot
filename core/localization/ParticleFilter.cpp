@@ -4,7 +4,7 @@
 #include <common/Random.h>
 
 ParticleFilter::ParticleFilter(MemoryCache& cache, TextLogger*& tlogger) 
-  : cache_(cache), tlogger_(tlogger), dirty_(true), kmeans_(new KMeans(cache, tlogger, 8, 10)), M_(200), alpha_slow_(0.01), alpha_fast_(0.5),robot_localized_(false) {
+  : cache_(cache), tlogger_(tlogger), dirty_(true), kmeans_(new KMeans(cache, tlogger, 4, 10)), M_(400), alpha_slow_(0.01), alpha_fast_(0.5),robot_localized_(false) {
 }
 
 ParticleFilter::~ParticleFilter() {
@@ -98,7 +98,7 @@ void ParticleFilter::updateStep(){
         double part_dist = sqrt(pow(p.x - it->second.translation.x, 2) + pow(p.y - it->second.translation.y,2));
         double mean_dist = beacon_current.visionDistance;
         double var_dist = (mean_dist/5.0)*(mean_dist/5.0);
-        double dist_weight = normDist(part_dist,mean_dist,var_dist);
+        double dist_weight = foldedNormPDF(part_dist,mean_dist,var_dist);
 
         double part_global_bearing = p.t;  //alpha
 
@@ -111,7 +111,7 @@ void ParticleFilter::updateStep(){
           p.t = -p.t;
           x_bear = part_beacon_sep - p.t;
         }
-        bear_weight = normDist(x_bear,mean_bear,var_bear);
+        bear_weight = truncNormPDF(x_bear,mean_bear,var_bear,-M_PI,M_PI);
 
         p.w *= dist_weight * bear_weight;
       }
@@ -119,9 +119,23 @@ void ParticleFilter::updateStep(){
   }
 }
 
-double ParticleFilter::normDist(double x, double mu, double sig_sq) {
+double ParticleFilter::normPDF(double x, double mu, double sig_sq) {
   return (exp(-pow(x - mu,2) / (2 * sig_sq)) / sqrt(2 * M_PI * sig_sq));
 }
+
+double ParticleFilter::foldedNormPDF(double x, double mu, double sig_sq) {
+  return normPDF(x,mu,sig_sq) + normPDF(-x,mu,sig_sq);
+}
+
+double ParticleFilter::truncNormPDF(double x, double mu, double sig_sq, double a, double b) {
+  if( (x < b) && (x > a)){
+    return normPDF(x,mu,sig_sq);
+  }
+  else {
+    return 0.0;
+  }
+}
+
 
 bool ParticleFilter::checkResample(){
   // W slow and fast calculation
