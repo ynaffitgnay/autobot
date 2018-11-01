@@ -197,11 +197,7 @@ class Squat2(Task):
         cfgpose.newGoalieSquat3, .5,
         cfgpose.newGoalieSquat4, .4,
         cfgpose.goalieSquatFinalPose, time,
-        cfgpose.newGoalieSquat4, .4,
-        cfgpose.newGoalieSquat5, .3,
-        cfgpose.newGoalieSquat6, .5,
-        cfgpose.newGoalieSquat2, .5,
-        cfgpose.newGoalieSquat1, .3
+        cfgpose.newGoalieSquat8, .6
       ),
       Stand()
     ])
