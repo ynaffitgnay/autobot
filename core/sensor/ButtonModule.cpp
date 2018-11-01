@@ -154,18 +154,23 @@ void ButtonModule::processCenterPresses() {
     game_state_->setState(FINISHED);
   } else if (center_.presses == 6) {
     sayIP();
+  } else if (center_.presses == 1) {
+    game_state_->setState(INITIAL);
+    game_state_->lastStateChangeFromButton = true;
+    speech_->say("Initial");
   } else { // center presses = 1, 2, or more than 6
     if (state == ATTACKING || state == PLAYING) {
       game_state_->setState(DEFENDING);
       game_state_->lastStateChangeFromButton = true;
       speech_->say("Defending");
-    } else if (state == DEFENDING) {
+    } else {// if (state == DEFENDING) {
       game_state_->setState(ATTACKING);
       game_state_->lastStateChangeFromButton = true;
       speech_->say("Attacking");
-    } else {
-      speech_->say("Confused");
     }
+    //} else {
+    //  speech_->say("Confused");
+    //}
     //if (state==PENALISED) {
     //  game_state_->setState(PLAYING);
     //  game_state_->lastTimeLeftPenalized = frame_info_->seconds_since_start;
