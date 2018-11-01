@@ -410,20 +410,6 @@
       </widget>
      </item>
      <item row="6" column="0">
-      <widget class="QPushButton" name="attackingButton">
-       <property name="text">
-        <string>Attacking</string>
-       </property>
-      </widget>
-     </item>
-     <item row="7" column="0">
-      <widget class="QPushButton" name="defendingButton">
-       <property name="text">
-        <string>Defending</string>
-       </property>
-      </widget>
-     </item>
-     <item row="8" column="0">
       <widget class="QPushButton" name="finishedButton">
        <property name="text">
         <string>Finished</string>
