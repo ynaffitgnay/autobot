@@ -125,8 +125,8 @@ bool KMeans::reassignParticles(std::vector<Cluster>& clusters) {
 }
 
 void KMeans::updateClusters(std::vector<Cluster>& clusters) {
-  int numParticles, theta;
-  float totalX, totalY, totalT;
+  int numParticles;
+  float totalX, totalY, totalSinT, totalCosT;
   for (Cluster& cluster : clusters) {
     numParticles = cluster.particles.size();
 
@@ -136,21 +136,19 @@ void KMeans::updateClusters(std::vector<Cluster>& clusters) {
     
     totalX = 0;
     totalY = 0;
-    totalT = 0;
+    totalSinT = 0;
+    totalCosT = 0;
 
     for (const auto& particle : cluster.particles) {
       totalX += particle->x;
       totalY += particle->y;
-      theta = (particle->t < 0.0) ? particle->t + 2*M_PI : particle->t;
-      totalT += theta;
+      totalSinT += sin(particle->t);
+      totalCosT += cos(particle->t);
     }
 
     cluster.centroid.x = totalX / numParticles;
     cluster.centroid.y = totalY / numParticles;
-    cluster.centroid.t = totalT / numParticles;
-    if(cluster.centroid.t > M_PI){
-      cluster.centroid.t -= 2*M_PI;
-    }
+    cluster.centroid.t = atan2f(totalSinT, totalCosT);
   }
 }
 

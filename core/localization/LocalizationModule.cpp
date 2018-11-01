@@ -118,9 +118,10 @@ void LocalizationModule::movePlayer(const Point2D& position, float orientation) 
 
 Pose2D LocalizationModule::avgLocVals(Pose2D pose) {
   int window_size = 1;
-  double x_sum;
-  double y_sum;
-  double th_sum;
+  double x_sum = 0;
+  double y_sum = 0;
+  double sin_th_sum = 0;
+  double cos_th_sum = 0;
   if (pose_list_.size() < window_size) {
     pose_list_.push_back(pose);
   } else {
@@ -129,18 +130,13 @@ Pose2D LocalizationModule::avgLocVals(Pose2D pose) {
   for (auto& p : pose_list_) {
       x_sum += p.translation.x;
       y_sum += p.translation.y;
-      if (p.rotation < 0.0) {
-        p.rotation += 2*M_PI;
-      }
-      th_sum += p.rotation;
+      sin_th_sum += sin(p.rotation);
+      cos_th_sum += cos(p.rotation);
   }
   Pose2D ret_pose = Pose2D();
   ret_pose.translation.x = x_sum/(double)pose_list_.size();
   ret_pose.translation.y = y_sum/(double)pose_list_.size();
-  ret_pose.rotation = th_sum/(double)pose_list_.size();
-  if (ret_pose.rotation > M_PI) {
-    ret_pose.rotation -= 2*M_PI;
-  }
+  ret_pose.rotation = (double)atan2f((double)sin_th_sum, (double)cos_th_sum);
   return ret_pose;
 }
 
