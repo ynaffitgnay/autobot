@@ -21,7 +21,7 @@ class Playing(StateMachine):
     class Squat(Node):
         def run(self):
             if self.getFrames() <= 3:
-                return pose.squat2()
+                return pose.Squat2()
             if self.getFrames() > 10 and not memory.kick_request.kick_running_:
                 self.finish()
 
