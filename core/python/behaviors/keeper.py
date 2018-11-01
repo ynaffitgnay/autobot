@@ -241,8 +241,8 @@ class MoveBtwBall(Node):
     self.poseListX = poseListX
     self.poseListY = poseListY
     self.pose_index = pose_index
-    self.k_x = (0.00005, 0.0001, 0.0001)
-    self.k_y = (0.000005, 0.0001, 0.0001)
+    self.k_x = (0.005, 0.0, 0.0)
+    self.k_y = (0.005, 0.0, 0.0)
     self.k_t = (0.7, 0.01, 0.1)
     
     # integrals and previouse values for the PID controllers
@@ -355,7 +355,7 @@ class MoveBtwBall(Node):
 
   def calc_integral(self, dt, x, y, theta):
     self.x_int = self.x_int + dt*(self.robot.loc.x - x)
-    self.y_int = self.y_int + dt*(y - self.robot.loc.y)
+    self.y_int = self.y_int + dt*(self.robot.loc.y - y)
     self.theta_int = self.theta_int + dt*(self.ball.bearing)
     if abs(self.x_int) >= 100.0:
       self.x_int = 100.0*np.sign(self.x_int)
@@ -379,11 +379,11 @@ class MoveBtwBall(Node):
     commands.setHeadPanTilt(self.ball.bearing, -elevation, 1.5)
     if dt == 0:
       x_cont = self.k_x[0] * (globX - x) + self.k_x[1] * self.x_int
-      y_cont = self.k_y[0] * (y - globY) + self.k_y[1] * self.y_int
+      y_cont = self.k_y[0] * (globY - y) + self.k_y[1] * self.y_int
       theta_cont = self.k_t[0] * bearing + self.k_t[1] * self.theta_int
     else:
       x_cont = self.k_x[0] * (globX - x) + self.k_x[1] * self.x_int + self.k_x[2] *(globX - self.x_prev) / dt
-      y_cont = self.k_y[0] * (y - globY) + self.k_y[1] * self.y_int + self.k_y[2] *(self.y_prev - globY) / dt
+      y_cont = self.k_y[0] * (globY - y) + self.k_y[1] * self.y_int + self.k_y[2] *(globY - self.y_prev) / dt
       theta_cont = self.k_t[0] * bearing + self.k_t[1] * self.theta_int + self.k_t[2] *(bearing - self.theta_prev) / dt
     
     if abs(bearing) >=0.3:
@@ -392,21 +392,22 @@ class MoveBtwBall(Node):
     else:
       # Control both heading and velocity
       if self.gb_line_obj.seen:
-        self.gb_line_seg = self.gb_line_obj.lineLoc
-        gb_line_cent = self.gb_line_seg.getCenter()
-        rel_robot = core.Point2D(0.0,0.0)
-        gb_dist_thresh = 200.0
-        gb_robo_dist = self.gb_line_seg.getDistanceTo(rel_robot)
-        # print("Line seen. Center at [%f, %f], robot at [%f, %f] dist to closest point is: %f" % (gb_line_cent.x,gb_line_cent.y,self.robot.loc.x,self.robot.loc.y,gb_robo_dist))
-        if gb_robo_dist < gb_dist_thresh:
-          # Too close in either x or y
-          x_cont = 0.0
+        if globX < 1800.0:
+          self.gb_line_seg = self.gb_line_obj.lineLoc
+          gb_line_cent = self.gb_line_seg.getCenter()
+          rel_robot = core.Point2D(0.0,0.0)
+          gb_dist_thresh = 200.0
+          gb_robo_dist = self.gb_line_seg.getDistanceTo(rel_robot)
+          # print("Line seen. Center at [%f, %f], robot at [%f, %f] dist to closest point is: %f" % (gb_line_cent.x,gb_line_cent.y,self.robot.loc.x,self.robot.loc.y,gb_robo_dist))
+          if gb_robo_dist < gb_dist_thresh:
+            # Too close in either x or y
+            x_cont = 0.0
       # else:
         # print("Line not seen.\n")
       commands.setWalkVelocity(x_cont, y_cont, theta_cont)
       print("Controls: [%f, %f, %f]\n" %(x_cont, y_cont, theta_cont))
     self.x_prev = globX - self.x_prev
-    self.y_prev = self.y_prev - globY
+    self.y_prev = globY - self.y_prev
     self.theta_prev = bearing
     self.time_last = self.time_current
 
@@ -419,6 +420,7 @@ class MoveBtwBall(Node):
     goalBallTh = np.arctan2(goalBallYComp,-goalBallXComp)
     print("Ball global pose: [%f, %f]" % (self.ball.loc.x,self.ball.loc.y))
     print("Ball to goal bearing: %f" % (goalBallTh*core.RAD_T_DEG))
+    print("Goal Start: [%f,%f]"%(self.goalieStartX, self.goalieStartY))
     self.roboDesiredX = self.goalieStartX - self.radius*np.cos(goalBallTh)
     self.roboDesiredY = self.goalieStartY + self.radius*np.sin(goalBallTh)
     if goalBallTh > 0:
@@ -426,10 +428,10 @@ class MoveBtwBall(Node):
     else:
       self.roboDesiredTh = -np.pi - goalBallTh
 
-    print("Robot should go to [%f, %f] with bearing: %f Robot at [%f,%f] with bearing: %f" %(self.roboDesiredX,self.roboDesiredY,self.roboDesiredTh*core.RAD_T_DEG,self.robot.loc.x,self.robot.loc.y,self.robot.orientation))
+    print("Robot should go to [%f, %f] with bearing: %f Robot at [%f,%f] with bearing: %f" %(self.roboDesiredX,self.roboDesiredY,self.roboDesiredTh*core.RAD_T_DEG,self.robot.loc.x,self.robot.loc.y,self.robot.orientation * core.RAD_T_DEG))
     return
 
-class Playing(LoopingStateMachine):
+class Defending(LoopingStateMachine):
   def setup(self):
     ball = mem_objects.world_objects[core.WO_BALL]
     robot = world_objects.getObjPtr(core.WO_TEAM5)
