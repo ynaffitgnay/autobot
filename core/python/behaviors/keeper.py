@@ -27,18 +27,18 @@ class BlockLeft(Node):
   def run(self):
     UTdebug.log(15, "Blocking left")
 
-    return #pose.BlockLeft()
+    return pose.BlockLeft()
 
 class BlockRight(Node):
   def run(self):
     UTdebug.log(15, "Blocking right")
-  
-    return #pose.BlockRight()
+ 
+    return pose.BlockRight()
 
 class BlockCenter(Node):
   def run(self):
     UTdebug.log(15, "Blocking center")
-    
+   
     return #pose.Squat(time=3.0)
 
 class Reset(Node):
@@ -46,7 +46,7 @@ class Reset(Node):
   def run(self):
     UTdebug.log(15,"Resetting keeper")
 
-    return #pose.Sit()
+    return pose.Sit()
 
 class DontBlock(Node):
   """Ball missed dont block"""
@@ -181,8 +181,8 @@ class CheckIfLocalized(Node):
     # y_stdev_avg = y_stdev_sum/window_size
 
     # print("Avg x stdev: %f Avg y stdev: %f\n" % (x_stdev_avg,y_stdev_avg))
-    
-    return 
+   
+    return
 
 class Blocker(Node):
 
@@ -206,7 +206,7 @@ class Blocker(Node):
       y_intercept = -ball.relVel.y * x_ball /ball.relVel.x + y_ball
       print("Y intercept: %f" % y_intercept)
       ## can do if xvel < yvel && xvel < 1, etc.
-      ## maybe look at distance between robot and goal? 
+      ## maybe look at distance between robot and goal?
       UTdebug.log(15, "Ball is close, blocking!")
       if y_intercept > 42.0 or y_intercept < -40.0 or not ball.seen:
         choice = "miss"
@@ -223,7 +223,7 @@ class Blocker(Node):
       # print("Move ball signal")
       self.postSignal(choice)
       return
-    else:  
+    else: 
       return
 
 class MoveBtwBall(Node):
@@ -244,7 +244,8 @@ class MoveBtwBall(Node):
     self.k_x = (0.005, 0.0, 0.0)
     self.k_y = (0.0005, 0.0, 0.0)
     self.k_t = (0.7, 0.01, 0.1)
-    
+    self.dir = 1.0
+   
     # integrals and previouse values for the PID controllers
     self.x_int = 0.0
     self.x_prev = 0.0
@@ -252,7 +253,7 @@ class MoveBtwBall(Node):
     self.y_prev = 0.0
     self.theta_int = 0.0
     self.theta_prev = 0.0
-    
+   
     # Time for PID control
     self.time_last = time.clock()
     self.time_current = time.clock()
@@ -264,6 +265,13 @@ class MoveBtwBall(Node):
     self.ball = mem_objects.world_objects[core.WO_BALL]
 
   def run(self):
+    self.time_current = time.clock()
+    dt = self.time_current - self.time_last
+
+    if (dt > 1.0):
+      self.dir = self.dir * (-1.0)
+      dt = 0.0
+
     self.checkLocalized()
 
     if self.localized:
@@ -276,12 +284,13 @@ class MoveBtwBall(Node):
       self.getDesiredGoaliePos()
 
       self.goToDesiredPos()
-      
+     
       # Look at the ball
       if self.ball.seen:
-        commands.setHeadPan(self.ball.bearing, 0.2)
+      #  if self.getTime():
+        commands.setHeadPan(self.ball.bearing + self.dir * 25.0 * core.DEG_T_RAD, 0.2)
       # print("Robot pose: [%f,%f,%f]\n" %(robot.loc.x,robot.loc.y,robot.orientation*core.RAD_T_DEG))
-      
+     
     if self.getTime() > 2.0:
       if self.localized:
         signal = "localized"
@@ -347,8 +356,8 @@ class MoveBtwBall(Node):
     y_stdev_avg = y_stdev_sum/window_size
 
     # print("Avg x stdev: %f Avg y stdev: %f\n" % (x_stdev_avg,y_stdev_avg))
-    
-    return 
+   
+    return
 
   def calc_integral(self, dt, x, y, theta):
     self.x_int = self.x_int + dt*(self.robot.loc.x - x)
@@ -382,7 +391,7 @@ class MoveBtwBall(Node):
       x_cont = self.k_x[0] * (globX - x) + self.k_x[1] * self.x_int + self.k_x[2] *(globX - self.x_prev) / dt
       y_cont = self.k_y[0] * (globY - y) + self.k_y[1] * self.y_int + self.k_y[2] *(globY - self.y_prev) / dt
       theta_cont = self.k_t[0] * bearing + self.k_t[1] * self.theta_int + self.k_t[2] *(bearing - self.theta_prev) / dt
-    
+   
     if abs(bearing) >=0.3:
       # Control only the heading of the robot and not the velocity
       commands.setWalkVelocity(0.0, 0.0, 0.4*np.sign(bearing))
@@ -412,7 +421,7 @@ class MoveBtwBall(Node):
 
   def getDesiredGoaliePos(self):
 
-    goalBallXComp = self.ball.loc.x - self.goalieStartX 
+    goalBallXComp = self.ball.loc.x - self.goalieStartX
     goalBallYComp = self.ball.loc.y - self.goalieStartY
     goalBallTh = np.arctan2(goalBallYComp,-goalBallXComp)
     print("Ball global pose: [%f, %f]" % (self.ball.loc.x,self.ball.loc.y))
@@ -432,12 +441,12 @@ class Defending(LoopingStateMachine):
   def setup(self):
     ball = mem_objects.world_objects[core.WO_BALL]
     robot = world_objects.getObjPtr(core.WO_TEAM5)
-    
+   
     localized = False
     poseListX = []
     poseListY = []
     poseListTh = []
-    pose_index = 0 
+    pose_index = 0
     blocker = Blocker()
     lookStraight = MoveHead(0.0,-10.0,2.5)
     moveHeadLeft = MoveHead(85.0,-10.0,2.5)

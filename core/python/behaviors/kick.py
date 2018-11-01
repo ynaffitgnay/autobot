@@ -21,8 +21,9 @@ class Playing(StateMachine):
     class Kick(Node):
         def run(self):
             if self.getFrames() <= 3:
-                memory.walk_request.noWalk()
-                memory.kick_request.setFwdKick()
+                #memory.walk_request.noWalk()
+                #memory.kick_request.setFwdKick()
+                return pose.BlockRight()
             if self.getFrames() > 10 and not memory.kick_request.kick_running_:
                 self.finish()
 
