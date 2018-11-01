@@ -62,7 +62,9 @@ class ObjectDistance(Event):
     self.object = obj
     self.dist = dist
   def ready(self):
-    return (self.object.seen and (self.object.distance < self.dist))
+    rel_robot = core.Point2D(0.0,0.0)
+    distance = self.obj.getDistanceTo(rel_robot)
+    return (self.object.seen and (distance < self.dist))
 
 def OD(obj, dist = 50.0):
   """Ball close enough"""

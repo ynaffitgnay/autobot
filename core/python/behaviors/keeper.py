@@ -242,7 +242,7 @@ class MoveBtwBall(Node):
     self.poseListY = poseListY
     self.pose_index = pose_index
     self.k_x = (0.005, 0.0, 0.0)
-    self.k_y = (0.005, 0.0, 0.0)
+    self.k_y = (0.0005, 0.0, 0.0)
     self.k_t = (0.7, 0.01, 0.1)
     
     # integrals and previouse values for the PID controllers
@@ -277,9 +277,6 @@ class MoveBtwBall(Node):
 
       self.goToDesiredPos()
       
-
-
-
       # Look at the ball
       if self.ball.seen:
         commands.setHeadPan(self.ball.bearing, 0.2)

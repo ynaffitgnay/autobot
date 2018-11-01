@@ -63,8 +63,6 @@ FilesWindow::FilesWindow(QMainWindow* p) : ConfigWindow(p) {
   connect (playingButton, SIGNAL(clicked()), SLOT(setPlaying()));
   connect (testingButton, SIGNAL(clicked()), SLOT(setTesting()));
   connect (penalisedButton, SIGNAL(clicked()), SLOT(setPenalised()));
-  connect (attackingButton, SIGNAL(clicked()), SLOT(setAttacking()));
-  connect (defendingButton, SIGNAL(clicked()), SLOT(setDefending()));
   connect (finishedButton, SIGNAL(clicked()), SLOT(setFinished()));
   //connect (topCamButton, SIGNAL(clicked()), SLOT(setTopCameraBehavior()));
   //connect (botCamButton, SIGNAL(clicked()), SLOT(setBottomCameraBehavior()));
@@ -141,14 +139,6 @@ void FilesWindow::setPlaying() {
 
 void FilesWindow::setPenalised() {
   ((UTMainWnd*)parent)->sendUDPCommand(locationBox->currentText(), ToolPacket::StatePenalized);
-}
-
-void FilesWindow::setAttacking() {
-  ((UTMainWnd*)parent)->sendUDPCommand(locationBox->currentText(), ToolPacket::StateAttacking);
-}
-
-void FilesWindow::setDefending() {
-  ((UTMainWnd*)parent)->sendUDPCommand(locationBox->currentText(), ToolPacket::StateDefending);
 }
 
 void FilesWindow::setFinished() {
