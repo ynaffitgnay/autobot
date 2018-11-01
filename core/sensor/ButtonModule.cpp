@@ -105,6 +105,10 @@ void ButtonModule::processCenterPresses() {
     std::cout << "Changed isPenaltyKick to ";
     std::cout << (game_state_->isPenaltyKick ? "true" : "false") << std::endl;
     speech_->say((game_state_->isPenaltyKick ? "Penalty" : "No Penalty"));
+  } else if (center_.presses == 1) {
+    game_state_->setState(INITIAL);
+    game_state_->lastStateChangeFromButton = true;
+    speech_->say("Initial");
   } else { // center presses = 1, 2,  or more than 8?
     if (state == ATTACKING || state == PLAYING) {
       game_state_->setState(DEFENDING);
