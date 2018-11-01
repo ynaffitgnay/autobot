@@ -109,15 +109,15 @@ void ButtonModule::processCenterPresses() {
     game_state_->setState(INITIAL);
     game_state_->lastStateChangeFromButton = true;
     speech_->say("Initial");
-  } else { // center presses = 1, 2,  or more than 8?
-    if (state == ATTACKING || state == PLAYING) {
-      game_state_->setState(DEFENDING);
-      game_state_->lastStateChangeFromButton = true;
-      speech_->say("Defending");
-    } else {//if (state == DEFENDING) {
+  } else { // center presses is 2  or more than 8?
+    if (state == DEFENDING || state == PLAYING) {
       game_state_->setState(ATTACKING);
       game_state_->lastStateChangeFromButton = true;
       speech_->say("Attacking");
+    } else {
+      game_state_->setState(DEFENDING);
+      game_state_->lastStateChangeFromButton = true;
+      speech_->say("Defending");
     }
     //} else {
     //  speech_->say("Confused");
@@ -158,15 +158,16 @@ void ButtonModule::processCenterPresses() {
     game_state_->setState(INITIAL);
     game_state_->lastStateChangeFromButton = true;
     speech_->say("Initial");
-  } else { // center presses = 1, 2, or more than 6
-    if (state == ATTACKING || state == PLAYING) {
-      game_state_->setState(DEFENDING);
-      game_state_->lastStateChangeFromButton = true;
-      speech_->say("Defending");
-    } else {// if (state == DEFENDING) {
+  } else { // 2 or more than 6
+    if (state == DEFENDING || state == PLAYING) {
       game_state_->setState(ATTACKING);
       game_state_->lastStateChangeFromButton = true;
       speech_->say("Attacking");
+    } else {
+      game_state_->setState(DEFENDING);
+      game_state_->lastStateChangeFromButton = true;
+      speech_->say("Defending");
+
     }
     //} else {
     //  speech_->say("Confused");
