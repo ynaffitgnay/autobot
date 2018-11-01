@@ -48,7 +48,6 @@ class Reset(Node):
 
     return #pose.Sit()
 
-
 class DontBlock(Node):
   """Ball missed dont block"""
   def run(self):
@@ -226,7 +225,6 @@ class Blocker(Node):
       return
     else:  
       return
-    
 
 class MoveBtwBall(Node):
   def __init__(self,localized,poseListX,poseListY, poseListTh,pose_index):
@@ -430,7 +428,6 @@ class MoveBtwBall(Node):
 
     print("Robot should go to [%f, %f] with bearing: %f Robot at [%f,%f] with bearing: %f" %(self.roboDesiredX,self.roboDesiredY,self.roboDesiredTh*core.RAD_T_DEG,self.robot.loc.x,self.robot.loc.y,self.robot.orientation))
     return
-
 
 class Playing(LoopingStateMachine):
   def setup(self):
