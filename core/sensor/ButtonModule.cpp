@@ -110,13 +110,14 @@ void ButtonModule::processCenterPresses() {
       game_state_->setState(DEFENDING);
       game_state_->lastStateChangeFromButton = true;
       speech_->say("Defending");
-    } else if (state == DEFENDING) {
+    } else {//if (state == DEFENDING) {
       game_state_->setState(ATTACKING);
       game_state_->lastStateChangeFromButton = true;
       speech_->say("Attacking");
-    } else {
-      speech_->say("Confused");
     }
+    //} else {
+    //  speech_->say("Confused");
+    //}
     //game_state_->lastStateChangeFromButton = true;
     //if (state==PENALISED) {
     //  game_state_->setState(PLAYING);
