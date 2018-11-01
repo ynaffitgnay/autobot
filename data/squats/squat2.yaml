@@ -1,0 +1,737 @@
+---
+keyframes:
+  - name: normal stand
+    frames: 50
+    joints:
+      HeadYaw: 0.612831893090224
+      HeadPitch: -22.4978798523823
+      LHipYawPitch: 0.00240422658784449
+      LHipRoll: -0.0902951008275686
+      LHipPitch: -24.607286447345
+      LKneePitch: 49.8321995805776
+      LAnklePitch: -24.6999857747604
+      LAnkleRoll: -0.0902951008275686
+      RHipYawPitch: 0.00240422658784449
+      RHipRoll: 0.00240422658784449
+      RHipPitch: -24.6999857747604
+      RKneePitch: 49.7491308198919
+      RAnklePitch: -24.7830681958245
+      RAnkleRoll: 0.00240422658784449
+      LShoulderPitch: -88.7682393593689
+      LShoulderRoll: 8.25941906044261
+      LElbowYaw: -0.793435755123701
+      LElbowRoll: -1.4917542958658
+      RShoulderPitch: -89.388297592601
+      RShoulderRoll: 8.17633749315222
+      RElbowYaw: -0.96440905042746
+      RElbowRoll: -1.93601712024011
+
+  - name: goalieSquatGetup5
+    frames: 50
+    joints:
+      HeadYaw: 0
+      HeadPitch: -21
+      RHipPitch: -60
+      LKneePitch: 120
+      RAnkleRoll: 0      
+      LHipPitch: -60
+      LAnklePitch: -60
+      RHipYawPitch: 0
+      LAnkleRoll: 0
+      LHipYawPitch: 0
+      RAnklePitch: -60
+      LHipRoll: 0
+      RHipRoll: 0
+      RKneePitch: 120
+      LShoulderPitch: -116 #  -93
+      LShoulderRoll: 12  #  10
+      LElbowYaw: -85  #  -90
+      LElbowRoll: -0  #  -80
+      RShoulderPitch: -116  #  -93
+      RShoulderRoll: 12  #  10
+      RElbowYaw: -85  #  -90
+      RElbowRoll: -0  #  -80
+
+  - name: goalieSquatGetup2
+    frames: 50
+    joints:
+      HeadYaw: 0
+      HeadPitch: -21
+      RHipPitch: -50.0
+      LHipPitch: -50.0
+      LKneePitch: 125.0
+      RAnkleRoll: 5      
+      LAnklePitch: -45.0
+      RHipYawPitch: -35.0
+      LAnkleRoll: 5
+      LHipYawPitch: -35.0
+      RAnklePitch: -45.0
+      LHipRoll: -4.0
+      RHipRoll: -4.0
+      RKneePitch: 125.0
+      LShoulderPitch: -80  #  -0.0
+      LShoulderRoll: 80  #  -12  #  45.0
+      LElbowYaw: 0.0
+      LElbowRoll: 0      
+      RShoulderPitch: -80.0
+      RShoulderRoll: 80 #  -12.0
+      RElbowYaw: -0.0
+      RElbowRoll: 0
+
+  - name: goalieSquatGetup3
+    frames: 50
+    joints:
+      HeadYaw: 0
+      HeadPitch: -21
+      RHipPitch: -61
+      RElbowYaw: -53
+      RShoulderPitch: -75
+      LShoulderPitch: -75
+      LKneePitch: 124
+      RAnkleRoll: 6
+      LShoulderRoll: 10
+      LHipPitch: -61
+      LElbowYaw: -53
+      LAnklePitch: -35
+      RHipYawPitch: -35.0
+      LElbowRoll: -74
+      RShoulderRoll: 10
+      LAnkleRoll: 6
+      LHipYawPitch: -35.0
+      RAnklePitch: -35
+      LHipRoll: -6
+      RHipRoll: -6
+      RElbowRoll: -74
+      RKneePitch: 124
+  
+  - name: goalieSquatGetup14
+    frames: 50
+    joints:
+      HeadYaw: -0.090295100827569 
+      HeadPitch: -21.970532899397 
+      LHipYawPitch: -42.27351609407 
+      LHipRoll: -19.426478678864 
+      LHipPitch: -18.454856948673 
+      LKneePitch: 121.55184963949 
+      LAnklePitch: -68.118487460534 
+      LAnkleRoll: 2.8980219440797 
+      RHipYawPitch: -42.27351609407 
+      RHipRoll: -19.157997602969 
+      RHipPitch: -19.778042175823 
+      RKneePitch: 121.82033071538 
+      RAnklePitch: -68.025794963308 
+      RAnkleRoll: 2.9028303972554 
+      LShoulderPitch: -84.197872917768 
+      LShoulderRoll: 0.1733775218916 
+      LElbowYaw: -50.188585191091 
+      LElbowRoll: -54.842034053755 
+      RShoulderPitch: -106.61507286813 
+      RShoulderRoll: 13.186158305952 
+      RElbowYaw: -49.568526957858 
+      RElbowRoll: -85.872635302255
+  
+  - name: goalieSquatGetup4
+    frames: 50
+    joints:
+      HeadYaw: 0
+      HeadPitch: -21
+      RHipPitch: -19.43
+      LKneePitch: 123.31
+      RAnkleRoll: 9.06      
+      LHipPitch: -15.2
+      LAnklePitch: -69.52
+      RHipYawPitch: -45.0
+      LAnkleRoll: 4.48
+      LHipYawPitch: -45.0
+      RAnklePitch: -65.3
+      LHipRoll: -23.56
+      RHipRoll: -31.11
+      RKneePitch: 124.54
+      LShoulderPitch: -76.9
+      LShoulderRoll: 27.6
+      LElbowYaw: -104.33
+      LElbowRoll: 1.58
+      RShoulderPitch: -82.09
+      RShoulderRoll: 27.07
+      RElbowYaw: -84.64
+      RElbowRoll: -2.81
+  
+  - name: goalieSquatGetup6
+    frames: 50
+    joints:
+      HeadYaw: 0
+      HeadPitch: -21
+      RHipPitch: -75.0
+      LKneePitch: 125.0
+      RAnkleRoll: 0
+      LHipPitch: -75.0
+      LAnklePitch: -10.7
+      RHipYawPitch: -76.0
+      LAnkleRoll: 0
+      LHipYawPitch: -76.0
+      RAnklePitch: -10.7
+      LHipRoll: -10.0
+      RHipRoll: -10.0
+      RKneePitch: 125.0
+      LShoulderPitch: 0.0
+      LShoulderRoll: 45 #  35.0  # 55.0
+      LElbowYaw: 0.0
+      LElbowRoll: 0
+      RShoulderPitch: 0.0
+      RShoulderRoll: 45  #  55.0
+      RElbowYaw: -0.0
+      RElbowRoll: 0
+
+  - name: goalieSquatGetup1
+    frames: 100
+    joints:
+      HeadYaw: 0
+      HeadPitch: -21
+      RHipPitch: -75.0
+      LKneePitch: 125.0
+      RAnkleRoll: 0      
+      LHipPitch: -75.0
+      LAnklePitch: -10.7
+      RHipYawPitch: -76.0
+      LAnkleRoll: 0
+      LHipYawPitch: -76.0
+      RAnklePitch: -10.7
+      LHipRoll: -10.0
+      RHipRoll: -10.0
+      RKneePitch: 125.0      
+      LShoulderPitch: 0.0
+      LShoulderRoll: 45 #  35.0  # 55.0
+      LElbowYaw: 0.0
+      LElbowRoll: 0
+      RShoulderPitch: 0.0
+      RShoulderRoll: 45  #  55.0
+      RElbowYaw: -0.0
+      RElbowRoll: 0
+  
+ 
+#  - name: goalieSquatPart1
+#    frames: 50
+#    joints:
+#      HeadYaw: 0
+#      HeadPitch: -21 # -40
+#      LHipYawPitch: -76.0
+#      LHipRoll: -14.0
+#      LHipPitch: -54  #  -54.0
+#      LKneePitch: 86.0
+#      LAnklePitch: 0.0
+#      LAnkleRoll: 11
+#      RHipYawPitch: -76.0
+#      RHipRoll: -14.0
+#      RHipPitch: -54  #  -54
+#      RKneePitch: 86.0
+#      RAnklePitch: 0
+#      RAnkleRoll: 11
+#      LShoulderPitch: 0  # -105 # 0
+#      LShoulderRoll: 90  # -20 # 90
+#      LElbowYaw: 0
+#      LElbowRoll: 0  # 
+#      RShoulderPitch: 0
+#      RShoulderRoll: 90
+#      RElbowYaw: 0
+#      RElbowRoll: 0  #
+#  
+#  - name: goalieSquatPart2
+#    frames: 50
+#    joints:
+#      HeadYaw: 0
+#      HeadPitch: -21
+#      LHipYawPitch: -90
+#      LHipRoll: -38
+#      LHipPitch: -75
+#      LKneePitch: 90
+#      LAnklePitch: 30
+#      LAnkleRoll: 20
+#      RHipYawPitch: -90
+#      RHipRoll: -38
+#      RHipPitch: -75
+#      RKneePitch: 90
+#      RAnklePitch: 30
+#      RAnkleRoll: 20
+#      LShoulderPitch: -125  # -105  # -20
+#      LShoulderRoll: -10 # 45  # -20  # 45
+#      LElbowYaw: 0
+#      LElbowRoll: 0  # 
+#      RShoulderPitch: -125  # -90 # -15
+#      RShoulderRoll: -10 # 45  # -30  #  45
+#      RElbowYaw: 0
+#      RElbowRoll: 0  #
+#  
+#  - name: goalieSquatRise
+#    frames: 50
+#    joints:
+#      HeadYaw: 0
+#      HeadPitch: -25  #  -21
+#      LHipYawPitch: -110 # -90
+#      LHipRoll: -38
+#      LHipPitch: -75
+#      LKneePitch: 90
+#      LAnklePitch: 30
+#      LAnkleRoll: 30 # 20
+#      RHipYawPitch: -110  # -90
+#      RHipRoll: -38
+#      RHipPitch: -75
+#      RKneePitch: 90
+#      RAnklePitch: 30
+#      RAnkleRoll: 30 # 20
+#      LShoulderPitch: -105  # -20
+#      LShoulderRoll: -10  # 45
+#      LElbowYaw: 0
+#      LElbowRoll: 75  # 
+#      RShoulderPitch: -45
+#      RShoulderRoll: -30  #  45
+#      RElbowYaw: 0
+#      RElbowRoll: 75  #
+#  
+#  - name: goalieSquatPart3
+#    frames: 50
+#    joints:
+#      HeadYaw: 0
+#      HeadPitch: -21
+#      LHipYawPitch: -90
+#      LHipRoll: -38
+#      LHipPitch: -90
+#      LKneePitch: 90
+#      LAnklePitch: 30
+#      LAnkleRoll: 20
+#      RHipYawPitch: -90
+#      RHipRoll: -38
+#      RHipPitch: -90
+#      RKneePitch: 90
+#      RAnklePitch: 30
+#      RAnkleRoll: 40
+#      LShoulderPitch: -30
+#      LShoulderRoll: -18
+#      LElbowYaw: 0
+#      LElbowRoll: 0  # 
+#      RShoulderPitch: -30
+#      RShoulderRoll: -18
+#      RElbowYaw: 0
+#      RElbowRoll: 0  #
+#  
+#  - name: goalieSquatPart4
+#    frames: 50
+#    joints:
+#      HeadYaw: 0
+#      HeadPitch: -21
+#      LHipYawPitch: -90
+#      LHipRoll: -38
+#      LHipPitch: -60
+#      LKneePitch: 90
+#      LAnklePitch: 30
+#      LAnkleRoll: 20
+#      RHipYawPitch: -90
+#      RHipRoll: -38
+#      RHipPitch: -60
+#      RKneePitch: 90
+#      RAnklePitch: 30
+#      RAnkleRoll: 40
+#      LShoulderPitch: -30
+#      LShoulderRoll: -18
+#      LElbowYaw: 0
+#      LElbowRoll: 0  # 
+#      RShoulderPitch: -30
+#      RShoulderRoll: -18
+#      RElbowYaw: 0
+#      RElbowRoll: 0  #
+#    
+#  - name: goalieSquatGetup6
+#    frames: 50
+#    joints:
+#      HeadYaw: 0
+#      HeadPitch: -21
+#      RHipPitch: -75.0
+#      LKneePitch: 125.0
+#      RAnkleRoll: 0
+#      LHipPitch: -75.0
+#      LAnklePitch: -10.7
+#      RHipYawPitch: -76.0
+#      LAnkleRoll: 0
+#      LHipYawPitch: -76.0
+#      RAnklePitch: -10.7
+#      LHipRoll: -10.0
+#      RHipRoll: -10.0
+#      RKneePitch: 125.0
+#      LShoulderPitch: 0.0
+#      LShoulderRoll: 45 #  35.0  # 55.0
+#      LElbowYaw: 0.0
+#      LElbowRoll: 0
+#      RShoulderPitch: 0.0
+#      RShoulderRoll: 45  #  55.0
+#      RElbowYaw: -0.0
+#      RElbowRoll: 0
+#  
+#  - name: goalieSquatGetup61
+#    frames: 50
+#    joints:
+#      HeadYaw: 0
+#      HeadPitch: -21
+#      RHipPitch: -75.0
+#      LKneePitch: 125.0
+#      RAnkleRoll: 0
+#      RHipYawPitch: -76.0
+#      LHipYawPitch: -76.0
+#      LHipPitch: -60
+#      LAnklePitch: -60
+#      LAnkleRoll: 0
+#      RAnklePitch: -60
+#      LHipRoll: 0
+#      RHipRoll: 0
+#      RKneePitch: 120
+#      LShoulderPitch: 0.0
+#      LShoulderRoll: 45 #  35.0  # 55.0
+#      LElbowYaw: 0.0
+#      LElbowRoll: 0
+#      RShoulderPitch: 0.0
+#      RShoulderRoll: 45  #  55.0
+#      RElbowYaw: -0.0
+#      RElbowRoll: 0
+#
+  
+  
+#  - name: goalieSquatGetup21
+#    frames: 50
+#    joints:
+#      HeadYaw: 0
+#      HeadPitch: -21
+#      RHipYawPitch: -35.0
+#      LHipYawPitch: -35.0
+#      LShoulderPitch: -80  #  -0.0
+#      LShoulderRoll: 80  #  -12  #  45.0
+#      LElbowYaw: 0.0
+#      LElbowRoll: 0
+#      RShoulderPitch: -80.0
+#      RShoulderRoll: 80 #  -12.0
+#      RElbowYaw: -0.0
+#      RElbowRoll: 0
+#      LHipPitch: -50
+#      LAnklePitch: -50
+#      LKneePitch: 130
+#      LAnkleRoll: 0
+#      RAnklePitch: -50
+#      LHipRoll: 0
+#      RHipRoll: 0
+#      RKneePitch: 130
+#      RHipPitch: -50
+#      RAnkleRoll: 0
+  
+  
+
+#   
+#  - name: goalieSquatGetup7
+#    frames: 50
+#    joints:
+#      HeadYaw: 0
+#      HeadPitch: -21
+#      RHipPitch: -50.0
+#      LHipPitch: -50.0
+#      LKneePitch: 125.0
+#      RAnkleRoll: 5      
+#      LAnklePitch: -45.0
+#      RHipYawPitch: -35.0
+#      LAnkleRoll: 5
+#      LHipYawPitch: -35.0
+#      RAnklePitch: -45.0
+#      LHipRoll: -4.0
+#      RHipRoll: -4.0
+#      RKneePitch: 125.0      
+#      LShoulderPitch: -80  #  -0.0
+#      LShoulderRoll: 80  #  -12  #  45.0
+#      LElbowYaw: 0.0
+#      LElbowRoll: 0
+#      RShoulderPitch: -80.0
+#      RShoulderRoll: 80 #  -12.0
+#      RElbowYaw: -0.0
+#      RElbowRoll: 0
+#   
+#  - name: goalieSquatGetup71
+#    frames: 50
+#    joints:
+#      HeadYaw: 0
+#      HeadPitch: -21
+#      LHipPitch: -50
+#      LAnklePitch: -50
+#      LKneePitch: 130
+#      LAnkleRoll: 0
+#      RAnklePitch: -50
+#      LHipRoll: 0
+#      RKneePitch: 130
+#      RHipPitch: -50
+#      RHipRoll: 20
+#      RAnkleRoll: -27
+#      RHipYawPitch: -35.0
+#      LHipYawPitch: -35.0
+#      LShoulderPitch: -80  #  -0.0
+#      LShoulderRoll: 80  #  -12  #  45.0
+#      LElbowYaw: 0.0
+#      LElbowRoll: 0
+#      RShoulderPitch: -80.0
+#      RShoulderRoll: 80 #  -12.0
+#      RElbowYaw: -0.0
+#      RElbowRoll: 0
+#  
+#  - name: goalieSquatGetup8
+#    frames: 50
+#    joints:
+#      HeadYaw: 0.08548664765188 
+#      HeadPitch: -23.025223390273 
+#      LHipYawPitch: -65.564823163839 
+#      LHipRoll: -10.90098191534 
+#      LHipPitch: 1.5844536232812 
+#      LKneePitch: 109.95014495682 
+#      LAnklePitch: -59.241427200052 
+#      LAnkleRoll: 6.2379024859459 
+#      RHipYawPitch: -65.564823163839 
+#      RHipRoll: -38.494167520626 
+#      RHipPitch: -70.140004888805 
+#      RKneePitch: 61.790289873761 
+#      RAnklePitch: 30.500838116096 
+#      RAnkleRoll: 11.955672406217 
+#      LShoulderPitch: -38.845744677964 
+#      LShoulderRoll: 43.679783742284 
+#      LElbowYaw: -0.7934357551237 
+#      LElbowRoll: -1.8433177928247 
+#      RShoulderPitch: -23.908954246225 
+#      RShoulderRoll: 44.739296346714 
+#      RElbowYaw: -0.87651817618774 
+#      RElbowRoll: -1.9360171202401
+#  
+#  - name: goalieSquatGetup9
+#    frames: 50
+#    joints:
+#      HeadYaw: -0.35396772354674 
+#      HeadPitch: -23.025223390273 
+#      LHipYawPitch: -55.89673820501 
+#      LHipRoll: -10.022059512565 
+#      LHipPitch: -11.862973078802 
+#      LKneePitch: 124.18860318744 
+#      LAnklePitch: -67.327469592377 
+#      LAnkleRoll: 1.9312086670644 
+#      RHipYawPitch: -55.89673820501 
+#      RHipRoll: -46.580209912951 
+#      RHipPitch: -55.110528790028 
+#      RKneePitch: 49.661239945652 
+#      RAnklePitch: 40.168929905114 
+#      RAnkleRoll: 17.668647533691 
+#      LShoulderPitch: -56.248301701969 
+#      LShoulderRoll: 43.064547622605 
+#      LElbowYaw: -0.7934357551237 
+#      LElbowRoll: -1.8433177928247 
+#      RShoulderPitch: -39.377898376578 
+#      RShoulderRoll: 42.981465201541 
+#      RElbowYaw: -0.87651817618774 
+#      RElbowRoll: -2.0239079944798
+#  
+#  - name: goalieSquatGetup10
+#    frames: 50
+#    joints:
+#      HeadYaw: -0.35396772354674 
+#      HeadPitch: -21.179501370861 
+#      LHipYawPitch: -53.69943902826 
+#      LHipRoll: -9.6704960156059 
+#      LHipPitch: -26.101444969799 
+#      LKneePitch: 124.18860318744 
+#      LAnklePitch: -67.766923963575 
+#      LAnkleRoll: 4.2163987180539 
+#      RHipYawPitch: -53.69943902826 
+#      RHipRoll: -27.683494366492 
+#      RHipPitch: -60.384008565169 
+#      RKneePitch: 47.903395140101 
+#      RAnklePitch: 40.168929905114 
+#      RAnkleRoll: 17.93232015641 
+#      LShoulderPitch: -56.863537821647 
+#      LShoulderRoll: 42.976656748366 
+#      LElbowYaw: -0.7934357551237 
+#      LElbowRoll: -1.8433177928247 
+#      RShoulderPitch: -55.549983161227 
+#      RShoulderRoll: 42.893560666923 
+#      RElbowYaw: -0.43705014461078 
+#      RElbowRoll: -2.0239079944798
+#  
+#  - name: goalieSquatGetup11
+#    frames: 50
+#    joints:
+#      HeadYaw: -0.52974947202619 
+#      HeadPitch: -23.64047317033 
+#      LHipYawPitch: -53.172093782822 
+#      LHipRoll: -5.803256567923 
+#      LHipPitch: -31.902297311134 
+#      LKneePitch: 122.43077204226 
+#      LAnklePitch: -70.227895763044 
+#      LAnkleRoll: 4.3042895922937 
+#      RHipYawPitch: -53.172093782822 
+#      RHipRoll: -27.156135460675 
+#      RHipPitch: -59.065645451573 
+#      RKneePitch: 43.59670132122 
+#      RAnklePitch: 39.993134496256 
+#      RAnkleRoll: 8.9673553613097 
+#      LShoulderPitch: -57.918241972902 
+#      LShoulderRoll: 41.394593691294 
+#      LElbowYaw: -0.70553122050564 
+#      LElbowRoll: -1.9312086670644 
+#      RShoulderPitch: -58.801972828854 
+#      RShoulderRoll: 29.70980658756 
+#      RElbowYaw: -0.61283189309022 
+#      RElbowRoll: -2.0239079944798
+#  
+#  - name: goalieSquatGetup12
+#    frames: 50
+#    joints:
+#      HeadYaw: 0
+#      HeadPitch: -21
+#      LHipYawPitch: -115
+#      LHipRoll: -38
+#      LHipPitch: -75
+#      LKneePitch: 90
+#      LAnklePitch: 30
+#      LAnkleRoll: 20
+#      RHipYawPitch: -115
+#      RHipRoll: -38
+#      RHipPitch: -75
+#      RKneePitch: 90
+#      RAnklePitch: 30
+#      RAnkleRoll: 20
+#      LShoulderPitch: 0
+#      LShoulderRoll: 0
+#      LElbowYaw: 0
+#      LElbowRoll: 0  # 
+#      RShoulderPitch: 0
+#      RShoulderRoll: 0
+#      RElbowYaw: 0
+#      RElbowRoll: 0  #
+#  
+#  - name: goalieSquatGetup13
+#    frames: 50
+#    joints:
+#      HeadYaw: 0
+#      HeadPitch: -21
+#      RHipPitch: -75.0
+#      LKneePitch: 125.0
+#      RAnkleRoll: 0      
+#      LHipPitch: -75.0
+#      LAnklePitch: -10.7
+#      RHipYawPitch: -76.0
+#      LAnkleRoll: 0
+#      LHipYawPitch: -76.0
+#      RAnklePitch: -10.7
+#      LHipRoll: -10.0
+#      RHipRoll: -10.0
+#      RKneePitch: 125.0      
+#      LShoulderPitch: 0.0
+#      LShoulderRoll: 45 #  35.0  # 55.0
+#      LElbowYaw: 0.0
+#      LElbowRoll: 0
+#      RShoulderPitch: 0.0
+#      RShoulderRoll: 45  #  55.0
+#      RElbowYaw: -0.0
+#      RElbowRoll: 0
+    
+
+#  - name: goalieSquatGetup15
+#    frames: 50
+#    joints:
+#      HeadYaw: 0.5249410188505 
+#      HeadPitch: -25  # -22.146314647876 
+#      LHipYawPitch: -49.920104115196 
+#      LHipRoll: -24.328753331446 
+#      LHipPitch: -24.519381912727 
+#      LKneePitch: 124.27649406168 
+#      LAnklePitch: -70.052114014565 
+#      LAnkleRoll: -5.4516930709641 
+#      RHipYawPitch: -49.920104115196 
+#      RHipRoll: -44.187473701745 
+#      RHipPitch: -14.856112237263 
+#      RKneePitch: 108.81237204488 
+#      RAnklePitch: -47.195459693008 
+#      RAnkleRoll: 20.041714798542 
+#      LShoulderPitch: 0
+#      LShoulderRoll: 0
+#      LElbowYaw: 0
+#      LElbowRoll: 0
+#      RShoulderPitch: 0
+#      RShoulderRoll: 0
+#      RElbowYaw: 0
+#      RElbowRoll: 0
+#  
+#  - name: goalieSquat5
+#    frames: 50
+#    joints:
+#      HeadYaw: 0.08548664765188 
+#      HeadPitch: 40 # -24.607286447345 
+#      LHipYawPitch: -69.168383158614 
+#      LHipRoll: -50 # -55
+#      LHipPitch: -89.910834384864 
+#      LKneePitch: 91.404992907317 
+#      LAnklePitch: 42.888752213748 
+#      LAnkleRoll: 20 # 11.071955210644 
+#      RHipYawPitch: -69.168383158614 
+#      RHipRoll: -50 # -55
+#      RHipPitch: -89.56407934108 
+#      RKneePitch: 92.728178134467 
+#      RAnklePitch: 41.39940214447 
+#      RAnkleRoll: 20 # -6.1548200648819 
+#      LShoulderPitch: -140 # -14
+#      LShoulderRoll: -15 # 16.472663752734 
+#      LElbowYaw: -1.8481262460004 
+#      LElbowRoll: -2.0190995413041 
+#      RShoulderPitch: -20 # -14
+#      RShoulderRoll: -30 # 16.057673120688 
+#      RElbowYaw: -0.43705014461078 
+#      RElbowRoll: -2.8149395230157
+#  
+#  - name: goalieSquat51
+#    frames: 50
+#    joints:
+#      HeadYaw: 0.08548664765188
+#      HeadPitch: -40 # -24.607286447345 
+#      LHipYawPitch: -69.168383158614
+#      LHipRoll: -50 # -55
+#      LHipPitch: -89.910834384864
+#      LKneePitch: 91.404992907317
+#      LAnklePitch: 42.888752213748
+#      LAnkleRoll: 20 # 11.071955210644 
+#      RHipYawPitch: -69.168383158614
+#      RHipRoll: -50 # -55
+#      RHipPitch: -89.56407934108
+#      RKneePitch: 92.728178134467
+#      RAnklePitch: 41.39940214447
+#      RAnkleRoll: 20 # -6.1548200648819 
+#      LShoulderPitch: -110 # -14
+#      LShoulderRoll: -45 # 16.472663752734 
+#      LElbowYaw: -1.8481262460004
+#      LElbowRoll: -2.0190995413041
+#      RShoulderPitch: -20 # -14
+#      RShoulderRoll: -30 # 16.057673120688 
+#      RElbowYaw: -0.43705014461078
+#      RElbowRoll: -2.8149395230157
+#  
+#  - name: goalieSquatGetup16
+#    frames: 50
+#    joints:
+#      HeadYaw: 0
+#      HeadPitch: -21
+#      RHipPitch: -75.0
+#      LKneePitch: 125.0
+#      RAnkleRoll: 0
+#      LHipPitch: -75.0
+#      LAnklePitch: -10.7
+#      RHipYawPitch: -76.0
+#      LAnkleRoll: 0
+#      LHipYawPitch: -76.0
+#      RAnklePitch: -10.7
+#      LHipRoll: -20.0
+#      RHipRoll: -20.0
+#      RKneePitch: 125.0      
+#      LShoulderPitch: 0.0
+#      LShoulderRoll: 0 #  35.0  # 55.0
+#      LElbowYaw: 0.0
+#      LElbowRoll: 0
+#      RShoulderPitch: 0.0
+#      RShoulderRoll: 0  #  55.0
+#      RElbowYaw: -0.0
+#      RElbowRoll: 0
+#  
