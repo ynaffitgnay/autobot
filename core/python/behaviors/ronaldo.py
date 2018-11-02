@@ -400,85 +400,6 @@ class Kick(Node):
       self.finish()
 
 class Attacking(LoopingStateMachine):
-  # def setup(self):
-  #   ball = memory.world_objects.getObjPtr(core.WO_BALL)
-  #   goal = memory.world_objects.getObjPtr(core.WO_UNKNOWN_GOAL)
-
-  #   rdy = GetReady()
-  #   lookStraight = MoveHead(0.0,-10.0,1.0)
-  #   moveHeadLeft = MoveHead(85.0,-15.0,1.0)
-  #   moveHeadRight = MoveHead(-85.0,-45.0,1.0)
-  #   turnInPlace = TurnInPlace()
-  #   goToBall = GoToBall(ball, 0.0)
-
-
-  #   moveHeadLeftGoal = MoveHead(85.0,0.0,1.0)
-  #   moveHeadRightGoal = MoveHead(-85.0,0.0,1.0)
-  #   alignm200Left = Align(ball,goal,-200.0, -15.0)
-  #   alignm200Right = Align(ball,goal,-200.0, -15.0)
-  #   dribble = Align(ball,goal,-300.0, -12.5)
-
-  #   # dribble = Align(ball,goal,-200.0, -20.0)
-  #   align50 = Align(ball,goal,50.0,-15.0)
-
-  #   alignForKick = Align(ball,goal, 0.0, -30.0)
-  #   positionForKick = PositionForKick(ball, 0.28, 140.0)
-
-  #   kick = Kick()
-
-  #   # Keep turning head and turning in place till ball is found and then go to ball
-  #   self.add_transition(rdy,C,lookStraight,C,moveHeadLeft,C,moveHeadRight,C,turnInPlace,C,moveHeadLeft)
-  #   self.add_transition(lookStraight,O(ball),goToBall)
-  #   self.add_transition(moveHeadLeft,O(ball),goToBall)
-  #   self.add_transition(moveHeadRight,O(ball),goToBall)
-  #   self.add_transition(turnInPlace,O(ball),goToBall)
-  #   self.add_transition(goToBall,NO(ball),moveHeadLeft)
-
-  #   # Not to shoot from the front, determine whether the robot should dribble the ball away from the center
-
-
-  #   # After Robot reaches near the ball, maintain distance to ball and find the goal
-  #   self.add_transition(goToBall,C,lookUp,C,moveHeadLeftBeacon,C,moveHeadRightBeacon,C,moveHeadLeftBeacon)
-
-  #   self.add_transition(lookUp,O(pb),turnAroundBallLeft)
-  #   self.add_transition(lookUp,O(bp),turnAroundBallLeft)
-  #   self.add_transition(lookUp,O(yb),turnAroundBallRight)
-  #   self.add_transition(lookUp,O(by),turnAroundBallRight)
-
-  #   self.add_transition(moveHeadLeftBeacon,O(pb),turnAroundBallLeft)
-  #   self.add_transition(moveHeadLeftBeacon,O(bp),turnAroundBallLeft)
-  #   self.add_transition(moveHeadLeftBeacon,O(yb),turnAroundBallRight)
-  #   self.add_transition(moveHeadLeftBeacon,O(by),turnAroundBallRight)
-
-  #   self.add_transition(moveHeadRightBeacon,O(pb),turnAroundBallLeft)
-  #   self.add_transition(moveHeadRightBeacon,O(bp),turnAroundBallLeft)
-  #   self.add_transition(moveHeadRightBeacon,O(yb),turnAroundBallRight)
-  #   self.add_transition(moveHeadRightBeacon,O(by),turnAroundBallRight)
-
-  #   self.add_transition(turnAroundBallRight,O(goal,ball),alignm200Right)
-  #   self.add_transition(turnAroundBallLeft,O(goal,ball),alignm200Left)
-  #   self.add_transition(alignm200Right,NO(goal,ball),turnAroundBallRight)
-  #   self.add_transition(alignm200Left,NO(goal,ball),turnAroundBallLeft)
-
-  #   # If the ball and goal are aligned with the robot, proceed to stopping, judging distance and dribbling/shooting
-  #   self.add_transition(alignm200Right,A(ball,goal,0.2,0.5),dribble)
-  #   self.add_transition(alignm200Left,A(ball,goal,0.2,0.5),dribble)
-  #   # self.add_transition(positionForKick, BB(ball,0.28), stand)
-  #   # self.add_transition(dribble,A(ball,goal,0.2).negation(),align50)
-  #   # self.add_transition(align50,A(ball,goal),dribble)
-  #   self.add_transition(dribble,D(ball,goal,800.0),stand)
-  #   self.add_transition(stand,C,positionForKick)
-  #   self.add_transition(dribble,A(ball,goal,0.2,0.2).negation(),align50)
-  #   self.add_transition(align50,A(ball,goal,0.2,0.2),dribble)
-  #   # self.add_transition(wait,D(ball,goal,1300.0),dribble)
-
-  #   # # After it's dribbled, align between ball and goal again and then shift left
-  #   # self.add_transition(wait,T(1.0),alignForKick)
-  #   # self.add_transition(alignForKick, OD(ball,150.0), positionForKick)
-  #   self.add_transition(positionForKick, BB(ball,0.28), stand_again)
-  #   # self.add_transition(stand, T(1.0), kick)
-  #   # self.add_transition(kick, C, stand_again)
-  #   # self.add_transition(stand_again, T(3.0), rdy)
 
   def setup(self):
     ball = memory.world_objects.getObjPtr(core.WO_BALL)
@@ -550,13 +471,9 @@ class Attacking(LoopingStateMachine):
     self.add_transition(align200,NO(goal,ball),moveHeadLeftGoal)
     self.add_transition(turnAroundBall,NO(ball),rdy)
 
-    # # moveHeadLeftGoal,C,moveHeadRightGoal,C,lookDown,C,turnAroundBall,C,moveHeadLeftGoal)
-    # self.add_transition(goToBall,OD(ball,200.0),moveHeadLeftGoal,C,moveHeadRightGoal,C,lookDown,C,turnAroundBall,C,moveHeadLeftGoal)
-
     # If the ball and goal are aligned with the robot, proceed to stopping, judging distance and dribbling/shooting
     self.add_transition(align200,AB(ball,goal,0.2,des_bearing),dribble)
     self.add_transition(dribble,A(ball,goal,0.2).negation(),align50)
-    # self.add_transition(dribble,NO(goal,ball),stand_find_goal,O(goal),dribble)
     self.add_transition(align50,A(ball,goal),dribble)
     self.add_transition(dribble,D(ball,goal,1300.0),wait)
     self.add_transition(wait,D(ball,goal,1300.0).negation(),dribble)
