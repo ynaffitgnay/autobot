@@ -19,6 +19,7 @@ class BallDetector;
 class Classifier;
 class BeaconDetector;
 class GoalDetector;
+class LineDetector;
 
 /// @ingroup vision
 class ImageProcessor {
@@ -32,6 +33,7 @@ class ImageProcessor {
     std::unique_ptr<BallDetector> ball_detector_;
     std::unique_ptr<GoalDetector> goal_detector_;
     std::unique_ptr<BeaconDetector> beacon_detector_;
+    std::unique_ptr<LineDetector> line_detector_;
     std::unique_ptr<Classifier> color_segmenter_;
     std::vector<Blob> blobs_;
     unsigned char* getImg();

@@ -3,10 +3,11 @@
 using namespace Eigen;
 
 LocalizationBlock::LocalizationBlock() {
-  header.version = 10;
+  header.version = 11;
   header.size = sizeof(LocalizationBlock);
   state = decltype(state)::Zero();
   covariance = decltype(covariance)::Identity();
+  particles = std::vector<Particle>(PART_SIZE);
 }
 
 Point2D LocalizationBlock::getBallPosition() {

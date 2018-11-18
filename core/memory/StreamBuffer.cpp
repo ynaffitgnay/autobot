@@ -9,7 +9,7 @@
 
 #define VERIFY_RESIZE \
   if(n == 0 || n > 1'000'000'000'000) {\
-    fprintf(stderr, "INVALID BUFFER REQUEST (%" BUFFER_SIZE_FORMAT ")!! The log file is most likely broken\n", n);\
+    fprintf(stderr, "");\
     return;\
   }\
 

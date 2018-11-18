@@ -1,4 +1,4 @@
-"""Simple behavior that stands, kicks, and then sits down."""
+"""Simple behavior that stands, squats, and then sits down."""
 
 from __future__ import print_function
 from __future__ import division
@@ -18,14 +18,14 @@ class Playing(StateMachine):
             if self.getTime() > 3.0:
                 self.finish()
 
-    class Kick(Node):
+    class Squat(Node):
         def run(self):
+            commands.setStiffness(cfgstiff.One)
             if self.getFrames() <= 3:
-                #memory.walk_request.noWalk()
-                #memory.kick_request.setFwdKick()
                 return pose.BlockRight()
-            if self.getFrames() > 10 and not memory.kick_request.kick_running_:
-                self.finish()
+            
+            #if self.getFrames() > 10 and not memory.kick_request.kick_running_:
+            #    self.finish()
 
     class Walk(Node):
         def run(self):
@@ -37,7 +37,12 @@ class Playing(StateMachine):
             if self.getTime() > 2.0:
                 memory.speech.say("turned off stiffness")
                 self.finish()
+                
+    class makeStiff(Node):
+        def run(self):
+            commands.setStiffness()
+            self.finish()
 
     def setup(self):
-        self.trans(self.Stand(), C, self.Kick(), C, self.Stand(),
+        self.trans(self.Stand(), C, self.Squat(), C, self.makeStiff(), C,  self.Stand(),
                    C, pose.Sit(), C, self.Off())

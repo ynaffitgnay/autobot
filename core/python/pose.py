@@ -171,18 +171,34 @@ class StandStraight(Task):
 
 class Squat(Task):
   def __init__(self, time = 3.0):
-    super(Squat, self).__init__(self, time=time)
+    super(Squat, self).__init__(time=time)
     self.setChain([ 
       PoseSequence(
-        cfgpose.goalieSquatPart1, 0.4,
-        cfgpose.goalieSquatPart2, 0.2,
+        cfgpose.goalieSquatPart1, 1.4,
+        cfgpose.goalieSquatPart2, 1.2,
         cfgpose.goalieSquatPart2, time,
-        cfgpose.goalieSquat5, 0.2,
-        cfgpose.goalieSquat5, 0.3,
-        cfgpose.goalieSquatPart2, 0.3,
-        cfgpose.goalieSquatGetup15, 0.4,
-        cfgpose.goalieSquatGetup2, 0.6,
-        cfgpose.goalieSquatGetup7, 0.3
+        cfgpose.goalieSquat5, 1.2,
+        cfgpose.goalieSquat5, 1.3,
+        cfgpose.goalieSquatPart2, 1.3,
+        cfgpose.goalieSquatGetup15, 1.4,
+        cfgpose.goalieSquatGetup2, 1.6,
+        cfgpose.goalieSquatGetup7, 1.3
+      ),
+      Stand()
+    ])
+
+class Squat2(Task):
+  def __init__(self, time = 3.0):
+    super(Squat2, self).__init__(time=time)
+    self.setChain([ 
+      PoseSequence(
+        cfgpose.standingPose, .4,
+        cfgpose.newGoalieSquat1, .3,
+        cfgpose.newGoalieSquat2, .5,
+        cfgpose.newGoalieSquat3, .5,
+        cfgpose.newGoalieSquat4, .4,
+        cfgpose.goalieSquatFinalPose, time,
+        cfgpose.newGoalieSquat8, .6
       ),
       Stand()
     ])
@@ -191,18 +207,18 @@ class BlockRight(Task):
   def __init__(self, time = 3.0):
     super(BlockRight, self).__init__(time=time)
     self.setSubtask(PoseSequence(
-      cfgpose.blockright, 1.0,
+      cfgpose.blockright, 0.5,#1.0,
       cfgpose.blockright, self.time, 
       cfgpose.sittingPoseNoArms, 2.0,
-      cfgpose.standingPose, 2.0
+      cfgpose.standingPose, 1.5#2.0
     ))
 
 class BlockLeft(Task):
   def __init__(self, time = 3.0):
     super(BlockLeft, self).__init__(time=time)
     self.setSubtask(PoseSequence(
-      cfgpose.blockleft, 1.0,
+      cfgpose.blockleft, 0.5,
       cfgpose.blockleft, self.time, 
       cfgpose.sittingPoseNoArms, 2.0,
-      cfgpose.standingPose, 2.0
+      cfgpose.standingPose, 1.5
     ))

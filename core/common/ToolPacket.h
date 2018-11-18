@@ -22,6 +22,8 @@ struct ToolPacket {
     StateTestOdometry,
     StateCameraTop,
     StateCameraBottom,
+    StateAttacking,
+    StateDefending,
     LogSelect,
     LogBegin,
     LogEnd,

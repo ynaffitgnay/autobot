@@ -117,11 +117,12 @@ void LocalizationModule::movePlayer(const Point2D& position, float orientation) 
 }
 
 Pose2D LocalizationModule::avgLocVals(Pose2D pose) {
-  int window_size = 10;
-  double x_sum;
-  double y_sum;
-  double th_sum;
-  if (pose_list_.size() <= window_size) {
+  int window_size = 1;
+  double x_sum = 0;
+  double y_sum = 0;
+  double sin_th_sum = 0;
+  double cos_th_sum = 0;
+  if (pose_list_.size() < window_size) {
     pose_list_.push_back(pose);
   } else {
     pose_list_.at(pose_index_++ % window_size) = pose; 
@@ -129,12 +130,13 @@ Pose2D LocalizationModule::avgLocVals(Pose2D pose) {
   for (auto& p : pose_list_) {
       x_sum += p.translation.x;
       y_sum += p.translation.y;
-      th_sum += p.rotation;
+      sin_th_sum += sin(p.rotation);
+      cos_th_sum += cos(p.rotation);
   }
   Pose2D ret_pose = Pose2D();
   ret_pose.translation.x = x_sum/(double)pose_list_.size();
   ret_pose.translation.y = y_sum/(double)pose_list_.size();
-  ret_pose.rotation = th_sum/(double)pose_list_.size();
+  ret_pose.rotation = (double)atan2f((double)sin_th_sum, (double)cos_th_sum);
   return ret_pose;
 }
 
@@ -151,9 +153,7 @@ void LocalizationModule::processFrame() {
   self.loc = pose_avg.translation;
   self.orientation = pose_avg.rotation;
 
-  self.localized = pfilter_->getLocalized();
   log(40, "Localization Update: x=%2.f, y=%2.f, theta=%2.2f", self.loc.x, self.loc.y, self.orientation * RAD_T_DEG);
-
   double dt = (last_time_ < 0) ? 1.0/30.0 : (time - last_time_);
   if(!ball.seen){
     occluded_time += dt; // Update time for which ball is not seen
