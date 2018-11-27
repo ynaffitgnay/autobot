@@ -1084,10 +1084,10 @@ void GLDrawer::drawBeacons() {
   if(gtcache_.world_object == NULL) return;
   map<WorldObjectType,vector<RGB>> beacons = {
     { WO_BEACON_BLUE_YELLOW, { Colors::Blue, Colors::Yellow } },
-    //{ WO_BEACON_YELLOW_BLUE, { Colors::Yellow, Colors::Blue } },
-    //{ WO_BEACON_BLUE_PINK, { Colors::Blue, Colors::Pink } },
+    { WO_BEACON_YELLOW_BLUE, { Colors::Yellow, Colors::Blue } },
+    { WO_BEACON_BLUE_PINK, { Colors::Blue, Colors::Pink } },
     { WO_BEACON_PINK_BLUE, { Colors::Pink, Colors::Blue } },
-    //{ WO_BEACON_PINK_YELLOW, { Colors::Pink, Colors::Yellow } },
+    { WO_BEACON_PINK_YELLOW, { Colors::Pink, Colors::Yellow } },
     { WO_BEACON_YELLOW_PINK, { Colors::Yellow, Colors::Pink } }
   };
   for(auto beacon : beacons) {

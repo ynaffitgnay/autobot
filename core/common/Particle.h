@@ -1,6 +1,7 @@
-#pragma once
 #ifndef PARTICLE_
 #define PARTICLE_
+
+#pragma once
 
 #include <common/Serialization.h>
 #include <schema/gen/Particle_generated.h>
