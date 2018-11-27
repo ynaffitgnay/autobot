@@ -11,13 +11,19 @@
 
 class DStarLite
 {
+public:
   DStarLite();
   std::priority_queue<PathNode> U_;
-  int k_; // key modifier
+  int k_;  // key modifier
 
   void init(Grid& wavefront);
-  
-  int calcKey(PathNode s);
+  void runDSL();
+private:
+  int calcKey(PathNode successor);
+  void updateVertex(PathNode u);
+  void computeShortestPath();
 }
+
+//TODO: this should not build yet bc end of class doesn't have a fuckin semicolon
 
 #endif
