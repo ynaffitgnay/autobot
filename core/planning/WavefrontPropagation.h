@@ -6,8 +6,9 @@
 #include <planning/structures/WavefrontCell.h>
 
 // Map data construct
-#include <planning/structures/CellGrid.h>
-#include <math/Pose3D.h>
+#include <planning/structures/Grid.h>
+#include <math/Point.h>
+
 
   
 /**

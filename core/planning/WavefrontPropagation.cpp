@@ -18,11 +18,12 @@ Wavefront::~Wavefront()
   // Do nothing
 }
 
-bool Wavefront::getCosts(CellGrid map, int ot)
+bool Wavefront::getCosts(Grid map, Point startPose)
 {
   // Set map variables
-  mapSize = map.grid_cells.size();
-  numCols = map.grid_cols;
+  mapSize = map.cells.size();
+  numRows = map.height;
+  numCols = map.width;
   
   // Check for invalid parameters
   if(numCols <= 0)
@@ -30,21 +31,18 @@ bool Wavefront::getCosts(CellGrid map, int ot)
     ROS_ERROR("Grid must have at least one column.");
     return false;
   }
-  else if(mapSize % numCols != 0)
+  else if(numRows <= 0)
   {
-    ROS_ERROR("Grid vector size must be divisible by the number of columns.");
+    ROS_ERROR("Grid must have at least one row.");
     return false;
   }
 
-  // Calculate number of rows
-  numRows = mapSize/numCols;
-  
   // Initialize wave cells
   waveCells.clear();
-  waveCells.resize(map.grid_cells.size());
+  waveCells.resize(map.cells.size());
   for(int i = 0; i<waveCells.size(); i++)
   {
-    waveCells[i].initialize(i, map.grid_cells[i], ot);
+    waveCells[i].initialize(i, map.cells[i]);
   }
   hasMap = true;
   
