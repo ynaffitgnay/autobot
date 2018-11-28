@@ -4,10 +4,10 @@
 PathNode::PathNode() : PathNode(-1, -1) {
 }
 
-PathNode::PathNode(int x, int y) {
-  this->x = x;
-  this->y = y;
-  idx = x + y * GRID_WIDTH;
+PathNode::PathNode(int row, int col) {
+  r = row;
+  c = col;
+  idx = row * GRID_WIDTH + col;
   pred = -1;
   h = -1;
   g = INT_MAX;
@@ -51,6 +51,6 @@ bool PathNode::operator>=(const PathNode& other) const {
   return (std::min(g, rhs) <= std::min(other.g, other.rhs));
 }
 
-int PathNode::getIdx(int x, int y) {
-  return (x + y * GRID_WIDTH);
+int PathNode::getIdx(int row, int col) {
+  return (row * GRID_WIDTH + col);
 }

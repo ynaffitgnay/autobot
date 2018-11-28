@@ -5,12 +5,11 @@
 
 // TODO: fix this definition
 struct GridCell {
-  int x;
-  int y;
+  int r;
+  int c;
   int cost;
 
-  GridCell(int x, int y) : x(x), y(y), cost(0) { };
+  GridCell(int row, int col) : r(row), c(col), cost(0) { };
 };
-
 
 #endif
