@@ -8,8 +8,9 @@ struct GridCell {
   int x;
   int y;
   int cost;
+  bool occupied;
 
-  GridCell(int x, int y) : x(x), y(y), cost(0) { };
+  GridCell(int x, int y) : x(x), y(y), cost(0), occupied(false) { };
 };
 
 
