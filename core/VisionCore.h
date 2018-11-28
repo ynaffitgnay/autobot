@@ -29,6 +29,7 @@ class LocalizationMethod {
     };
     static Type DEFAULT;
 };
+class PlanningModule;
 
 class VisionCore {
 public:
@@ -68,6 +69,7 @@ public:
   ButtonModule *buttons_;
   LEDModule *leds_;
   AudioModule *audio_;
+  PlanningModule *planner_;
 
 #ifndef SWIG   // Swig can't handle the file IO
   LogWriter* log_;

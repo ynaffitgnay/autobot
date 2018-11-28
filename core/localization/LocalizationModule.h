@@ -1,3 +1,6 @@
+#ifndef LOCALIZATION_MODULE_H
+#define LOCALIZATION_MODULE_H
+
 #pragma once
 
 #include <Module.h>
@@ -61,4 +64,4 @@ class LocalizationModule : public Module {
 
 };
 
-
+#endif
