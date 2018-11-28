@@ -87,7 +87,8 @@ void LineDetector::detBestLine(std::vector<Blob>& line_cand) {
   Point2D lh_point(xlh_rel,ylh_rel);
   Point2D rh_point(xrh_rel,yrh_rel);
   LineSegment line_seg(lh_point,rh_point);
-  object.lineLoc = line_seg;
+  //object.lineLoc = line_seg;
+  object.visionLine = line_seg;
   object.seen = true;
   object.fromTopCamera = camera_ == Camera::BOTTOM;
   

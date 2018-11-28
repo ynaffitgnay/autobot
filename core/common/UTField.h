@@ -23,14 +23,14 @@ const float HALF_FIELD_X = FIELD_X/2.0;
 const float HALF_GRASS_Y = GRASS_Y/2.0;
 const float HALF_GRASS_X = GRASS_X/2.0;
 
-const float GOAL_Y = 500;
+const float GOAL_Y = 900;
 const float GOAL_POST_WIDTH = 70;
 const float GOAL_WIDTH = GOAL_Y + GOAL_POST_WIDTH;
 const float GOAL_X = 500;
 const float HALF_GOAL_Y = GOAL_Y / 2.0;
-const float PENALTY_Y = 2200;
-const float PENALTY_X =  600;
-const float CIRCLE_DIAMETER = 1500;
+const float PENALTY_Y = 1400;
+const float PENALTY_X =  650;
+const float CIRCLE_DIAMETER = 1205;
 const float CIRCLE_RADIUS = CIRCLE_DIAMETER / 2.0;
 const float LINE_WIDTH = 50;
 
@@ -62,7 +62,7 @@ const Point2D ownCrossLocation = Point2D(-PENALTY_CROSS_X, 0);
 
 // Landmark locations
 const Point2D landmarkLocation[] = {
-  Point2D(0, 0),  // center circle
+  Point2D(-HALF_FIELD_X, 0),  // Semi-circle
 
   Point2D(-HALF_FIELD_X, HALF_FIELD_Y),      // WO_BEACON_BLUE_YELLOW
   Point2D(-HALF_FIELD_X, -HALF_FIELD_Y),     // WO_BEACON_YELLOW_BLUE
@@ -89,10 +89,16 @@ const Point2D intersectionLocation[] = {
   Point2D( FIELD_X / 2, -FIELD_Y / 2),                //   WO_OPP_FIELD_RIGHT_L
   Point2D( FIELD_X / 2 - PENALTY_X, PENALTY_Y / 2),   // 2 WO_OPP_PEN_LEFT_L
   Point2D( FIELD_X / 2 - PENALTY_X, -PENALTY_Y / 2),  //   WO_OPP_PEN_RIGHT_L
-  Point2D( -FIELD_X / 2 + PENALTY_X, PENALTY_Y / 2),  // 4 WO_OWN_PEN_RIGHT_L
-  Point2D( -FIELD_X / 2 + PENALTY_X, -PENALTY_Y / 2), //   WO_OWN_PEN_LEFT_L
+  Point2D( -FIELD_X / 2 - PENALTY_X, PENALTY_Y / 2),  // 4 WO_OWN_PEN_RIGHT_L
+  Point2D( -FIELD_X / 2 - PENALTY_X, -PENALTY_Y / 2), //   WO_OWN_PEN_LEFT_L
   Point2D( -FIELD_X / 2, FIELD_Y / 2),                // 6 WO_OWN_FIELD_RIGHT_L
   Point2D( -FIELD_X / 2, -FIELD_Y / 2),               // 7 WO_OWN_FIELD_LEFT_L
+
+  Point2D( -FIELD_X / 2, FIELD_Y / 2),                //   WO_OWN_FIELD_EDGE_TOP_L
+  Point2D( FIELD_X / 2, FIELD_Y / 2),                 //   WO_OPP_FIELD_EDGE_TOP_L
+  Point2D( -FIELD_X / 2, -FIELD_Y / 2),               //   WO_OWN_FIELD_EDGE_BOTTOM_L
+  Point2D( FIELD_X / 2, -FIELD_Y / 2),                //   WO_OPP_FIELD_EDGE_BOTTOM_L
+  
   
   Point2D(  HALF_FIELD_X + GOAL_X, -HALF_GOAL_Y),      // Back right of opp goal post
   Point2D(  HALF_FIELD_X + GOAL_X,  HALF_GOAL_Y),      // Back left of opp goal post
@@ -126,6 +132,9 @@ const Point2D lineLocationStarts[] = {
   intersectionLocation[WO_OWN_PEN_RIGHT_L   - INTERSECTION_OFFSET],    // WO_OWN_PENALTY
   intersectionLocation[WO_OWN_FIELD_RIGHT_L - INTERSECTION_OFFSET],    // WO_OWN_GOAL_LINE
 
+  intersectionLocation[WO_OWN_FIELD_EDGE_TOP_L - INTERSECTION_OFFSET], // WO_OWN_FIELD_EDGE_TOP
+  intersectionLocation[WO_OPP_FIELD_EDGE_TOP_L - INTERSECTION_OFFSET], // WO_OPP_FIELD_EDGE_TOP
+  
   intersectionLocation[WO_OPP_BACK_RIGHT_GOAL_L - INTERSECTION_OFFSET],
   intersectionLocation[WO_OWN_BACK_RIGHT_GOAL_L - INTERSECTION_OFFSET],
 
@@ -136,6 +145,11 @@ const Point2D lineLocationStarts[] = {
   intersectionLocation[WO_OPP_PEN_RIGHT_L   - INTERSECTION_OFFSET],    // WO_PENALTY_BOTTOM_OPP
   intersectionLocation[WO_OWN_PEN_LEFT_L    - INTERSECTION_OFFSET],    // WO_PENALTY_BOTTOM_OWN
   intersectionLocation[WO_OPP_FIELD_RIGHT_L - INTERSECTION_OFFSET],    // WO_BOTTOM_SIDE_LINE
+
+  // NEED TOP_FIELD_EDGE and BOTTOM_FIELD EDGE
+  intersectionLocation[WO_OWN_FIELD_EDGE_TOP_L - INTERSECTION_OFFSET], // WO_TOP_FIELD_EDGE
+  intersectionLocation[WO_OWN_FIELD_EDGE_BOTTOM_L - INTERSECTION_OFFSET], // WO_BOTTOM_FIELD_EDGE
+  
 
   intersectionLocation[WO_OPP_BACK_LEFT_GOAL_L  - INTERSECTION_OFFSET], // WO_OPP_LEFT_GOALBAR
   intersectionLocation[WO_OPP_BACK_RIGHT_GOAL_L - INTERSECTION_OFFSET], // WO_OPP_RIGHT_GOALBAR
@@ -152,6 +166,9 @@ const Point2D lineLocationEnds[] = {
   intersectionLocation[WO_CENTER_BOTTOM_T   - INTERSECTION_OFFSET],    // WO_CENTER_LINE
   intersectionLocation[WO_OWN_PEN_LEFT_L    - INTERSECTION_OFFSET],    // WO_OWN_PENALTY
   intersectionLocation[WO_OWN_FIELD_LEFT_L  - INTERSECTION_OFFSET],    // WO_OWN_GOAL_LINE
+
+  intersectionLocation[WO_OWN_FIELD_EDGE_BOTTOM_L - INTERSECTION_OFFSET], // WO_OWN_FIELD_EDGE_BOTTOM
+  intersectionLocation[WO_OPP_FIELD_EDGE_BOTTOM_L - INTERSECTION_OFFSET], // WO_OPP_FIELD_EDGE_BOTTOM
   
   intersectionLocation[WO_OPP_BACK_LEFT_GOAL_L - INTERSECTION_OFFSET], // opp back goalbar
   intersectionLocation[WO_OWN_BACK_LEFT_GOAL_L - INTERSECTION_OFFSET], // own back goalbar
@@ -163,6 +180,10 @@ const Point2D lineLocationEnds[] = {
   intersectionLocation[WO_OPP_PEN_RIGHT_T   - INTERSECTION_OFFSET],    // WO_PENALTY_BOTTOM_OPP
   intersectionLocation[WO_OWN_PEN_LEFT_T    - INTERSECTION_OFFSET],    // WO_PENALTY_BOTTOM_OWN
   intersectionLocation[WO_OWN_FIELD_LEFT_L  - INTERSECTION_OFFSET],    // WO_BOTTOM_SIDE_LINE
+
+  intersectionLocation[WO_OPP_FIELD_EDGE_TOP_L - INTERSECTION_OFFSET], // WO_TOP_FIELD_EDGE
+  intersectionLocation[WO_OPP_FIELD_EDGE_BOTTOM_L - INTERSECTION_OFFSET], // WO_BOTTOM_FIELD_EDGE
+  
 
   intersectionLocation[WO_OPP_FRONT_LEFT_GOAL_T  - INTERSECTION_OFFSET], // WO_OPP_LEFT_GOALBAR
   intersectionLocation[WO_OPP_FRONT_RIGHT_GOAL_T - INTERSECTION_OFFSET], // WO_OPP_RIGHT_GOALBAR

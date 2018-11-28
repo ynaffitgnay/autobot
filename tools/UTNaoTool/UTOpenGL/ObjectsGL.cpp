@@ -59,7 +59,9 @@ void ObjectsGL::drawCenterCircle(Point2D p, float alpha){
   basicGL.colorRGB(Colors::White);
   basicGL.colorRGBAlpha(Colors::White,alpha);  
   basicGL.translate(p,0.0);
-  basicGL.drawCircle(CIRCLE_RADIUS);
+  //basicGL.drawCircle(CIRCLE_RADIUS);
+  // Draw a semi-circle
+  basicGL.drawSemiCircle(CIRCLE_RADIUS);
   glPopMatrix();
   glEnable(GL_LIGHTING);
 }

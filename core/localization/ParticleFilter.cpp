@@ -97,14 +97,15 @@ void ParticleFilter::updateStep(){
       if (beacon_current.seen) {
         // printf("Saw %s at [%f, %f] with distance: %f and bearing: %f\n",getName(it->first),it->second.translation.x, it->second.translation.y,beacon_current.visionDistance,beacon_current.visionBearing*180.0/M_PI);
         beacons_list_.insert(it->first);
-        double part_dist = sqrt(pow(p.x - it->second.translation.x, 2) + pow(p.y - it->second.translation.y,2));
+        //double part_dist = sqrt(pow(p.x - it->second.translation.x, 2) + pow(p.y - it->second.translation.y,2));
+        double part_dist = sqrt(pow(p.x - beacon_current.loc.x, 2) + pow(p.y - beacon_current.loc.y,2));
         double mean_dist = beacon_current.visionDistance;
         double var_dist = (mean_dist/4.0)*(mean_dist/4.0);
         double dist_weight = foldedNormPDF(part_dist,mean_dist,var_dist);
 
         double part_global_bearing = p.t;  //alpha
 
-        double part_beacon_sep = atan2f(it->second.translation.y-p.y,it->second.translation.x-p.x);  // beta
+        double part_beacon_sep = atan2f(beacon_current.loc.y-p.y,beacon_current.loc.x-p.x);  // beta
         double mean_bear = beacon_current.visionBearing;  //theta
         double x_bear = part_beacon_sep - part_global_bearing;  //phi
 

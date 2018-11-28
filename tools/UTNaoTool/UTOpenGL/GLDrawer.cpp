@@ -109,6 +109,7 @@ void GLDrawer::drawField() {
   if(display_[SHOW_LINES]) {
     for (int i = LINE_OFFSET; i < LINE_OFFSET + NUM_LINES; i++){
       WorldObject* wo = &(gtcache_.world_object->objects_[i]);
+      if (i == WO_CENTER_LINE || i == WO_OWN_LEFT_GOALBAR || i == WO_OWN_RIGHT_GOALBAR) continue;
       objectsGL.drawFieldLine(wo->loc, wo->endLoc);
     }
     WorldObject* wo = &(gtcache_.world_object->objects_[WO_OPP_GOAL]);
@@ -131,8 +132,8 @@ void GLDrawer::drawField() {
       parent_->renderText(wo->loc.x/FACT,wo->loc.y/FACT,1000/FACT,"OWN - BLUE");
     }
 
-    objectsGL.drawPenaltyCross(gtcache_.world_object->objects_[WO_OPP_PENALTY_CROSS].loc,1.0);
-    objectsGL.drawPenaltyCross(gtcache_.world_object->objects_[WO_OWN_PENALTY_CROSS].loc,1.0);
+    //objectsGL.drawPenaltyCross(gtcache_.world_object->objects_[WO_OPP_PENALTY_CROSS].loc,1.0);
+    //objectsGL.drawPenaltyCross(gtcache_.world_object->objects_[WO_OWN_PENALTY_CROSS].loc,1.0);
     objectsGL.drawCenterCircle(gtcache_.world_object->objects_[WO_CENTER_CIRCLE].loc, 1.0);
   }
 }

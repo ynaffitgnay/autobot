@@ -33,7 +33,7 @@ ENUM(WorldObjectType,   // Types of objects  // 0
   WO_OPPONENT_COACH,  // 13
   WO_TEAM_LISTENER,  // 14
 
-  /// center cirlce
+  /// center cicle   // LANDMARKS START HERE
   WO_CENTER_CIRCLE,  // 15
   
   WO_BEACON_BLUE_YELLOW,  // 16
@@ -51,7 +51,7 @@ ENUM(WorldObjectType,   // Types of objects  // 0
   WO_OPP_LEFT_GOALPOST,  // 25
 
   WO_OWN_RIGHT_GOALPOST,  // 26
-  WO_OPP_RIGHT_GOALPOST,  // 27
+  WO_OPP_RIGHT_GOALPOST,  // 27  // AND END HERE
 
   // Unknown goals and goal posts
   WO_UNKNOWN_GOAL,  // 28

@@ -1,8 +1,8 @@
 #include <planning/PlanningModule.h>
 
 PlanningModule::PlanningModule() : tlogger_(textlogger) {
-  GG_ = std::make_unique<GridGenerator>(cache_);
-  WP_ = std::make_unique<WavefrontPropagation>(cache_);
+  //GG_ = std::make_unique<GridGenerator>(cache_);
+  //WP_ = std::make_unique<WavefrontPropagation>(cache_);
   DSL_ = std::make_unique<DStarLite>(cache_, tlogger_);
 }
 
@@ -27,8 +27,8 @@ void PlanningModule::specifyMemoryBlocks() {
 // Perform startup initialization for planning
 void PlanningModule::initSpecificModule() {
   // TODO: get the wavefront costs in a grid here
-  GG_->generateGrid(initial_cost_map_);
-  WP_->getCosts(initial_cost_map_, startPose);
+  //GG_->generateGrid(initial_cost_map_);
+  //WP_->getCosts(initial_cost_map_, startPose);
   DSL_->init(initial_cost_map_);
 
   // TODO: re-initialize features in planning block (maybe shift planning stuff to world_object)?

@@ -63,7 +63,7 @@ DECLARE_INTERNAL_SCHEMA(struct WorldObjectBlock : public MemoryBlock {
         wo->elevation = 0;
       }
 
-      // set penalty cross locations
+      // set penalty cross locations (there are 2)
       for (int i = 0; i < NUM_CROSSES; i++){
         WorldObject* wo = &(objects_[i + CROSS_OFFSET]);
         Point2D loc = oppCrossLocation;
