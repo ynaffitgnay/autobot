@@ -160,13 +160,14 @@ void ImageProcessor::processFrame(){
   }
 
   // Populate world objects with the best ball candidate
-  bestBall = getBestBallCandidate();
-  if (bestBall) {
-    // std::cout << "Ball distance: " << bestBall->visionDistance << ", Ball bearing: " << bestBall->visionBearing << std::endl;
-  }
+  // bestBall = getBestBallCandidate();
+  // if (bestBall) {
+  //   // std::cout << "Ball distance: " << bestBall->visionDistance << ", Ball bearing: " << bestBall->visionBearing << std::endl;
+  // }
 
   beacon_detector_->findBeacons(blobs_);
-  goal_detector_->findGoals(blobs_);
+  // // GOAL DETECTION
+  // goal_detector_->findGoals(blobs_);
 
 
   // auto& ball = vblocks_.world_object->objects_[WO_BALL];

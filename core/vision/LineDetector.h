@@ -4,7 +4,7 @@
 #pragma once
 
 #include <vision/ObjectDetector.h>
-
+#include <vision/structures/Blob.h>
 
 class TextLogger;
 
