@@ -1,15 +1,16 @@
 #include "PathNode.h"
 #include <climits>
 
-PathNode::PathNode() : PathNode(-1, -1) {
-}
+PathNode::PathNode() : PathNode(-1, -1) { }
 
-PathNode::PathNode(int row, int col) {
+PathNode::PathNode(int row, int col) : PathNode(row, col, -1) { }
+
+PathNode::PathNode(int row, int col, int cost) {
   r = row;
   c = col;
   idx = row * GRID_WIDTH + col;
   pred = -1;
-  h = -1;
+  h = cost;
   g = INT_MAX;
   rhs = INT_MAX;
   consistent = false;

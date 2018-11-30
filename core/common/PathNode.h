@@ -12,6 +12,7 @@ DECLARE_INTERNAL_SCHEMA(class PathNode {
     SCHEMA_METHODS(PathNode);
     PathNode();
     PathNode(int row, int col);
+    PathNode(int row, int col, int cost);
     void visit();
     bool operator==(const PathNode& other) const;
     bool operator!=(const PathNode& other) const;
@@ -19,7 +20,8 @@ DECLARE_INTERNAL_SCHEMA(class PathNode {
     bool operator<=(const PathNode& other) const;
     bool operator>(const PathNode& other) const;
     bool operator>=(const PathNode& other) const;
-    static int getIdx(int x, int y);
+    static int getIdx(int row, int col);
+    
     SCHEMA_FIELD(int idx);          // id of this node
     SCHEMA_FIELD(int pred);         // id of this node's predecessor
     SCHEMA_FIELD(int r);            // Y-coordinate (row of the grid cell)
