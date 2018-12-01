@@ -3,7 +3,7 @@
 
 
 // Wavefront cell construct holds data for a single cell in the map
-#include <planning/structures/WavefrontCell.h>
+#include <planning/WaveCell.h>
 
 // Map data construct
 #include <planning/structures/Grid.h>
@@ -16,7 +16,7 @@
 */
 class WavefrontPropagation {
 private:
-  std::vector<WavefrontCell> waveCells;    /*!< Vector of wave cells that store wavefront data for each cell */
+  std::vector<WaveCell> waveCells;    /*!< Vector of wave cells that store wavefront data for each cell */
   int mapSize;                             /*!< Number of cells in the map (should be equivalent to mapCells size and waveCells size */
   int numRows;                             /*!< Number of cell rows in the map */
   int numCols;                             /*!< Number of cell columns in the map */
@@ -25,14 +25,7 @@ private:
   bool hasMap;                             /*!< True if map data has been sent to waveCells */
   bool isInitialized;                      /*!< True if class was initialized successfully */
   
-    /**
-   * @brief Adds the pose of the cell at the passed index to the plan accounting for orientation between the new cell and the previous cell in the plan.
-   * @param lastI The index of the previous cell in the plan
-   * @param i     The index of the cell to add to the plan
-   * @param plan  The vector of poses that makes up the wavefront plan
-   */
-  void addPose(int lastI, int i, std::vector<Pose2D>& plan);
-  
+     
     /**
    * @brief Finds and sets valid neighbors of all wavefront cells. Occupied cells are invalid neighbors.
    */
@@ -44,15 +37,8 @@ private:
    * @param r         Row of proposed neighbor
    * @param c         Column of proposed neighbor
    */
-  void addNeighbor(std::vector<WavefrontCell*> &neighbors, int r, int c);
-  
-    /**
-   * @brief Finds and returns the next closest valid and unplanned cell to the cell at the passed index.
-   * @param index The index of the cell that the wavefront algorithm got stuck at.
-   * @return The index of the closest valid and unplanned cell to the cell that was passed into the function.
-   */
-  int hop(int index);
-  
+  void addNeighbor(std::vector<WaveCell*> &neighbors, int r, int c);
+
     /**
    * @brief Sets the start index to the cell that startPose is contained in if it is a valid place to start.
    * @param startPose The pose that the robot at the start of the plan
@@ -78,13 +64,6 @@ public:
    * @return True if initialization was successful
    */
   bool getCosts(Grid& map, Point startPose);
-
-  /**
-   * @brief Checks if a pose is in a valid cell in the grid
-   * @param pose The pose to check
-   * @return True if the pose is in a valid cell in the grid
-   */
-  bool checkPose(Pose2D pose);
   
   /**
    * @brief Propogates the wavefront and stores data in wavefront cells
@@ -92,12 +71,13 @@ public:
    * @return True if the wavefront was propogated successfully
    */
   bool fill(Pose2D startPose);
-  
+ 
   /**
-   * @brief Creates a full coverage plan based on the propogated wavefront.
-   * @param plan Stores the wavefront plan
+   * @brief Checks if a pose is in a valid cell in the grid
+   * @param pose The pose to check
+   * @return True if the pose is in a valid cell in the grid
    */
-  void getPlan(std::vector<Pose2D> &plan);
+  bool checkPose(Pose2D pose);
   
   /**
    * @brief Transforms index into (r,c) getCoordinate if the index is valid
@@ -124,16 +104,6 @@ public:
    */
   int getIndex(Pose2D pose);
   
-  /**
-   * @brief Resets data of cells that contains each pose in the given vector
-   * @param cells Vector of poses that are within cells whose data should be reset
-   */
-  void resetCells(std::vector<Pose2D> cells);
-
-  /**
-   * @brief Re-initializes the wavefront propogation
-   */
-  void reinit();
   
 }; // WavefrontPropagation
 

@@ -9,17 +9,13 @@
 struct Grid {
   int width;
   int height;
-  std::vector<vector<GridCell>> cells;
+  std::vector<GridCell> cells;
   Grid() : width(GRID_WIDTH), height(GRID_HEIGHT), cell_width(CELL_WIDTH), cell_height(CELL_HEIGHT) {
     for (int r = 0; r < std::round(height/cell_height); ++r) {
-      std::vector<GridCell> row;
       for (int c = 0; c < std::round(width/cell_width); ++c) {
-        row.push_back(GridCell(r,c));
+        cells.push_back(GridCell(r,c));
       }
-      cells.push_back(row);
-    }
-        
-  }
-    
+    }        
+  }    
 };
 #endif

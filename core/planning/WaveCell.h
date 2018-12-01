@@ -17,20 +17,22 @@ private:
   bool occupied_;
   bool is_labelled_;
   bool is_initialized_;
-  Point position_;
+  Pose2D position_;
   std::vector<WaveCell*> neighbors_
   GridCell gc_;
-  setNeighbors();
-  void setValue();
+  void setNeighbors(std::vector<WaveCell*> nbs);
+  bool setValue();
 
 
 public:
   WaveCell();
   ~WaveCell();
   WaveCell(int wave_value, bool occupied, bool isLabelled, bool isInitialized, Point position, std::vector<WaveCell*> neighbors, GridCell gc); 
-  bool contains(Point pose);
+  bool contains(Pose2D pose);
   int getValue();
   int setNeighborsValues(int wave_label);
+  std::vector<WaveCell*> getNeighbors();
+  Pose2D getPosition();
 
 };
 
