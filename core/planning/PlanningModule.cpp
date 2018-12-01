@@ -1,4 +1,5 @@
 #include <planning/PlanningModule.h>
+#include <memory/PlanningBlock.h>
 
 PlanningModule::PlanningModule() : tlogger_(textlogger) {
   //GG_ = std::make_unique<GridGenerator>(cache_);
@@ -13,6 +14,7 @@ void PlanningModule::specifyMemoryDependency() {
   requiresMemoryBlock("robot_state");
   requiresMemoryBlock("game_state");
   requiresMemoryBlock("vision_odometry");
+  requiresMemoryBlock("planning");
 }
 
 void PlanningModule::specifyMemoryBlocks() {
@@ -22,6 +24,7 @@ void PlanningModule::specifyMemoryBlocks() {
   getOrAddMemoryBlock(cache_.robot_state,"robot_state");
   getOrAddMemoryBlock(cache_.game_state,"game_state");
   getOrAddMemoryBlock(cache_.odometry,"vision_odometry");
+  getOrAddMemoryBlock(cache_.planning,"planning");
 }
 
 // Perform startup initialization for planning

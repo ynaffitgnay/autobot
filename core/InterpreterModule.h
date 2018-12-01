@@ -42,6 +42,7 @@ class InterpreterModule: public Module {
     LocalizationBlock *localization_;
     ImageBlock *image_;
     AudioProcessingBlock *audio_processing_;
+    PlanningBlock* planning_;
 
     std::vector<float> joint_values_, joint_stiffness_;
     std::vector<float> sensor_values_;
