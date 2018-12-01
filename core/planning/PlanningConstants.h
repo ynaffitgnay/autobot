@@ -1,7 +1,9 @@
 #ifndef PLANNING_CONSTANTS_H
 #define PLANNING_CONSTANTS_H
 
-#define GRID_WIDTH  (300)
-#define GRID_HEIGHT (200)
+#define GRID_WIDTH  (3000)
+#define GRID_HEIGHT (2400)
+#define CELL_WIDTH  (200)
+#define CELL_HEIGHT (200)
 
 #endif

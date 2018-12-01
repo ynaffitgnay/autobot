@@ -27,8 +27,7 @@ private:
 public:
   WaveCell();
   ~WaveCell();
-  WaveCell(int wave_value, bool occupied, bool isLabelled, bool isInitialized, Point position, std::vector<WaveCell*> neighbors, GridCell gc);:
-    wave_value_(WAVE_INIT), occupied_(false), is_labelled_(false), is_initialized_(false), position_(position), neighbors_(NUM_NEIGHBORS,NULL), gc_(gc) { }
+  WaveCell(int wave_value, bool occupied, bool isLabelled, bool isInitialized, Point position, std::vector<WaveCell*> neighbors, GridCell gc); 
   bool contains(Point pose);
   int getValue();
   int setNeighborsValues(int wave_label);

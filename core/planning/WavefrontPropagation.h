@@ -31,7 +31,7 @@ private:
    * @param i     The index of the cell to add to the plan
    * @param plan  The vector of poses that makes up the wavefront plan
    */
-  void addPose(int lastI, int i, std::vector<Pose3D>& plan);
+  void addPose(int lastI, int i, std::vector<Pose2D>& plan);
   
     /**
    * @brief Finds and sets valid neighbors of all wavefront cells. Occupied cells are invalid neighbors.
@@ -58,7 +58,7 @@ private:
    * @param startPose The pose that the robot at the start of the plan
    * @return True if the start index was set successfully
    */
-  bool setStartIndex(Pose3D startPose);
+  bool setStartIndex(Pose2D startPose);
   
 public:
   /**
@@ -84,20 +84,20 @@ public:
    * @param pose The pose to check
    * @return True if the pose is in a valid cell in the grid
    */
-  bool checkPose(Pose3D pose);
+  bool checkPose(Pose2D pose);
   
   /**
    * @brief Propogates the wavefront and stores data in wavefront cells
    * @param startPose Pose of the robot at the start of the plan
    * @return True if the wavefront was propogated successfully
    */
-  bool fill(Pose3D startPose);
+  bool fill(Pose2D startPose);
   
   /**
    * @brief Creates a full coverage plan based on the propogated wavefront.
    * @param plan Stores the wavefront plan
    */
-  void getPlan(std::vector<Pose3D> &plan);
+  void getPlan(std::vector<Pose2D> &plan);
   
   /**
    * @brief Transforms index into (r,c) getCoordinate if the index is valid
@@ -122,13 +122,13 @@ public:
    * @param pose The pose we want the cell index of
    * @return Index of the cell containing the given pose
    */
-  int getIndex(Pose3D pose);
+  int getIndex(Pose2D pose);
   
   /**
    * @brief Resets data of cells that contains each pose in the given vector
    * @param cells Vector of poses that are within cells whose data should be reset
    */
-  void resetCells(std::vector<Pose3D> cells);
+  void resetCells(std::vector<Pose2D> cells);
 
   /**
    * @brief Re-initializes the wavefront propogation

@@ -18,7 +18,7 @@ Wavefront::~Wavefront()
   // Do nothing
 }
 
-bool Wavefront::getCosts(Grid map, Point startPose)
+bool Wavefront::getCosts(Grid& map, Pose2D& startPose)
 {
   // Set map variables
   mapSize = map.cells.size();
