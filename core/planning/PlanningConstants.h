@@ -1,6 +1,8 @@
 #ifndef PLANNING_CONSTANTS_H
 #define PLANNING_CONSTANTS_H
 
+#define FIELD_WIDTH  (3000)
+#define FIELD_HEIGHT (2500)
 #define CELL_HEIGHT (200)
 #define CELL_WIDTH  (200)
 #define GRID_HEIGHT (13)  // ~2480 mm / 200 mm
