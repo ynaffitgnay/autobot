@@ -14,9 +14,13 @@ DECLARE_INTERNAL_SCHEMA(struct PlanningBlock : public MemoryBlock {
     SCHEMA_METHODS(PlanningBlock);
     PlanningBlock();
     SCHEMA_FIELD(Point2D start_point);
+    SCHEMA_FIELD(int pathIdx);
 
     mutable SCHEMA_FIELD(std::array<PathNode, GRID_SIZE> grid_data);
     std::vector<PathNode> grid;
+
+    mutable SCHEMA_FIELD(std::array<PathNode, PATH_SIZE> path_data);
+    std::vector<PathNode> path;
 
   SCHEMA_PRE_SERIALIZATION({
       std::copy(
@@ -24,12 +28,22 @@ DECLARE_INTERNAL_SCHEMA(struct PlanningBlock : public MemoryBlock {
         __source_object__.grid.data() + __source_object__.grid.size(), 
         __source_object__.grid_data.data()
       );
+      std::copy(
+        __source_object__.path.data(), 
+        __source_object__.path.data() + __source_object__.path.size(), 
+        __source_object__.path_data.data()
+      );
   });
   SCHEMA_POST_DESERIALIZATION({
       std::copy(
         __target_object__.grid_data.data(), 
         __target_object__.grid_data.data() + __target_object__.grid.size(),
         __target_object__.grid.data()
+      );
+      std::copy(
+        __target_object__.path_data.data(), 
+        __target_object__.path_data.data() + __target_object__.path.size(),
+        __target_object__.path.data()
       );
   });
 
