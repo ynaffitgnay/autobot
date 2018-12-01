@@ -23,7 +23,7 @@ void DStarLite::init(const Grid& wavefront) {
   // Set pointer to start node
   S_ = &(map_.at(getGridRow(startCoords_.y)).at(getGridCol(startCoords_.x)));
 
-  U_ = priority_queue<PathNode*, vector<PathNode*>, PNCmp>();
+  U_ = DSLPQueue();//priority_queue<PathNode*, vector<PathNode*>, PNCmp>();
 
   //TODO: change this to accept input
   //auto& robot = cache_.world_object->objects_[cache_.robot_state->WO_SELF];

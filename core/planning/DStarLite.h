@@ -10,6 +10,7 @@
 #include <planning/Logging.h>
 #include <planning/structures/PNCmp.h>
 #include <planning/structures/Grid.h>
+#include <planning/structures/DSLPQueue.h>
 #include <planning/PlanningConstants.h>
 #include <queue>
 #include <vector>
@@ -20,9 +21,9 @@ class DStarLite {
 
     // TODO: move this out of here
     std::vector<std::vector<PathNode>> map_;
-
     
-    std::priority_queue<PathNode*, vector<PathNode*>, PNCmp> U_;
+    //priority_queue<PathNode*, vector<PathNode*>, PNCmp> U_;
+    DSLPQueue U_;
     int k_;  // key modifier
     const Grid* wf_;
     Point2D startCoords_;
