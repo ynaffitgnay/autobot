@@ -29,7 +29,7 @@ private:
     /**
    * @brief Finds and sets valid neighbors of all wavefront cells. Occupied cells are invalid neighbors.
    */
-  void findNeighbors();
+  void findNeighbors(void);
   
     /**
    * @brief Adds neighbor at position (r,c) to the neighbors vector if it is valid.

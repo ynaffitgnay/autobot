@@ -5,6 +5,7 @@
 #include <planning/structures/GridCell.h>
 #include <planning/PlanningConstants.h>
 #include <vector>
+#include <algorithm>
 
 static const int WAVE_END = 0;           // wavefront value used for end cell (must be zero because wave starts propogating upward from here)
 static const int WAVE_OBSTRUCTION = -1;  // wavefront value used for obstruction 
@@ -29,10 +30,11 @@ public:
   ~WaveCell();
   WaveCell(Pose2D position, GridCell gc); 
   bool contains(Pose2D pose);
-  int getValue();
+  int getValue(void);
   int setNeighborsValues(int wave_label);
-  std::vector<WaveCell*> getNeighbors();
-  Pose2D getPosition();
+  int getWallFactor(void);
+  std::vector<WaveCell*> getNeighbors(void);
+  Pose2D getPosition(void);
   void setNeighbors(std::vector<WaveCell*> nbs);
   bool setValue(int value);
 

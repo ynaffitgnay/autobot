@@ -32,7 +32,9 @@ void PlanningModule::initSpecificModule() {
   startPose.translation.x = 2900; //mm
   startPose.translation.y = 2300; //mm
   startPose.rotation = 0;
+  printf("Generating grid\n");
   GG_->generateGrid(initial_cost_map_);
+  printf("Generating wave\n");
   WP_->getCosts(initial_cost_map_, startPose);
   DSL_->init(initial_cost_map_);
 

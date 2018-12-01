@@ -26,12 +26,12 @@ bool WavefrontPropagation::getCosts(Grid& map, Pose2D& startPose) {
   // Check for invalid parameters
   if(numCols <= 0)
   {
-    printf("Grid must have at least one column.");
+    printf("Grid must have at least one column.\n");
     return false;
   }
   else if(numRows <= 0)
   {
-    printf("Grid must have at least one row.");
+    printf("Grid must have at least one row.\n");
     return false;
   }
 
@@ -51,13 +51,13 @@ bool WavefrontPropagation::getCosts(Grid& map, Pose2D& startPose) {
   isInitialized = true;
 
   if (fill(startPose)) {
-  	printf("Success!");
+  	printf("Success!\n");
     for(int i = 0; i<waveCells.size(); i++) {
       map.cells[i].cost = waveCells[i].getValue();
     }
   	return true;
   } else {
-  	printf("Failure! :(");
+  	printf("Failure! :(\n");
   	return false;
   }
 }
@@ -77,12 +77,26 @@ bool WavefrontPropagation::fill(Pose2D startPose) {
   int lastFillCount = 0;  // Number of cells filled with wave numbers in previous iteration
   while(fillCount != lastFillCount) {
     lastFillCount = fillCount;
-    for(int i = 0; i<mapSize; i++) {
-      if(waveCells[i].getValue() == waveNumber-1) {
-        fillCount += waveCells[i].setNeighborsValues(waveNumber);
+    for(auto& wc : waveCells) {
+      if(wc.getValue() == waveNumber-1) {
+        fillCount += wc.setNeighborsValues(waveNumber);
       }
     }
     waveNumber++;
+  }
+
+  // Add a factor for the distance from the wall. We want cells on the outside to have a higher value.
+  int alpha = 1;
+  std::vector<int> wall_factors;
+  for (auto& wc : waveCells) {
+
+    int wallFactor = wc.getWallFactor();
+    wall_factors.push_back(wallFactor);
+    int newValue = wc.getValue() + alpha*wallFactor;
+    printf("Old wave value: %d Wall factor: %d New wave value: %d\n", wc.getValue(),wallFactor,newValue);
+    if (wc.getValue() != WAVE_OBSTRUCTION && wc.getValue() != WAVE_START && wc.getValue() != WAVE_END) {
+      wc.setValue(newValue);
+    }
   }
   
   /********************************************************************************/
@@ -124,7 +138,7 @@ bool WavefrontPropagation::fill(Pose2D startPose) {
 bool WavefrontPropagation::setStartIndex(Pose2D startPose) {
   // Find the cell that contains the start index
   int cellIndex = getIndex(startPose);
-  printf("Cell Index: %d", cellIndex);
+  printf("Cell Index: %d\n", cellIndex);
   
   // Make sure the cell is valid and not obstructed
   if (checkPose(startPose)) {
@@ -144,7 +158,7 @@ bool WavefrontPropagation::setStartIndex(Pose2D startPose) {
   }
   else
   {
-   printf("Start pose invalid: has no valid neighbors");
+   printf("Start pose invalid: has no valid neighbors\n");
     return false;
   }
 }
@@ -155,14 +169,14 @@ bool WavefrontPropagation::checkPose(Pose2D pose) {
   {
     if(WAVE_OBSTRUCTION == waveCells[cell_index].getValue())
     {
-     printf("Start pose invalid: cell is occupied");
+     printf("Start pose invalid: cell is occupied\n");
       return false;
     }
     return true;
   }
   else
   {
-   printf("Start pose invalid: not within map bounds.");
+   printf("Start pose invalid: not within map bounds.\n");
     return false;
   }
 }
@@ -202,13 +216,13 @@ bool WavefrontPropagation::getCoordinate(int index, int &r, int &c) {
   //return the coordinate corresponding to index if it is withing the map
   if(!hasMap)
   {
-    printf("Cannot get coordinate before mapdata is set.");
+    printf("Cannot get coordinate before mapdata is set.\n");
     return false;
   }
 
   if(index<0 || index >= mapSize)
   {
-    printf("Index out of range. Cannot get coordinate");
+    printf("Index out of range. Cannot get coordinate\n");
     return false;
   }
 
@@ -221,7 +235,7 @@ bool WavefrontPropagation::getIndex(int &index, int r, int c) {
   // Return the index corresponding to (r,c) if it is in the map
   if(!hasMap)
   {
-    printf("Cannot get index before map data is set.");
+    printf("Cannot get index before map data is set.\n");
     return false;
   }
 
@@ -245,7 +259,7 @@ int WavefrontPropagation::getIndex(Pose2D pose) {
     }
   }
   // If the pose was not found, return -1
- printf("Pose passed in getIndex is not contained within any wave cells.");
+ printf("Pose passed in getIndex is not contained within any wave cells.\n");
   return -1;
 }
 
