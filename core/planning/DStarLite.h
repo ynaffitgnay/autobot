@@ -36,12 +36,17 @@ class DStarLite {
     void runDSL();
     //void runCCDSL();
     //void runDSL(PathNode& dest);
+    //static int safeAdd(int q1, int q2);
+    int safeAdd(int q1, int q2);
   private:
     MemoryCache& cache_;
     TextLogger*& tlogger_;
     DSLKey calcKey(PathNode& successor);
     void updateVertex(PathNode& u);
     void computeShortestPath(PathNode& curr);
+    void getPreds(PathNode& successor, std::vector<PathNode*>& preds);
+    void getSuccs(PathNode& predecessor, std::vector<PathNode*>& succs);
+    int getTransitionCost(PathNode& s, PathNode& p);
     bool buildPathGrid();
 };
 

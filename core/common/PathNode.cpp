@@ -17,13 +17,19 @@ PathNode::PathNode(int row, int col, int cost) {
   visited = false;
   numVisits = 0;
   overlapped = false;
-  reachable = true;
+  occupied = true;
   initialized = false;
 }
 
 void PathNode::visit() {
   visited = true;
   ++numVisits;
+}
+
+void PathNode::setOccupied() {
+  occupied = true;
+  g = INT_MAX;
+  rhs = INT_MAX;
 }
 
 bool PathNode::operator==(const PathNode& other) const {
@@ -49,91 +55,6 @@ bool PathNode::operator>(const PathNode& other) const {
 bool PathNode::operator>=(const PathNode& other) const {
   return !(*this < other);
 }
-
-bool PathNode::operator==(const DSLKey& other) const {
-  return (key == other);
-}
-
-bool PathNode::operator!=(const DSLKey& other) const {
-  return !(*this == other);
-}
-
-bool PathNode::operator<(const DSLKey& other) const {
-  return (key < other);
-}
-
-bool PathNode::operator<=(const DSLKey& other) const {
-  return (*this < other || *this == other);
-}
-
-bool PathNode::operator>(const DSLKey& other) const {
-  return !(*this <= other);
-}
-
-bool PathNode::operator>=(const DSLKey& other) const {
-  return !(*this < other);
-}
-
-
-//From before adding key schema
-//bool PathNode::operator==(const PathNode& other) const {
-//  //return (std::min(g, rhs) == std::min(other.g, other.rhs));
-//  return (k_1 == other.k_1 && k_2 == other.k_2);
-//}
-//
-//bool PathNode::operator!=(const PathNode& other) const {
-//  return !(*this == other);
-//}
-//
-//bool PathNode::operator<(const PathNode& other) const {
-//  if (k_1 < other.k_1) return true;
-//  if (k_1 > other.k_1) return false;
-//  // k_1 == other.k_1
-//  return (k_2 < other.k_2);
-//}
-//
-//bool PathNode::operator<=(const PathNode& other) const {
-//  //return (std::min(g, rhs) >= std::min(other.g, other.rhs));
-//  return (*this < other || *this == other);
-//}
-//
-//bool PathNode::operator>(const PathNode& other) const {
-//  return !(*this <= other);
-//}
-//
-//bool PathNode::operator>=(const PathNode& other) const {
-//  return !(*this < other);
-//}
-
-// THESE FUNCTIONS WERE FOR WHEN HEAP WAS USING STANDARD < OPERATOR
-//// larger key means smaller priority
-//bool PathNode::operator<(const PathNode& other) const {
-//  //return (std::min(g, rhs) > std::min(other.g, other.rhs));
-//  if (k_1 > other.k_1) return true;
-//  if (k_1 < other.k_1) return false;
-//  //if (k_1 == other.k_1) {
-//  // k_1 == other.k_1
-//  return (k_2 > other.k_2);
-//}
-//
-//bool PathNode::operator<=(const PathNode& other) const {
-//  //return (std::min(g, rhs) >= std::min(other.g, other.rhs));
-//  return (*this < other || *this == other);
-//}
-//
-//// smaller key means larger priority
-//bool PathNode::operator>(const PathNode& other) const {
-//  //return (std::min(g, rhs) < std::min(other.g, other.rhs));
-//  //if (k_1 < other.k_1) return true;
-//  //if (k_1 > other.k_1) return false;
-//  //return (k_2 < other.k_2);
-//  return !(*this <= other);
-//}
-//
-//bool PathNode::operator>=(const PathNode& other) const {
-//  //return (std::min(g, rhs) <= std::min(other.g, other.rhs));
-//  return !(*this < other);
-//}
 
 int PathNode::getIdx(int row, int col) {
   return (row * GRID_WIDTH + col);

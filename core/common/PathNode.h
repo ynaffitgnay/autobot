@@ -15,19 +15,14 @@ DECLARE_INTERNAL_SCHEMA(class PathNode {
     PathNode(int row, int col);
     PathNode(int row, int col, int cost);
     void visit();
+    void setOccupied();
     bool operator==(const PathNode& other) const;
     bool operator!=(const PathNode& other) const;
     bool operator<(const PathNode& other) const;
     bool operator<=(const PathNode& other) const;
     bool operator>(const PathNode& other) const;
     bool operator>=(const PathNode& other) const;
-    bool operator==(const DSLKey& other) const;
-    bool operator!=(const DSLKey& other) const;
-    bool operator<(const DSLKey& other) const;
-    bool operator<=(const DSLKey& other) const;
-    bool operator>(const DSLKey& other) const;
-    bool operator>=(const DSLKey& other) const;
-
+    
     static int getIdx(int row, int col);
     
     SCHEMA_FIELD(int idx);          // id of this node
@@ -45,7 +40,7 @@ DECLARE_INTERNAL_SCHEMA(class PathNode {
     SCHEMA_FIELD(int numVisits);    // How many times has this node been visited?
     SCHEMA_FIELD(bool overlapped);  // does this overlap with the CCP?
     SCHEMA_FIELD(bool initialized); // Has this cell been initialized? TODO: remove?
-    SCHEMA_FIELD(bool reachable);   // Is this a free space?
+    SCHEMA_FIELD(bool occupied);   // Is this a free space?
 });
 
 #endif
