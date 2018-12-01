@@ -24,16 +24,18 @@ void PlanningModule::specifyMemoryBlocks() {
   getOrAddMemoryBlock(cache_.robot_state,"robot_state");
   getOrAddMemoryBlock(cache_.game_state,"game_state");
   getOrAddMemoryBlock(cache_.odometry,"vision_odometry");
-  getOrAddMemoryBlock(cache_.planning,"planning");
 }
 
 // Perform startup initialization for planning
 void PlanningModule::initSpecificModule() {
+  // TODO: get the wavefront costs in a grid here
   Pose2D startPose;
   startPose.translation.x = 2900; //mm
   startPose.translation.y = 2300; //mm
   startPose.rotation = 0;
+  printf("Generating grid\n");
   GG_->generateGrid(initial_cost_map_);
+  printf("Generating wave\n");
   WP_->getCosts(initial_cost_map_, startPose);
   DSL_->init(initial_cost_map_);
 
