@@ -3,7 +3,9 @@
 
 #include <math/Pose2D.h>
 #include <planning/structures/GridCell.h>
+#include <planning/structures/Grid.h>
 #include <planning/structures/Obstacle.h>
+#include <planning/PlanningConstants.h>
 
 
 class GridGenerator {

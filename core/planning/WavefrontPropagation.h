@@ -50,12 +50,12 @@ public:
   /**
    * @brief Constructor.
    */
-  Wavefront();
+  WavefrontPropagation();
 
   /**
    * @brief Destructor.
    */
-  ~Wavefront();
+  ~WavefrontPropagation();
 
   /**
    * @brief Initializes the wavefront.
@@ -63,7 +63,7 @@ public:
    * @param ot  Occupancy threshold for the map grid
    * @return True if initialization was successful
    */
-  bool getCosts(Grid& map, Point startPose);
+  bool getCosts(Grid& map, Pose2D& startPose);
   
   /**
    * @brief Propogates the wavefront and stores data in wavefront cells

@@ -9,6 +9,8 @@
 struct Grid {
   int width;
   int height;
+  int cell_width;
+  int cell_height;
   std::vector<GridCell> cells;
   Grid() : width(GRID_WIDTH), height(GRID_HEIGHT), cell_width(CELL_WIDTH), cell_height(CELL_HEIGHT) {
     for (int r = 0; r < std::round(height/cell_height); ++r) {

@@ -1,5 +1,7 @@
 #ifndef GRID_CELL_H
 #define GRID_CELL_H
+#include <math/Pose2D.h>
+#include <planning/PlanningConstants.h>
 
 #pragma once
 
@@ -10,6 +12,8 @@ struct GridCell {
   Pose2D center;
   int cost;
   bool occupied;
+
+  GridCell() : r(-1), c(-1), cost(0), occupied(false) {};
 
   GridCell(int row, int col) : r(row), c(col), cost(0), occupied(false) {
   	int centerX = CELL_WIDTH*col+CELL_WIDTH/2;

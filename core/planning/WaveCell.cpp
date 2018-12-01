@@ -53,7 +53,7 @@ int WaveCell::setNeighborsValues(int wave_label) {
   int count = 0;
   for(int i = 0; i<neighbors_.size(); i++)
   {
-    if(neighbors_[i]->setCell(wave_label))
+    if(neighbors_[i]->setValue(wave_label))
       count++;
   }
   return count;
@@ -66,12 +66,12 @@ Pose2D WaveCell::getPosition() {
 
 bool WaveCell::contains(Pose2D pose) {
   // If the given pose is within the cell boundaries, return true
-  xwc1 = gc_.center.translation.x-CELL_WIDTH;
-  xwc2 = gc_.center.translation.x+CELL_WIDTH;
-  ywc1 = gc_.center.translation.y-CELL_HEIGHT;
-  ywc2 = gc_.center.translation.y+CELL_HEIGHT;
-  poseX = pose.translation.x;
-  poseY = pose.translation.y;
+  int xwc1 = gc_.center.translation.x-CELL_WIDTH;
+  int xwc2 = gc_.center.translation.x+CELL_WIDTH;
+  int ywc1 = gc_.center.translation.y-CELL_HEIGHT;
+  int ywc2 = gc_.center.translation.y+CELL_HEIGHT;
+  int poseX = pose.translation.x;
+  int poseY = pose.translation.y;
 
   if ((poseX > xwc1 && poseX < xwc2) && (poseY > ywc1 && poseY < ywc2)) { // if pose within cell bounds 
       return true;
