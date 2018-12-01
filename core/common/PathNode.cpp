@@ -5,7 +5,9 @@ PathNode::PathNode() : PathNode(-1, -1) { }
 
 PathNode::PathNode(int row, int col) : PathNode(row, col, -1) { }
 
-PathNode::PathNode(int row, int col, int cost) {
+PathNode::PathNode(int row, int col, int cost) : PathNode(row, col, cost, false) { }
+
+PathNode::PathNode(int row, int col, int cost, bool occupied) {
   r = row;
   c = col;
   idx = row * GRID_WIDTH + col;
@@ -17,7 +19,7 @@ PathNode::PathNode(int row, int col, int cost) {
   visited = false;
   numVisits = 0;
   overlapped = false;
-  occupied = true;
+  occupied = occupied;
   initialized = false;
 }
 

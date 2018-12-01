@@ -20,7 +20,8 @@ class DStarLite {
     DStarLite(MemoryCache& cache, TextLogger*& tlogger, Point2D startloc);
 
     // TODO: move this out of here
-    std::vector<std::vector<PathNode>> map_;
+    //std::vector<std::vector<PathNode>> map_;
+    std::vector<PathNode> map_;
     
     DSLPQueue U_;
     
@@ -35,8 +36,6 @@ class DStarLite {
   
     void init(const Grid& wavefront);
     void runDSL();
-    //void runCCDSL();
-    //void runDSL(PathNode& dest);
     //static int safeAdd(int q1, int q2);
     int safeAdd(int q1, int q2);
   private:

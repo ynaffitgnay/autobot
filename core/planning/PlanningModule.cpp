@@ -4,7 +4,7 @@
 PlanningModule::PlanningModule() : tlogger_(textlogger) {
   GG_ = std::make_unique<GridGenerator>();
   WP_ = std::make_unique<WavefrontPropagation>();
-  DSL_ = std::make_unique<DStarLite>(cache_, tlogger_);
+  DSL_ = std::make_unique<DStarLite>(cache_, tlogger_, Point2D(2900, 2300));
 }
 
 void PlanningModule::specifyMemoryDependency() {

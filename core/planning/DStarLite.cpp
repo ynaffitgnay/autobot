@@ -21,9 +21,10 @@ void DStarLite::init(const Grid& wavefront) {
   }
 
   // Set pointer to start node
-  S_ = &(map_.at(getGridRow(startCoords_.y)).at(getGridCol(startCoords_.x)));
+  //S_ = &(map_.at(getGridRow(startCoords_.y)).at(getGridCol(startCoords_.x)));
+  S_ = &(map_.at(PathNode::getIdx(getGridRow(startCoords_.y), getGridCol(startCoords_.x))));
 
-  U_ = DSLPQueue();//priority_queue<PathNode*, vector<PathNode*>, PNCmp>();
+  U_ = DSLPQueue();
 
   //TODO: change this to accept input
   //auto& robot = cache_.world_object->objects_[cache_.robot_state->WO_SELF];
@@ -35,68 +36,74 @@ void DStarLite::init(const Grid& wavefront) {
   S_->rhs = 0;
 
   // Calculate the key for the start node
-  //calcKey(map_.at(S_r_).at(S_c_));
   S_->key = calcKey(*S_);
   
-  //map_.at(S_r_).at(S_c_).initialized = true;
-  S_->initialized = true;
+  //S_->initialized = true;
 
   // Insert the start into the pqueue
-  //U_.push(&(map_.at(S_r_).at(S_c_)));
   U_.push(S_);
 }
-
-//void DStarLite::runCCDSL() {
-//  // Run DSL on 
-//}
 
 void DStarLite::runDSL() {
   PathNode* S_last = nullptr;
   PathNode* S_curr = nullptr;
+  std::vector<PathNode>::iterator mapIt;
 
   // here we're going to need to update the DSL from a certain coordinate
   // TODO: update this function to use the robot's current location when replanning
   if (!initialized) {
-  
+    if (map_.size() <= 0) {
+      std::cout << "EMPTY MAP IN RUNDSL?!\n" << std::endl;
+      return;
+    }
+    
     // TODO: do i have to init here??
     
     // Initialize costs for each node to S
-    for (int r = 0; r < GRID_HEIGHT; ++r) {
-      if (map_.at(r).size() <= 0) {
-        std::cout << "Unexpected empty row" << std::endl;
-        continue;
-      }
-      for (int c = 0; c < GRID_WIDTH; ++c) {
-        //if ((r == S_->r && c == S_->c) || map_.at(r).at(c).initialized) {
-        //if (map_.at(r).at(c).initialized) {
-        //  continue;
-        //}
-        computeShortestPath(map_.at(r).at(c));
-        // TODO: print here
-      }
+    for (mapIt = map_.begin(); mapIt != map_.end(); mapIt++) {
+      computeShortestPath(*mapIt);
+      // Print map after each iteration??
     }
+    
+    //for (int r = 0; r < GRID_HEIGHT; ++r) {
+    //  if (map_.at(r).size() <= 0) {
+    //    std::cout << "Unexpected empty row" << std::endl;
+    //    continue;
+    //  }
+    //  for (int c = 0; c < GRID_WIDTH; ++c) {
+    //    computeShortestPath(map_.at(r).at(c));
+    //    // TODO: print here
+    //  }
+    //}
   }
 
   generatePath();
 
   //TODO:
   // if "changed":
-  for (int r = 0; r < GRID_HEIGHT; ++r) {
-    if (map_.at(r).size() <= 0) {
-      std::cout << "Unexpected empty row" << std::endl;
-      continue;
-    }
-    for (int c = 0; c < GRID_WIDTH; ++c) {
-      //if ((r == S_->r && c == S_->c) || map_.at(r).at(c).initialized) {
-      if (!map_.at(r).at(c).changed) {
-        continue;
-      }
-      // TODO: h(s_last, s_start)??
-      //k_ = k + 
-      computeShortestPath(map_.at(r).at(c));
-      // TODO: print here
-    }
+
+  for (mapIt = map_.begin(); mapIt != map_.end(); mapIt++) {
+    if (!mapIt->changed) continue;
+
+    computeShortestPath(*mapIt);
   }
+  
+  //for (int r = 0; r < GRID_HEIGHT; ++r) {
+  //  if (map_.at(r).size() <= 0) {
+  //    std::cout << "Unexpected empty row" << std::endl;
+  //    continue;
+  //  }
+  //  for (int c = 0; c < GRID_WIDTH; ++c) {
+  //    //if ((r == S_->r && c == S_->c) || map_.at(r).at(c).initialized) {
+  //    if (!map_.at(r).at(c).changed) {
+  //      continue;
+  //    }
+  //    // TODO: h(s_last, s_start)??
+  //    //k_ = k + 
+  //    computeShortestPath(map_.at(r).at(c));
+  //    // TODO: print here
+  //  }
+  //}
 }
 
 DSLKey DStarLite::calcKey(PathNode& successor) {
@@ -193,32 +200,32 @@ void DStarLite::getPreds(PathNode& successor, vector<PathNode*>& preds) {
   int s_r = successor.r;
   int s_c = successor.c;
   // Check above
-  if (s_r - 1 >= 0) preds.push_back(&(map_.at(s_r - 1).at(s_c)));
+  if (s_r - 1 >= 0) preds.push_back(&(map_.at(PathNode::getIdx(s_r - 1, s_c))));
   
   // Check below
-  if (s_r + 1 < GRID_HEIGHT) preds.push_back(&(map_.at(s_r + 1).at(s_c)));
+  if (s_r + 1 < GRID_HEIGHT) preds.push_back(&(map_.at(PathNode::getIdx(s_r + 1, s_c))));
   
   // Check left side
-  if (s_c - 1 >= 0) preds.push_back(&(map_.at(s_r).at(s_c - 1)));
+  if (s_c - 1 >= 0) preds.push_back(&(map_.at(PathNode::getIdx(s_r, s_c - 1))));
   
   // Check right side
-  if (s_c + 1 < GRID_WIDTH) preds.push_back(&(map_.at(s_r).at(s_c + 1)));
+  if (s_c + 1 < GRID_WIDTH) preds.push_back(&(map_.at(PathNode::getIdx(s_r, s_c + 1))));
 }
 
 void DStarLite::getSuccs(PathNode& predecessor, vector<PathNode*>& succs) {
   int s_r = predecessor.r;
   int s_c = predecessor.c;
   // Check above
-  if (s_r - 1 >= 0) succs.push_back(&(map_.at(s_r - 1).at(s_c)));
+  if (s_r - 1 >= 0) succs.push_back(&(map_.at(PathNode::getIdx(s_r - 1, s_c))));
   
   // Check below
-  if (s_r + 1 < GRID_HEIGHT) succs.push_back(&(map_.at(s_r + 1).at(s_c)));
+  if (s_r + 1 < GRID_HEIGHT) succs.push_back(&(map_.at(PathNode::getIdx(s_r + 1, s_c))));
   
   // Check left side
-  if (s_c - 1 >= 0) succs.push_back(&(map_.at(s_r).at(s_c - 1)));
+  if (s_c - 1 >= 0) succs.push_back(&(map_.at(PathNode::getIdx(s_r, s_c - 1))));
   
   // Check right side
-  if (s_c + 1 < GRID_WIDTH) succs.push_back(&(map_.at(s_r).at(s_c + 1)));
+  if (s_c + 1 < GRID_WIDTH) succs.push_back(&(map_.at(PathNode::getIdx(s_r, s_c + 1))));
 }
 
 
@@ -241,19 +248,18 @@ bool DStarLite::buildPathGrid() {
     std::cout << "Wavefront grid is empty" << std::endl;
     return false;
   }
-  
-  for (int r = 0; r < GRID_HEIGHT; ++r) {
-    vector<PathNode> row;
-    if (wf_->cells.at(r).size() <= 0) {
-      std::cout << "Unexpected empty row" << std::endl;
-      continue;
-    }
-    for (int c = 0; c < GRID_WIDTH; ++c) {
-      PathNode cell = PathNode(r,c,wf_->cells.at(r).at(c).cost);
-      row.push_back(cell);
-    }
-    map_.push_back(row);
+
+  std::vector<GridCell>::const_iterator gridIt;
+
+  for (gridIt = wf_->cells.begin(); gridIt != wf_->cells.end(); gridIt++) {
+    PathNode cell = PathNode(gridIt->r, gridIt->c, gridIt->cost, gridIt->occupied);
+    map_.push_back(cell);
   }
+
+  if (map_.size() != GRID_SIZE) {
+    std::cout << "GRID_SIZE ALL WRONG WHEN BUILDING PATH_GRID???" << std::endl;
+  }
+  
   return true;
 }
 

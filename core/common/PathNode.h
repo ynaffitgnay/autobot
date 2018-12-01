@@ -14,6 +14,7 @@ DECLARE_INTERNAL_SCHEMA(class PathNode {
     PathNode();
     PathNode(int row, int col);
     PathNode(int row, int col, int cost);
+    PathNode(int row, int col, int cost, bool occupied);
     void visit();
     void setOccupied();
     bool operator==(const PathNode& other) const;

@@ -24,9 +24,9 @@ class PlanningModule: public Module {
   protected:
     MemoryCache cache_;
     TextLogger*& tlogger_;
-    //TODO: comment these back in when they compile
-    //std::unique_ptr<GridGenerator> GG_;
-    //std::unique_ptr<WavefrontPropagation> WP_;
+    
+    std::unique_ptr<GridGenerator> GG_;
+    std::unique_ptr<WavefrontPropagation> WP_;
     std::unique_ptr<DStarLite> DSL_;
     Grid initial_cost_map_;
 };

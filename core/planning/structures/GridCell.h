@@ -21,7 +21,6 @@ struct GridCell {
   	center.translation.x = centerX;
   	center.translation.y = centerY;
   	center.rotation = 0.0;
-
   };
 };
 
