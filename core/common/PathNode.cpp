@@ -13,7 +13,7 @@ PathNode::PathNode(int row, int col, int cost) {
   h = cost;
   g = INT_MAX;
   rhs = INT_MAX;
-  consistent = false;
+  changed = false;
   visited = false;
   numVisits = 0;
   overlapped = false;
@@ -58,4 +58,14 @@ bool PathNode::operator>=(const PathNode& other) const {
 
 int PathNode::getIdx(int row, int col) {
   return (row * GRID_WIDTH + col);
+}
+
+bool PathNode::getGridCoordinate(int index, int &row, int &col) {
+  if (index >= GRID_HEIGHT * GRID_WIDTH || index < 0) {
+    return false;
+  }
+
+  col = index % GRID_WIDTH;
+  row = (index - col) / GRID_HEIGHT;
+  return true;
 }

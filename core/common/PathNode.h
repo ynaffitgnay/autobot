@@ -24,6 +24,7 @@ DECLARE_INTERNAL_SCHEMA(class PathNode {
     bool operator>=(const PathNode& other) const;
     
     static int getIdx(int row, int col);
+    static bool getGridCoordinate(int index, int &row, int &col);
     
     SCHEMA_FIELD(int idx);          // id of this node
     SCHEMA_FIELD(int pred);         // id of this node's predecessor
@@ -35,7 +36,7 @@ DECLARE_INTERNAL_SCHEMA(class PathNode {
     //SCHEMA_FIELD(int k_1);          // 1st component of key for priority queue
     //SCHEMA_FIELD(int k_2);          // 2nd componentof key for priority queue
     SCHEMA_FIELD(DSLKey key);
-    SCHEMA_FIELD(bool consistent);  // is this node consistent?
+    SCHEMA_FIELD(bool changed);  // is this node consistent?
     SCHEMA_FIELD(bool visited);     // Has this node been visited
     SCHEMA_FIELD(int numVisits);    // How many times has this node been visited?
     SCHEMA_FIELD(bool overlapped);  // does this overlap with the CCP?

@@ -22,8 +22,8 @@ class DStarLite {
     // TODO: move this out of here
     std::vector<std::vector<PathNode>> map_;
     
-    //priority_queue<PathNode*, vector<PathNode*>, PNCmp> U_;
     DSLPQueue U_;
+    
     int k_;  // key modifier
     const Grid* wf_;
     Point2D startCoords_;
@@ -42,12 +42,14 @@ class DStarLite {
   private:
     MemoryCache& cache_;
     TextLogger*& tlogger_;
+    bool initialized;
     DSLKey calcKey(PathNode& successor);
     void updateVertex(PathNode& u);
     void computeShortestPath(PathNode& curr);
     void getPreds(PathNode& successor, std::vector<PathNode*>& preds);
     void getSuccs(PathNode& predecessor, std::vector<PathNode*>& succs);
     int getTransitionCost(PathNode& s, PathNode& p);
+    void generatePath();
     bool buildPathGrid();
 };
 

@@ -4,7 +4,7 @@
 #include <memory/RobotStateBlock.h>
 
 DStarLite::DStarLite(MemoryCache& cache, TextLogger*& tlogger, Point2D S)
-  : cache_(cache), tlogger_(tlogger), startCoords_(S), wf_(nullptr), k_(0) {
+  : cache_(cache), tlogger_(tlogger), startCoords_(S), wf_(nullptr), k_(0), initialized(false) {
 }
   
 void DStarLite::init(const Grid& wavefront) {
@@ -51,15 +51,36 @@ void DStarLite::init(const Grid& wavefront) {
 //}
 
 void DStarLite::runDSL() {
-  // here we're going to need to update the DSL from a certain coordinate
-  // TODO: update this function to use the robot's current location when replanning
-
   PathNode* S_last = nullptr;
   PathNode* S_curr = nullptr;
 
-  // TODO: do i have to init here??
+  // here we're going to need to update the DSL from a certain coordinate
+  // TODO: update this function to use the robot's current location when replanning
+  if (!initialized) {
   
-  // Initialize costs for each node to S
+    // TODO: do i have to init here??
+    
+    // Initialize costs for each node to S
+    for (int r = 0; r < GRID_HEIGHT; ++r) {
+      if (map_.at(r).size() <= 0) {
+        std::cout << "Unexpected empty row" << std::endl;
+        continue;
+      }
+      for (int c = 0; c < GRID_WIDTH; ++c) {
+        //if ((r == S_->r && c == S_->c) || map_.at(r).at(c).initialized) {
+        //if (map_.at(r).at(c).initialized) {
+        //  continue;
+        //}
+        computeShortestPath(map_.at(r).at(c));
+        // TODO: print here
+      }
+    }
+  }
+
+  generatePath();
+
+  //TODO:
+  // if "changed":
   for (int r = 0; r < GRID_HEIGHT; ++r) {
     if (map_.at(r).size() <= 0) {
       std::cout << "Unexpected empty row" << std::endl;
@@ -67,9 +88,11 @@ void DStarLite::runDSL() {
     }
     for (int c = 0; c < GRID_WIDTH; ++c) {
       //if ((r == S_->r && c == S_->c) || map_.at(r).at(c).initialized) {
-      if (map_.at(r).at(c).initialized) {
+      if (!map_.at(r).at(c).changed) {
         continue;
       }
+      // TODO: h(s_last, s_start)??
+      //k_ = k + 
       computeShortestPath(map_.at(r).at(c));
       // TODO: print here
     }
@@ -80,15 +103,25 @@ DSLKey DStarLite::calcKey(PathNode& successor) {
   int k_1 = 0;
   int k_2 = std::min(successor.g, successor.rhs);
   // Check for integer overflow
-  //k_1 = (k_2 > INT_MAX - successor.h) ? INT_MAX : k_2 + successor.h;
   k_1 = safeAdd(k_2, successor.h);
-  //k_1 = (k_1 > INT_MAX - k_) ? INT_MAX : k_1 + k_;
   k_1 = safeAdd(k_1, k_);
   
   return DSLKey(k_1, k_2);
 }
 
 void DStarLite::updateVertex(PathNode& u) {
+  PathNode* uPtr = &u;
+  if (u.g != u.rhs && U_.contains(uPtr)) {
+    std::cout << "Vertex is in the pq!" << std::endl;
+    U_.remove(uPtr);
+    u.key = calcKey(u);
+    U_.push(uPtr);
+  } else if (u.g != u.rhs && !U_.contains(uPtr)) {
+    u.key = calcKey(u);
+    U_.push(uPtr);
+  } else {
+    U_.remove(uPtr);
+  }
 }
 
 void DStarLite::computeShortestPath(PathNode& curr) {
@@ -104,7 +137,6 @@ void DStarLite::computeShortestPath(PathNode& curr) {
       // Update priority of u
       u->key = k_new;
       U_.push(u);
-      
     } else if (u->g > u->rhs) {
       U_.pop();
       u->g = u->rhs;
@@ -197,6 +229,9 @@ int DStarLite::getTransitionCost(PathNode& s, PathNode& p) {
 
   // can add more costs for different types of movement here (e.g., based on turning?)
   return 1;
+}
+
+void DStarLite::generatePath() {
 }
 
 // Maybe do these steps in generateGrid
