@@ -22,6 +22,8 @@ bool WavefrontPropagation::getCosts(Grid& map, Pose2D& startPose) {
   map_size_ = map.cells.size();
   num_rows_ = std::round(float(map.height)/float(map.cell_height));
   num_cols_ = std::round(float(map.width)/float(map.cell_width));
+
+  printf("Start pose: [%f, %f]\n",startPose.translation.x, startPose.translation.y);
   
   // Check for invalid parameters
   if(num_cols_ <= 0)
@@ -54,6 +56,11 @@ bool WavefrontPropagation::getCosts(Grid& map, Pose2D& startPose) {
   	printf("Success!\n");
     for(int i = 0; i<waveCells.size(); i++) {
       map.cells[i].cost = waveCells[i].getValue();
+      float globX = map.cells[i].center.translation.x;  // TODO: Needs a conversion from local x,y to global x,y not r,c
+      float globY = map.cells[i].center.translation.y;
+      float globTh = map.cells[i].center.rotation;
+      Pose2D globCenter(globTh,globX,globY);
+      map.cells[i].center = globCenter;
     }
   } else {
   	printf("Failure! :(\n");
@@ -69,7 +76,7 @@ bool WavefrontPropagation::getCosts(Grid& map, Pose2D& startPose) {
   return true;
 }
 
-bool WavefrontPropagation::fill(Pose2D startPose) {
+bool WavefrontPropagation::fill(Pose2D& startPose) {
   // Set start state if it is valid
   if(!setStartIndex(startPose)) {
     return false;
@@ -187,6 +194,7 @@ bool WavefrontPropagation::traverse(std::vector<GridCell> &orig_cells) {
         }
         int lastIndex = index;
         index = getIndex(unvisited[maxIndex]->getPosition()); // set the index to the neighbor we will move to
+        // printf("Unvisted index: %d\n", index);
         addPose(lastIndex, index, plan, orig_cells);            // add the new cell to the plan
         debugPoses.push_back(index);
         numPlanned++;
@@ -212,13 +220,23 @@ bool WavefrontPropagation::traverse(std::vector<GridCell> &orig_cells) {
   }
   addPose(index, end_index_, plan, orig_cells); // add end cell to the plan
   debugPoses.push_back(end_index_);
+  
+  printf("Orig cell size: %d Debug pose size: %d", orig_cells.size(), debugPoses.size());
 
-  int counter;
-  for (auto& plan_cell : plan){
-    int plan_index;
-    getIndex(plan_index,plan_cell.r,plan_cell.c);
-    orig_cells[plan_index].order_index = counter;
-    counter++;
+  std::vector<GridCell> ordered_plan;
+  for (int i = 0; i < orig_cells.size(); i++){
+    int order = 0;
+    std::vector<int>::iterator it = std::find(debugPoses.begin(),debugPoses.end(),i);
+    if(it == debugPoses.end())
+      order = -1;
+    else
+      order = std::distance(debugPoses.begin(), it);
+    orig_cells[i].order_index = order;
+  }
+
+  for (int i = 0; i < orig_cells.size(); i++){
+    int debug_ind = debugPoses[i];
+    ordered_plan.push_back(orig_cells[debug_ind]);
   }
   
   /**************************************************************************************************/
@@ -370,7 +388,7 @@ void WavefrontPropagation::addPose(int lastI, int i, std::vector<GridCell>& plan
 
 
 
-bool WavefrontPropagation::setStartIndex(Pose2D startPose) {
+bool WavefrontPropagation::setStartIndex(Pose2D& startPose) {
   // Find the cell that contains the start index
   int cellIndex = getIndex(startPose);
   printf("Cell Index: %d\n", cellIndex);
@@ -388,6 +406,7 @@ bool WavefrontPropagation::setStartIndex(Pose2D startPose) {
   if(startNeighbors.size() > 0)
   {
     Pose2D endPose = startNeighbors[0]->getPosition();
+    // printf("Num neighbors: %d End pose [%f, %f]\n",startNeighbors.size(), endPose.translation.x, endPose.translation.y);
     end_index_ = getIndex(endPose);
     return true;
   }
@@ -487,6 +506,7 @@ bool WavefrontPropagation::getIndex(int &index, int r, int c) {
 
 int WavefrontPropagation::getIndex(Pose2D pose) {
   // Return the index of the cell that contains pose
+  // printf("Getting index of [%f, %f]\n",pose.translation.x, pose.translation.y);
   for(int i = 0; i<waveCells.size(); i++)
   {
     if(waveCells[i].contains(pose)) {

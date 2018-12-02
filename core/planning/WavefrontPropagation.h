@@ -3,7 +3,7 @@
 
 
 // Wavefront cell construct holds data for a single cell in the map
-#include <planning/WaveCell.h>
+#include <planning/structures/WaveCell.h>
 
 // Map data construct
 #include <planning/structures/Grid.h>
@@ -44,14 +44,14 @@ private:
    * @param startPose The pose that the robot at the start of the plan
    * @return True if the start index was set successfully
    */
-  bool setStartIndex(Pose2D startPose);
+  bool setStartIndex(Pose2D& startPose);
   
   /**
    * @brief Propogates the wavefront and stores data in wavefront cells
    * @param startPose Pose of the robot at the start of the plan
    * @return True if the wavefront was propogated successfully
    */
-  bool fill(Pose2D startPose);
+  bool fill(Pose2D& startPose);
 
     /**
    * @brief Generates an initial plan by ascending the gradient of values

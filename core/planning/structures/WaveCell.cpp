@@ -1,4 +1,4 @@
-#include <planning/WaveCell.h>
+#include <planning/structures/WaveCell.h>
 
 WaveCell::WaveCell() {
   // Default Constructor
@@ -123,12 +123,12 @@ Pose2D WaveCell::getPosition() {
 
 bool WaveCell::contains(Pose2D pose) {
   // If the given pose is within the cell boundaries, return true
-  int xwc1 = gc_.center.translation.x-CELL_WIDTH/2;
-  int xwc2 = gc_.center.translation.x+CELL_WIDTH/2;
-  int ywc1 = gc_.center.translation.y-CELL_HEIGHT/2;
-  int ywc2 = gc_.center.translation.y+CELL_HEIGHT/2;
-  int poseX = pose.translation.x;
-  int poseY = pose.translation.y;
+  float xwc1 = gc_.center.translation.x-float(CELL_WIDTH)/2.0;
+  float xwc2 = gc_.center.translation.x+float(CELL_WIDTH)/2.0;
+  float ywc1 = gc_.center.translation.y-float(CELL_HEIGHT)/2.0;
+  float ywc2 = gc_.center.translation.y+float(CELL_HEIGHT)/2.0;
+  float poseX = pose.translation.x;
+  float poseY = pose.translation.y;
 
   if ((poseX > xwc1 && poseX < xwc2) && (poseY > ywc1 && poseY < ywc2)) { // if pose within cell bounds 
       return true;
