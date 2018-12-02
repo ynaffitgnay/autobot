@@ -68,6 +68,7 @@ def processFrame():
         core.visionC.processFrame()
         core.localizationC.processFrame()
         core.opponentsC.processFrame()
+        core.planningC.processFrame()
         processBehaviorFrame()
         lights.processFrame()
         core.instance.publishData()
