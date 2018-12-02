@@ -8,5 +8,10 @@ PlanningBlock::PlanningBlock() {
   changedCost = false;
   coverageStarted = false;
   pathIdx = 0;
-  path = std::vector<PathNode>(PATH_SIZE);
+  path = std::vector<GridCell>(PATH_SIZE);
 }
+
+Pose2D PlanningBlock::getDestPose() {
+  return path.at(pathIdx).center;
+}
+

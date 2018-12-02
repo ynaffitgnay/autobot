@@ -1,5 +1,7 @@
 #include <planning/PlanningModule.h>
 #include <memory/PlanningBlock.h>
+#include <memory/WorldObjectBlock.h>
+#include <memory/RobotStateBlock.h>
 
 PlanningModule::PlanningModule() : tlogger_(textlogger) {
   GG_ = std::make_unique<GridGenerator>();
@@ -29,8 +31,9 @@ void PlanningModule::specifyMemoryBlocks() {
 
 // Perform startup initialization for planning
 void PlanningModule::initSpecificModule() {
-  std::cout << "cache_.planning->startPoint.x: " << cache_.planning->startPoint.x << std::endl;
   startLoc_ = Point2D(cache_.planning->startPoint.x, cache_.planning->startPoint.y);
+  prevLoc_r = getGridRow(startLoc_.x);
+  prevLoc_c = getGridCol(startLoc_.y);
   Pose2D wfStartPose;
 
   wfStartPose.translation.x = startLoc_.x + 1500; //mm
@@ -46,12 +49,25 @@ void PlanningModule::initSpecificModule() {
 }
 
 void PlanningModule::processFrame() {
-  visitNewCell();
+  updateCell();
   // Check if any obstacles have been encountered -- maybe store this in world objects?
   DSL_->runDSL();
 }
 
-void PlanningModule::visitNewCell() {
+// Check if robot has moved to new cell
+// If so, visit the current cell
+// If this is the correct cell in the path, increment the pathIdx
+// Otherwise, warn the user and maintain the same cell destination
+void PlanningModule::updateCell() {
   // check in planning block whether coverage has started
+  if (!cache_.planning->coverageStarted) return;
+  
+  auto& robot = cache_.world_object->objects_[cache_.robot_state->WO_SELF];
+  int curr_r = getGridRow(robot.loc.y);
+  int curr_c = getGridCol(robot.loc.x);
+
+  // if we haven't changed cells, return
+  if (curr_r == prevLoc_r && curr_c == prevLoc_c) return;
+
   // then visit a new cell
 }

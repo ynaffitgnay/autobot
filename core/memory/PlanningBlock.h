@@ -5,8 +5,10 @@
 #include <common/PathNode.h>
 #include <memory/MemoryBlock.h>
 #include <math/Geometry.h>
+#include <math/Pose2D.h>
 #include <vector>
 #include <planning/PlanningConstants.h>
+#include <planning/structures/GridCell.h>
 #include <schema/gen/PlanningBlock_generated.h>
 
 DECLARE_INTERNAL_SCHEMA(struct PlanningBlock : public MemoryBlock {
@@ -21,8 +23,8 @@ DECLARE_INTERNAL_SCHEMA(struct PlanningBlock : public MemoryBlock {
     mutable SCHEMA_FIELD(std::array<PathNode, GRID_SIZE> grid_data);
     std::vector<PathNode> grid;
 
-    mutable SCHEMA_FIELD(std::array<PathNode, PATH_SIZE> path_data);
-    std::vector<PathNode> path;
+    mutable SCHEMA_FIELD(std::array<GridCell, PATH_SIZE> path_data);
+    std::vector<GridCell> path;
 
   SCHEMA_PRE_SERIALIZATION({
       std::copy(
@@ -49,6 +51,7 @@ DECLARE_INTERNAL_SCHEMA(struct PlanningBlock : public MemoryBlock {
       );
   });
 
+  Pose2D getDestPose();
 });
 
 #endif
