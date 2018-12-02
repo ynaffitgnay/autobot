@@ -1,31 +1,8 @@
 #include "PathNode.h"
 #include <climits>
 
-//PathNode::PathNode() : PathNode(-1) { }
-//PathNode::PathNode(GridCell& cell) : PathNode(cell, -1) { }
-//PathNode::PathNode(int row, int col) : PathNode(row, col, -1) { }
-//
-//PathNode::PathNode(int row, int col, int cost) : PathNode(row, col, cost, false) { }
-//
-//PathNode::PathNode(int row, int col, int cost, bool occupied) {
-//  r = row;
-//  c = col;
-//  idx = row * GRID_WIDTH + col;
-//  pred = -1;
-//  h = cost;
-//  g = INT_MAX;
-//  rhs = INT_MAX;
-//  changed = false;
-//  visited = false;
-//  numVisits = 0;
-//  overlapped = false;
-//  occupied = occupied;
-//  initialized = false;
-//}
-
 PathNode::PathNode(GridCell& cell) : cell(cell) {
-  idx = cell.r * GRID_WIDTH + cell.c;// = row * GRID_WIDTH + col;
-  //this->cell = cell;
+  idx = cell.r * GRID_WIDTH + cell.c;
   pred = -1;
   g = INT_MAX;
   rhs = INT_MAX;
@@ -33,7 +10,6 @@ PathNode::PathNode(GridCell& cell) : cell(cell) {
   visited = false;
   numVisits = 0;
   overlapped = false;
-  //occupied = occupied;
   initialized = false;
 }
 

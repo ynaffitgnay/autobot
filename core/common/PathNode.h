@@ -12,12 +12,7 @@
 DECLARE_INTERNAL_SCHEMA(class PathNode {
   public:
     SCHEMA_METHODS(PathNode);
-    //PathNode();
-    //PathNode(int row, int col);
-    //PathNode(int row, int col, int cost);
-    //PathNode(int row, int col, int cost, bool occupied);
     PathNode(GridCell& cell);
-    //PathNode(GridCell& cell, int idx);
     void visit();
     void setOccupied();
     bool operator==(const PathNode& other) const;
