@@ -20,8 +20,8 @@ DECLARE_INTERNAL_SCHEMA(struct PlanningBlock : public MemoryBlock {
     SCHEMA_FIELD(bool changedCost);
     SCHEMA_FIELD(int pathIdx);
 
-    mutable SCHEMA_FIELD(std::array<PathNode, GRID_SIZE> grid_data);
-    std::vector<PathNode> grid;
+    mutable SCHEMA_FIELD(std::array<GridCell, GRID_SIZE> grid_data);
+    std::vector<GridCell> grid;
 
     mutable SCHEMA_FIELD(std::array<GridCell, PATH_SIZE> path_data);
     std::vector<GridCell> path;

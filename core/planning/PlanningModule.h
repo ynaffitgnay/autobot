@@ -5,10 +5,12 @@
 
 #include <Module.h>
 #include <memory/MemoryCache.h>
+#include <memory/PlanningBlock.h>
 #include <planning/DStarLite.h>
 #include <planning/WavefrontPropagation.h>
 #include <planning/GridGenerator.h>
 #include <planning/structures/Grid.h>
+#include <common/GridCell.h>
 
 class VisionCore;
 
@@ -20,6 +22,10 @@ class PlanningModule: public Module {
     void specifyMemoryBlocks();
     void initSpecificModule();
     void processFrame();
+
+    inline std::vector<GridCell>& grid() {
+      return cache_.planning->grid;
+    }
 
   protected:
     MemoryCache cache_;

@@ -3,7 +3,7 @@
 #include <memory/WorldObjectBlock.h>
 #include <memory/RobotStateBlock.h>
 
-PlanningModule::PlanningModule() : tlogger_(textlogger) {
+PlanningModule::PlanningModule() : tlogger_(textlogger), initial_cost_map_(Grid(grid())) {
   GG_ = std::make_unique<GridGenerator>();
   WP_ = std::make_unique<WavefrontPropagation>();
   DSL_ = std::make_unique<DStarLite>(cache_, tlogger_, Point2D(START_X, START_Y));
@@ -31,6 +31,7 @@ void PlanningModule::specifyMemoryBlocks() {
 
 // Perform startup initialization for planning
 void PlanningModule::initSpecificModule() {
+  grid().resize(GRID_SIZE);
   startLoc_ = Point2D(cache_.planning->startPoint.x, cache_.planning->startPoint.y);
   prevLoc_r = getGridRow(startLoc_.x);
   prevLoc_c = getGridCol(startLoc_.y);
