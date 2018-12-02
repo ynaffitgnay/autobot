@@ -223,7 +223,7 @@ bool WavefrontPropagation::traverse(std::vector<GridCell> &orig_cells) {
   
   printf("Orig cell size: %d Debug pose size: %d", orig_cells.size(), debugPoses.size());
 
-  std::vector<GridCell> ordered_plan;
+  std::vector<GridCell*> ordered_plan;
   for (int i = 0; i < orig_cells.size(); i++){
     int order = 0;
     std::vector<int>::iterator it = std::find(debugPoses.begin(),debugPoses.end(),i);
@@ -236,7 +236,8 @@ bool WavefrontPropagation::traverse(std::vector<GridCell> &orig_cells) {
 
   for (int i = 0; i < orig_cells.size(); i++){
     int debug_ind = debugPoses[i];
-    ordered_plan.push_back(orig_cells[debug_ind]);
+    //std::cout << "Adding " << i <<  " to ordered_plan!\n";
+    ordered_plan.push_back(&(orig_cells[debug_ind]));
   }
   
   /**************************************************************************************************/

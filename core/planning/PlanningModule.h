@@ -34,7 +34,7 @@ class PlanningModule: public Module {
     std::unique_ptr<GridGenerator> GG_;
     std::unique_ptr<WavefrontPropagation> WP_;
     std::unique_ptr<DStarLite> DSL_;
-    Grid initial_cost_map_;
+    //Grid initial_cost_map_;
     Point2D startLoc_;
     int prevLoc_r;
     int prevLoc_c;

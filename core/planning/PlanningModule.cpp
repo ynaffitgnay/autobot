@@ -2,8 +2,10 @@
 #include <memory/PlanningBlock.h>
 #include <memory/WorldObjectBlock.h>
 #include <memory/RobotStateBlock.h>
+#include <iostream>
 
-PlanningModule::PlanningModule() : tlogger_(textlogger), initial_cost_map_(Grid(grid())) {
+PlanningModule::PlanningModule() : tlogger_(textlogger) {
+  //std::cout << "grid.size(): " << grid().size() << std::endl;
   GG_ = std::make_unique<GridGenerator>();
   WP_ = std::make_unique<WavefrontPropagation>();
   DSL_ = std::make_unique<DStarLite>(cache_, tlogger_, Point2D(START_X, START_Y));
@@ -32,6 +34,9 @@ void PlanningModule::specifyMemoryBlocks() {
 // Perform startup initialization for planning
 void PlanningModule::initSpecificModule() {
   grid().resize(GRID_SIZE);
+  Grid initial_cost_map = Grid(grid());
+  //std::cout << "grid.size() 2: " << grid().size() << std::endl;
+  ///std::cout << "initial_cost_map.cells.size(): " << initial_cost_map.cells.size() << std::endl;
   startLoc_ = Point2D(cache_.planning->startPoint.x, cache_.planning->startPoint.y);
   prevLoc_r = getGridRow(startLoc_.x);
   prevLoc_c = getGridCol(startLoc_.y);
@@ -41,10 +46,10 @@ void PlanningModule::initSpecificModule() {
   wfStartPose.translation.y = 1250 - startLoc_.y; //mm
   wfStartPose.rotation = 0;
   printf("Generating grid\n");
-  GG_->generateGrid(initial_cost_map_);
+  GG_->generateGrid(initial_cost_map);
   printf("Generating wave\n");
-  WP_->getCosts(initial_cost_map_, wfStartPose);
-  DSL_->init(initial_cost_map_);
+  WP_->getCosts(initial_cost_map, wfStartPose);
+  DSL_->init(initial_cost_map);
 
   // TODO: re-initialize features in planning block (maybe shift planning stuff to world_object)?
 }
@@ -70,5 +75,5 @@ void PlanningModule::updateCell() {
   // if we haven't changed cells, return
   if (curr_r == prevLoc_r && curr_c == prevLoc_c) return;
 
-  // then visit a new cell
+  // get information about the new cell
 }

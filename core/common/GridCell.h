@@ -20,11 +20,14 @@ DECLARE_INTERNAL_SCHEMA(struct GridCell {
   GridCell() : r(-1), c(-1), cost(0), occupied(false), order_index(-1) {};
 
   GridCell(int row, int col) : r(row), c(col), cost(0), occupied(false) {
-  	int centerX = CELL_WIDTH * col + CELL_WIDTH / 2;
-  	int centerY = CELL_HEIGHT * row + CELL_HEIGHT / 2;
+  	int centerX = CELL_WIDTH * col + CELL_WIDTH / 2;  // Need to translate
+  	int centerY = CELL_HEIGHT * row + CELL_HEIGHT / 2;  // Need to translate
   	center.translation.x = centerX;
   	center.translation.y = centerY;
   	center.rotation = 0.0;
   };
+
+  GridCell(const GridCell& other) : r(other.r), c(other.c), center(other.center),
+    cost(other.cost), occupied(other.occupied), order_index(other.order_index) {};
 });
 #endif
