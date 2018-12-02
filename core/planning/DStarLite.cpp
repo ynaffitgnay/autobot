@@ -4,13 +4,11 @@
 #include <memory/RobotStateBlock.h>
 
 DStarLite::DStarLite(MemoryCache& cache, TextLogger*& tlogger, Point2D S)
-  : cache_(cache), tlogger_(tlogger), startCoords_(S), wf_(nullptr), k_(0), initialized(false) {
+  : cache_(cache), tlogger_(tlogger), startCoords_(S), wf_(nullptr), k_(0),
+    movementCostSinceReplan(0), initialized(false) {
 }
   
 void DStarLite::init(const Grid& wavefront) {
-  //int S_r;
-  //int S_c;
-  
   wf_ = &wavefront;
   k_ = 0;
   map_.clear();
@@ -20,25 +18,20 @@ void DStarLite::init(const Grid& wavefront) {
     std::cout << "EMPTY PATH GRID!" << std::endl;
   }
 
+  std::cout << "Debug 1\n";
+
   // Set pointer to start node
-  //S_ = &(map_.at(getGridRow(startCoords_.y)).at(getGridCol(startCoords_.x)));
+  std::cout << "gridRow: " << getGridRow(startCoords_.y) << " gridCol: " << getGridCol(startCoords_.x) << std:: endl;
+  std::cout << "Result of getIdx: " << PathNode::getIdx(getGridRow(startCoords_.y), getGridCol(startCoords_.x)) << std::endl;
   S_ = &(map_.at(PathNode::getIdx(getGridRow(startCoords_.y), getGridCol(startCoords_.x))));
+  std::cout << "Debug 2\n";
 
   U_ = DSLPQueue();
-
-  //TODO: change this to accept input
-  //auto& robot = cache_.world_object->objects_[cache_.robot_state->WO_SELF];
-  //
-  //S_r = getGridRow(robot.loc.y);
-  //S_c = getGridCol(robot.loc.x);
-  //map_.at(S_r).at(S_c).rhs = 0;
 
   S_->rhs = 0;
 
   // Calculate the key for the start node
   S_->key = calcKey(*S_);
-  
-  //S_->initialized = true;
 
   // Insert the start into the pqueue
   U_.push(S_);
@@ -57,27 +50,15 @@ void DStarLite::runDSL() {
       return;
     }
     
-    // TODO: do i have to init here??
-    
     // Initialize costs for each node to S
     for (mapIt = map_.begin(); mapIt != map_.end(); mapIt++) {
       computeShortestPath(*mapIt);
       // Print map after each iteration??
     }
-    
-    //for (int r = 0; r < GRID_HEIGHT; ++r) {
-    //  if (map_.at(r).size() <= 0) {
-    //    std::cout << "Unexpected empty row" << std::endl;
-    //    continue;
-    //  }
-    //  for (int c = 0; c < GRID_WIDTH; ++c) {
-    //    computeShortestPath(map_.at(r).at(c));
-    //    // TODO: print here
-    //  }
-    //}
+    generatePath();
+    initialized = true;
   }
 
-  generatePath();
 
   //TODO:
   // if "changed":
@@ -88,22 +69,6 @@ void DStarLite::runDSL() {
     computeShortestPath(*mapIt);
   }
   
-  //for (int r = 0; r < GRID_HEIGHT; ++r) {
-  //  if (map_.at(r).size() <= 0) {
-  //    std::cout << "Unexpected empty row" << std::endl;
-  //    continue;
-  //  }
-  //  for (int c = 0; c < GRID_WIDTH; ++c) {
-  //    //if ((r == S_->r && c == S_->c) || map_.at(r).at(c).initialized) {
-  //    if (!map_.at(r).at(c).changed) {
-  //      continue;
-  //    }
-  //    // TODO: h(s_last, s_start)??
-  //    //k_ = k + 
-  //    computeShortestPath(map_.at(r).at(c));
-  //    // TODO: print here
-  //  }
-  //}
 }
 
 DSLKey DStarLite::calcKey(PathNode& successor) {
@@ -257,6 +222,7 @@ bool DStarLite::buildPathGrid() {
   }
 
   if (map_.size() != GRID_SIZE) {
+    std::cout << "map_.size(): " << map_.size() << " GRID_SIZE: " << GRID_SIZE << std::endl;
     std::cout << "GRID_SIZE ALL WRONG WHEN BUILDING PATH_GRID???" << std::endl;
   }
   

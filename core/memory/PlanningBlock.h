@@ -13,7 +13,9 @@ DECLARE_INTERNAL_SCHEMA(struct PlanningBlock : public MemoryBlock {
   public:
     SCHEMA_METHODS(PlanningBlock);
     PlanningBlock();
-    SCHEMA_FIELD(Point2D start_point);
+    SCHEMA_FIELD(Point2D startPoint);  // Set desired starting point
+    SCHEMA_FIELD(bool coverageStarted);
+    SCHEMA_FIELD(bool changedCost);
     SCHEMA_FIELD(int pathIdx);
 
     mutable SCHEMA_FIELD(std::array<PathNode, GRID_SIZE> grid_data);

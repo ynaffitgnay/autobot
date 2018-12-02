@@ -29,6 +29,8 @@ class PlanningModule: public Module {
     std::unique_ptr<WavefrontPropagation> WP_;
     std::unique_ptr<DStarLite> DSL_;
     Grid initial_cost_map_;
+
+    void visitNewCell();
 };
 
 #endif
