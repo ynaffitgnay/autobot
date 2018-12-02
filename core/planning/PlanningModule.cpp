@@ -1,10 +1,10 @@
 #include <planning/PlanningModule.h>
+#include <memory/PlanningBlock.h>
 
 PlanningModule::PlanningModule() : tlogger_(textlogger) {
-
   GG_ = std::make_unique<GridGenerator>();
   WP_ = std::make_unique<WavefrontPropagation>();
-  DSL_ = std::make_unique<DStarLite>(cache_, tlogger_);
+  DSL_ = std::make_unique<DStarLite>(cache_, tlogger_, Point2D(1400, -1060));
 }
 
 void PlanningModule::specifyMemoryDependency() {
@@ -14,6 +14,7 @@ void PlanningModule::specifyMemoryDependency() {
   requiresMemoryBlock("robot_state");
   requiresMemoryBlock("game_state");
   requiresMemoryBlock("vision_odometry");
+  requiresMemoryBlock("planning");
 }
 
 void PlanningModule::specifyMemoryBlocks() {
@@ -42,6 +43,12 @@ void PlanningModule::initSpecificModule() {
 }
 
 void PlanningModule::processFrame() {
+  visitNewCell();
   // Check if any obstacles have been encountered -- maybe store this in world objects?
   DSL_->runDSL();
+}
+
+void PlanningModule::visitNewCell() {
+  // check in planning block whether coverage has started
+  // then visit a new cell
 }

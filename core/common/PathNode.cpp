@@ -1,22 +1,26 @@
 #include "PathNode.h"
 #include <climits>
 
-PathNode::PathNode() : PathNode(-1, -1) {
-}
+PathNode::PathNode() : PathNode(-1, -1) { }
 
-PathNode::PathNode(int row, int col) {
+PathNode::PathNode(int row, int col) : PathNode(row, col, -1) { }
+
+PathNode::PathNode(int row, int col, int cost) : PathNode(row, col, cost, false) { }
+
+PathNode::PathNode(int row, int col, int cost, bool occupied) {
   r = row;
   c = col;
   idx = row * GRID_WIDTH + col;
   pred = -1;
-  h = -1;
+  h = cost;
   g = INT_MAX;
   rhs = INT_MAX;
-  consistent = false;
+  changed = false;
   visited = false;
   numVisits = 0;
   overlapped = false;
-  reachable = true;
+  occupied = occupied;
+  initialized = false;
 }
 
 void PathNode::visit() {
@@ -24,33 +28,46 @@ void PathNode::visit() {
   ++numVisits;
 }
 
-//TODO: fix these to deal with keys
+void PathNode::setOccupied() {
+  occupied = true;
+  g = INT_MAX;
+  rhs = INT_MAX;
+}
+
 bool PathNode::operator==(const PathNode& other) const {
-  return (std::min(g, rhs) == std::min(other.g, other.rhs));
+  return (key == other.key);
 }
 
 bool PathNode::operator!=(const PathNode& other) const {
   return !(*this == other);
 }
 
-// larger key means smaller priority
 bool PathNode::operator<(const PathNode& other) const {
-  return (std::min(g, rhs) > std::min(other.g, other.rhs));
+  return (key < other.key);
 }
 
 bool PathNode::operator<=(const PathNode& other) const {
-  return (std::min(g, rhs) >= std::min(other.g, other.rhs));
+  return (*this < other || *this == other);
 }
 
-// smaller key means larger priority
 bool PathNode::operator>(const PathNode& other) const {
-  return (std::min(g, rhs) < std::min(other.g, other.rhs));
+  return !(*this <= other);
 }
 
 bool PathNode::operator>=(const PathNode& other) const {
-  return (std::min(g, rhs) <= std::min(other.g, other.rhs));
+  return !(*this < other);
 }
 
 int PathNode::getIdx(int row, int col) {
   return (row * GRID_WIDTH + col);
+}
+
+bool PathNode::getGridCoordinate(int index, int &row, int &col) {
+  if (index >= GRID_HEIGHT * GRID_WIDTH || index < 0) {
+    return false;
+  }
+
+  col = index % GRID_WIDTH;
+  row = (index - col) / GRID_HEIGHT;
+  return true;
 }

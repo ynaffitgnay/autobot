@@ -12,4 +12,5 @@ options:
   - SHOW_SIM_INFO
   - SHOW_TRUE_SIM_LOCATION
   - SHOW_BEACONS
+  - SHOW_LINES
 ...
