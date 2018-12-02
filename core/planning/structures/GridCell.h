@@ -12,8 +12,9 @@ struct GridCell {
   Pose2D center;
   int cost;
   bool occupied;
+  int order_index;
 
-  GridCell() : r(-1), c(-1), cost(0), occupied(false) {};
+  GridCell() : r(-1), c(-1), cost(0), occupied(false), order_index(-1) {};
 
   GridCell(int row, int col) : r(row), c(col), cost(0), occupied(false) {
   	int centerX = CELL_WIDTH*col+CELL_WIDTH/2;
@@ -21,6 +22,7 @@ struct GridCell {
   	center.translation.x = centerX;
   	center.translation.y = centerY;
   	center.rotation = 0.0;
+
   };
 };
 

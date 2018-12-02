@@ -9,7 +9,7 @@ WaveCell::~WaveCell() {
 }
 
 WaveCell::WaveCell(Pose2D position, GridCell gc):
-    wave_value_(WAVE_INIT), occupied_(false), is_labelled_(false), is_initialized_(false), position_(position), neighbors_(NUM_NEIGHBORS,NULL), gc_(gc) { 
+    wave_value_(WAVE_INIT), occupied_(false), is_planned_(false), is_initialized_(false), position_(position), neighbors_(NUM_NEIGHBORS,NULL), gc_(gc) { 
     if(gc_.occupied) {
       wave_value_ = WAVE_OBSTRUCTION;
       occupied_ = true;
@@ -28,6 +28,31 @@ void WaveCell::setNeighbors(std::vector<WaveCell*> nbs) {
 std::vector<WaveCell*> WaveCell::getNeighbors() {
   return neighbors_; 
 }
+
+
+std::vector<WaveCell*> WaveCell::getUnvisitedNeighbors()
+{
+  // Check neighbors vector and return any that are not visited/planned
+  std::vector<WaveCell*> unvisited;
+  unvisited.clear();
+  for(int i = 0; i<neighbors_.size(); i++)
+  {
+    if(!neighbors_[i]->isVisited())
+      unvisited.push_back(neighbors_[i]);
+  }
+  return unvisited; 
+}
+
+void WaveCell::visit()
+{
+  is_planned_ = true;
+}
+
+bool WaveCell::isVisited()
+{
+  return is_planned_;
+}
+
 
 bool WaveCell::setValue(int value) {
   // Set the cell to the wave value
@@ -72,16 +97,16 @@ int  WaveCell::getWallFactor() {
 
   switch (min_index) {
     case 0:
-      wall_factor = std::round(GRID_HEIGHT/2)-(row-1);
+      wall_factor = std::round(float(GRID_HEIGHT)/2.0)-(row-1);
       break;
     case 1:
-      wall_factor = std::round(GRID_HEIGHT/2)-( GRID_HEIGHT-row);
+      wall_factor = std::round(float(GRID_HEIGHT)/2.0)-( GRID_HEIGHT-row);
       break;
     case 2:
-      wall_factor = std::round(GRID_WIDTH/2)-(col-1);
+      wall_factor = std::round(float(GRID_WIDTH)/2.0)-(col-1);
       break;
     case 3:
-      wall_factor = std::round(GRID_WIDTH/2)-(GRID_WIDTH-col);
+      wall_factor = std::round(float(GRID_WIDTH)/2.0)-(GRID_WIDTH-col);
       break;
     default:
       wall_factor = 0;

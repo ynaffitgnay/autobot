@@ -17,13 +17,13 @@
 class WavefrontPropagation {
 private:
   std::vector<WaveCell> waveCells;    /*!< Vector of wave cells that store wavefront data for each cell */
-  int mapSize;                             /*!< Number of cells in the map (should be equivalent to mapCells size and waveCells size */
-  int numRows;                             /*!< Number of cell rows in the map */
-  int numCols;                             /*!< Number of cell columns in the map */
-  int startIndex;                          /*!< Index of the cell that the plan should start at (current position of the robot) */
-  int endIndex;                            /*!< Index of the cell that the plan will end at (adjacent to start cell) */
-  bool hasMap;                             /*!< True if map data has been sent to waveCells */
-  bool isInitialized;                      /*!< True if class was initialized successfully */
+  int map_size_;                             /*!< Number of cells in the map (should be equivalent to mapCells size and waveCells size */
+  int num_rows_;                             /*!< Number of cell rows in the map */
+  int num_cols_;                             /*!< Number of cell columns in the map */
+  int start_index_;                          /*!< Index of the cell that the plan should start at (current position of the robot) */
+  int end_index_;                            /*!< Index of the cell that the plan will end at (adjacent to start cell) */
+  bool has_map_;                             /*!< True if map data has been sent to waveCells */
+  bool is_initialized_;                      /*!< True if class was initialized successfully */
   
      
     /**
@@ -46,31 +46,19 @@ private:
    */
   bool setStartIndex(Pose2D startPose);
   
-public:
-  /**
-   * @brief Constructor.
-   */
-  WavefrontPropagation();
-
-  /**
-   * @brief Destructor.
-   */
-  ~WavefrontPropagation();
-
-  /**
-   * @brief Initializes the wavefront.
-   * @param map Map data
-   * @param ot  Occupancy threshold for the map grid
-   * @return True if initialization was successful
-   */
-  bool getCosts(Grid& map, Pose2D& startPose);
-  
   /**
    * @brief Propogates the wavefront and stores data in wavefront cells
    * @param startPose Pose of the robot at the start of the plan
    * @return True if the wavefront was propogated successfully
    */
   bool fill(Pose2D startPose);
+
+    /**
+   * @brief Generates an initial plan by ascending the gradient of values
+   * @param plan Grid cells whose order value will be altered
+   * @return True if all cells successfully ordered
+   */
+  bool traverse(std::vector<GridCell>& plan);
  
   /**
    * @brief Checks if a pose is in a valid cell in the grid
@@ -103,6 +91,41 @@ public:
    * @return Index of the cell containing the given pose
    */
   int getIndex(Pose2D pose);
+
+   /**
+   * @brief Finds and returns the next closest valid and unplanned cell to the cell at the passed index.
+   * @param index The index of the cell that the wavefront algorithm got stuck at.
+   * @return The index of the closest valid and unplanned cell to the cell that was passed into the function.
+   */
+  int hop(int index);
+
+  /**
+   * @brief Adds the pose of the cell at the passed index to the plan accounting for orientation between the new cell and the previous cell in the plan.
+   * @param lastI The index of the previous cell in the plan
+   * @param i     The index of the cell to add to the plan
+   * @param plan  The vector of poses that makes up the wavefront plan
+   */
+  void addPose(int lastI, int i, std::vector<GridCell>& plan, std::vector<GridCell>& orig_cells);
+
+public:
+  /**
+   * @brief Constructor.
+   */
+  WavefrontPropagation();
+
+  /**
+   * @brief Destructor.
+   */
+  ~WavefrontPropagation();
+
+  /**
+   * @brief Initializes the wavefront.
+   * @param map Map data
+   * @param ot  Occupancy threshold for the map grid
+   * @return True if initialization was successful
+   */
+  bool getCosts(Grid& map, Pose2D& startPose);
+  
   
   
 }; // WavefrontPropagation
