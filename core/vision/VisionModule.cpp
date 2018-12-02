@@ -12,6 +12,7 @@
 #include <memory/CameraBlock.h>
 #include <memory/WorldObjectBlock.h>
 #include <memory/RobotInfoBlock.h>
+#include <memory/PlanningBlock.h>
 #include <vision/Logging.h>
 #include <common/Util.h>
 #include <boost/lexical_cast.hpp>
@@ -29,6 +30,7 @@ void VisionModule::specifyMemoryDependency() {
   requiresMemoryBlock("camera_info");
   requiresMemoryBlock("robot_info");
   requiresMemoryBlock("game_state");
+  requiresMemoryBlock("planning");
   providesMemoryBlock("world_objects");
 }
 
@@ -44,6 +46,7 @@ void VisionModule::specifyMemoryBlocks() {
   getOrAddMemoryBlock(cache_.camera,"camera_info");
   getOrAddMemoryBlock(cache_.game_state,"game_state");
   getOrAddMemoryBlock(cache_.robot_info,"robot_info");
+  getOrAddMemoryBlock(cache_.planning, "planning");
   *top_params_ = cache_.image->top_params_;
   *bottom_params_ = cache_.image->bottom_params_;
 }
