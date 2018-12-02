@@ -22,10 +22,10 @@ bool GridGenerator::checkObstruction(GridCell& gc) {
 		int xo2 = obs.center.translation.x+obs.width;
 		int yo1 = obs.center.translation.y-obs.height;
 		int yo2 = obs.center.translation.y+obs.height;
-		int xgc1 = gc.center.translation.x-CELL_WIDTH/2;
-		int xgc2 = gc.center.translation.x+CELL_WIDTH/2;
-		int ygc1 = gc.center.translation.y-CELL_HEIGHT/2;
-		int ygc2 = gc.center.translation.y+CELL_HEIGHT/2;
+		int xgc1 = gc.center.translation.x-float(CELL_WIDTH)/2.0;
+		int xgc2 = gc.center.translation.x+float(CELL_WIDTH)/2.0;
+		int ygc1 = gc.center.translation.y-float(CELL_HEIGHT)/2.0;
+		int ygc2 = gc.center.translation.y+float(CELL_HEIGHT)/2.0;
 
 		// printf("Obstacle bounds:\n[%d,%d]\n[%d,%d]\n",xo1,yo1,xo2,yo2);
 		// printf("Cell bounds:\n[%d,%d]\n[%d,%d]\n",xgc1,ygc1,xgc2,ygc2);

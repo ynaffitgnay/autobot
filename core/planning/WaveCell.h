@@ -18,7 +18,7 @@ class WaveCell {
 private:
   int wave_value_;
   bool occupied_;
-  bool is_labelled_;
+  bool is_planned_;
   bool is_initialized_;
   Pose2D position_;
   std::vector<WaveCell*> neighbors_;
@@ -37,6 +37,9 @@ public:
   Pose2D getPosition(void);
   void setNeighbors(std::vector<WaveCell*> nbs);
   bool setValue(int value);
+  std::vector<WaveCell*> getUnvisitedNeighbors(void);
+  void visit(void);
+  bool isVisited(void);
 
 };
 
