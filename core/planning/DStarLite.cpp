@@ -2,13 +2,14 @@
 #include <iostream>
 #include <memory/WorldObjectBlock.h>
 #include <memory/RobotStateBlock.h>
+#include <common/GridCell.h>
 
 DStarLite::DStarLite(MemoryCache& cache, TextLogger*& tlogger, Point2D S)
   : cache_(cache), tlogger_(tlogger), startCoords_(S), wf_(nullptr), k_(0),
     movementCostSinceReplan(0), initialized(false) {
 }
   
-void DStarLite::init(const Grid& wavefront) {
+void DStarLite::init(Grid& wavefront) {
   wf_ = &wavefront;
   k_ = 0;
   map_.clear();
@@ -73,7 +74,7 @@ DSLKey DStarLite::calcKey(PathNode& successor) {
   int k_1 = 0;
   int k_2 = std::min(successor.g, successor.rhs);
   // Check for integer overflow
-  k_1 = safeAdd(k_2, successor.h);
+  k_1 = safeAdd(k_2, successor.cell.cost);
   k_1 = safeAdd(k_1, k_);
   
   return DSLKey(k_1, k_2);
@@ -160,8 +161,8 @@ void DStarLite::computeShortestPath(PathNode& curr) {
 }
 
 void DStarLite::getPreds(PathNode& successor, vector<PathNode*>& preds) {
-  int s_r = successor.r;
-  int s_c = successor.c;
+  int s_r = successor.cell.r;
+  int s_c = successor.cell.c;
   // Check above
   if (s_r - 1 >= 0) preds.push_back(&(map_.at(PathNode::getIdx(s_r - 1, s_c))));
   
@@ -176,8 +177,8 @@ void DStarLite::getPreds(PathNode& successor, vector<PathNode*>& preds) {
 }
 
 void DStarLite::getSuccs(PathNode& predecessor, vector<PathNode*>& succs) {
-  int s_r = predecessor.r;
-  int s_c = predecessor.c;
+  int s_r = predecessor.cell.r;
+  int s_c = predecessor.cell.c;
   // Check above
   if (s_r - 1 >= 0) succs.push_back(&(map_.at(PathNode::getIdx(s_r - 1, s_c))));
   
@@ -193,9 +194,9 @@ void DStarLite::getSuccs(PathNode& predecessor, vector<PathNode*>& succs) {
 
 
 int DStarLite::getTransitionCost(PathNode& s, PathNode& p) {
-  if (p.occupied) return INT_MAX;
+  if (p.cell.occupied) return INT_MAX;
 
-  if (s.r == p.r && s.c == p.c) return 0;
+  if (s.cell.r == p.cell.r && s.cell.c == p.cell.c) return 0;
 
   // can add more costs for different types of movement here (e.g., based on turning?)
   return 1;
@@ -212,10 +213,11 @@ bool DStarLite::buildPathGrid() {
     return false;
   }
 
-  std::vector<GridCell>::const_iterator gridIt;
-
+  std::vector<GridCell>::iterator gridIt;
+  
   for (gridIt = wf_->cells.begin(); gridIt != wf_->cells.end(); gridIt++) {
-    PathNode cell = PathNode(gridIt->r, gridIt->c, gridIt->cost, gridIt->occupied);
+    //PathNode cell = PathNode(gridIt->r, gridIt->c, gridIt->cost, gridIt->occupied);
+    PathNode cell = PathNode(*(gridIt));
     map_.push_back(cell);
   }
 

@@ -2,7 +2,7 @@
 #define PLANNING_BLOCK_H
 #pragma once
 
-#include <common/PathNode.h>
+//#include <common/PathNode.h>
 #include <memory/MemoryBlock.h>
 #include <math/Geometry.h>
 #include <math/Pose2D.h>

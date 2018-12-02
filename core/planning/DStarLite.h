@@ -35,7 +35,7 @@ class DStarLite {
     //int S_x; // Start x-coord
     //int S_y; // Start y-coord
   
-    void init(const Grid& wavefront);
+    void init(Grid& wavefront);
     void runDSL();
     //static int safeAdd(int q1, int q2);
     int safeAdd(int q1, int q2);
