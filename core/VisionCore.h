@@ -69,7 +69,7 @@ public:
   ButtonModule *buttons_;
   LEDModule *leds_;
   AudioModule *audio_;
-  PlanningModule *planner_;
+  PlanningModule *planning_;
 
 #ifndef SWIG   // Swig can't handle the file IO
   LogWriter* log_;

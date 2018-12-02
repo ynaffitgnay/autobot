@@ -23,7 +23,7 @@ void DStarLite::init(Grid& wavefront) {
   //std::cout << "gridRow: " << getGridRow(startCoords_.y) << " gridCol: " << getGridCol(startCoords_.x) << std:: endl;
   //std::cout << "Result of getIdx: " << PathNode::getIdx(getGridRow(startCoords_.y), getGridCol(startCoords_.x)) << std::endl;
   S_ = &(map_.at(PathNode::getIdx(getGridRow(startCoords_.y), getGridCol(startCoords_.x))));
-  std::cout << "Debug 2\n";
+  //std::cout << "Debug 2\n";
 
   U_ = DSLPQueue();
 
@@ -34,6 +34,39 @@ void DStarLite::init(Grid& wavefront) {
 
   // Insert the start into the pqueue
   U_.push(S_);
+
+  // Perform the initial cost calculations for each cell
+  std::cout << "not initialized yet!\n";
+  //printGrid();
+  if (map_.size() <= 0) {
+    std::cout << "EMPTY MAP IN RUNDSL?!\n" << std::endl;
+    return;
+  }
+
+  std::vector<PathNode>::iterator mapIt;
+
+  std::cout << "About to start computing shortest paths\n";
+  // Initialize costs for each node to S
+
+  int calcNode = 0;
+  for (mapIt = map_.begin(); mapIt != map_.end(); mapIt++) {
+    if (S_ == &(*mapIt)) {
+      std::cout << "Skipping start point" << std::endl;
+      continue;
+    }
+    std::cout << "Processing node (" << mapIt->cell.r << ", " << mapIt->cell.c << "), node " << calcNode++ << " / " << map_.size() << std::endl;
+    computeShortestPath(*mapIt);
+    // Print map after each iteration??
+    //printGrid();
+    if (mapIt->g < mapIt->cell.cost) {
+      std::cout << "HEURISTICS FOR CELL AT (" << mapIt->cell.r << ", " << mapIt->cell.c << ") INCONSISTENT\n\n\n\n";
+      return;
+    }
+    std::cout << "\n\n";
+  }
+  std::cout << "About to generate path!\n";
+  generatePath();
+  initialized = true;
 }
 
 void DStarLite::runDSL() {
@@ -41,27 +74,24 @@ void DStarLite::runDSL() {
   PathNode* S_curr = nullptr;
   std::vector<PathNode>::iterator mapIt;
 
+  //std::cout << "in runDSL\n";
+
   // here we're going to need to update the DSL from a certain coordinate
   // TODO: update this function to use the robot's current location when replanning
-  if (!initialized) {
-    if (map_.size() <= 0) {
-      std::cout << "EMPTY MAP IN RUNDSL?!\n" << std::endl;
-      return;
-    }
-    
-    // Initialize costs for each node to S
-    for (mapIt = map_.begin(); mapIt != map_.end(); mapIt++) {
-      computeShortestPath(*mapIt);
-      // Print map after each iteration??
-    }
-    generatePath();
-    initialized = true;
-  }
+  //if (!initialized) {
+  //  
+  //}
+
+  //std::cout << "already initalized\n";
 
 
   //TODO:
   // if "changed":
 
+  //TODO: make sure that no cells left on the path are occupied
+
+  // TODO: BFS from start node. the way that you're currently computing
+  // costs is insane!
   for (mapIt = map_.begin(); mapIt != map_.end(); mapIt++) {
     if (!mapIt->changed) continue;
 
@@ -95,7 +125,13 @@ void DStarLite::updateVertex(PathNode& u) {
   }
 }
 
+// Generates cost for each cell in the grid
 void DStarLite::computeShortestPath(PathNode& curr) {
+  // Don't compute for occupied cells
+  if (curr.cell.occupied) {
+    std::cout << "Cell is occupied." << std::endl;
+    return;
+  }
   PathNode* u = nullptr;
   
   // Calculate the key for the current node
@@ -164,33 +200,62 @@ void DStarLite::getPreds(PathNode& successor, vector<PathNode*>& preds) {
   int s_r = successor.cell.r;
   int s_c = successor.cell.c;
   // Check above
-  if (s_r - 1 >= 0) preds.push_back(&(map_.at(PathNode::getIdx(s_r - 1, s_c))));
+  if (s_r - 1 >= 0 && !map_.at(PathNode::getIdx(s_r - 1, s_c)).cell.occupied) {
+    preds.push_back(&(map_.at(PathNode::getIdx(s_r - 1, s_c))));
+  }
   
   // Check below
-  if (s_r + 1 < GRID_HEIGHT) preds.push_back(&(map_.at(PathNode::getIdx(s_r + 1, s_c))));
+  if (s_r + 1 < GRID_HEIGHT && !map_.at(PathNode::getIdx(s_r + 1, s_c)).cell.occupied) {
+    preds.push_back(&(map_.at(PathNode::getIdx(s_r + 1, s_c))));
+  }
   
   // Check left side
-  if (s_c - 1 >= 0) preds.push_back(&(map_.at(PathNode::getIdx(s_r, s_c - 1))));
+  if (s_c - 1 >= 0 && !map_.at(PathNode::getIdx(s_r, s_c - 1)).cell.occupied) {
+    preds.push_back(&(map_.at(PathNode::getIdx(s_r, s_c - 1))));
+  }
   
   // Check right side
-  if (s_c + 1 < GRID_WIDTH) preds.push_back(&(map_.at(PathNode::getIdx(s_r, s_c + 1))));
+  if (s_c + 1 < GRID_WIDTH && !map_.at(PathNode::getIdx(s_r, s_c + 1)).cell.occupied) {
+    preds.push_back(&(map_.at(PathNode::getIdx(s_r, s_c + 1))));
+  }
 }
 
 void DStarLite::getSuccs(PathNode& predecessor, vector<PathNode*>& succs) {
   int s_r = predecessor.cell.r;
   int s_c = predecessor.cell.c;
-  // Check above
-  if (s_r - 1 >= 0) succs.push_back(&(map_.at(PathNode::getIdx(s_r - 1, s_c))));
+  
+  //// Check above
+  //if (s_r - 1 >= 0) succs.push_back(&(map_.at(PathNode::getIdx(s_r - 1, s_c))));
+  //
+  //// Check below
+  //if (s_r + 1 < GRID_HEIGHT) succs.push_back(&(map_.at(PathNode::getIdx(s_r + 1, s_c))));
+  //
+  //// Check left side
+  //if (s_c - 1 >= 0) succs.push_back(&(map_.at(PathNode::getIdx(s_r, s_c - 1))));
+  //
+  //// Check right side
+  //if (s_c + 1 < GRID_WIDTH) succs.push_back(&(map_.at(PathNode::getIdx(s_r, s_c + 1))));
+
+  if (s_r - 1 >= 0 && !map_.at(PathNode::getIdx(s_r - 1, s_c)).cell.occupied) {
+    succs.push_back(&(map_.at(PathNode::getIdx(s_r - 1, s_c))));
+  }
   
   // Check below
-  if (s_r + 1 < GRID_HEIGHT) succs.push_back(&(map_.at(PathNode::getIdx(s_r + 1, s_c))));
+  if (s_r + 1 < GRID_HEIGHT && !map_.at(PathNode::getIdx(s_r + 1, s_c)).cell.occupied) {
+    succs.push_back(&(map_.at(PathNode::getIdx(s_r + 1, s_c))));
+  }
   
   // Check left side
-  if (s_c - 1 >= 0) succs.push_back(&(map_.at(PathNode::getIdx(s_r, s_c - 1))));
+  if (s_c - 1 >= 0 && !map_.at(PathNode::getIdx(s_r, s_c - 1)).cell.occupied) {
+    succs.push_back(&(map_.at(PathNode::getIdx(s_r, s_c - 1))));
+  }
   
   // Check right side
-  if (s_c + 1 < GRID_WIDTH) succs.push_back(&(map_.at(PathNode::getIdx(s_r, s_c + 1))));
+  if (s_c + 1 < GRID_WIDTH && !map_.at(PathNode::getIdx(s_r, s_c + 1)).cell.occupied) {
+    succs.push_back(&(map_.at(PathNode::getIdx(s_r, s_c + 1))));
+  }
 }
+
 
 
 int DStarLite::getTransitionCost(PathNode& s, PathNode& p) {
@@ -199,10 +264,11 @@ int DStarLite::getTransitionCost(PathNode& s, PathNode& p) {
   if (s.cell.r == p.cell.r && s.cell.c == p.cell.c) return 0;
 
   // can add more costs for different types of movement here (e.g., based on turning?)
-  return 1;
+  return 5;
 }
 
 void DStarLite::generatePath() {
+  // make sure that no cell on the path is occupied
 }
 
 // Maybe do these steps in generateGrid
@@ -216,7 +282,11 @@ bool DStarLite::buildPathGrid() {
   std::vector<GridCell>::iterator gridIt;
   
   for (gridIt = wf_->cells.begin(); gridIt != wf_->cells.end(); gridIt++) {
-    //PathNode cell = PathNode(gridIt->r, gridIt->c, gridIt->cost, gridIt->occupied);
+    if (gridIt->occupied) {
+      std::cout << "Occupied cost = " << gridIt->cost << std::endl;
+      //gridIt->cost = INT_MAX;
+      //std::cout << "New cost = " << (*(gridIt)).cost << std::endl;
+    }
     PathNode cell = PathNode(*(gridIt));
     map_.push_back(cell);
   }
@@ -231,4 +301,114 @@ bool DStarLite::buildPathGrid() {
 
 int DStarLite::safeAdd(int q1, int q2) {
   return ((q1 > INT_MAX - q2) ? INT_MAX : q1 + q2);
+}
+
+void DStarLite::printGrid() {
+  //int grid_cols = num_cols_;
+  //int grid_rows = num_rows_;
+  int index;
+
+  // Pretty colors to distinguish walls from free space
+  std::string color_red = "\033[0;31m";
+  std::string default_col = "\033[0m";
+  GridCell* cell = nullptr;
+
+  //std::cout << "---------------------g & h-Values-----------------------------------" << std::endl;
+  std::cout << "     ";
+  for (int col = 0; col < GRID_WIDTH; ++col) {
+    if (col < 10) {
+      std::cout << "  " << col << "  ";
+    } else {
+      std::cout << " " << col << "  ";
+    }
+  }
+  std::cout << std::endl;
+  for (int row = 0; row < GRID_HEIGHT; ++row) {
+    std::cout << "  g |";
+    for (int col = 0; col < GRID_WIDTH; ++col) {
+      index = row * GRID_WIDTH + col; // Finding the appropriate cell in vectorized form
+      //if (waveCells[index].getValue() == WAVE_OBSTRUCTION) // If the cell is an obstacle
+      if (map_.at(index).cell.occupied) {
+        std::cout<<color_red<< "|  |" <<default_col<<"|";
+      } else {
+        //if(waveCells[index].getValue()<10 && waveCells[index].getValue()>=0)
+        if (map_.at(index).g < 10 && map_.at(index).g >= 0) {
+          std::cout << "|  "<< map_.at(index).g <<"|"; 
+        } else if (map_.at(index).g == INT_MAX) {
+          std::cout << "|"<< "inf" <<"|";
+        } else {
+          std::cout << "| "<< map_.at(index).g <<"|";
+        }
+      }
+    }
+    std::cout << std::endl;
+
+    std::cout << "rhs |";
+    for (int col = 0; col < GRID_WIDTH; ++col) {
+      index = row * GRID_WIDTH + col; // Finding the appropriate cell in vectorized form
+      //if (waveCells[index].getValue() == WAVE_OBSTRUCTION) // If the cell is an obstacle
+      if (map_.at(index).cell.occupied) {
+        std::cout<<color_red<< "|  |" <<default_col<<"|";
+      } else {
+        //if(waveCells[index].getValue()<10 && waveCells[index].getValue()>=0)
+        if (map_.at(index).rhs < 10 && map_.at(index).rhs >= 0) {
+          std::cout << "|  "<< map_.at(index).rhs <<"|"; 
+        } else if (map_.at(index).rhs == INT_MAX) {
+          std::cout << "|"<< "inf" <<"|";
+        } else {
+          std::cout << "| "<< map_.at(index).rhs <<"|";
+        }
+      }
+    }
+    std::cout << "  " << row << std::endl;
+
+    std::cout << "  h |";
+    for (int col = 0; col < GRID_WIDTH; ++col) {
+      index = row * GRID_WIDTH + col; // Finding the appropriate cell in vectorized form
+      //if (waveCells[index].getValue() == WAVE_OBSTRUCTION) // If the cell is an obstacle
+      if (map_.at(index).cell.occupied) {
+        std::cout<<color_red<< "|  |" <<default_col<<"|";
+      } else {
+         //if(waveCells[index].getValue()<10 && waveCells[index].getValue()>=0)
+        if (map_.at(index).cell.cost < 10 && map_.at(index).cell.cost >= 0) {
+          std::cout << "|  "<< map_.at(index).cell.cost <<"|"; 
+        } else if (map_.at(index).cell.cost == INT_MAX) {
+          std::cout << "|"<< "inf" <<"|";
+        } else {
+          std::cout << "| "<< map_.at(index).cell.cost <<"|";
+        }
+      }
+    }
+    std::cout << std::endl;
+
+    std::cout << "    |";
+    for (int col = 0; col < GRID_WIDTH; ++col) {
+      index = row * GRID_WIDTH + col; // Finding the appropriate cell in vectorized form
+      //if (waveCells[index].getValue() == WAVE_OBSTRUCTION) // If the cell is an obstacle
+      std::cout << " --- ";
+      //if (map_.at(index).cell.occupied) {
+      //  std::cout<<color_red<< "|  |" <<default_col<<"|";
+      //} else {
+      //   //if(waveCells[index].getValue()<10 && waveCells[index].getValue()>=0)
+      //  if (map_.at(index).cell.cost < 10 && map_.at(index).cell.cost >= 0) {
+      //    std::cout << "|  "<< map_.at(index).cell.cost <<"|"; 
+      //  } else if (map_.at(index).cell.cost == INT_MAX) {
+      //    std::cout << "|"<< "inf" <<"|";
+      //  } else {
+      //    std::cout << "| "<< map_.at(index).cell.cost <<"|";
+      //  }
+      //}
+    }
+    std::cout << std::endl;
+  }
+  std::cout << "     ";
+  for (int col = 0; col < GRID_WIDTH; ++col) {
+    if (col < 10) {
+      std::cout << "  " << col << "  ";
+    } else {
+      std::cout << " " << col << "  ";
+    }
+  }
+  std::cout << std::endl;
+  //std::cout << "----------------------------------------------------------------" << std::endl;
 }

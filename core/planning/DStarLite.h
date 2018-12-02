@@ -52,6 +52,7 @@ class DStarLite {
     int getTransitionCost(PathNode& s, PathNode& p);
     void generatePath();
     bool buildPathGrid();
+    void printGrid();
 };
 
 #endif

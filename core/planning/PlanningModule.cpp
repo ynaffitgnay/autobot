@@ -51,6 +51,8 @@ void PlanningModule::initSpecificModule() {
   WP_->getCosts(initial_cost_map, wfStartPose);
   DSL_->init(initial_cost_map);
 
+  std::cout << "Initialized D* lite" << std::endl;
+
   // TODO: re-initialize features in planning block (maybe shift planning stuff to world_object)?
 }
 
