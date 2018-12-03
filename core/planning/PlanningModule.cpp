@@ -77,5 +77,25 @@ void PlanningModule::updateCell() {
   // if we haven't changed cells, return
   if (curr_r == prevLoc_r && curr_c == prevLoc_c) return;
 
+  int desiredCellIdx = cache_.planning->path[cache_.planning->pathIdx];
+  int currIdx = getCellIdx(curr_r, curr_c);
+
   // get information about the new cell
+  if (currIdx != desiredCellIdx) { //cache_.planning->path[cache_.planning->pathIdx]) {
+    std::cout << "I'm in the wrong gridCell!!" << std::endl;
+    std::cout << "I should be in " << desiredCellIdx << ", but I'm in " << currIdx << std::endl;
+    std::cout << "I guess I'm going to keep trying to go to my original destination" << std::endl;
+    return;
+  }
+
+  // Remove a node on the path
+  cache_.planning->nodesLeft--;
+  
+  // Increment the place along the path
+  cache_.planning->pathIdx++;
+
+  // TODO:
+  
+
+  //if (currIdx == 0) 
 }
