@@ -15,9 +15,10 @@ DECLARE_INTERNAL_SCHEMA(struct GridCell {
   SCHEMA_FIELD(Pose2D center);
   SCHEMA_FIELD(int cost);
   SCHEMA_FIELD(bool occupied);
+  SCHEMA_FIELD(bool visited);
   SCHEMA_FIELD(int order_index);
 
-  GridCell() : r(-1), c(-1), cost(0), occupied(false), order_index(-1) {};
+  GridCell() : r(-1), c(-1), cost(0), occupied(false), order_index(-1), visited(false) {};
 
   GridCell(int row, int col) : r(row), c(col), cost(0), occupied(false) {
   	int centerX = CELL_WIDTH * col + CELL_WIDTH / 2;  // Need to translate

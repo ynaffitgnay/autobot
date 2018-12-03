@@ -21,6 +21,7 @@ DECLARE_INTERNAL_SCHEMA(class PathNode {
     bool operator<=(const PathNode& other) const;
     bool operator>(const PathNode& other) const;
     bool operator>=(const PathNode& other) const;
+    const int getValue();
     
     static int getIdx(int row, int col);
     static bool getGridCoordinate(int index, int &row, int &col);
@@ -39,7 +40,7 @@ DECLARE_INTERNAL_SCHEMA(class PathNode {
     SCHEMA_FIELD(int numVisits);    // How many times has this node been visited?
     SCHEMA_FIELD(bool overlapped);  // does this overlap with the CCP?
     SCHEMA_FIELD(bool initialized); // Has this cell been initialized? TODO: remove?
-    //SCHEMA_FIELD(bool occupied);   // Is this a free space?
+    SCHEMA_FIELD(bool planned);   // Is this a free space?
 });
 
 #endif

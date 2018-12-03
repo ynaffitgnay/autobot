@@ -49,9 +49,11 @@ class DStarLite {
     void computeShortestPath(PathNode& curr);
     void getPreds(PathNode& successor, std::vector<PathNode*>& preds);
     void getSuccs(PathNode& predecessor, std::vector<PathNode*>& succs);
+    void getUnplannedNeighbors(PathNode& curr, vector<PathNode*>& neighbors);
     int getTransitionCost(PathNode& s, PathNode& p);
     void generatePath();
     bool buildPathGrid();
+    int hop(int index);
     void printGrid();
 };
 

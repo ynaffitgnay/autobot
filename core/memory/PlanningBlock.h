@@ -2,7 +2,7 @@
 #define PLANNING_BLOCK_H
 #pragma once
 
-//#include <common/PathNode.h>
+#include <common/PathNode.h>
 #include <memory/MemoryBlock.h>
 #include <math/Geometry.h>
 #include <math/Pose2D.h>
@@ -19,12 +19,16 @@ DECLARE_INTERNAL_SCHEMA(struct PlanningBlock : public MemoryBlock {
     SCHEMA_FIELD(bool coverageStarted);
     SCHEMA_FIELD(bool changedCost);
     SCHEMA_FIELD(int pathIdx);
+    SCHEMA_FIELD(int nodesLeft);
 
     mutable SCHEMA_FIELD(std::array<GridCell, GRID_SIZE> grid_data);
     std::vector<GridCell> grid;
 
-    mutable SCHEMA_FIELD(std::array<GridCell, PATH_SIZE> path_data);
-    std::vector<GridCell> path;
+    //mutable SCHEMA_FIELD(std::array<GridCell, PATH_SIZE> path_data);
+    //std::vector<GridCell> path;
+    
+    mutable SCHEMA_FIELD(std::array<int, PATH_SIZE> path_data);
+    std::vector<int> path;
 
   SCHEMA_PRE_SERIALIZATION({
       std::copy(
