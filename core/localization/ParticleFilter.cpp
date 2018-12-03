@@ -19,8 +19,8 @@ void ParticleFilter::init(Point2D loc, float orientation) {
   particles().resize(M_);
   auto frame = cache_.frame_info->frame_id;
   for(auto& p : particles()) {
-    p.x = Random::inst().sampleU(1200.0,2000.0);
-    p.y = Random::inst().sampleU(-700.0,700.0);
+    p.x = Random::inst().sampleU(-2000.0,2000.0);
+    p.y = Random::inst().sampleU(-1200.0,1200.0);
     p.t = Random::inst().sampleU(-M_PI, M_PI);  
     p.w = 1.0/M_;
   }
@@ -220,8 +220,8 @@ std::vector<Particle> ParticleFilter::resampleStep(){
           particles().at(i).t = stdev_th*Random::inst().sampleN(0.0,1.0) + mu_th;
         } else{
           ++rand_injected;
-          particles().at(i).x = Random::inst().sampleU(1200.0,2000.0);
-          particles().at(i).y = Random::inst().sampleU(-700.0,700.0);
+          particles().at(i).x = Random::inst().sampleU(-2000.0,2000.0);
+          particles().at(i).y = Random::inst().sampleU(-1200.0,1200.0);
           particles().at(i).t = Random::inst().sampleU(-M_PI, M_PI);
         }
       }
@@ -234,8 +234,8 @@ std::vector<Particle> ParticleFilter::resampleStep(){
     resampled_particles.clear();
     resampled_particles.resize(M_);
     for(auto& p : resampled_particles) {
-      p.x = Random::inst().sampleU(1200.0,2000.0);
-      p.y = Random::inst().sampleU(-700.0,700.0);
+      p.x = Random::inst().sampleU(-2000.0,2000.0);
+      p.y = Random::inst().sampleU(-1200.0,1200.0);
       p.t = Random::inst().sampleU(-M_PI, M_PI);  
       p.w = 1.0/M_;
     }
