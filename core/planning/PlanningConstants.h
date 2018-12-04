@@ -5,8 +5,8 @@
 #define FIELD_WIDTH  (3000)
 #define CELL_HEIGHT  (300)
 #define CELL_WIDTH   (300)
-#define GRID_HEIGHT  (10) //(13)  // ~2480 mm / 200 mm
-#define GRID_WIDTH   (8) //(15)  // ~2980 mm / 200 mm
+#define GRID_HEIGHT  (8) //(13)  // ~2480 mm / 200 mm
+#define GRID_WIDTH   (10) //(15)  // ~2980 mm / 200 mm
 #define GRID_SIZE    (GRID_WIDTH * GRID_HEIGHT)
 #define PATH_SIZE    (4 * GRID_SIZE)
 
