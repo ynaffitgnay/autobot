@@ -55,6 +55,7 @@ class DStarLite {
     bool buildPathGrid();
     int hop(int index);
     void printGrid();
+    void printPath();
 };
 
 #endif

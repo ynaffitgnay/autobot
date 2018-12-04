@@ -41,6 +41,7 @@ DECLARE_INTERNAL_SCHEMA(class PathNode {
     SCHEMA_FIELD(bool overlapped);  // does this overlap with the CCP?
     SCHEMA_FIELD(bool initialized); // Has this cell been initialized? TODO: remove?
     SCHEMA_FIELD(bool planned);   // Is this a free space?
+    SCHEMA_FIELD(int pathorder);  
 });
 
 #endif

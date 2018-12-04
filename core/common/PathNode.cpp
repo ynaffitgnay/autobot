@@ -12,6 +12,7 @@ PathNode::PathNode(GridCell& cell) : cell(cell) {
   overlapped = false;
   initialized = false;
   planned = false;
+  pathorder = -1;
 }
 
 

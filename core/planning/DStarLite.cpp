@@ -317,7 +317,8 @@ void DStarLite::generatePath() {
   
   // Plan order of poses
   int currCellIdx = S_->idx;                    // index of the current cell being added to the plan
-  S_->visited = true;
+  S_->planned = true;
+  S_->pathorder = pathIdx;
   path.at(pathIdx++) = currCellIdx;   // Add the start pose as the first pose in the plan
   
   //debugPoses.push_back(start_index_);          // Make the start pose the first pose in debug_poses
@@ -350,6 +351,8 @@ void DStarLite::generatePath() {
         currCellIdx = unplanned.at(maxIndex)->idx;//getIndex(unplanned[maxIndex]->getPosition()); // set the index to the neighbor we will move to
         // printf("Unvisted index: %d\n", index);
         //addPose(lastIndex, currCellIdx, plan, orig_cells);            // add the new cell to the plan
+        map_.at(currCellIdx).pathorder = pathIdx;
+        map_.at(currCellIdx).planned = true;
         path.at(pathIdx++) = currCellIdx;
         //debugPoses.push_back(currCellIdx);
         numPlanned++;
@@ -359,23 +362,31 @@ void DStarLite::generatePath() {
         //printf("Stuck: no neighbors are unplanned.\n");
         stuck = true;
       }
-    }
-    
-    if(numPlanned < numPoses) // if we exited the previous loop because we were stuck, not because we were done planning
-    {
-      // When we get stuck, find the closest unplanned cell and go there
-      int lastIndex = currCellIdx;
-      currCellIdx = hop(currCellIdx); // hop to the closed unplanned cell
-      if(currCellIdx == lastIndex) // if hop was unsuccessful, we should must not have any more cells to plan
-        numPlanned = numPoses;
-      //addPose(lastIndex, currCellIdx, plan, orig_cells); // add new cell to the plan
-      path.at(pathIdx++) = currCellIdx;
-      //debugPoses.push_back(currCellIdx);
-      numPlanned++;
+      //}
+
+      if (stuck)
+      //if(numPlanned < numPoses) // if we exited the previous loop because we were stuck, not because we were done planning
+      {
+        // When we get stuck, find the closest unplanned cell and go there
+        int lastIndex = currCellIdx;
+        currCellIdx = hop(currCellIdx); // hop to the closed unplanned cell
+        if(currCellIdx == lastIndex) {// if hop was unsuccessful, we should must not have any more cells to plan
+          numPlanned = numPoses;
+          std::cout << "I guess we're stuck forever\n";
+          break;
+        }
+        //addPose(lastIndex, currCellIdx, plan, orig_cells); // add new cell to the plan
+        map_.at(currCellIdx).pathorder = pathIdx;
+        map_.at(currCellIdx).planned = true;
+        path.at(pathIdx++) = currCellIdx;
+        //debugPoses.push_back(currCellIdx);
+        numPlanned++;
+      }
     }
   }
   //addPose(currCellIdx, end_index_, plan, orig_cells); // add end cell to the plan
   //debugPoses.push_back(end_index_);
+  printPath();
   
   printf("Path size: %d\n", numPlanned);
 
@@ -431,49 +442,55 @@ bool DStarLite::buildPathGrid() {
 
 int DStarLite::hop(int index)
 {
-//  // Find the closest unvisited cell
-//  bool found = false;        // true if we have found the closest unvisited cell
-//  std::vector<int> checked;  // vector of indices of cells that we have already checked to be unvisited
-//  checked.clear();
-//  checked.push_back(index);  // put the current cell on the list since it should hop back to itself
-//  std::vector<PathNode*> neighbors; // vector of neighbors propogating outward from original cell
-//  neighbors.clear();
-//  neighbors.push_back(&map_.at(index)); // we start propogation from the cell we got stuck at
-//  while(!found && neighbors.size() != 0) // keep going until we find a valid hop, or we have checked all valid cells and therefore neighbors is empty
-//  {
-//    int numOld = neighbors.size(); // number of neighbors in the previous iteration
-//    int i = 0; // iteration of old neighbors
-//    while(i < numOld && !found) // iterate all old neighbors unless we find a valid cell to hop to
-//    {
-//      std::vector<PathNode*> newNeighbors = getSuccs(neighbors.at(i)); // neighbors of our old neighbors (this is how we propogate outward)
-//      int j = 0; // iteration of new neighbors
-//      while(j < newNeighbors.size() && !found) // check all new neighbors unless one of them is found to be a valid hop
-//      {
-//      if(std::find(checked.begin(), checked.end(), getIndex(newNeighbors[j]->getPosition())) == checked.end()) // if the new neighbor has not already been checked
-//      {
-//        int r, c;
-//        getCoordinate(getIndex(newNeighbors[j]->getPosition()), r, c);
-//        neighbors.push_back(newNeighbors[j]); // move the new neighbor to the old neighbors list so that in the next iteration we check its neighbors
-//        checked.push_back(getIndex(newNeighbors[j]->getPosition())); // add this neighbor to the already checked list
-//        if(!newNeighbors[j]->isVisited())  // if it has not been visited, we found a valid hop
-//        {
-//          index = getIndex(newNeighbors[j]->getPosition());
-//          found = true;
-//        }
-//      }
-//      j++;
-//          }
-//          i++;
-//        }
-//        if(numOld == 1) // delete the neighbors who ran through the algorithm in the last iteration so we don't keep rechecking neighbors
-//          neighbors.erase(neighbors.begin());
-//        else
-//          neighbors.erase(neighbors.begin(), neighbors.begin()+numOld);
-//      }
-//      if(!found && neighbors.size()==0) // the algorithm failed (this means we have already planned all poses and didn't need to hop in the first place)
-//      {
-//        printf("We ran out of neighbors. Hop was called when all poses had already been planned\n");
-//      }
+  // Find the closest unvisited cell
+  bool found = false;        // true if we have found the closest unvisited cell
+  std::vector<int> checked;  // vector of indices of cells that we have already checked to be unvisited
+  checked.clear();
+  checked.push_back(index);  // put the current cell on the list since it should hop back to itself
+  std::vector<PathNode*> neighbors; // vector of neighbors propogating outward from original cell
+  neighbors.clear();
+  neighbors.push_back(&map_.at(index)); // we start propogation from the cell we got stuck at
+  while(!found && neighbors.size() != 0) // keep going until we find a valid hop, or we have checked all valid cells and therefore neighbors is empty
+  {
+    int numOld = neighbors.size(); // number of neighbors in the previous iteration
+    int i = 0; // iteration of old neighbors
+    while(i < numOld && !found) // iterate all old neighbors unless we find a valid cell to hop to
+    {
+      std::vector<PathNode*> newNeighbors;
+      getSuccs(*neighbors.at(i), newNeighbors); // neighbors of our old neighbors (this is how we propogate outward)
+      int j = 0; // iteration of new neighbors
+      while(j < newNeighbors.size() && !found) // check all new neighbors unless one of them is found to be a valid hop
+      {
+        if(std::find(checked.begin(), checked.end(), newNeighbors.at(j)->idx) == checked.end()) // if the new neighbor has not already been checked
+        {
+          int r, c;
+          //getCoordinate(getIndex(newNeighbors[j]->getPosition()), r, c);
+          neighbors.push_back(newNeighbors.at(j)); // move the new neighbor to the old neighbors list so that in the next iteration we check its neighbors
+          //checked.push_back(getIndex(newNeighbors[j]->getPosition())); // add this neighbor to the already checked list
+          checked.push_back(newNeighbors.at(j)->idx);
+          if(!newNeighbors.at(j)->planned)//->isVisited())  // if it has not been visited, we found a valid hop
+          {
+            index = newNeighbors.at(j)->idx;//getIndex(newNeighbors[j]->getPosition());
+            found = true;
+          }
+        }
+        j++;
+      }
+      i++;
+    }
+    
+    if(numOld == 1) { // delete the neighbors who ran through the algorithm in the last iteration so we don't keep rechecking neighbors
+      neighbors.erase(neighbors.begin());
+    } else {
+      neighbors.erase(neighbors.begin(), neighbors.begin() + numOld);
+    }
+  }
+  
+  if(!found && neighbors.size()==0) // the algorithm failed (this means we have already planned all poses and didn't need to hop in the first place)
+  {
+    printf("We ran out of neighbors. Hop was called when all poses had already been planned\n");
+  }
+    
   return index;
 }
 
@@ -591,6 +608,56 @@ void DStarLite::printGrid() {
       std::cout << " --- ";
     }
     std::cout << std::endl;
+  }
+  std::cout << "     ";
+  for (int col = 0; col < GRID_WIDTH; ++col) {
+    if (col < 10) {
+      std::cout << "  " << col << "  ";
+    } else {
+      std::cout << " " << col << "  ";
+    }
+  }
+  std::cout << std::endl;
+}
+
+
+void DStarLite::printPath() {
+  int index;
+
+  // Colors to distinguish walls from free space
+  std::string color_red = "\033[0;31m";
+  std::string default_col = "\033[0m";
+  GridCell* cell = nullptr;
+
+  std::cout << "     ";
+  for (int col = 0; col < GRID_WIDTH; ++col) {
+    if (col < 10) {
+      std::cout << "  " << col << "  ";
+    } else {
+      std::cout << " " << col << "  ";
+    }
+  }
+  std::cout << std::endl;
+  for (int row = 0; row < GRID_HEIGHT; ++row) {
+    std::cout << "    |";
+    for (int col = 0; col < GRID_WIDTH; ++col) {
+      index = row * GRID_WIDTH + col;
+      if (map_.at(index).cell.occupied) {
+        std::cout<<color_red<< "|  |" <<default_col<<"|";
+      } else {
+        if (map_.at(index).pathorder < 10 && map_.at(index).pathorder >= 0) {
+          std::cout << "|  "<< map_.at(index).pathorder <<"|";
+        } else if (map_.at(index).pathorder == INT_MAX) {  
+          std::cout << "|"<< "inf" <<"|";
+        } else if (map_.at(index).pathorder > 99) {
+          std::cout << "|"<< map_.at(index).pathorder <<"|"; 
+        } else {
+          std::cout << "| "<< map_.at(index).pathorder <<"|";
+        }
+      }
+    }
+    std::cout << std::endl;
+
   }
   std::cout << "     ";
   for (int col = 0; col < GRID_WIDTH; ++col) {

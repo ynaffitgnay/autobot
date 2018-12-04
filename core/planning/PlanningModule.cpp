@@ -88,6 +88,9 @@ void PlanningModule::updateCell() {
     return;
   }
 
+  //cache_.planning->grid.at(cache_.planning->path.at(cache_.planning->pathIdx)).visited = true;
+  cache_.planning->grid.at(currIdx).visited = true;
+
   // Remove a node on the path
   cache_.planning->nodesLeft--;
   
