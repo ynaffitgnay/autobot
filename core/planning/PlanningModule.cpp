@@ -82,9 +82,9 @@ void PlanningModule::updateCell() {
 
   // get information about the new cell
   if (currIdx != desiredCellIdx) { //cache_.planning->path[cache_.planning->pathIdx]) {
-    std::cout << "I'm in the wrong gridCell!!" << std::endl;
+    //std::cout << "I'm in the wrong gridCell!!" << std::endl;
     std::cout << "I should be in " << desiredCellIdx << ", but I'm in " << currIdx << std::endl;
-    std::cout << "I guess I'm going to keep trying to go to my original destination" << std::endl;
+    //std::cout << "I guess I'm going to keep trying to go to my original destination" << std::endl;
     return;
   }
 
