@@ -53,12 +53,18 @@ void PlanningModule::initSpecificModule() {
 
   std::cout << "Initialized D* lite" << std::endl;
 
-  for (int i = 0; i < PATH_SIZE; ++i) {
+  for (int i = 0; i < GRID_SIZE; ++i) {
     
     std::cout << cache_.planning->path.at(i) << " ";
     if (i % 10 == 0)
       std::cout << std::endl;
   }
+  std::cout << std::endl;
+
+  int desiredCellIdx = cache_.planning->path[cache_.planning->pathIdx];
+
+  std::cout << "pathIdx: " << cache_.planning->pathIdx << ". I should be in idx " << desiredCellIdx << "  (" << getRowFromIdx(desiredCellIdx)  <<
+      ", " << getColFromIdx(desiredCellIdx) << ")." << std::endl;
 
   // TODO: re-initialize features in planning block (maybe shift planning stuff to world_object)?
 }
@@ -82,7 +88,8 @@ void PlanningModule::updateCell() {
   int curr_c = getGridCol(robot.loc.x);
 
   // if we haven't changed cells, return
-  if (curr_r == prevLoc_r && curr_c == prevLoc_c) return;
+  // THIS CAUSES PROBLEMS FROM FIRST ONE!
+  //if (curr_r == prevLoc_r && curr_c == prevLoc_c) return;
 
   int desiredCellIdx = cache_.planning->path[cache_.planning->pathIdx];
   int currIdx = getCellIdx(curr_r, curr_c);
@@ -90,8 +97,8 @@ void PlanningModule::updateCell() {
   // get information about the new cell
   if (currIdx != desiredCellIdx) { //cache_.planning->path[cache_.planning->pathIdx]) {
     //std::cout << "I'm in the wrong gridCell!!" << std::endl;
-    std::cout << "I should be in idx " << desiredCellIdx << "  (" << getGridRow(desiredCellIdx)  <<
-      ", " << getGridCol(desiredCellIdx) << "), but I'm in " << currIdx << " (" <<
+    std::cout << "I should be in idx " << desiredCellIdx << "  (" << getRowFromIdx(desiredCellIdx)  <<
+      ", " << getColFromIdx(desiredCellIdx) << "), but I'm in " << currIdx << " (" <<
       curr_r << ", " << curr_c << ")." << std::endl;
 
 
@@ -101,6 +108,7 @@ void PlanningModule::updateCell() {
       if (i % 10 == 0)
         std::cout << std::endl;
     }
+    std::cout << std::endl;
     
     //std::cout << "I guess I'm going to keep trying to go to my original destination" << std::endl;
     return;
