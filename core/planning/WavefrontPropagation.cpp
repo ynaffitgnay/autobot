@@ -56,8 +56,8 @@ bool WavefrontPropagation::getCosts(Grid& map, Pose2D& startPose) {
   	printf("Success!\n");
     for(int i = 0; i<waveCells.size(); i++) {
       map.cells[i].cost = waveCells[i].getValue();
-      float globX = map.cells[i].center.translation.x;  // TODO: Needs a conversion from local x,y to global x,y not r,c
-      float globY = map.cells[i].center.translation.y;
+      float globX = map.cells[i].center.translation.x-1500;  // TODO: Needs a conversion from local x,y to global x,y not r,c
+      float globY = -map.cells[i].center.translation.y +1250;
       float globTh = map.cells[i].center.rotation;
       Pose2D globCenter(globTh,globX,globY);
       map.cells[i].center = globCenter;
