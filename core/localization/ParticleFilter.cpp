@@ -211,7 +211,7 @@ std::vector<Particle> ParticleFilter::resampleStep(){
       }
     
       double rand_prob = Random::inst().sampleU(0.0, 1.0);
-      if (rand_prob < resample_prob && rand_injected < (0.05 * (double)M_)) {
+      if (rand_prob < resample_prob && rand_injected < (0.0 * (double)M_)) {
         if (area_injected < (0.20 * (double)M_)) {
           ++rand_injected;
           ++area_injected;
