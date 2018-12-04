@@ -56,19 +56,25 @@ void DStarLite::init(Grid& wavefront) {
       continue;
     }
     
-    if (mapIt->rhs != INT_MAX && mapIt->rhs == mapIt->g) {
-      //std::cout << "Node cost for " << calcNode++ <<" (" << mapIt->cell.r << ", " << mapIt->cell.c << ") has already been calculated. It's " << mapIt->g << std::endl;
-      continue;
-    }
+    //if (mapIt->rhs != INT_MAX && mapIt->rhs == mapIt->g) {
+    //  //std::cout << "Node cost for " << calcNode++ <<" (" << mapIt->cell.r << ", " << mapIt->cell.c << ") has already been calculated. It's " << mapIt->g << std::endl;
+    //  continue;
+    //}
     
     //std::cout << "Processing node (" << mapIt->cell.r << ", " << mapIt->cell.c << "), node " << calcNode++ << " / " << map_.size() << std::endl;
+    
     computeShortestPath(*mapIt);
     // Print map after each iteration??
     //printGrid();
-    if (mapIt->g < mapIt->cell.cost) {
-      std::cout << "HEURISTICS FOR CELL AT (" << mapIt->cell.r << ", " << mapIt->cell.c << ") INCONSISTENT\n\n\n\n";
-      return;
+    // TODO: fix. check the edge
+    if (mapIt->g != mapIt->rhs) {
+      mapIt->g = mapIt->rhs;
     }
+    
+    //if (mapIt->g < mapIt->cell.cost) {
+    //  std::cout << "HEURISTICS FOR CELL AT (" << mapIt->cell.r << ", " << mapIt->cell.c << ") INCONSISTENT\n\n\n\n";
+    //  return;
+    //}
     //std::cout << "\n\n";
   }
 
@@ -371,10 +377,10 @@ void DStarLite::generatePath() {
   //addPose(currCellIdx, end_index_, plan, orig_cells); // add end cell to the plan
   //debugPoses.push_back(end_index_);
   
-  printf("Path size: %d\n", path.size());
+  printf("Path size: %d\n", numPlanned);
 
   // TODO: update this for replanning
-  cache_.planning->nodesLeft = path.size();
+  cache_.planning->nodesLeft = numPlanned;
 
   //std::vector<GridCell*> ordered_plan;
   //for (int i = 0; i < orig_cells.size(); i++){
