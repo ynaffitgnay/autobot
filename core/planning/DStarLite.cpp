@@ -374,7 +374,7 @@ void DStarLite::generatePath() {
   printf("Path size: %d\n", path.size());
 
   // TODO: update this for replanning
-  cache_->planning.nodesLeft = path.size();
+  cache_.planning->nodesLeft = path.size();
 
   //std::vector<GridCell*> ordered_plan;
   //for (int i = 0; i < orig_cells.size(); i++){
