@@ -392,6 +392,7 @@ void DStarLite::generatePath() {
 
   // TODO: update this for replanning
   cache_.planning->nodesLeft = numPlanned;
+  cache_.planning->nodesInPath = numPlanned;
 
   //std::vector<GridCell*> ordered_plan;
   //for (int i = 0; i < orig_cells.size(); i++){

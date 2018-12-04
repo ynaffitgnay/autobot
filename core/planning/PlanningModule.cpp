@@ -53,6 +53,13 @@ void PlanningModule::initSpecificModule() {
 
   std::cout << "Initialized D* lite" << std::endl;
 
+  for (int i = 0; i < PATH_SIZE; ++i) {
+    
+    std::cout << cache_.planning->path.at(i) << " ";
+    if (i % 10 == 0)
+      std::cout << std::endl;
+  }
+
   // TODO: re-initialize features in planning block (maybe shift planning stuff to world_object)?
 }
 
@@ -83,9 +90,18 @@ void PlanningModule::updateCell() {
   // get information about the new cell
   if (currIdx != desiredCellIdx) { //cache_.planning->path[cache_.planning->pathIdx]) {
     //std::cout << "I'm in the wrong gridCell!!" << std::endl;
-    std::cout << "I should be in (" << getGridRow(desiredCellIdx)  <<
-      ", " << getGridCol(desiredCellIdx) << "), but I'm in (" <<
-      getGridRow(currIdx) << ", " << getGridCol(currIdx) << ")." << std::endl;
+    std::cout << "I should be in idx " << desiredCellIdx << "  (" << getGridRow(desiredCellIdx)  <<
+      ", " << getGridCol(desiredCellIdx) << "), but I'm in " << currIdx << " (" <<
+      curr_r << ", " << curr_c << ")." << std::endl;
+
+
+    std::cout << "rest of path: " << std::endl;
+    for (int i = cache_.planning->pathIdx; i < cache_.planning->nodesLeft; ++i) {
+      std::cout << cache_.planning->path.at(i) << " ";
+      if (i % 10 == 0)
+        std::cout << std::endl;
+    }
+    
     //std::cout << "I guess I'm going to keep trying to go to my original destination" << std::endl;
     return;
   }
