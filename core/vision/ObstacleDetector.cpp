@@ -14,6 +14,12 @@ void ObstacleDetector::findObstacles(std::vector<Blob>& blobs) {
   for (int i = 0; i < blobs.size(); i++) {
     if(blobs.at(i).color == c_ORANGE) obstaclesCands.push_back(blobs.at(i));
   }
+  auto& obs1 = vblocks_.world_object->objects_[WO_OBSTACLE_1];
+  auto& obs2 = vblocks_.world_object->objects_[WO_OBSTACLE_2];
+  obs1.width = 600.0;
+  obs1.length = 300.0;
+  obs2.width = 600.0;
+  obs2.length = 300.0;
   obsAssign(obstaclesCands);
 }
 

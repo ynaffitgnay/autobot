@@ -11,6 +11,7 @@
 #include <planning/GridGenerator.h>
 #include <planning/structures/Grid.h>
 #include <common/GridCell.h>
+
 class VisionCore;
 
 class PlanningModule: public Module {
