@@ -49,103 +49,108 @@ ENUM(WorldObjectType,   // Types of objects  // 0
 
   WO_OWN_LEFT_GOALPOST,  // 24
   WO_OPP_LEFT_GOALPOST,  // 25
+  
+  WO_OBSTACLE_1, // 26
+  WO_OBSTACLE_2, // 27
+  WO_OBSTACLE_UNKNOWN, // 28
 
-  WO_OWN_RIGHT_GOALPOST,  // 26
-  WO_OPP_RIGHT_GOALPOST,  // 27  // AND END HERE
+  WO_OWN_RIGHT_GOALPOST,  // 29
+  WO_OPP_RIGHT_GOALPOST,  // 30  // AND END HERE
 
   // Unknown goals and goal posts
-  WO_UNKNOWN_GOAL,  // 28
-  WO_UNKNOWN_LEFT_GOALPOST,  // 29
-  WO_UNKNOWN_RIGHT_GOALPOST,  // 30
-  WO_UNKNOWN_GOALPOST,  // 31
+  WO_UNKNOWN_GOAL,  // 28  --  CHANGED
+  WO_UNKNOWN_LEFT_GOALPOST,  // 29  --  CHANGED
+  WO_UNKNOWN_RIGHT_GOALPOST,  // 30  --  CHANGED
+  WO_UNKNOWN_GOALPOST,  // 31  --  CHANGED
 
   // Field Corners
-  WO_UNKNOWN_L_1,  // 32
-  WO_UNKNOWN_L_2,  // 33
-  WO_UNKNOWN_T_1,  // 34
-  WO_UNKNOWN_T_2,  // 35
+  WO_UNKNOWN_L_1,  // 32  --  CHANGED
+  WO_UNKNOWN_L_2,  // 33  --  CHANGED
+  WO_UNKNOWN_T_1,  // 34  --  CHANGED
+  WO_UNKNOWN_T_2,  // 35  --  CHANGED
 
   // L intersections (yellow to blue, top to bottom)
-  WO_OPP_FIELD_LEFT_L,  // 36
-  WO_OPP_FIELD_RIGHT_L,  // 37
-  WO_OPP_PEN_LEFT_L,  // 38
-  WO_OPP_PEN_RIGHT_L,  // 39
-  WO_OWN_PEN_RIGHT_L,  // 40
-  WO_OWN_PEN_LEFT_L,  // 41
-  WO_OWN_FIELD_RIGHT_L,  // 42
-  WO_OWN_FIELD_LEFT_L,  // 43
+  WO_OPP_FIELD_LEFT_L,  // 36  --  CHANGED
+  WO_OPP_FIELD_RIGHT_L,  // 37  --  CHANGED
+  WO_OPP_PEN_LEFT_L,  // 38  --  CHANGED
+  WO_OPP_PEN_RIGHT_L,  // 39  --  CHANGED
+  WO_OWN_PEN_RIGHT_L,  // 40  --  CHANGED
+  WO_OWN_PEN_LEFT_L,  // 41  --  CHANGED
+  WO_OWN_FIELD_RIGHT_L,  // 42  --  CHANGED
+  WO_OWN_FIELD_LEFT_L,  // 43  --  CHANGED
 
-  WO_OWN_FIELD_EDGE_TOP_L,  // 44
-  WO_OPP_FIELD_EDGE_TOP_L,  // 45
-  WO_OWN_FIELD_EDGE_BOTTOM_L,  // 46
-  WO_OPP_FIELD_EDGE_BOTTOM_L,  // 47
+  WO_OWN_FIELD_EDGE_TOP_L,  // 44  --  CHANGED
+  WO_OPP_FIELD_EDGE_TOP_L,  // 45  --  CHANGED
+  WO_OWN_FIELD_EDGE_BOTTOM_L,  // 46  --  CHANGED
+  WO_OPP_FIELD_EDGE_BOTTOM_L,  // 47  --  CHANGED
 
-  WO_OPP_BACK_RIGHT_GOAL_L,  // 48
-  WO_OPP_BACK_LEFT_GOAL_L,  // 49
+  WO_OPP_BACK_RIGHT_GOAL_L,  // 48  --  CHANGED
+  WO_OPP_BACK_LEFT_GOAL_L,  // 49  --  CHANGED
   
-  WO_OWN_BACK_RIGHT_GOAL_L,  // 50
-  WO_OWN_BACK_LEFT_GOAL_L,  // 51
+  WO_OWN_BACK_RIGHT_GOAL_L,  // 50  --  CHANGED
+  WO_OWN_BACK_LEFT_GOAL_L,  // 51  --  CHANGED
 
   // T intersections (yellow to blue, top to bottom)
-  WO_OPP_PEN_LEFT_T,  // 52
-  WO_OPP_PEN_RIGHT_T,  // 53
-  WO_CENTER_TOP_T,  // 54
-  WO_CENTER_BOTTOM_T,  // 55
-  WO_OWN_PEN_RIGHT_T,  // 56
-  WO_OWN_PEN_LEFT_T,  // 57
+  WO_OPP_PEN_LEFT_T,  // 52  --  CHANGED
+  WO_OPP_PEN_RIGHT_T,  // 53  --  CHANGED
+  WO_CENTER_TOP_T,  // 54  --  CHANGED
+  WO_CENTER_BOTTOM_T,  // 55  --  CHANGED
+  WO_OWN_PEN_RIGHT_T,  // 56  --  CHANGED
+  WO_OWN_PEN_LEFT_T,  // 57  --  CHANGED
 
-  WO_OPP_FRONT_RIGHT_GOAL_T,  // 58
-  WO_OPP_FRONT_LEFT_GOAL_T,  // 59
+  WO_OPP_FRONT_RIGHT_GOAL_T,  // 58  --  CHANGED
+  WO_OPP_FRONT_LEFT_GOAL_T,  // 59  --  CHANGED
 
-  WO_OWN_FRONT_RIGHT_GOAL_T,  // 60
-  WO_OWN_FRONT_LEFT_GOAL_T,  // 61
+  WO_OWN_FRONT_RIGHT_GOAL_T,  // 60  --  CHANGED
+  WO_OWN_FRONT_LEFT_GOAL_T,  // 61  --  CHANGED
 
-  WO_UNKNOWN_FIELD_LINE_1,  // 62
-  WO_UNKNOWN_FIELD_LINE_2,  // 63
-  WO_UNKNOWN_FIELD_LINE_3,  // 64
-  WO_UNKNOWN_FIELD_LINE_4,  // 65
+  WO_UNKNOWN_FIELD_LINE_1,  // 62  --  CHANGED
+  WO_UNKNOWN_FIELD_LINE_2,  // 63  --  CHANGED
+  WO_UNKNOWN_FIELD_LINE_3,  // 64  --  CHANGED
+  WO_UNKNOWN_FIELD_LINE_4,  // 65  --  CHANGED
 
 
   // Horizontal Lines (right to left)
-  WO_OPP_GOAL_LINE,   // 66  // THIS IS WHERE LINES START          
-  WO_OPP_PENALTY,  // 67
-  WO_CENTER_LINE,  // 68
-  WO_OWN_PENALTY,  // 69
-  WO_OWN_GOAL_LINE,  // 70
+  WO_OPP_GOAL_LINE,   // 66  // THIS IS WHERE LINES START            --  CHANGED
+  WO_OPP_PENALTY,  // 67  --  CHANGED
+  WO_CENTER_LINE,  // 68  --  CHANGED
+  WO_OWN_PENALTY,  // 69  --  CHANGED
+  WO_OWN_GOAL_LINE,  // 70  --  CHANGED
 
-  WO_OWN_FIELD_EDGE,  // 71
-  WO_OPP_FIELD_EDGE,  // 72
+  WO_OWN_FIELD_EDGE,  // 71  --  CHANGED
+  WO_OPP_FIELD_EDGE,  // 72  --  CHANGED
   
-  WO_OPP_BOTTOM_GOALBAR,  // 73
-  WO_OWN_BOTTOM_GOALBAR,  // 74
+  WO_OPP_BOTTOM_GOALBAR,  // 73  --  CHANGED
+  WO_OWN_BOTTOM_GOALBAR,  // 74  --  CHANGED
 
   // Vertical Lines (top to bottom)
-  WO_TOP_SIDE_LINE,  // 75    
-  WO_PENALTY_TOP_OPP,  // 76   
-  WO_PENALTY_TOP_OWN,  // 77
-  WO_PENALTY_BOTTOM_OPP,  // 78 
-  WO_PENALTY_BOTTOM_OWN,  // 79       
-  WO_BOTTOM_SIDE_LINE,  // 80   
+  WO_TOP_SIDE_LINE,  // 75      --  CHANGED
+  WO_PENALTY_TOP_OPP,  // 76     --  CHANGED
+  WO_PENALTY_TOP_OWN,  // 77  --  CHANGED
+  WO_PENALTY_BOTTOM_OPP,  // 78   --  CHANGED
+  WO_PENALTY_BOTTOM_OWN,  // 79         --  CHANGED
+  WO_BOTTOM_SIDE_LINE,  // 80     --  CHANGED
   
-  WO_TOP_FIELD_EDGE,  // 81
-  WO_BOTTOM_FIELD_EDGE,  // 82
+  WO_TOP_FIELD_EDGE,  // 81  --  CHANGED
+  WO_BOTTOM_FIELD_EDGE,  // 82  --  CHANGED
   
-  WO_OPP_LEFT_GOALBAR,  // 83
-  WO_OPP_RIGHT_GOALBAR,  // 84
-  WO_OWN_LEFT_GOALBAR,  // 85
-  WO_OWN_RIGHT_GOALBAR,  // 86  // last line
+  WO_OPP_LEFT_GOALBAR,  // 83  --  CHANGED
+  WO_OPP_RIGHT_GOALBAR,  // 84  --  CHANGED
+  WO_OWN_LEFT_GOALBAR,  // 85  --  CHANGED
+  WO_OWN_RIGHT_GOALBAR,  // 86  // last line  --  CHANGED
 
   // penalty crosses
-  WO_UNKNOWN_PENALTY_CROSS,  // 87
-  WO_OWN_PENALTY_CROSS,  // 88
-  WO_OPP_PENALTY_CROSS,  // 89
+  WO_UNKNOWN_PENALTY_CROSS,  // 87  --  CHANGED
+  WO_OWN_PENALTY_CROSS,  // 88  --  CHANGED
+  WO_OPP_PENALTY_CROSS,  // 89  --  CHANGED
 
   // cluster of robots
-  WO_ROBOT_CLUSTER,  // 90
+  WO_ROBOT_CLUSTER,  // 90  --  CHANGED
 
-  NUM_WORLD_OBJS,  // 91
+  NUM_WORLD_OBJS,  // 94
 
-  WO_INVALID  // 92
+  WO_INVALID  // 92  --  CHANGED
+
 );
 
 
@@ -336,6 +341,10 @@ DECLARE_INTERNAL_SCHEMA(class WorldObject {
       return type >= WO_BEACON_BLUE_YELLOW && type <= WO_BEACON_YELLOW_PINK;
     }
 
+    WO_PROPERTY(isObstacle) {
+      return type >= WO_OBSTACLE_1 && type <= WO_OBSTACLE_UNKNOWN;
+    }
+
     WO_PROPERTY(isEdgeIntersection) {
       return type >= WO_OWN_FIELD_EDGE_TOP_L && type <= WO_OPP_FIELD_EDGE_BOTTOM_L;
     }
@@ -412,6 +421,14 @@ DECLARE_INTERNAL_SCHEMA(class WorldObject {
     SCHEMA_FIELD(bool fromTopCamera); ///< True if observed from top cam, false if from bottom
 
     SCHEMA_FIELD(bool localized);
+
+    // Obstacle
+    SCHEMA_FIELD(float width);
+    SCHEMA_FIELD(float length);
+
+    // Obstacle
+    SCHEMA_FIELD(float cwidth);
+    SCHEMA_FIELD(float cheight);
 });
 
 typedef std::vector<WorldObject> ObjectSet;

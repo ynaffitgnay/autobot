@@ -53,6 +53,7 @@ void GLDrawer::draw(const map<DisplayOption,bool>& displayOptions) {
   if (display_[SHOW_ODOMETRY_OVERLAY]) overlayOdometry();
   if (display_[SHOW_RELATIVE_OBJECT_UNCERTS]) localizationGL.drawRelativeObjectUncerts(gtcache_.world_object, bcache_.world_object, gtcache_.robot_state, bcache_.localization_mem);
   if (display_[SHOW_BEACONS]) drawBeacons();
+  if (display_[SHOW_BEACONS]) drawObstacles();
 
   // truth data from sim
   if (display_[SHOW_TRUTH_ROBOT]) drawTruthRobot();
@@ -1094,5 +1095,15 @@ void GLDrawer::drawBeacons() {
   for(auto beacon : beacons) {
     const auto& object = gtcache_.world_object->objects_[beacon.first];
     objectsGL.drawBeacon(object.loc, beacon.second[0], beacon.second[1]);
+  }
+}
+
+void GLDrawer::drawObstacles(){
+  if(gtcache_.world_object == NULL) return;
+  std::vector<WorldObjectType> obstacles(WO_OBSTACLE_1, WO_OBSTACLE_2);
+
+  for(auto obs : obstacles) {
+    const auto& object = gtcache_.world_object->objects_[obs];
+    objectsGL.drawObstacle(object.loc);
   }
 }

@@ -111,6 +111,7 @@ class GLDrawer {
     void drawCoachBallPackets();
     void drawAnnotations();
     void drawBeacons();
+    void drawObstacles();
    
     void overlayOdometry();
     void overlayObservationText();

@@ -30,6 +30,10 @@ class LineDetector : public ObjectDetector {
   * Input: Sorted list of blobs
   */
   void findPenaltyLine(std::vector<Blob>& blobs);
+  // unsigned char* getImg();
+  // void findTags();
+  // void saveImg(std::string filepath);
+
  private:
   // Logger
   TextLogger* textlogger;

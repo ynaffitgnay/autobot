@@ -27,6 +27,8 @@ WorldObject::WorldObject() {
   fieldLineIndex = -1;
   fromTopCamera = false;
   localized = false;
+  width=0.0;
+  length=0.0;
 }
 
 WorldObject::WorldObject(WorldObjectType type) : WorldObject() {

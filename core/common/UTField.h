@@ -71,6 +71,9 @@ const Point2D landmarkLocation[] = {
   Point2D(HALF_FIELD_X, HALF_FIELD_Y),       // WO_BEACON_PINK_YELLOW
   Point2D(HALF_FIELD_X, -HALF_FIELD_Y),      // WO_BEACON_YELLOW_PINK
 
+  Point2D(1800.0, 750.0),                    // WO_OBSTACLE_1
+  Point2D(750.0, 1350.0),                    // WO_OBSTACLE_2
+
   Point2D( -FIELD_X / 2, 0),                 // WO_OWN_GOAL
   Point2D( FIELD_X / 2, 0 ),                 // WO_OPP_GOAL
 

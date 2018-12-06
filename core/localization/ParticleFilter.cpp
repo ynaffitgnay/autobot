@@ -21,7 +21,7 @@ void ParticleFilter::init(Point2D loc, float orientation) {
   for(auto& p : particles()) {
     p.x = Random::inst().sampleU(-2000.0,2000.0);
     p.y = Random::inst().sampleU(-1200.0,1200.0);
-    p.t = Random::inst().sampleU(-M_PI, M_PI);  
+    p.t = Random::inst().sampleU(-M_PI, M_PI);
     p.w = 1.0/M_;
   }
 }
@@ -92,27 +92,26 @@ void ParticleFilter::updateStep(){
   int num_unreliable = 0;
   for(auto& p : particles()) {
     double bear_weight = 0.0;
-    for(std::map<WorldObjectType,Pose2D>::iterator it=beacons_.begin(); it!=beacons_.end(); ++it){
-      auto& beacon_current = cache_.world_object->objects_[it->first];
-      if (beacon_current.seen) {
-        // printf("Saw %s at [%f, %f] with distance: %f and bearing: %f\n",getName(it->first),it->second.translation.x, it->second.translation.y,beacon_current.visionDistance,beacon_current.visionBearing*180.0/M_PI);
-        beacons_list_.insert(it->first);
+    for(std::map<WorldObjectType,Pose2D>::iterator it=landmarks_.begin(); it!=landmarks_.end(); ++it){
+      auto& landmark_current = cache_.world_object->objects_[it->first];
+      if (landmark_current.seen) {
+        // printf("Saw %s at [%f, %f] with distance: %f and bearing: %f\n",getName(it->first),it->second.translation.x, it->second.translation.y,landmark_current.visionDistance,landmark_current.visionBearing*180.0/M_PI);
         //double part_dist = sqrt(pow(p.x - it->second.translation.x, 2) + pow(p.y - it->second.translation.y,2));
-        double part_dist = sqrt(pow(p.x - beacon_current.loc.x, 2) + pow(p.y - beacon_current.loc.y,2));
-        double mean_dist = beacon_current.visionDistance;
-        double var_dist = (mean_dist/4.0)*(mean_dist/4.0);
+        double part_dist = sqrt(pow(p.x - landmark_current.loc.x, 2) + pow(p.y - landmark_current.loc.y,2));
+        double mean_dist = landmark_current.visionDistance;
+        double var_dist = (mean_dist/3.5)*(mean_dist/3.5);
         double dist_weight = foldedNormPDF(part_dist,mean_dist,var_dist);
 
         double part_global_bearing = p.t;  //alpha
 
-        double part_beacon_sep = atan2f(beacon_current.loc.y-p.y,beacon_current.loc.x-p.x);  // beta
-        double mean_bear = beacon_current.visionBearing;  //theta
-        double x_bear = part_beacon_sep - part_global_bearing;  //phi
+        double part_landmark_sep = atan2f(landmark_current.loc.y-p.y,landmark_current.loc.x-p.x);  // beta
+        double mean_bear = landmark_current.visionBearing;  //theta
+        double x_bear = part_landmark_sep - part_global_bearing;  //phi
 
-        double var_bear = 0.2 * 0.2;
+        double var_bear = 0.3 * 0.3;
         if (x_bear > M_PI  || x_bear < -M_PI) {
           p.t = -p.t;
-          x_bear = part_beacon_sep - p.t;
+          x_bear = part_landmark_sep - p.t;
         }
         bear_weight = truncNormPDF(x_bear,mean_bear,var_bear,-M_PI,M_PI);
 
@@ -162,7 +161,7 @@ bool ParticleFilter::checkResample(){
   if(sum_weights_squared < 0.000001) return true;
   double N_eff = 1/sum_weights_squared;
 
-  return (N_eff < (M_/4.0));
+  return (N_eff < (0.9*M_));
 }
 
 std::vector<Particle> ParticleFilter::resampleStep(){

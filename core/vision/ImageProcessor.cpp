@@ -1,9 +1,7 @@
 #include <vision/ImageProcessor.h>
 #include <vision/Classifier.h>
-#include <vision/GoalDetector.h>
 #include <vision/BeaconDetector.h>
-#include <vision/LineDetector.h>
-#include <vision/BallDetector.h>
+#include <vision/ObstacleDetector.h>
 #include <vision/Logging.h>
 #include <vision/structures/Blob.h>
 #include <common/ColorConversion.h>
@@ -16,10 +14,8 @@ ImageProcessor::ImageProcessor(VisionBlocks& vblocks, const ImageParams& iparams
 {
   enableCalibration_ = false;
   color_segmenter_ = std::make_unique<Classifier>(vblocks_, vparams_, iparams_, camera_);
-  goal_detector_ = std::make_unique<GoalDetector>(DETECTOR_PASS_ARGS);
-  ball_detector_ = std::make_unique<BallDetector>(DETECTOR_PASS_ARGS);
   beacon_detector_ = std::make_unique<BeaconDetector>(DETECTOR_PASS_ARGS);
-  line_detector_ = std::make_unique<LineDetector>(DETECTOR_PASS_ARGS);
+  obstacle_detector_ = std::make_unique<ObstacleDetector>(DETECTOR_PASS_ARGS);
   calibration_ = std::make_unique<RobotCalibration>();
 }
 
@@ -30,10 +26,8 @@ void ImageProcessor::init(TextLogger* tl){
   textlogger = tl;
   vparams_.init();
   color_segmenter_->init(tl);
-  goal_detector_ ->init(tl);
-  ball_detector_->init(tl);
   beacon_detector_->init(tl);
-  line_detector_->init(tl);
+  obstacle_detector_->init(tl);
 }
 
 unsigned char* ImageProcessor::getImg() {
@@ -125,12 +119,8 @@ void ImageProcessor::setCalibration(const RobotCalibration& calibration){
 }
 
 void ImageProcessor::processFrame(){
-  BallCandidate* bestBall = nullptr;
-  
   // clear out the blobs for a new frame
   std::vector<Blob>().swap(blobs_);
-
-
 
   if(vblocks_.robot_state->WO_SELF == WO_TEAM_COACH && camera_ == Camera::BOTTOM) return;
   tlog(30, "Process Frame camera %i", camera_);
@@ -142,42 +132,16 @@ void ImageProcessor::processFrame(){
   vblocks_.robot_vision->horizon = horizon;
   tlog(30, "Classifying Image: %i", camera_);
   if(!color_segmenter_->classifyImage(color_table_)) return;
+  
+  // Make blobs
   color_segmenter_->makeBlobs(blobs_);
   std::sort(blobs_.begin(), blobs_.end(), sortBlobAreaPredicate);
 
-  if (camera_ == Camera::BOTTOM) {
-    line_detector_->findPenaltyLine(blobs_);
-  }
-
-  if (vblocks_.world_object->objects_[WO_OWN_PENALTY].seen) {
-    LineSegment linseg =  vblocks_.world_object->objects_[WO_OWN_PENALTY].lineLoc;
-    Point2D gb_line_cent = linseg.getCenter();
-    Point2D robo_rel_cent(0.0,0.0);
-    float gb_line_dist = linseg.getDistanceTo(robo_rel_cent);
-    // printf("Saw the penalty box at [%f, %f] with distance %f\n", gb_line_cent.x, gb_line_cent.y, gb_line_dist);
-  } else {
-    // printf("Saw no penalty box\n");
-  }
-
-  // Populate world objects with the best ball candidate
-  // bestBall = getBestBallCandidate();
-  // if (bestBall) {
-  //   // std::cout << "Ball distance: " << bestBall->visionDistance << ", Ball bearing: " << bestBall->visionBearing << std::endl;
-  // }
-
+  // Detecting the beacons
   beacon_detector_->findBeacons(blobs_);
-  // // GOAL DETECTION
-  // goal_detector_->findGoals(blobs_);
 
-
-  // auto& ball = vblocks_.world_object->objects_[WO_BALL];
-  // auto& goal = vblocks_.world_object->objects_[WO_UNKNOWN_GOAL];
-  // if(goal.seen){
-  //   std::cout << "Goal distance: " << goal.visionDistance << ", Goal bearing: " << goal.visionBearing << ", Goal orientation: " << goal.orientation << "\t";
-  // }
-  // if(ball.seen){
-  //   std::cout << "Ball distance: " << ball.visionDistance << ", Ball bearing: " << ball.visionBearing << std::endl;
-  // }
+  // Detecting Orange colored Obstacles
+  obstacle_detector_->findObstacles(blobs_);
 }
 
 int ImageProcessor::getTeamColor() {
@@ -192,46 +156,6 @@ float ImageProcessor::getHeadChange() const {
   if (vblocks_.joint == NULL)
     return 0;
   return vblocks_.joint->getJointDelta(HeadPan);
-}
-
-std::vector<BallCandidate*> ImageProcessor::getBallCandidates() {
-  std::vector<BallCandidate*> ballCands = std::vector<BallCandidate*>();
-  ball_detector_->findBall(blobs_, ballCands);
-
-  return ballCands;
-}
-
-BallCandidate* ImageProcessor::getBestBallCandidate() {
-  std::vector<BallCandidate*> ballCands = getBallCandidates();
-  BallCandidate* bestCand = nullptr;
-  // now put some heuristics in here to get the best one. for now just choose the first one.
-
-  // Assuming that the bottom frame gets processed first.
-  if (ballCands.size() == 0) {
-    if (camera_ == Camera::BOTTOM) {
-      vblocks_.world_object->objects_[WO_BALL].seen = false;
-    } else if (camera_ == Camera::TOP && !vblocks_.world_object->objects_[WO_BALL].seen) {
-      vblocks_.world_object->objects_[WO_BALL].seen = false;
-    }
-    return bestCand;
-  }
-  
-  // FOR NOW: return the first one in the list
-  bestCand = ballCands.at(0);
-
-  auto& ball = vblocks_.world_object->objects_[WO_BALL];
-  ball.imageCenterX = bestCand->centerX;
-  ball.imageCenterY = bestCand->centerY;
-  ball.radius = bestCand->radius;
-  ball.visionDistance = bestCand->groundDistance;
-  ball.visionBearing = bestCand->bearing;
-  ball.visionElevation = bestCand->elevation;
-  ball.seen = true;
-
-  ball.fromTopCamera = (camera_ == Camera::TOP);
-  tlog(30, "saw %s at (%i,%i) with calculated distance %2.4f", getName(WO_BALL), ball.imageCenterX, ball.imageCenterY, ball.visionDistance);
-
-  return bestCand;
 }
 
 void ImageProcessor::enableCalibration(bool value) {
