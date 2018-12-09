@@ -7,7 +7,7 @@ PathNode::PathNode(GridCell& cell) : cell(cell) {
   g = INT_MAX;
   rhs = INT_MAX;
   changed = false;
-  visited = false;
+  //visited = false;
   numVisits = 0;
   overlapped = false;
   initialized = false;
@@ -16,10 +16,10 @@ PathNode::PathNode(GridCell& cell) : cell(cell) {
 }
 
 
-void PathNode::visit() {
-  visited = true;
-  ++numVisits;
-}
+//void PathNode::visit() {
+//  //visited = true;
+//  ++numVisits;
+//}
 
 void PathNode::setOccupied() {
   cell.occupied = true;

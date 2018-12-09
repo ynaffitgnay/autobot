@@ -35,8 +35,8 @@ DECLARE_INTERNAL_SCHEMA(class PathNode {
     SCHEMA_FIELD(int g);            // g-value
     SCHEMA_FIELD(int rhs);          // rhs-value
     SCHEMA_FIELD(DSLKey key);
-    SCHEMA_FIELD(bool changed);  // is this node consistent?
-    SCHEMA_FIELD(bool visited);     // Has this node been visited
+    SCHEMA_FIELD(bool changed);     // Has this node changed?
+    //SCHEMA_FIELD(bool visited);     // Has this node been visited
     SCHEMA_FIELD(int numVisits);    // How many times has this node been visited?
     SCHEMA_FIELD(bool overlapped);  // does this overlap with the CCP?
     SCHEMA_FIELD(bool initialized); // Has this cell been initialized? TODO: remove?
