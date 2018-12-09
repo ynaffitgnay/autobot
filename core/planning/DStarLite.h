@@ -18,9 +18,7 @@
 class DStarLite {
   public:
     DStarLite(MemoryCache& cache, TextLogger*& tlogger, Point2D startloc);
-
-    // TODO: move this out of here
-    //std::vector<std::vector<PathNode>> map_;
+    
     std::vector<PathNode> map_;
     
     DSLPQueue U_;
@@ -29,20 +27,16 @@ class DStarLite {
     const Grid* wf_;
     Point2D startCoords_;
     PathNode* S_;  // Start/current location
-    PathNode* S_prev;  // Previous location
-    //int S_r_;  // Start node row
-    //int S_c_;  // Start node column
-    //int S_x; // Start x-coord
-    //int S_y; // Start y-coord
+    //PathNode* S_prev;  // Previous location
   
     void init(Grid& wavefront);
     void runDSL();
-    //static int safeAdd(int q1, int q2);
+
     int safeAdd(int q1, int q2);
   private:
     MemoryCache& cache_;
     TextLogger*& tlogger_;
-    //int movementCostSinceReplan;
+    
     int lastReplanIdx;
     bool initialized;
     DSLKey calcKey(PathNode& successor);
@@ -52,7 +46,7 @@ class DStarLite {
     void getUnplannedNeighbors(PathNode& curr, vector<PathNode*>& neighbors);
     int getTransitionCost(PathNode& s, PathNode& p);
     int calcPathCost(int sIdx, int fIdx);
-    void generatePath(int startIdx);
+    void generateCoveragePath(int startIdx);
     bool buildPathGrid();
     int hop(int index);
     void printGrid();

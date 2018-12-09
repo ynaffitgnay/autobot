@@ -81,7 +81,7 @@ void DStarLite::init(Grid& wavefront) {
   printGrid();
   
   std::cout << "About to generate path!\n";
-  generatePath(0);
+  generateCoveragePath(0);
   initialized = true;
 }
 
@@ -130,7 +130,7 @@ void DStarLite::runDSL() {
   cache_.planning->nodesInPath -= cache_.planning->nodesLeft;
     
   // Replan
-  generatePath(cache_.planning->pathIdx);
+  generateCoveragePath(cache_.planning->pathIdx);
  
   //std::cout << "in runDSL\n";
 
@@ -313,7 +313,7 @@ int DStarLite::calcPathCost(int sIdx, int fIdx) {
 }
 
 // Generate path from idx startIdx
-void DStarLite::generatePath(int startIdx) {
+void DStarLite::generateCoveragePath(int startIdx) {
   // Determine how many cells are to be in the full coverage plan
   //int numPoses = 0;     // number of poses we need to add to the plan
   // TODO: make this the total number of unoccupied cells - the ones that have been visited...
@@ -348,56 +348,58 @@ void DStarLite::generatePath(int startIdx) {
   int numPlanned = 1;                        // start and end cell
   while(numPlanned < numPoses)               // while we still have poses that need to be added to the plan
   {
-    bool stuck = false;
-    while(!stuck && numPlanned <= numPoses)  // if we get stuck, we exit the loop and use the hop function to find the closest unplanned cell
+    //bool stuck = false;
+    //while(!stuck && numPlanned <= numPoses)  // if we get stuck, we exit the loop and use the hop function to find the closest unplanned cell
+    //{
+    std::vector<PathNode*> unplanned;
+    getUnplannedNeighbors(map_.at(currCellIdx), unplanned); // vector of valid unvisited neighbors
+    if(unplanned.size() > 0) // We can only move to a neighbor if it is valid and unplanned
     {
-      std::vector<PathNode*> unplanned;
-      getUnplannedNeighbors(map_.at(currCellIdx), unplanned); // vector of valid unvisited neighbors
-      if(unplanned.size() > 0) // We can only move to a neighbor if it is valid and unplanned
+      int maxValue = unplanned[0]->getValue(); // value of the neighbor whose wavefront number is the highest
+      int maxIndex = 0;                       // index of the neighbor whose wavefront number is the highest
+      if(unplanned.size() > 1) // If there is more than one unplanned neighbor, find the one with the highest wavefront value
       {
-        int maxValue = unplanned[0]->getValue(); // value of the neighbor whose wavefront number is the highest
-        int maxIndex = 0;                       // index of the neighbor whose wavefront number is the highest
-        if(unplanned.size() > 1) // If there is more than one unplanned neighbor, find the one with the highest wavefront value
+        for(int i = 1; i < unplanned.size(); i++)
         {
-          for(int i = 1; i < unplanned.size(); i++)
+          if(unplanned[i]->getValue() > maxValue)
           {
-            if(unplanned[i]->getValue() > maxValue)
-            {
-              maxValue = unplanned[i]->getValue();
-              maxIndex = i;
-            }
+            maxValue = unplanned[i]->getValue();
+            maxIndex = i;
           }
         }
-        int lastIndex = currCellIdx;
-        currCellIdx = unplanned.at(maxIndex)->idx;
+      }
+      int lastIndex = currCellIdx;
+      currCellIdx = unplanned.at(maxIndex)->idx;
 
-        map_.at(currCellIdx).pathorder = pathIdx;
-        map_.at(currCellIdx).planned = true;
-        path.at(pathIdx++) = currCellIdx;
-        numPlanned++;
-      }
-      else // if all valid neighbors have been visited, we are stuck
-      {
-        //printf("Stuck: no neighbors are unplanned.\n");
-        stuck = true;
-      }
-
-      if (stuck)
-      {
-        // When we get stuck, find the closest unplanned cell and go there
-        int lastIndex = currCellIdx;
-        currCellIdx = hop(currCellIdx); // hop to the closed unplanned cell
-        if(currCellIdx == lastIndex) {// if hop was unsuccessful, we should must not have any more cells to plan
-          numPlanned = numPoses;
-          //std::cout << "I guess we're stuck forever\n";
-          break;
-        }
-        map_.at(currCellIdx).pathorder = pathIdx;
-        map_.at(currCellIdx).planned = true;
-        path.at(pathIdx++) = currCellIdx;
-        numPlanned++;
-      }
+      map_.at(currCellIdx).pathorder = pathIdx;
+      map_.at(currCellIdx).planned = true;
+      path.at(pathIdx++) = currCellIdx;
+      numPlanned++;
     }
+    else // if all valid neighbors have been visited, we are stuck
+    {
+    //  //printf("Stuck: no neighbors are unplanned.\n");
+    //  stuck = true;
+    //}
+    //
+    //if (stuck)
+    //{
+      // When we get stuck, find the closest unplanned cell and go there
+      int lastIndex = currCellIdx;
+      currCellIdx = hop(currCellIdx); // hop to the closed unplanned cell
+      if(currCellIdx == lastIndex) {// if hop was unsuccessful, we should must not have any more cells to plan
+        std::cout << "Hop unsuccessful. Original numPlanned: " << numPlanned <<
+          " and numPoses: " << numPoses << std::endl;
+        numPlanned = numPoses;
+        //std::cout << "I guess we're stuck forever\n";
+        break;
+      }
+      map_.at(currCellIdx).pathorder = pathIdx;
+      map_.at(currCellIdx).planned = true;
+      path.at(pathIdx++) = currCellIdx;
+      numPlanned++;
+    }
+      //}
   }
   printPath();
   
@@ -415,16 +417,29 @@ bool DStarLite::buildPathGrid() {
     return false;
   }
 
+  // Create empty gridcells for planning paths between stuck points
+  //for (int r = 0; r < GRID_HEIGHT; ++r) {
+  //  for (int c = 0; c < GRID_WIDTH; ++c) {
+  //    directGrid.push_back(GridCell(r,c));
+  //  }
+  //}
+
   std::vector<GridCell>::iterator gridIt;
+  //int gridIdx = 0;
   
   for (gridIt = wf_->cells.begin(); gridIt != wf_->cells.end(); gridIt++) {
-    if (gridIt->occupied) {
-      std::cout << "Occupied cost = " << gridIt->cost << std::endl;
-      //gridIt->cost = INT_MAX;
-      //std::cout << "New cost = " << (*(gridIt)).cost << std::endl;
-    }
+    //if (gridIt->occupied) {
+    //  //std::cout << "Occupied cost = " << gridIt->cost << std::endl;
+    //  //gridIt->cost = INT_MAX;
+    //  //std::cout << "New cost = " << (*(gridIt)).cost << std::endl;
+    //  directGrid.at(gridIdx).occupied = true;
+    //}
     PathNode cell = PathNode(*(gridIt));
     map_.push_back(cell);
+
+    //PathNode directCell = PathNode(directGrid.at(gridIdx));
+    //directMap_.push_back(directCell);
+    //++gridIdx;
   }
 
   if (map_.size() != GRID_SIZE) {
@@ -488,35 +503,6 @@ int DStarLite::hop(int index)
     
   return index;
 }
-
-
-//void DStarLite::addPose(int lastI, int i, int idx)//, std::vector<GridCell>& plan, std::vector<GridCell>& orig_cells)
-//{
-//  // Get the center pose of the cell to be added to the plan
-//  Pose2D pose& = map_.cell.center;
-//  
-//  // Determine which direction the robot will be coming so we know what orientation it should stop in
-//  if(i - lastI == 1) // the new cell is directly to the right of the old cell
-//  {
-//    pose.rotation = 0;
-//  }
-//  else if(i - lastI == -1) // the new cell is directly to left of the old cell
-//  {
-//    pose.rotation = 3.14;
-//  }
-//  else if(i - lastI < -1) // the new cell is far to the left or above the old cell
-//  {
-//    pose.rotation = 1.57;
-//  }
-//  else // the new cell is far to the right or below the old cell
-//  {
-//    pose.rotation = -1.57;
-//  }
-//
-//  // add the pose to the plan
-//  cache_.planning->plan.at(i) = idx;  
-//}
-
 
 int DStarLite::safeAdd(int q1, int q2) {
   return ((q1 > INT_MAX - q2) ? INT_MAX : q1 + q2);

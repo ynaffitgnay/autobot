@@ -90,8 +90,7 @@ void PlanningModule::updateCell() {
   int curr_c = getGridCol(robot.loc.x);
 
   // if we haven't changed cells, return
-  // THIS CAUSES PROBLEMS FROM FIRST ONE!
-  //if (curr_r == prevLoc_r && curr_c == prevLoc_c) return;
+  if (cache_.planning->pathIdx != 0 && curr_r == prevLoc_r && curr_c == prevLoc_c) return;
   // TODO: check if the cell we're trying to go to is occupied??
 
   int desiredCellIdx = cache_.planning->path[cache_.planning->pathIdx];
@@ -105,7 +104,6 @@ void PlanningModule::updateCell() {
 
     // TODO: Check if desired cell is occupied and trigger replanning?
 
-
     std::cout << "rest of path: " << std::endl;
     for (int i = cache_.planning->pathIdx; i < cache_.planning->nodesLeft; ++i) {
       std::cout << cache_.planning->path.at(i) << " ";
@@ -116,8 +114,7 @@ void PlanningModule::updateCell() {
    
     return;
   }
-
-  //cache_.planning->grid.at(cache_.planning->path.at(cache_.planning->pathIdx)).visited = true;
+  
   cache_.planning->grid.at(currIdx).visited = true;
 
   // Remove a node on the path
@@ -125,9 +122,4 @@ void PlanningModule::updateCell() {
   
   // Increment the place along the path
   cache_.planning->pathIdx++;
-
-  // TODO:
-  
-
-  //if (currIdx == 0) 
 }
