@@ -11,6 +11,7 @@ PlanningBlock::PlanningBlock() {
   //path = std::vector<GridCell>(PATH_SIZE);
   path = std::vector<int>(PATH_SIZE);
   nodesLeft = 0;  // to keep track of when finished
+  nodesInPath = 0;
 
   for (int r = 0; r < GRID_HEIGHT; ++r) {
     for (int c = 0; c < GRID_WIDTH; ++c) {

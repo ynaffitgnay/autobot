@@ -90,16 +90,18 @@ void PlanningModule::updateCell() {
   // if we haven't changed cells, return
   // THIS CAUSES PROBLEMS FROM FIRST ONE!
   //if (curr_r == prevLoc_r && curr_c == prevLoc_c) return;
+  // TODO: check if the cell we're trying to go to is occupied??
 
   int desiredCellIdx = cache_.planning->path[cache_.planning->pathIdx];
   int currIdx = getCellIdx(curr_r, curr_c);
 
   // get information about the new cell
-  if (currIdx != desiredCellIdx) { //cache_.planning->path[cache_.planning->pathIdx]) {
-    //std::cout << "I'm in the wrong gridCell!!" << std::endl;
+  if (currIdx != desiredCellIdx) {
     std::cout << "I should be in idx " << desiredCellIdx << "  (" << getRowFromIdx(desiredCellIdx)  <<
       ", " << getColFromIdx(desiredCellIdx) << "), but I'm in " << currIdx << " (" <<
       curr_r << ", " << curr_c << ")." << std::endl;
+
+    // TODO: Check if desired cell is occupied and trigger replanning?
 
 
     std::cout << "rest of path: " << std::endl;
@@ -109,8 +111,7 @@ void PlanningModule::updateCell() {
         std::cout << std::endl;
     }
     std::cout << std::endl;
-    
-    //std::cout << "I guess I'm going to keep trying to go to my original destination" << std::endl;
+   
     return;
   }
 
