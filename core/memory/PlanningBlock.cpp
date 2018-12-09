@@ -20,6 +20,13 @@ PlanningBlock::PlanningBlock() {
   }
 }
 
+void PlanningBlock::RestartPath() {
+  coverageStarted = false;
+  pathIdx = 0;
+  nodesLeft = nodesInPath;
+  // TODO: go back to pre-obstacle path
+}
+
 Pose2D PlanningBlock::getDestPose() {
   return grid.at(path.at(pathIdx)).center;
 }

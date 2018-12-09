@@ -80,6 +80,8 @@ void PlanningModule::processFrame() {
 // If this is the correct cell in the path, increment the pathIdx
 // Otherwise, warn the user and maintain the same cell destination
 void PlanningModule::updateCell() {
+  //std::cout << "\n\n\n\n\ndoes this happen?\n\n\n\n\n" << std::endl;
+  
   // check in planning block whether coverage has started
   if (!cache_.planning->coverageStarted) return;
   

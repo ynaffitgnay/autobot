@@ -25,9 +25,6 @@ DECLARE_INTERNAL_SCHEMA(struct PlanningBlock : public MemoryBlock {
     mutable SCHEMA_FIELD(std::array<GridCell, GRID_SIZE> grid_data);
     std::vector<GridCell> grid;
 
-    //mutable SCHEMA_FIELD(std::array<GridCell, PATH_SIZE> path_data);
-    //std::vector<GridCell> path;
-    
     mutable SCHEMA_FIELD(std::array<int, PATH_SIZE> path_data);
     std::vector<int> path;
 
@@ -56,6 +53,7 @@ DECLARE_INTERNAL_SCHEMA(struct PlanningBlock : public MemoryBlock {
       );
   });
 
+  void RestartPath();
   Pose2D getDestPose();
 });
 
