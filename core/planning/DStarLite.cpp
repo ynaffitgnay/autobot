@@ -7,7 +7,7 @@
 
 DStarLite::DStarLite(MemoryCache& cache, TextLogger*& tlogger, Point2D S)
   : cache_(cache), tlogger_(tlogger), startCoords_(S), wf_(nullptr), k_(0),
-    movementCostSinceReplan(0), initialized(false) {
+    lastReplanIdx(0), initialized(false) {
 }
   
 void DStarLite::init(Grid& wavefront) {
@@ -24,7 +24,6 @@ void DStarLite::init(Grid& wavefront) {
   //std::cout << "gridRow: " << getGridRow(startCoords_.y) << " gridCol: " << getGridCol(startCoords_.x) << std:: endl;
   //std::cout << "Result of getIdx: " << PathNode::getIdx(getGridRow(startCoords_.y), getGridCol(startCoords_.x)) << std::endl;
   S_ = &(map_.at(PathNode::getIdx(getGridRow(startCoords_.y), getGridCol(startCoords_.x))));
-  //std::cout << "Debug 2\n";
 
   U_ = DSLPQueue();
 
@@ -38,7 +37,7 @@ void DStarLite::init(Grid& wavefront) {
 
   // Perform the initial cost calculations for each cell
   std::cout << "not initialized yet!\n";
-  //printGrid();
+
   if (map_.size() <= 0) {
     std::cout << "EMPTY MAP IN RUNDSL?!\n" << std::endl;
     return;
@@ -47,8 +46,8 @@ void DStarLite::init(Grid& wavefront) {
   std::vector<PathNode>::iterator mapIt;
 
   std::cout << "About to start computing shortest paths\n";
-  // Initialize costs for each node to S
 
+  // Initialize costs for each node to S_
   int calcNode = 0;
   for (mapIt = map_.begin(); mapIt != map_.end(); mapIt++) {
     if (S_ == &(*mapIt)) {
@@ -82,36 +81,63 @@ void DStarLite::init(Grid& wavefront) {
   printGrid();
   
   std::cout << "About to generate path!\n";
-  generatePath();
+  generatePath(0);
   initialized = true;
 }
 
 void DStarLite::runDSL() {
-  PathNode* S_last = nullptr;
-  PathNode* S_curr = nullptr;
+  //PathNode* S_last = nullptr;
+  //PathNode* S_curr = nullptr;
   std::vector<PathNode>::iterator mapIt;
 
+  // Check if any edge costs have changed
+  if (!cache_.planning->changedCost) return;  
+
+  // Get the new k offset
+  // use pathIdx - 1 because we only want to replan up to visited node
+  // (so pathIdx may actually be one further than the one we care about...)
+  k_ = k_ + calcPathCost(lastReplanIdx, cache_.planning->pathIdx - 1);
+  lastReplanIdx = cache_.planning->pathIdx - 1;
+  S_ = &(map_.at(cache_.planning->path.at(lastReplanIdx)));  // Reset node planning from
+
+  // Get a list of all edges with changed edge costs (basically any vertex that is
+  // connected to a block w/ changed occupation)
+  // For now, assume that the path with changed occupancy is the current destination
+  // gridCell.
+  std::vector<PathNode*> changedEdges;
+  std::vector<PathNode*>::iterator changedIt;
+  getNeighbors(map_.at(cache_.planning->path.at(cache_.planning->pathIdx)), changedEdges);
+
+  for (changedIt = changedEdges.begin(); changedIt != changedEdges.end(); changedIt++) {
+    updateVertex(**changedIt);
+  }
+
+  for (mapIt = map_.begin(); mapIt != map_.end(); mapIt++) {
+    // Don't recalculate cost for visited cells
+    if (mapIt->cell.visited) continue;
+
+    computeShortestPath(*mapIt);
+  }
+
+  printGrid();
+
+  // Mark all cells after the current idx unplanned (so beginning with pathIdx, inclusive)
+  for (int i = cache_.planning->pathIdx; i < cache_.planning->nodesInPath; ++i) {
+    //cache_.planning->grid.at(cache_.planning->path.at(i));
+    map_.at(cache_.planning->path.at(i)).planned = false;
+    map_.at(cache_.planning->path.at(i)).pathorder = -1;
+  }
+  cache_.planning->nodesInPath -= cache_.planning->nodesLeft;
+    
+  // Replan
+  generatePath(cache_.planning->pathIdx);
+ 
   //std::cout << "in runDSL\n";
 
   // here we're going to need to update the DSL from a certain coordinate
   // TODO: update this function to use the robot's current location when replanning
-  //if (!initialized) {
-  //  
-  //}
-
-  //std::cout << "already initalized\n";
-
-
-  //TODO:
-  // if "changed":
 
   //TODO: make sure that no cells left on the path are occupied
-  for (mapIt = map_.begin(); mapIt != map_.end(); mapIt++) {
-    if (!mapIt->changed) continue;
-
-    computeShortestPath(*mapIt);
-  }
-  
 }
 
 DSLKey DStarLite::calcKey(PathNode& successor) {
@@ -164,7 +190,7 @@ void DStarLite::computeShortestPath(PathNode& curr) {
       
       std::vector<PathNode*> preds;
       std::vector<PathNode*>::iterator predIt;
-      getPreds(*u, preds);
+      getNeighbors(*u, preds);
 
       for (predIt = preds.begin(); predIt != preds.end(); predIt++) {
         // Ignore occupied nodes
@@ -182,7 +208,7 @@ void DStarLite::computeShortestPath(PathNode& curr) {
 
       std::vector<PathNode*> preds;
       std::vector<PathNode*>::iterator predIt;
-      getPreds(*u, preds);
+      getNeighbors(*u, preds);
       preds.push_back(u);
 
       for (predIt = preds.begin(); predIt != preds.end(); predIt++) {
@@ -193,7 +219,7 @@ void DStarLite::computeShortestPath(PathNode& curr) {
             std::vector<PathNode*> succs;
             std::vector<PathNode*>::iterator succIt;
 
-            getSuccs(**predIt, succs);
+            getNeighbors(**predIt, succs);
 
             for (succIt = succs.begin(); succIt != succs.end(); succIt++) {
               int t2 = safeAdd(getTransitionCost(**predIt, **succIt), (*succIt)->g); 
@@ -210,51 +236,27 @@ void DStarLite::computeShortestPath(PathNode& curr) {
   }
 }
 
-void DStarLite::getPreds(PathNode& successor, vector<PathNode*>& preds) {
-  int s_r = successor.cell.r;
-  int s_c = successor.cell.c;
-  // Check above
+void DStarLite::getNeighbors(PathNode& curr, vector<PathNode*>& neighbors) {
+  int s_r = curr.cell.r;
+  int s_c = curr.cell.c;
+
   if (s_r - 1 >= 0 && !map_.at(PathNode::getIdx(s_r - 1, s_c)).cell.occupied) {
-    preds.push_back(&(map_.at(PathNode::getIdx(s_r - 1, s_c))));
+    neighbors.push_back(&(map_.at(PathNode::getIdx(s_r - 1, s_c))));
   }
   
   // Check below
   if (s_r + 1 < GRID_HEIGHT && !map_.at(PathNode::getIdx(s_r + 1, s_c)).cell.occupied) {
-    preds.push_back(&(map_.at(PathNode::getIdx(s_r + 1, s_c))));
+    neighbors.push_back(&(map_.at(PathNode::getIdx(s_r + 1, s_c))));
   }
   
   // Check left side
   if (s_c - 1 >= 0 && !map_.at(PathNode::getIdx(s_r, s_c - 1)).cell.occupied) {
-    preds.push_back(&(map_.at(PathNode::getIdx(s_r, s_c - 1))));
+    neighbors.push_back(&(map_.at(PathNode::getIdx(s_r, s_c - 1))));
   }
   
   // Check right side
   if (s_c + 1 < GRID_WIDTH && !map_.at(PathNode::getIdx(s_r, s_c + 1)).cell.occupied) {
-    preds.push_back(&(map_.at(PathNode::getIdx(s_r, s_c + 1))));
-  }
-}
-
-void DStarLite::getSuccs(PathNode& predecessor, vector<PathNode*>& succs) {
-  int s_r = predecessor.cell.r;
-  int s_c = predecessor.cell.c;
-
-  if (s_r - 1 >= 0 && !map_.at(PathNode::getIdx(s_r - 1, s_c)).cell.occupied) {
-    succs.push_back(&(map_.at(PathNode::getIdx(s_r - 1, s_c))));
-  }
-  
-  // Check below
-  if (s_r + 1 < GRID_HEIGHT && !map_.at(PathNode::getIdx(s_r + 1, s_c)).cell.occupied) {
-    succs.push_back(&(map_.at(PathNode::getIdx(s_r + 1, s_c))));
-  }
-  
-  // Check left side
-  if (s_c - 1 >= 0 && !map_.at(PathNode::getIdx(s_r, s_c - 1)).cell.occupied) {
-    succs.push_back(&(map_.at(PathNode::getIdx(s_r, s_c - 1))));
-  }
-  
-  // Check right side
-  if (s_c + 1 < GRID_WIDTH && !map_.at(PathNode::getIdx(s_r, s_c + 1)).cell.occupied) {
-    succs.push_back(&(map_.at(PathNode::getIdx(s_r, s_c + 1))));
+    neighbors.push_back(&(map_.at(PathNode::getIdx(s_r, s_c + 1))));
   }
 }
 
@@ -292,37 +294,56 @@ int DStarLite::getTransitionCost(PathNode& s, PathNode& p) {
   return 7;
 }
 
-void DStarLite::generatePath() {
-  // make sure that no cell on the path is occupied
-  // Use debugPoses vector to print out map of plan order
-  //std::vector<GridCell> plan = orig_cells;
-  //std::vector<int> debugPoses;
-  //debugPoses.clear();
+// This only works if we include the nodes discovered in "hop" in the path
+// Determine the cost between two nodes on a path
+int DStarLite::calcPathCost(int sIdx, int fIdx) {
+  int traversalCost = 0;
+
+  // Go through each node between these two path indices and sum the transition cost between them
+  // Also check h(sIdx) - h(fIdx) to see what that is...
+  int i;
+  for (i = sIdx; i < fIdx; ++i) {
+    // TODO: make sure that this is within bounds...
+    traversalCost += getTransitionCost(map_.at(cache_.planning->path.at(i)), map_.at(cache_.planning->path.at(i + 1)));
+  }
+
+  std::cout << "Got cost up to " << i << " to " << i + 1 << std::endl;
   
+  return traversalCost;
+}
+
+// Generate path from idx startIdx
+void DStarLite::generatePath(int startIdx) {
   // Determine how many cells are to be in the full coverage plan
-  int numPoses = 0;     // number of poses we need to add to the plan
+  //int numPoses = 0;     // number of poses we need to add to the plan
   // TODO: make this the total number of unoccupied cells - the ones that have been visited...
+  int numPoses = 0;
   vector<PathNode>::iterator mapIt;
   for(mapIt = map_.begin(); mapIt != map_.end(); mapIt++)
   {
     // Cells to be planned do not include cells that the wavefront propogation could not reach, obstructions, or cells planned in a previous plan
-    if(mapIt->getValue() != INT_MAX && !mapIt->cell.occupied && !mapIt->visited)
+    if(mapIt->getValue() != INT_MAX && !mapIt->cell.occupied && !mapIt->cell.visited)
     {
       numPoses++;
     }
   }
 
+  std::cout << "Poses to plan: " << numPoses << std::endl;
+
   auto& path = cache_.planning->path;
-  int pathIdx = 0;
+  int pathIdx = startIdx;
+  int currCellIdx;
   
   // Plan order of poses
-  int currCellIdx = S_->idx;                    // index of the current cell being added to the plan
-  S_->planned = true;
-  S_->pathorder = pathIdx;
-  path.at(pathIdx++) = currCellIdx;   // Add the start pose as the first pose in the plan
+  if (startIdx == 0) {
+    currCellIdx = S_->idx;                    // index of the current cell being added to the plan
+    S_->planned = true;
+    S_->pathorder = pathIdx;
+    path.at(pathIdx++) = currCellIdx;   // Add the start pose as the first pose in the plan
+  } else {
+    currCellIdx = cache_.planning->path.at(lastReplanIdx);
+  }
   
-  //debugPoses.push_back(start_index_);          // Make the start pose the first pose in debug_poses
-  //waveCells[currCellIdx].visit();                  // visit the start cell since it has been planned
   //waveCells[end_index_].visit();               // visit the end cell so it will not be planned (it will always be added at the end)
   int numPlanned = 1;                        // start and end cell
   while(numPlanned < numPoses)               // while we still have poses that need to be added to the plan
@@ -348,13 +369,11 @@ void DStarLite::generatePath() {
           }
         }
         int lastIndex = currCellIdx;
-        currCellIdx = unplanned.at(maxIndex)->idx;//getIndex(unplanned[maxIndex]->getPosition()); // set the index to the neighbor we will move to
-        // printf("Unvisted index: %d\n", index);
-        //addPose(lastIndex, currCellIdx, plan, orig_cells);            // add the new cell to the plan
+        currCellIdx = unplanned.at(maxIndex)->idx;
+
         map_.at(currCellIdx).pathorder = pathIdx;
         map_.at(currCellIdx).planned = true;
         path.at(pathIdx++) = currCellIdx;
-        //debugPoses.push_back(currCellIdx);
         numPlanned++;
       }
       else // if all valid neighbors have been visited, we are stuck
@@ -362,58 +381,33 @@ void DStarLite::generatePath() {
         //printf("Stuck: no neighbors are unplanned.\n");
         stuck = true;
       }
-      //}
 
       if (stuck)
-      //if(numPlanned < numPoses) // if we exited the previous loop because we were stuck, not because we were done planning
       {
         // When we get stuck, find the closest unplanned cell and go there
         int lastIndex = currCellIdx;
         currCellIdx = hop(currCellIdx); // hop to the closed unplanned cell
         if(currCellIdx == lastIndex) {// if hop was unsuccessful, we should must not have any more cells to plan
           numPlanned = numPoses;
-          std::cout << "I guess we're stuck forever\n";
+          //std::cout << "I guess we're stuck forever\n";
           break;
         }
-        //addPose(lastIndex, currCellIdx, plan, orig_cells); // add new cell to the plan
         map_.at(currCellIdx).pathorder = pathIdx;
         map_.at(currCellIdx).planned = true;
         path.at(pathIdx++) = currCellIdx;
-        //debugPoses.push_back(currCellIdx);
         numPlanned++;
       }
     }
   }
-  //addPose(currCellIdx, end_index_, plan, orig_cells); // add end cell to the plan
-  //debugPoses.push_back(end_index_);
   printPath();
   
   printf("Path size: %d\n", numPlanned);
 
-  // TODO: update this for replanning
   cache_.planning->nodesLeft = numPlanned;
-  cache_.planning->nodesInPath = numPlanned;
-
-  //std::vector<GridCell*> ordered_plan;
-  //for (int i = 0; i < orig_cells.size(); i++){
-  //  int order = 0;
-  //  std::vector<int>::iterator it = std::find(debugPoses.begin(),debugPoses.end(),i);
-  //  if(it == debugPoses.end())
-  //    order = -1;
-  //  else
-  //    order = std::distance(debugPoses.begin(), it);
-  //  orig_cells[i].order_index = order;
-  //}
-  //
-  //for (int i = 0; i < orig_cells.size(); i++){
-  //  int debug_ind = debugPoses[i];
-  //  //std::cout << "Adding " << i <<  " to ordered_plan!\n";
-  //  ordered_plan.push_back(&(orig_cells[debug_ind]));
-  //}
-
+  //cache_.planning->nodesInPath = numPlanned;
+  cache_.planning->nodesInPath += numPlanned;
 }
 
-// Maybe do these steps in generateGrid
 bool DStarLite::buildPathGrid() {
   // TODO: add checks for robustness
   if (wf_->cells.size() <= 0) {
@@ -458,7 +452,7 @@ int DStarLite::hop(int index)
     while(i < numOld && !found) // iterate all old neighbors unless we find a valid cell to hop to
     {
       std::vector<PathNode*> newNeighbors;
-      getSuccs(*neighbors.at(i), newNeighbors); // neighbors of our old neighbors (this is how we propogate outward)
+      getNeighbors(*neighbors.at(i), newNeighbors); // neighbors of our old neighbors (this is how we propogate outward)
       int j = 0; // iteration of new neighbors
       while(j < newNeighbors.size() && !found) // check all new neighbors unless one of them is found to be a valid hop
       {
@@ -487,9 +481,9 @@ int DStarLite::hop(int index)
     }
   }
   
-  if(!found && neighbors.size()==0) // the algorithm failed (this means we have already planned all poses and didn't need to hop in the first place)
+  if(!found && neighbors.size() == 0) // the algorithm failed (this means we have already planned all poses and didn't need to hop in the first place)
   {
-    printf("We ran out of neighbors. Hop was called when all poses had already been planned\n");
+    //printf("We ran out of neighbors. Hop was called when all poses had already been planned\n");
   }
     
   return index;

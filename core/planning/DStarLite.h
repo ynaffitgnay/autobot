@@ -42,16 +42,17 @@ class DStarLite {
   private:
     MemoryCache& cache_;
     TextLogger*& tlogger_;
-    int movementCostSinceReplan;
+    //int movementCostSinceReplan;
+    int lastReplanIdx;
     bool initialized;
     DSLKey calcKey(PathNode& successor);
     void updateVertex(PathNode& u);
     void computeShortestPath(PathNode& curr);
-    void getPreds(PathNode& successor, std::vector<PathNode*>& preds);
-    void getSuccs(PathNode& predecessor, std::vector<PathNode*>& succs);
+    void getNeighbors(PathNode& curr, std::vector<PathNode*>& neighbors);
     void getUnplannedNeighbors(PathNode& curr, vector<PathNode*>& neighbors);
     int getTransitionCost(PathNode& s, PathNode& p);
-    void generatePath();
+    int calcPathCost(int sIdx, int fIdx);
+    void generatePath(int startIdx);
     bool buildPathGrid();
     int hop(int index);
     void printGrid();
