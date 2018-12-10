@@ -6,12 +6,12 @@
 #include <common/GridCell.h>
 
 DStarLite::DStarLite(MemoryCache& cache, TextLogger*& tlogger, Point2D S)
-  : cache_(cache), tlogger_(tlogger), startCoords_(S), wf_(nullptr), k_(0),
+  : cache_(cache), tlogger_(tlogger), startCoords_(S), cells_(nullptr), k_(0),
     lastReplanIdx(0), initialized(false) {
 }
   
-void DStarLite::init(Grid& wavefront) {
-  wf_ = &wavefront;
+void DStarLite::init(std::vector<GridCell>& wavefront) {
+  cells_ = &wavefront;
   k_ = 0;
   map_.clear();
   
@@ -406,40 +406,33 @@ void DStarLite::generateCoveragePath(int startIdx) {
   printf("Path size: %d\n", numPlanned);
 
   cache_.planning->nodesLeft = numPlanned;
-  //cache_.planning->nodesInPath = numPlanned;
   cache_.planning->nodesInPath += numPlanned;
 }
 
 bool DStarLite::buildPathGrid() {
   // TODO: add checks for robustness
-  if (wf_->cells.size() <= 0) {
+  if (cells_->size() <= 0) {
     std::cout << "Wavefront grid is empty" << std::endl;
     return false;
   }
 
   // Create empty gridcells for planning paths between stuck points
-  //for (int r = 0; r < GRID_HEIGHT; ++r) {
-  //  for (int c = 0; c < GRID_WIDTH; ++c) {
-  //    directGrid.push_back(GridCell(r,c));
-  //  }
-  //}
+  for (int r = 0; r < GRID_HEIGHT; ++r) {
+    for (int c = 0; c < GRID_WIDTH; ++c) {
+      blankGrid.push_back(GridCell(r,c));
+    }
+  }
 
   std::vector<GridCell>::iterator gridIt;
-  //int gridIdx = 0;
+  int gridIdx = 0;
   
-  for (gridIt = wf_->cells.begin(); gridIt != wf_->cells.end(); gridIt++) {
-    //if (gridIt->occupied) {
-    //  //std::cout << "Occupied cost = " << gridIt->cost << std::endl;
-    //  //gridIt->cost = INT_MAX;
-    //  //std::cout << "New cost = " << (*(gridIt)).cost << std::endl;
-    //  directGrid.at(gridIdx).occupied = true;
-    //}
+  for (gridIt = cells_->begin(); gridIt != cells_->end(); gridIt++) {
+    if (gridIt->occupied) {
+      blankGrid.at(gridIdx).occupied = true;
+    }
     PathNode cell = PathNode(*(gridIt));
     map_.push_back(cell);
-
-    //PathNode directCell = PathNode(directGrid.at(gridIdx));
-    //directMap_.push_back(directCell);
-    //++gridIdx;
+    ++gridIdx;
   }
 
   if (map_.size() != GRID_SIZE) {

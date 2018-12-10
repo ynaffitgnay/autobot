@@ -35,8 +35,6 @@ void PlanningModule::specifyMemoryBlocks() {
 void PlanningModule::initSpecificModule() {
   grid().resize(GRID_SIZE);
   Grid initial_cost_map = Grid(grid());
-  //std::cout << "grid.size() 2: " << grid().size() << std::endl;
-  ///std::cout << "initial_cost_map.cells.size(): " << initial_cost_map.cells.size() << std::endl;
   startLoc_ = Point2D(cache_.planning->startPoint.x, cache_.planning->startPoint.y);
   prevLoc_r = getGridRow(startLoc_.x);
   prevLoc_c = getGridCol(startLoc_.y);
@@ -49,7 +47,7 @@ void PlanningModule::initSpecificModule() {
   GG_->generateGrid(initial_cost_map);
   printf("Generating wave\n");
   WP_->getCosts(initial_cost_map, wfStartPose);
-  DSL_->init(initial_cost_map);
+  DSL_->init(initial_cost_map.cells);
 
   std::cout << "Initialized D* lite" << std::endl;
 
