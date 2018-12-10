@@ -56,9 +56,12 @@ bool WavefrontPropagation::getCosts(Grid& map, Pose2D& startPose) {
   	printf("Success!\n");
     for(int i = 0; i<waveCells.size(); i++) {
       map.cells[i].cost = waveCells[i].getValue();
-      float globX = map.cells[i].center.translation.x-1500;  // TODO: Needs a conversion from local x,y to global x,y not r,c
-      float globY = -map.cells[i].center.translation.y +1250;
-      float globTh = map.cells[i].center.rotation;
+      float globX = map.cells[i].center.translation.x-FIELD_WIDTH/2.0;  // Converts from local x,y to global x,y not r,c
+      float globY = -map.cells[i].center.translation.y +FIELD_HEIGHT/2.0;
+      float globTh = atan2f(-globY, -globX);
+      printf("Location: [%f,%f] Angle to center: %f\n", globX, globY, globTh*180/M_PI);
+
+      // float globTh = map.cells[i].center.rotation;
       Pose2D globCenter(globTh,globX,globY);
       map.cells[i].center = globCenter;
     }
@@ -360,6 +363,8 @@ void WavefrontPropagation::addPose(int lastI, int i, std::vector<GridCell>& plan
 {
   // Get the center pose of the cell to be added to the plan
   Pose2D pose = waveCells[i].getPosition();
+
+  // Get angle to center at FIELD_HEIGHT/2,FIELD_WIDTH/2
   
   // Determine which direction the robot will be coming so we know what orientation it should stop in
   if(i-lastI == 1) // the new cell is directly to the right of the old cell
