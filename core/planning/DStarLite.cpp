@@ -7,13 +7,15 @@
 
 DStarLite::DStarLite(MemoryCache& cache, TextLogger*& tlogger, Point2D S)
   : cache_(cache), tlogger_(tlogger), startCoords_(S), cells_(nullptr), k_(0),
-    lastReplanIdx(0), initialized(false) {
+    lastReplanIdx(0), initialized(false), startIdx_(-1), endIdx_(-1) {
 }
   
-void DStarLite::init(std::vector<GridCell>& wavefront) {
+void DStarLite::init(std::vector<GridCell>& wavefront, int start, int end) {
   cells_ = &wavefront;
   k_ = 0;
   map_.clear();
+  startIdx_ = start;
+  endIdx_ = end;
   
   // Make a 2D array out of PathNodes
   if (!buildPathGrid()) {
@@ -23,6 +25,12 @@ void DStarLite::init(std::vector<GridCell>& wavefront) {
   // Set pointer to start node
   //std::cout << "gridRow: " << getGridRow(startCoords_.y) << " gridCol: " << getGridCol(startCoords_.x) << std:: endl;
   //std::cout << "Result of getIdx: " << PathNode::getIdx(getGridRow(startCoords_.y), getGridCol(startCoords_.x)) << std::endl;
+  //std::cout << "Passed in start: " << start << " passed in end: " << end << std::endl;
+  //std::cout << "End row: " << getRowFromIdx(end) << " end col: " << getColFromIdx(end) << std::endl;
+  //
+  //std::cout << "\n\n\n\n\nIS THIS SHIT HAPPENING????\n\n\n\n\n" << std::endl;
+
+  
   S_ = &(map_.at(PathNode::getIdx(getGridRow(startCoords_.y), getGridCol(startCoords_.x))));
 
   U_ = DSLPQueue();
@@ -416,23 +424,11 @@ bool DStarLite::buildPathGrid() {
     return false;
   }
 
-  // Create empty gridcells for planning paths between stuck points
-  for (int r = 0; r < GRID_HEIGHT; ++r) {
-    for (int c = 0; c < GRID_WIDTH; ++c) {
-      blankGrid.push_back(GridCell(r,c));
-    }
-  }
-
   std::vector<GridCell>::iterator gridIt;
-  int gridIdx = 0;
   
   for (gridIt = cells_->begin(); gridIt != cells_->end(); gridIt++) {
-    if (gridIt->occupied) {
-      blankGrid.at(gridIdx).occupied = true;
-    }
     PathNode cell = PathNode(*(gridIt));
     map_.push_back(cell);
-    ++gridIdx;
   }
 
   if (map_.size() != GRID_SIZE) {

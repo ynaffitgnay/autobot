@@ -9,7 +9,10 @@
 //  : cache_(cache), tlogger_(tlogger), startCoords_(S), cells_(nullptr), k_(0),
 //    lastReplanIdx(0), initialized(false) {
 //}
-CoverageDSL::CoverageDSL(MemoryCache& cache, TextLogger*& tlogger, Point2D S) : DStarLite(cache, tlogger, S) { }
+CoverageDSL::CoverageDSL(MemoryCache& cache, TextLogger*& tlogger, Point2D S) :
+  DStarLite(cache, tlogger, S)
+{
+}
   
 //void CoverageDSL::init(std::vector<GridCell>& wavefront) {
 //  cells_ = &wavefront;

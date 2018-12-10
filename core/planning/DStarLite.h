@@ -24,21 +24,22 @@ class DStarLite {
     DSLPQueue U_;
     
     int k_;  // key modifier
-    //const Grid* wf_;
     std::vector<GridCell>* cells_;
     Point2D startCoords_;
     PathNode* S_;  // Start/current location
+    int startIdx_;
+    int endIdx_;
     //PathNode* S_prev;  // Previous location
   
-    void init(std::vector<GridCell>& wavefront);
+    void init(std::vector<GridCell>& wavefront, int start, int end);
     void runDSL();
 
     int safeAdd(int q1, int q2);
-  private:
+  protected:
     MemoryCache& cache_;
     TextLogger*& tlogger_;
 
-    std::vector<GridCell> blankGrid;
+    //std::vector<GridCell> blankGrid;
     
     int lastReplanIdx;
     bool initialized;

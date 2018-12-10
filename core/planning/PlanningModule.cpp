@@ -47,7 +47,9 @@ void PlanningModule::initSpecificModule() {
   GG_->generateGrid(initial_cost_map);
   printf("Generating wave\n");
   WP_->getCosts(initial_cost_map, wfStartPose);
-  DSL_->init(initial_cost_map.cells);
+
+  
+  DSL_->init(initial_cost_map.cells, WP_->start_index_, WP_->end_index_);
 
   std::cout << "Initialized D* lite" << std::endl;
 

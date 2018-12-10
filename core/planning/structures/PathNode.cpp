@@ -62,6 +62,6 @@ bool PathNode::getGridCoordinate(int index, int &row, int &col) {
   }
 
   col = index % GRID_WIDTH;
-  row = (index - col) / GRID_HEIGHT;
+  row = (index - col) / GRID_WIDTH;
   return true;
 }

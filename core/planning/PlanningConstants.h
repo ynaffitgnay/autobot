@@ -18,7 +18,7 @@
 #define getGridRow(y) (int)((1250 - (y)) / CELL_HEIGHT)
 #define getGridCol(x) (int)((1500 + (x)) / CELL_WIDTH)
 #define getCellIdx(r,c) (int)((r) * GRID_WIDTH + (c))
-#define getColFromIdx(x) (int)(x % GRID_SIZE)
-#define getRowFromIdx(y) (int)((y - getColFromIdx(y)) / GRID_HEIGHT)
+#define getColFromIdx(x) (int)(x % GRID_WIDTH)
+#define getRowFromIdx(y) (int)((y - getColFromIdx(y)) / GRID_WIDTH)
 
 #endif

@@ -20,8 +20,6 @@ private:
   int map_size_;                             /*!< Number of cells in the map (should be equivalent to mapCells size and waveCells size */
   int num_rows_;                             /*!< Number of cell rows in the map */
   int num_cols_;                             /*!< Number of cell columns in the map */
-  int start_index_;                          /*!< Index of the cell that the plan should start at (current position of the robot) */
-  int end_index_;                            /*!< Index of the cell that the plan will end at (adjacent to start cell) */
   bool has_map_;                             /*!< True if map data has been sent to waveCells */
   bool is_initialized_;                      /*!< True if class was initialized successfully */
   
@@ -117,6 +115,9 @@ public:
    * @brief Destructor.
    */
   ~WavefrontPropagation();
+
+  int start_index_;                          /*!< Index of the cell that the plan should start at (current position of the robot) */
+  int end_index_;                            /*!< Index of the cell that the plan will end at (adjacent to start cell) */
 
   /**
    * @brief Initializes the wavefront.
