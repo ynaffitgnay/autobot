@@ -6,10 +6,10 @@
 #include <memory/MemoryCache.h>
 #include <math/Geometry.h>
 #include <common/DSLKey.h>
-#include <common/PathNode.h>
 #include <planning/Logging.h>
 #include <planning/structures/PNCmp.h>
 #include <planning/structures/Grid.h>
+#include <planning/structures/PathNode.h>
 #include <planning/structures/DSLPQueue.h>
 #include <planning/PlanningConstants.h>
 #include <queue>

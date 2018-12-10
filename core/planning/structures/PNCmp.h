@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <common/PathNode.h>
+#include <planning/structures/PathNode.h>
 
 struct PNCmp {
   // Organize heap such that the value with the largest priority has the smallest key
