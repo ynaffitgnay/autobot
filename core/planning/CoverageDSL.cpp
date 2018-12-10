@@ -36,7 +36,7 @@ void CoverageDSL::init(std::vector<GridCell>& wavefront, int startCoverageIdx) {
     computeShortestPath(*mapIt);
     
     if (mapIt->g != mapIt->rhs) {
-      std::cout << "Cell at (" << mapIt->cell.r << ", " << mapIt->cell.c << ") was inconsistent" << std::endl;
+      //std::cout << "Cell at (" << mapIt->cell.r << ", " << mapIt->cell.c << ") was inconsistent" << std::endl;
       mapIt->g = mapIt->rhs;
     }    
   }
@@ -189,7 +189,7 @@ void CoverageDSL::generateCoveragePath(int startIdx) {
         break;
       }
 
-      std::cout << "Hop from " << lastIndex << " to " << currCellIdx << std::endl;
+      //std::cout << "Hop from " << lastIndex << " to " << currCellIdx << std::endl;
 
       std::vector<int>* hopPath = new std::vector<int>(GRID_SIZE);
       DStarLite* hopDSL = new DStarLite(tlogger_);
@@ -203,17 +203,15 @@ void CoverageDSL::generateCoveragePath(int startIdx) {
 
       delete(hopDSL);
  
-      //std::vector<int>::iterator hpIt = hopPath->begin();
-      std::cout << "hop path: ";
-      std::cout << "(" << getRowFromIdx(hopPath->at(0)) << ", " << getColFromIdx(hopPath->at(0)) << ") ";
+      //std::cout << "hop path: ";
+      //std::cout << "(" << getRowFromIdx(hopPath->at(0)) << ", " << getColFromIdx(hopPath->at(0)) << ") ";
       // Advance to the next spot in the path (since first one already in the path)
       for (int i = 1; i < hopsize; ++i) {
-        //std::cout << hopPath->at(i) << " ";
-        std::cout << "(" << getRowFromIdx(hopPath->at(i)) << ", " << getColFromIdx(hopPath->at(i)) << ") ";
+        //std::cout << "(" << getRowFromIdx(hopPath->at(i)) << ", " << getColFromIdx(hopPath->at(i)) << ") ";
         path.at(pathIdx++) = hopPath->at(i);
         ++numPlanned;
       }
-      std::cout << std::endl;
+      //std::cout << std::endl;
       
       delete(hopPath);
       

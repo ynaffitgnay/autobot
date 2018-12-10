@@ -54,13 +54,14 @@ void PlanningModule::initSpecificModule() {
   
   DSL_->init(initial_cost_map_->cells, WP_->start_index_);
 
-  std::cout << "Initialized D* lite" << std::endl;
+  std::cout << "Initialized D* lite. Initial path: " << std::endl;
 
   for (int i = 0; i < GRID_SIZE; ++i) {
-    
-    std::cout << cache_.planning->path.at(i) << " ";
-    if (i % 10 == 0)
+    if (i % 10 == 0) {
       std::cout << std::endl;
+    }
+    
+    std::cout << "(" << getRowFromIdx(cache_.planning->path.at(i)) << ", " << getColFromIdx(cache_.planning->path.at(i)) << ") ";
   }
   std::cout << std::endl;
 
@@ -117,9 +118,10 @@ void PlanningModule::updateCell() {
 
     std::cout << "rest of path: " << std::endl;
     for (int i = cache_.planning->pathIdx; i < cache_.planning->nodesLeft; ++i) {
-      std::cout << cache_.planning->path.at(i) << " ";
       if (i % 10 == 0)
         std::cout << std::endl;
+
+      std::cout << "(" << getRowFromIdx(cache_.planning->path.at(i)) << ", " << getColFromIdx(cache_.planning->path.at(i)) << ") ";
     }
     std::cout << std::endl;
    
