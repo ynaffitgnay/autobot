@@ -8,7 +8,7 @@ PlanningModule::PlanningModule() : tlogger_(textlogger) {
   //std::cout << "grid.size(): " << grid().size() << std::endl;
   GG_ = std::make_unique<GridGenerator>();
   WP_ = std::make_unique<WavefrontPropagation>();
-  DSL_ = std::make_unique<DStarLite>(cache_, tlogger_, Point2D(START_X, START_Y));
+  DSL_ = std::make_unique<CoverageDSL>(cache_, tlogger_, Point2D(START_X, START_Y));
 }
 
 void PlanningModule::specifyMemoryDependency() {
