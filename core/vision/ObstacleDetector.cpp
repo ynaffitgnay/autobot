@@ -14,7 +14,7 @@ void ObstacleDetector::findObstacles(std::vector<Blob>& blobs) {
   for (int i = 0; i < blobs.size(); i++) {
     if(blobs.at(i).color == c_ORANGE) obstaclesCands.push_back(blobs.at(i));
   }
-  printf("Num Obstacle Cands: %d\n",obstaclesCands.size());
+  // printf("Num Obstacle Cands: %d\n",obstaclesCands.size());
   auto& obs1 = vblocks_.world_object->objects_[WO_OBSTACLE_1];
   auto& obs2 = vblocks_.world_object->objects_[WO_OBSTACLE_2];
   obs1.width = 600.0;
@@ -36,8 +36,8 @@ void ObstacleDetector::obsAssign(std::vector<Blob>& obstaclesCands) {
       // printf("Comparing with obstacle: %s at [%f, %f]\n",getName(obs.first), obsPt.x, obsPt.y);
       float dist = obsPt.getDistanceTo(relPos);
       // printf("Estimated distance: %f\n", dist);
-      // printf("Blob size: %d Blob width: %d Blob height: %d \n", blob.total, blob.xf-blob.xi, blob.yf-blob.yi);
       if (blob.total > 2000){
+        // printf("Blob size: %d Blob width: %d Blob height: %d \n", blob.total, blob.xf-blob.xi, blob.yf-blob.yi);
         addObstaclesObject(center.x, center.y, blob.xf - blob.xi, blob.yf - blob.yi, WO_OBSTACLE_UNKNOWN);
       }
     }
@@ -63,6 +63,6 @@ void ObstacleDetector::addObstaclesObject(int newCenterX, int newCenterY, int wi
   obsObject.seen = true;
   obsObject.cwidth = width;
   obsObject.cheight = height;
-  printf("Obstacle at [%f, %f]\n", position.x, position.y);
+  // printf("Obstacle at [%f, %f]\n", position.x, position.y);
   tlog(30, "saw %s at (%i,%i) with calculated distance %2.4f", getName(wo_type), obsObject.imageCenterX, obsObject.imageCenterY, obsObject.visionDistance);
 }

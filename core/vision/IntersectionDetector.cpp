@@ -23,15 +23,21 @@ void IntersectionDetector::findIntersections(std::vector<Blob>& blobs) {
       {  
         case c_BLUE : 
           // std::cout << "Pushed back blue" << std::endl;
-          blueCand.push_back(blobs.at(i));
+          if (blobs.at(i).total > 10){
+            blueCand.push_back(blobs.at(i));
+          }
           break;
         case c_YELLOW :
           // std::cout << "Pushed back yellow" << std::endl;
-          yellowCand.push_back(blobs.at(i));
+          if (blobs.at(i).total > 10){
+            yellowCand.push_back(blobs.at(i));
+          }
           break;
         case c_PINK :
           // std::cout << "Pushed back pink" << std::endl;  
-          pinkCand.push_back(blobs.at(i));
+          if (blobs.at(i).total > 10){
+            pinkCand.push_back(blobs.at(i));
+          }
           break;
         default: // None of the intersection colors
           break;       
@@ -48,28 +54,30 @@ void IntersectionDetector::findIntersections(std::vector<Blob>& blobs) {
 void IntersectionDetector::processBlobs(std::vector<Blob>& yBlobs, std::vector<Blob>& pBlobs, std::vector<Blob>& bBlobs
                                       , std::vector<WorldObject>& y_intersections, std::vector<WorldObject>& p_intersections ) {
   WorldObject object;
-  bool mightBeAIntersection = false;
+  bool mightBeABeacon = false;
 
   // Going through yellow blobs
   for (int i = 0; i < yBlobs.size(); i++) {
-    mightBeAIntersection = false;
+    mightBeABeacon = false;
     if (bBlobs.size() > 0) {
       // Going through blue compared with yellow
       for (int j = 0; j < bBlobs.size(); j++) {
-        std::cout << "Comparing yellow at [" << yBlobs.at(i).avgX << " ," << yBlobs.at(i).avgY << "] with blue at [" << bBlobs.at(j).avgX << " ," << bBlobs.at(j).avgY << "]" << std::endl;
+        // std::cout << "Comparing yellow at [" << yBlobs.at(i).avgX << " ," << yBlobs.at(i).avgY << "] with blue at [" << bBlobs.at(j).avgX << " ," << bBlobs.at(j).avgY << "]" << std::endl;
         if (neighbors(yBlobs.at(i),bBlobs.at(j))) {
-          mightBeAIntersection = true;
-        }
-      }
-    } else if (pBlobs.size() > 0) {
-      for (int k = 0; k < pBlobs.size(); k++) {
-        std::cout << "Comparing yellow at [" << yBlobs.at(i).avgX << " ," << yBlobs.at(i).avgY << "] with pink at [" << pBlobs.at(k).avgX << " ," << pBlobs.at(k).avgY << "]" << std::endl;
-        if (neighbors(yBlobs.at(i),pBlobs.at(k))) {
-          mightBeAIntersection = true;
+          mightBeABeacon = true;
         }
       }
     } 
-    if (!mightBeAIntersection) {
+    if (pBlobs.size() > 0) {
+      for (int k = 0; k < pBlobs.size(); k++) {
+        // std::cout << "Comparing yellow at [" << yBlobs.at(i).avgX << " ," << yBlobs.at(i).avgY << "] with pink at [" << pBlobs.at(k).avgX << " ," << pBlobs.at(k).avgY << "]" << std::endl;
+        if (neighbors(yBlobs.at(i),pBlobs.at(k))) {
+          mightBeABeacon = true;
+        }
+      }
+    } 
+    if (!mightBeABeacon) {
+      // printf("Might be a yellow intersection at [%d, %d]\n", yBlobs.at(i).avgX, yBlobs.at(i).avgY);
       object = addIntersectionObject(yBlobs.at(i).avgX,yBlobs.at(i).avgY);
       if(objectValidInWorld(object,yBlobs.at(i))) {
          y_intersections.push_back(object);
@@ -79,17 +87,26 @@ void IntersectionDetector::processBlobs(std::vector<Blob>& yBlobs, std::vector<B
 
   // Going through pink blobs now
   for (int p = 0; p < pBlobs.size(); p++) { 
-    mightBeAIntersection = false;
+    mightBeABeacon = false;
     if (bBlobs.size() > 0) {
       // Going through blue compared with yellow
       for (int q = 0; q < bBlobs.size(); q++) {
-        std::cout << "Comparing pink at [" << pBlobs.at(p).avgX << " ," << pBlobs.at(p).avgY << "] with blue at [" << bBlobs.at(q).avgX << " ," << bBlobs.at(q).avgY << "]" << std::endl;
+        // std::cout << "Comparing pink at [" << pBlobs.at(p).avgX << " ," << pBlobs.at(p).avgY << "] with blue at [" << bBlobs.at(q).avgX << " ," << bBlobs.at(q).avgY << "]" << std::endl;
         if (neighbors(pBlobs.at(p),bBlobs.at(q)) ) {
-          mightBeAIntersection = true;
+          mightBeABeacon = true;
+        }
+      }
+    }
+    if (yBlobs.size() > 0) {
+      for (int r = 0; r < yBlobs.size(); r++) {
+        // std::cout << "Comparing pink at [" << pBlobs.at(p).avgX << " ," << pBlobs.at(p).avgY << "] with yellow at [" << yBlobs.at(r).avgX << " ," << yBlobs.at(r).avgY << "] " << std::endl;
+        if (neighbors(pBlobs.at(p),yBlobs.at(r))) {
+          mightBeABeacon = true;
         }
       }
     } 
-    if (!mightBeAIntersection) {
+    if (!mightBeABeacon) {
+      // printf("Might be a pink intersection at [%d, %d]\n", pBlobs.at(p).avgX, pBlobs.at(p).avgY);
       object = addIntersectionObject(pBlobs.at(p).avgX, pBlobs.at(p).avgY);
       if(objectValidInWorld(object,pBlobs.at(p))) {
         p_intersections.push_back(object);
@@ -99,13 +116,16 @@ void IntersectionDetector::processBlobs(std::vector<Blob>& yBlobs, std::vector<B
 }
 
 bool IntersectionDetector::neighbors(Blob& blobA, Blob& blobB) {
-  int minDist1 = std::min(std::abs(blobA.xi - blobB.xi), std::abs(blobA.xf - blobB.xi));
-  int minDist2 = std::min(std::abs(blobA.xi - blobB.xf), std::abs(blobA.xf - blobB.xf));
-  int minDistOverall = std::min(minDist1,minDist2);
-  printf("Min dist between blobA and blobB is %d", minDistOverall);
-  if (minDistOverall > 10) {
+  int minDist1X = std::min(std::abs(blobA.xi - blobB.xi), std::abs(blobA.xf - blobB.xi));
+  int minDist2X = std::min(std::abs(blobA.xi - blobB.xf), std::abs(blobA.xf - blobB.xf));
+  int minDistX = std::min(minDist1X,minDist2X);
+  int minDistY = std::min(std::abs(blobA.yi - blobB.yf), std::abs(blobA.yf - blobB.yi));
+  if (minDistX > 10 || minDistY > 10) {  // X pixels are far apart or the y pixels are far apart: not a neighbor
+    // printf("Min dist between blobA and blobB is %d, %d\n", minDistX, minDistY);
+
     return false;
   } 
+  // probably a neighbor and thus might be a beacon
   return true;
 }
 

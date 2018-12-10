@@ -1,6 +1,7 @@
 #include <vision/ImageProcessor.h>
 #include <vision/Classifier.h>
 #include <vision/BeaconDetector.h>
+#include <vision/IntersectionDetector.h>
 #include <vision/ObstacleDetector.h>
 #include <vision/Logging.h>
 #include <vision/structures/Blob.h>
@@ -15,6 +16,7 @@ ImageProcessor::ImageProcessor(VisionBlocks& vblocks, const ImageParams& iparams
   enableCalibration_ = false;
   color_segmenter_ = std::make_unique<Classifier>(vblocks_, vparams_, iparams_, camera_);
   beacon_detector_ = std::make_unique<BeaconDetector>(DETECTOR_PASS_ARGS);
+  intersection_detector_ = std::make_unique<IntersectionDetector>(DETECTOR_PASS_ARGS);
   obstacle_detector_ = std::make_unique<ObstacleDetector>(DETECTOR_PASS_ARGS);
   calibration_ = std::make_unique<RobotCalibration>();
 }
@@ -26,6 +28,7 @@ void ImageProcessor::init(TextLogger* tl){
   textlogger = tl;
   vparams_.init();
   color_segmenter_->init(tl);
+  intersection_detector_->init(tl);
   beacon_detector_->init(tl);
   obstacle_detector_->init(tl);
 }
@@ -138,7 +141,10 @@ void ImageProcessor::processFrame(){
   std::sort(blobs_.begin(), blobs_.end(), sortBlobAreaPredicate);
 
   // Detecting the beacons
-  beacon_detector_->findBeacons(blobs_);
+  beacon_detector_->findBeacons(blobs_);  
+
+  // Detecting the intersections
+  intersection_detector_->findIntersections(blobs_);
 
   // Detecting Orange colored Obstacles
   obstacle_detector_->findObstacles(blobs_);
