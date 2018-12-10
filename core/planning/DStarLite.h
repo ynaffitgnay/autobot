@@ -17,29 +17,25 @@
 
 class DStarLite {
   public:
-    DStarLite(MemoryCache& cache, TextLogger*& tlogger, Point2D startloc);
+    DStarLite(TextLogger*& tlogger);
     
     std::vector<PathNode> map_;
+    std::vector<int>* path_;
     
     DSLPQueue U_;
     
     int k_;  // key modifier
     std::vector<GridCell>* cells_;
-    Point2D startCoords_;
     PathNode* S_;  // Start/current location
-    int startIdx_;
-    int endIdx_;
-    //PathNode* S_prev;  // Previous location
+    int goalIdx_;
+    int endPlanIdx_;
   
-    void init(std::vector<GridCell>& wavefront, int start, int end);
-    void runDSL();
+    void init(std::vector<GridCell>& wavefront, int goal, int start, std::vector<int>* path);
+    bool runDSL();
 
     int safeAdd(int q1, int q2);
   protected:
-    MemoryCache& cache_;
     TextLogger*& tlogger_;
-
-    //std::vector<GridCell> blankGrid;
     
     int lastReplanIdx;
     bool initialized;
@@ -49,10 +45,8 @@ class DStarLite {
     void getNeighbors(PathNode& curr, std::vector<PathNode*>& neighbors);
     void getUnplannedNeighbors(PathNode& curr, vector<PathNode*>& neighbors);
     int getTransitionCost(PathNode& s, PathNode& p);
-    int calcPathCost(int sIdx, int fIdx);
-    void generateCoveragePath(int startIdx);
+    bool generatePath(int startIdx);
     bool buildPathGrid();
-    int hop(int index);
     void printGrid();
     void printPath();
 };

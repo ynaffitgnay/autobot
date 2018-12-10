@@ -8,7 +8,7 @@ PlanningModule::PlanningModule() : tlogger_(textlogger) {
   //std::cout << "grid.size(): " << grid().size() << std::endl;
   GG_ = std::make_unique<GridGenerator>();
   WP_ = std::make_unique<WavefrontPropagation>();
-  DSL_ = std::make_unique<CoverageDSL>(cache_, tlogger_, Point2D(START_X, START_Y));
+  DSL_ = std::make_unique<CoverageDSL>(cache_, tlogger_);
 }
 
 void PlanningModule::specifyMemoryDependency() {
@@ -47,9 +47,8 @@ void PlanningModule::initSpecificModule() {
   GG_->generateGrid(initial_cost_map);
   printf("Generating wave\n");
   WP_->getCosts(initial_cost_map, wfStartPose);
-
   
-  DSL_->init(initial_cost_map.cells, WP_->start_index_, WP_->end_index_);
+  DSL_->init(initial_cost_map.cells, WP_->start_index_);
 
   std::cout << "Initialized D* lite" << std::endl;
 
