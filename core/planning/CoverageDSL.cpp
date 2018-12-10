@@ -308,7 +308,8 @@ int CoverageDSL::calcPathCost(int sIdx, int fIdx) {
 void CoverageDSL::generateCoveragePath(int startIdx) {
   // Determine how many cells are to be in the full coverage plan
   int numPoses = 0;
-    vector<PathNode>::iterator mapIt;
+  
+  vector<PathNode>::iterator mapIt;
   for(mapIt = map_.begin(); mapIt != map_.end(); mapIt++)
   {
     // Cells to be planned do not include cells that could not be reached, obstructions, or cells planned in a previous plan
@@ -332,10 +333,12 @@ void CoverageDSL::generateCoveragePath(int startIdx) {
   } else {
     currCellIdx = cache_.planning->path.at(lastReplanIdx);
   }
-  
-  int numPlanned = 1;                       
-  while(numPlanned < numPoses)          // while we still have poses that need to be added to the plan
+
+  int newNumPlanned = 1;
+  int numPlanned = newNumPlanned;
+  while(newNumPlanned < numPoses)          // while we still have poses that need to be added to the plan
   {
+    //std::cout << "PathIdx: " << pathIdx << std::endl;
     std::vector<PathNode*> unplanned;
     getUnplannedNeighbors(map_.at(currCellIdx), unplanned); // vector of valid unvisited neighbors
     if(unplanned.size() > 0)
@@ -359,7 +362,8 @@ void CoverageDSL::generateCoveragePath(int startIdx) {
       map_.at(currCellIdx).pathorder = pathIdx;
       map_.at(currCellIdx).planned = true;
       path.at(pathIdx++) = currCellIdx;
-      numPlanned++;
+      ++newNumPlanned;
+      ++numPlanned;
     }
     else // Check for another valid neighbor
     {
@@ -379,31 +383,37 @@ void CoverageDSL::generateCoveragePath(int startIdx) {
       std::vector<int>* hopPath = new std::vector<int>(GRID_SIZE);
       DStarLite* hopDSL = new DStarLite(tlogger_);
       hopDSL->init(*blankGrid, currCellIdx, lastIndex, hopPath);
-      if (!hopDSL->runDSL()) {
+      
+      int hopsize = hopDSL->runDSL();
+      if (hopsize == -1) {
         std::cout << "Uh oh... no path could be found to hop destination!" << std::endl;
         // TODO: can maybe have hop accept a list of indices that can't be hopped to!
       }
-      delete(hopDSL);
 
-      std::vector<int>::iterator hpIt = hopPath->begin();
+      delete(hopDSL);
+ 
+      //std::vector<int>::iterator hpIt = hopPath->begin();
       std::cout << "hop path: ";
+      std::cout << "(" << getRowFromIdx(hopPath->at(0)) << ", " << getColFromIdx(hopPath->at(0)) << ") ";
       // Advance to the next spot in the path (since first one already in the path)
-      for (hpIt++; hpIt != hopPath->end(); hpIt++) {
-        std::cout << *hpIt << " ";
-        path.at(pathIdx++) = *hpIt;
+      for (int i = 1; i < hopsize; ++i) {
+        //std::cout << hopPath->at(i) << " ";
+        std::cout << "(" << getRowFromIdx(hopPath->at(i)) << ", " << getColFromIdx(hopPath->at(i)) << ") ";
+        path.at(pathIdx++) = hopPath->at(i);
+        ++numPlanned;
       }
       std::cout << std::endl;
       
       delete(hopPath);
       
-      // Create a path array to send to dstarlite
-      // Create an instance of dstarlite that moves from lastIndex to currCellIdx
-      
       map_.at(currCellIdx).pathorder = pathIdx - 1;
       map_.at(currCellIdx).planned = true;
-      //path.at(pathIdx++) = currCellIdx;
-      numPlanned++;
+      ++newNumPlanned;
+
+      //std::cout << "pathIdx = " << pathIdx << " and numPlanned = " << numPlanned << std::endl;
     }
+    
+    //printPath();
   }
   printPath();
   
@@ -457,6 +467,7 @@ int CoverageDSL::hop(int index)
   
   while (!queue.empty() && !found) {
     int s = queue.front();
+    //std::cout << "checking (" << getRowFromIdx(s) << ", " << getColFromIdx(s) << ")" << std::endl;
     if (map_.at(s).planned == false) {
       index = s;
       found = true;
@@ -467,12 +478,15 @@ int CoverageDSL::hop(int index)
     std::vector<PathNode*> neighbors;
     std::vector<PathNode*>::const_iterator neighborIt;
     //list<int>::const_iterator i;
-    getNeighbors(map_.at(index), neighbors);
+    getNeighbors(map_.at(s), neighbors);
 
     for (neighborIt = neighbors.begin(); neighborIt != neighbors.end(); neighborIt++) {
-      if (!checked[(*neighborIt)->idx]) {
-        checked[(*neighborIt)->idx] = true;
-        queue.push_back((*neighborIt)->idx);
+      int thisIdx = (*neighborIt)->idx; 
+      if (!checked[thisIdx]) {
+        checked[thisIdx] = true;
+        queue.push_back(thisIdx);
+      } else {
+        //std::cout << "Already checked  (" << getRowFromIdx(thisIdx) << ", " << getColFromIdx(thisIdx) << ")" << std::endl;
       }
     }
     

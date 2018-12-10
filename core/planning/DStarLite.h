@@ -31,7 +31,7 @@ class DStarLite {
     int endPlanIdx_;
   
     void init(std::vector<GridCell>& wavefront, int goal, int start, std::vector<int>* path);
-    bool runDSL();
+    int runDSL();
 
     int safeAdd(int q1, int q2);
   protected:
@@ -45,7 +45,7 @@ class DStarLite {
     void getNeighbors(PathNode& curr, std::vector<PathNode*>& neighbors);
     void getUnplannedNeighbors(PathNode& curr, vector<PathNode*>& neighbors);
     int getTransitionCost(PathNode& s, PathNode& p);
-    bool generatePath(int startIdx);
+    int generatePath(int startIdx);
     bool buildPathGrid();
     void printGrid();
     void printPath();

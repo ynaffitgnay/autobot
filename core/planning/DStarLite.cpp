@@ -38,7 +38,7 @@ void DStarLite::init(std::vector<GridCell>& wavefront, int goal, int start, std:
 }
 
 // runDSL with no replanning
-bool DStarLite::runDSL() {
+int DStarLite::runDSL() {
   std::vector<PathNode>::iterator mapIt;
 
   if (endPlanIdx_ == -1) {
@@ -47,7 +47,9 @@ bool DStarLite::runDSL() {
 
   computeShortestPath(map_.at(endPlanIdx_));
 
-  return generatePath(0);
+  int pathSize = generatePath(0);
+  //printGrid();
+  return pathSize;
 
 }
 
@@ -202,7 +204,7 @@ int DStarLite::getTransitionCost(PathNode& s, PathNode& p) {
 }
 
 // Generate path from idx startIdx
-bool DStarLite::generatePath(int startIdx) {
+int DStarLite::generatePath(int startIdx) {
   int pathIdx = startIdx;
   int currCellIdx = endPlanIdx_;
   
@@ -248,14 +250,14 @@ bool DStarLite::generatePath(int startIdx) {
     else // if all valid neighbors have been visited, we are stuck
     {
       std::cout << "Stuck: no neighbors are unplanned." << std::endl;
-      printPath();
-      return false;
+      //printPath();
+      return -1;
     }
   }
   
-  printPath();
+  //printPath();
   printf("Path size: %d\n", numPlanned);
-  return true;
+  return numPlanned;
 
 }
 
