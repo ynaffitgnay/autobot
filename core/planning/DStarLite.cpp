@@ -81,7 +81,7 @@ void DStarLite::updateVertex(PathNode& u) {
 void DStarLite::computeShortestPath(PathNode& curr) {
   // Don't compute for occupied cells
   if (curr.cell.occupied) {
-    std::cout << "Cell is occupied." << std::endl;
+    //std::cout << "Cell is occupied." << std::endl;
     return;
   }
   PathNode* u = nullptr;
@@ -256,7 +256,7 @@ int DStarLite::generatePath(int startIdx) {
   }
   
   //printPath();
-  printf("Path size: %d\n", numPlanned);
+  //printf("Path size: %d\n", numPlanned);
   return numPlanned;
 
 }
@@ -397,6 +397,7 @@ void DStarLite::printPath() {
       std::cout << " " << col << "  ";
     }
   }
+  
   std::cout << std::endl;
   for (int row = 0; row < GRID_HEIGHT; ++row) {
     std::cout << "    |";
@@ -416,9 +417,9 @@ void DStarLite::printPath() {
         }
       }
     }
-    std::cout << std::endl;
-
+    std::cout << "  " << row << std::endl;
   }
+  
   std::cout << "     ";
   for (int col = 0; col < GRID_WIDTH; ++col) {
     if (col < 10) {
