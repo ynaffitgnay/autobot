@@ -8,7 +8,7 @@ PlanningModule::PlanningModule() : tlogger_(textlogger) {
   //std::cout << "grid.size(): " << grid().size() << std::endl;
   GG_ = std::make_unique<GridGenerator>();
   WP_ = std::make_unique<WavefrontPropagation>();
-  DSL_ = std::make_unique<DStarLite>(cache_, tlogger_, Point2D(START_X, START_Y));
+  DSL_ = std::make_unique<CoverageDSL>(cache_, tlogger_, Point2D(START_X, START_Y));
 }
 
 void PlanningModule::specifyMemoryDependency() {
@@ -35,8 +35,6 @@ void PlanningModule::specifyMemoryBlocks() {
 void PlanningModule::initSpecificModule() {
   grid().resize(GRID_SIZE);
   Grid initial_cost_map = Grid(grid());
-  //std::cout << "grid.size() 2: " << grid().size() << std::endl;
-  ///std::cout << "initial_cost_map.cells.size(): " << initial_cost_map.cells.size() << std::endl;
   startLoc_ = Point2D(cache_.planning->startPoint.x, cache_.planning->startPoint.y);
   prevLoc_r = getGridRow(startLoc_.x);
   prevLoc_c = getGridCol(startLoc_.y);
@@ -49,7 +47,7 @@ void PlanningModule::initSpecificModule() {
   GG_->generateGrid(initial_cost_map);
   printf("Generating wave\n");
   WP_->getCosts(initial_cost_map, wfStartPose);
-  DSL_->init(initial_cost_map);
+  DSL_->init(initial_cost_map.cells);
 
   std::cout << "Initialized D* lite" << std::endl;
 
@@ -90,8 +88,7 @@ void PlanningModule::updateCell() {
   int curr_c = getGridCol(robot.loc.x);
 
   // if we haven't changed cells, return
-  // THIS CAUSES PROBLEMS FROM FIRST ONE!
-  //if (curr_r == prevLoc_r && curr_c == prevLoc_c) return;
+  if (cache_.planning->pathIdx != 0 && curr_r == prevLoc_r && curr_c == prevLoc_c) return;
   // TODO: check if the cell we're trying to go to is occupied??
 
   int desiredCellIdx = cache_.planning->path[cache_.planning->pathIdx];
@@ -105,7 +102,6 @@ void PlanningModule::updateCell() {
 
     // TODO: Check if desired cell is occupied and trigger replanning?
 
-
     std::cout << "rest of path: " << std::endl;
     for (int i = cache_.planning->pathIdx; i < cache_.planning->nodesLeft; ++i) {
       std::cout << cache_.planning->path.at(i) << " ";
@@ -116,8 +112,7 @@ void PlanningModule::updateCell() {
    
     return;
   }
-
-  //cache_.planning->grid.at(cache_.planning->path.at(cache_.planning->pathIdx)).visited = true;
+  
   cache_.planning->grid.at(currIdx).visited = true;
 
   // Remove a node on the path
@@ -125,9 +120,4 @@ void PlanningModule::updateCell() {
   
   // Increment the place along the path
   cache_.planning->pathIdx++;
-
-  // TODO:
-  
-
-  //if (currIdx == 0) 
 }

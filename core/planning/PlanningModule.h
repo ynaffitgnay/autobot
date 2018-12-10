@@ -6,7 +6,7 @@
 #include <Module.h>
 #include <memory/MemoryCache.h>
 #include <memory/PlanningBlock.h>
-#include <planning/DStarLite.h>
+#include <planning/CoverageDSL.h>
 #include <planning/WavefrontPropagation.h>
 #include <planning/GridGenerator.h>
 #include <planning/structures/Grid.h>
@@ -33,7 +33,7 @@ class PlanningModule: public Module {
     
     std::unique_ptr<GridGenerator> GG_;
     std::unique_ptr<WavefrontPropagation> WP_;
-    std::unique_ptr<DStarLite> DSL_;
+    std::unique_ptr<CoverageDSL> DSL_;
     //Grid initial_cost_map_;
     Point2D startLoc_;
     int prevLoc_r;
