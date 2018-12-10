@@ -17,6 +17,7 @@ DECLARE_INTERNAL_SCHEMA(struct PlanningBlock : public MemoryBlock {
     SCHEMA_FIELD(Point2D startPoint);  // Set desired starting point
     SCHEMA_FIELD(bool coverageStarted);
     SCHEMA_FIELD(bool changedCost);
+    SCHEMA_FIELD(bool resetPath);
     SCHEMA_FIELD(int pathIdx);
     SCHEMA_FIELD(int nodesInPath);
     SCHEMA_FIELD(int nodesLeft);

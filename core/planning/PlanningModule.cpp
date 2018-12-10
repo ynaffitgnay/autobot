@@ -11,6 +11,10 @@ PlanningModule::PlanningModule() : tlogger_(textlogger) {
   DSL_ = std::make_unique<CoverageDSL>(cache_, tlogger_);
 }
 
+PlanningModule::~PlanningModule() {
+  delete(initial_cost_map_);
+}
+
 void PlanningModule::specifyMemoryDependency() {
   requiresMemoryBlock("world_objects");
   requiresMemoryBlock("localization");
@@ -34,7 +38,7 @@ void PlanningModule::specifyMemoryBlocks() {
 // Perform startup initialization for planning
 void PlanningModule::initSpecificModule() {
   grid().resize(GRID_SIZE);
-  Grid initial_cost_map = Grid(grid());
+  initial_cost_map_ = new Grid(grid());
   startLoc_ = Point2D(cache_.planning->startPoint.x, cache_.planning->startPoint.y);
   prevLoc_r = getGridRow(startLoc_.x);
   prevLoc_c = getGridCol(startLoc_.y);
@@ -44,11 +48,11 @@ void PlanningModule::initSpecificModule() {
   wfStartPose.translation.y = 1250 - startLoc_.y; //mm
   wfStartPose.rotation = 0;
   printf("Generating grid\n");
-  GG_->generateGrid(initial_cost_map);
+  GG_->generateGrid(*initial_cost_map_);
   printf("Generating wave\n");
-  WP_->getCosts(initial_cost_map, wfStartPose);
+  WP_->getCosts(*initial_cost_map_, wfStartPose);
   
-  DSL_->init(initial_cost_map.cells, WP_->start_index_);
+  DSL_->init(initial_cost_map_->cells, WP_->start_index_);
 
   std::cout << "Initialized D* lite" << std::endl;
 
@@ -69,7 +73,15 @@ void PlanningModule::initSpecificModule() {
 }
 
 void PlanningModule::processFrame() {
+  if (cache_.planning->resetPath) {
+    DSL_->init(initial_cost_map_->cells, WP_->start_index_);
+    cache_.planning->resetPath = false;
+    std::cout << "Re-initialized planning" << std::endl;
+    return;
+  }
+  
   updateCell();
+  
   // Check if any obstacles have been encountered -- maybe store this in world objects?
   DSL_->runDSL();
 }

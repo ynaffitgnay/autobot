@@ -15,6 +15,7 @@ void DStarLite::init(std::vector<GridCell>& wavefront, int goal, int start, std:
   k_ = 0;
   path_ = path;
   map_.clear();
+  lastReplanIdx = 0;
   goalIdx_ = goal;
   endPlanIdx_ = start;
   

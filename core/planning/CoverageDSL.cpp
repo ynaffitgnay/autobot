@@ -478,56 +478,8 @@ int CoverageDSL::hop(int index)
     
   }
 
-  //TODO: remember to delete before returning!
   delete(checked);
-  
-  //std::vector<int> checked;  // vector of indices of cells that we have already checked to be unvisited
-  //checked.clear();
-  //checked.push_back(index);  // put the current cell on the list since it should hop back to itself
-  //std::vector<PathNode*> neighbors; // vector of neighbors propogating outward from original cell
-  //neighbors.clear();
-  //neighbors.push_back(&map_.at(index)); // we start propogation from the cell we got stuck at
-  //while(!found && neighbors.size() != 0) // keep going until we find a valid hop, or we have checked all valid cells and therefore neighbors is empty
-  //{
-  //  int numOld = neighbors.size(); // number of neighbors in the previous iteration
-  //  int i = 0; // iteration of old neighbors
-  //  while(i < numOld && !found) // iterate all old neighbors unless we find a valid cell to hop to
-  //  {
-  //    std::vector<PathNode*> newNeighbors;
-  //    getNeighbors(*neighbors.at(i), newNeighbors); // neighbors of our old neighbors (this is how we propogate outward)
-  //    int j = 0; // iteration of new neighbors
-  //    while(j < newNeighbors.size() && !found) // check all new neighbors unless one of them is found to be a valid hop
-  //    {
-  //      if(std::find(checked.begin(), checked.end(), newNeighbors.at(j)->idx) == checked.end()) // if the new neighbor has not already been checked
-  //      {
-  //        int r, c;
-  //        //getCoordinate(getIndex(newNeighbors[j]->getPosition()), r, c);
-  //        neighbors.push_back(newNeighbors.at(j)); // move the new neighbor to the old neighbors list so that in the next iteration we check its neighbors
-  //        //checked.push_back(getIndex(newNeighbors[j]->getPosition())); // add this neighbor to the already checked list
-  //        checked.push_back(newNeighbors.at(j)->idx);
-  //        if(!newNeighbors.at(j)->planned)//->isVisited())  // if it has not been visited, we found a valid hop
-  //        {
-  //          index = newNeighbors.at(j)->idx;//getIndex(newNeighbors[j]->getPosition());
-  //          found = true;
-  //        }
-  //      }
-  //      j++;
-  //    }
-  //    i++;
-  //  }
-  //  
-  //  if(numOld == 1) { // delete the neighbors who ran through the algorithm in the last iteration so we don't keep rechecking neighbors
-  //    neighbors.erase(neighbors.begin());
-  //  } else {
-  //    neighbors.erase(neighbors.begin(), neighbors.begin() + numOld);
-  //  }
-  //}
-  //
-  //if(!found && neighbors.size() == 0) // the algorithm failed (this means we have already planned all poses and didn't need to hop in the first place)
-  //{
-  //  //printf("We ran out of neighbors. Hop was called when all poses had already been planned\n");
-  //}
-    
+      
   return index;
 }
 //

@@ -17,6 +17,7 @@ class VisionCore;
 class PlanningModule: public Module {
   public:
     PlanningModule();
+    ~PlanningModule();
 
     void specifyMemoryDependency();
     void specifyMemoryBlocks();
@@ -30,11 +31,12 @@ class PlanningModule: public Module {
   protected:
     MemoryCache cache_;
     TextLogger*& tlogger_;
+    Grid* initial_cost_map_;
     
     std::unique_ptr<GridGenerator> GG_;
     std::unique_ptr<WavefrontPropagation> WP_;
     std::unique_ptr<CoverageDSL> DSL_;
-    //Grid initial_cost_map_;
+
     Point2D startLoc_;
     int prevLoc_r;
     int prevLoc_c;

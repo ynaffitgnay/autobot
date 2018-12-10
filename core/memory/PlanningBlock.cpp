@@ -7,6 +7,7 @@ PlanningBlock::PlanningBlock() {
   //grid = std::vector<GridCell>(GRID_SIZE);
   changedCost = false;
   coverageStarted = false;
+  resetPath = false;
   pathIdx = 0;
   //path = std::vector<GridCell>(PATH_SIZE);
   path = std::vector<int>(PATH_SIZE);
@@ -22,6 +23,7 @@ PlanningBlock::PlanningBlock() {
 
 void PlanningBlock::RestartPath() {
   coverageStarted = false;
+  resetPath = true;
   pathIdx = 0;
   nodesLeft = nodesInPath;
   // TODO: go back to pre-obstacle path
