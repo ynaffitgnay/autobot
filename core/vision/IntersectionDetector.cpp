@@ -8,7 +8,7 @@ IntersectionDetector::IntersectionDetector(DETECTOR_DECLARE_ARGS) : DETECTOR_INI
 }
 
 void IntersectionDetector::findIntersections(std::vector<Blob>& blobs) {
-  printf("\n\nNew frame\n");
+  // printf("\n\nNew frame\n");
   if(camera_ == Camera::BOTTOM) return;
   // std::cout << std::endl;
   // std::cout << "Frame ID: " << vblocks_.frame_info->frame_id << std::endl;
@@ -160,7 +160,7 @@ WorldObject IntersectionDetector::addIntersectionObject(int newCenterX,int newCe
     auto i_pos = cmatrix_.getWorldPosition(xi_new,newCenterY,0);
     auto f_pos = cmatrix_.getWorldPosition(xf_new,newCenterY,0);
     float test_width = i_pos.y - f_pos.y;
-    printf("Init: [%f, %f] Final: [%f, %f] Center: [%f, %f] test_width: %f\n", i_pos.x, i_pos.y, f_pos.x, f_pos.y, position.x, position.y,test_width);
+    // printf("Init: [%f, %f] Final: [%f, %f] Center: [%f, %f] test_width: %f\n", i_pos.x, i_pos.y, f_pos.x, f_pos.y, position.x, position.y,test_width);
     lineWidth = test_width;
   } else if (ydiff > 2*xdiff) {
     int yf_new = newCenterY - std::round(ydiff*0.5);
@@ -169,7 +169,7 @@ WorldObject IntersectionDetector::addIntersectionObject(int newCenterX,int newCe
     auto i_pos = cmatrix_.getWorldPosition(newCenterX, yi_new,0);
     auto f_pos = cmatrix_.getWorldPosition(newCenterX, yf_new,0);
     float test_width = i_pos.y - f_pos.y;
-    printf("Init: [%f, %f] Final: [%f, %f] Center: [%f, %f] test_width: %f\n", i_pos.x, i_pos.y, f_pos.x, f_pos.y, position.x, position.y,test_width);
+    // printf("Init: [%f, %f] Final: [%f, %f] Center: [%f, %f] test_width: %f\n", i_pos.x, i_pos.y, f_pos.x, f_pos.y, position.x, position.y,test_width);
     lineWidth =  test_width;
   } else {
     lineWidth = 0;
@@ -201,61 +201,60 @@ void IntersectionDetector::chooseBestIntersections(std::vector<WorldObject>& y_l
   int max_index = 0;
   if (!named_y) {
     if (y_list.size() > 1) {  // can see both intersections of one color
-      printf("Dist yellow1: %f Dist yellow 2: %f\n",y_list.at(0).visionDistance, y_list.at(1).visionDistance);
+      // printf("Dist yellow1: %f Dist yellow 2: %f\n",y_list.at(0).visionDistance, y_list.at(1).visionDistance);
       if (y_list.at(0).visionDistance > y_list.at(1).visionDistance) {
         y_list.at(0).type = WO_OPP_PEN_RIGHT_T;
         y_list.at(1).type = WO_OPP_PEN_RIGHT_L;
-        printf("Saw %s at [%d, %d] with distance %f and bearing %f\n", getName(y_list.at(0).type), y_list.at(0).imageCenterX, y_list.at(0).imageCenterY, y_list.at(0).visionDistance, y_list.at(0).visionBearing*180.0/M_PI);
-        printf("Saw %s at [%d, %d] with distance %f and bearing %f\n", getName(y_list.at(1).type), y_list.at(1).imageCenterX, y_list.at(1).imageCenterY, y_list.at(1).visionDistance, y_list.at(1).visionBearing*180.0/M_PI);
+        // printf("Saw %s at [%d, %d] with distance %f and bearing %f\n", getName(y_list.at(0).type), y_list.at(0).imageCenterX, y_list.at(0).imageCenterY, y_list.at(0).visionDistance, y_list.at(0).visionBearing*180.0/M_PI);
+        // printf("Saw %s at [%d, %d] with distance %f and bearing %f\n", getName(y_list.at(1).type), y_list.at(1).imageCenterX, y_list.at(1).imageCenterY, y_list.at(1).visionDistance, y_list.at(1).visionBearing*180.0/M_PI);
       } else {
         y_list.at(0).type = WO_OPP_PEN_RIGHT_L;
         y_list.at(1).type = WO_OPP_PEN_RIGHT_T;
-        printf("Saw %s at [%d, %d] with distance %f and bearing %f\n", getName(y_list.at(0).type), y_list.at(0).imageCenterX, y_list.at(0).imageCenterY, y_list.at(0).visionDistance, y_list.at(0).visionBearing*180.0/M_PI);
-        printf("Saw %s at [%d, %d] with distance %f and bearing %f\n", getName(y_list.at(1).type), y_list.at(1).imageCenterX, y_list.at(1).imageCenterY, y_list.at(1).visionDistance, y_list.at(1).visionBearing*180.0/M_PI);
+        // printf("Saw %s at [%d, %d] with distance %f and bearing %f\n", getName(y_list.at(0).type), y_list.at(0).imageCenterX, y_list.at(0).imageCenterY, y_list.at(0).visionDistance, y_list.at(0).visionBearing*180.0/M_PI);
+        // printf("Saw %s at [%d, %d] with distance %f and bearing %f\n", getName(y_list.at(1).type), y_list.at(1).imageCenterX, y_list.at(1).imageCenterY, y_list.at(1).visionDistance, y_list.at(1).visionBearing*180.0/M_PI);
       }
     } else {  // only one intersection
-      printf("Width yellow: %f at [%d, %d] with distance %f and bearing %f and adjusted width %f\n",y_list.at(0).width, y_list.at(0).imageCenterX, y_list.at(0).imageCenterY, y_list.at(0).visionDistance, y_list.at(0).visionBearing*180.0/M_PI, y_list.at(0).width);
-      float case1 = std::abs(1.0 - y_list.at(0).width/375.0);
+      // printf("Width yellow: %f at [%d, %d] with distance %f and bearing %f and adjusted width %f\n",y_list.at(0).width, y_list.at(0).imageCenterX, y_list.at(0).imageCenterY, y_list.at(0).visionDistance, y_list.at(0).visionBearing*180.0/M_PI, y_list.at(0).width);
+      float case1 = std::abs(1.0 - y_list.at(0).width/300.0);
       float case2 = std::abs(1.0 - y_list.at(0).width/225.0);
-      printf("T case: %f L case: %f\n", case1, case2);
+      // printf("T case: %f L case: %f\n", case1, case2);
       if (case1 < case2) {
         y_list.at(0).type = WO_OWN_PEN_LEFT_T;
-        printf("Saw %s at [%d, %d] with distance %f and bearing %f\n", getName(y_list.at(0).type), y_list.at(0).imageCenterX, y_list.at(0).imageCenterY, y_list.at(0).visionDistance, y_list.at(0).visionBearing*180.0/M_PI);
+        // printf("Saw %s at [%d, %d] with distance %f and bearing %f\n", getName(y_list.at(0).type), y_list.at(0).imageCenterX, y_list.at(0).imageCenterY, y_list.at(0).visionDistance, y_list.at(0).visionBearing*180.0/M_PI);
       } else {
         y_list.at(0).type = WO_OPP_PEN_RIGHT_L;
-        printf("Saw %s at [%d, %d] with distance %f and bearing %f\n", getName(y_list.at(0).type), y_list.at(0).imageCenterX, y_list.at(0).imageCenterY, y_list.at(0).visionDistance, y_list.at(0).visionBearing*180.0/M_PI);
+        // printf("Saw %s at [%d, %d] with distance %f and bearing %f\n", getName(y_list.at(0).type), y_list.at(0).imageCenterX, y_list.at(0).imageCenterY, y_list.at(0).visionDistance, y_list.at(0).visionBearing*180.0/M_PI);
       }   
     }
   }
 
   if (!named_p) {
     if (p_list.size() > 1) {  // can see both intersections of one color
-      printf("Dist pink1: %f Dist pink 2: %f\n",p_list.at(0).visionDistance, p_list.at(1).visionDistance);
+      // printf("Dist pink1: %f Dist pink 2: %f\n",p_list.at(0).visionDistance, p_list.at(1).visionDistance);
       if (p_list.at(0).visionDistance > p_list.at(1).visionDistance) {
         p_list.at(0).type = WO_OPP_PEN_LEFT_T;
         p_list.at(1).type = WO_OPP_PEN_LEFT_L;
-        printf("Saw %s at [%d, %d] with distance %f and bearing %f\n", getName(p_list.at(0).type), p_list.at(0).imageCenterX, p_list.at(0).imageCenterY, p_list.at(0).visionDistance, p_list.at(0).visionBearing*180.0/M_PI);
-        printf("Saw %s at [%d, %d] with distance %f and bearing %f\n", getName(p_list.at(1).type), p_list.at(1).imageCenterX, p_list.at(1).imageCenterY, p_list.at(1).visionDistance, p_list.at(1).visionBearing*180.0/M_PI);
+        // printf("Saw %s at [%d, %d] with distance %f and bearing %f\n", getName(p_list.at(0).type), p_list.at(0).imageCenterX, p_list.at(0).imageCenterY, p_list.at(0).visionDistance, p_list.at(0).visionBearing*180.0/M_PI);
+        // printf("Saw %s at [%d, %d] with distance %f and bearing %f\n", getName(p_list.at(1).type), p_list.at(1).imageCenterX, p_list.at(1).imageCenterY, p_list.at(1).visionDistance, p_list.at(1).visionBearing*180.0/M_PI);
       } else {
         p_list.at(0).type = WO_OPP_PEN_LEFT_L;
         p_list.at(1).type = WO_OPP_PEN_LEFT_T;
-        printf("Saw %s at [%d, %d] with distance %f and bearing %f\n", getName(p_list.at(0).type), p_list.at(0).imageCenterX, p_list.at(0).imageCenterY, p_list.at(0).visionDistance, p_list.at(0).visionBearing*180.0/M_PI);
-        printf("Saw %s at [%d, %d] with distance %f and bearing %f\n", getName(p_list.at(1).type), p_list.at(1).imageCenterX, p_list.at(1).imageCenterY, p_list.at(1).visionDistance, p_list.at(1).visionBearing*180.0/M_PI);
+        // printf("Saw %s at [%d, %d] with distance %f and bearing %f\n", getName(p_list.at(0).type), p_list.at(0).imageCenterX, p_list.at(0).imageCenterY, p_list.at(0).visionDistance, p_list.at(0).visionBearing*180.0/M_PI);
+        // printf("Saw %s at [%d, %d] with distance %f and bearing %f\n", getName(p_list.at(1).type), p_list.at(1).imageCenterX, p_list.at(1).imageCenterY, p_list.at(1).visionDistance, p_list.at(1).visionBearing*180.0/M_PI);
       }
     } else {  // only one intersection
-      printf("Width pink: %f at [%d, %d] with distance %f and bearing %f and adjusted width %f\n",p_list.at(0).width, p_list.at(0).imageCenterX, p_list.at(0).imageCenterY, p_list.at(0).visionDistance, p_list.at(0).visionBearing*180.0/M_PI);
-      float case1 = std::abs(1.0 - p_list.at(0).width/375.0);
+      // printf("Width pink: %f at [%d, %d] with distance %f and bearing %f and adjusted width %f\n",p_list.at(0).width, p_list.at(0).imageCenterX, p_list.at(0).imageCenterY, p_list.at(0).visionDistance, p_list.at(0).visionBearing*180.0/M_PI);
+      float case1 = std::abs(1.0 - p_list.at(0).width/300.0);
       float case2 = std::abs(1.0 - p_list.at(0).width/225.0);
-      printf("T case: %f L case: %f\n", case1, case2);
+      // printf("T case: %f L case: %f\n", case1, case2);
       if (case1 < case2) {
         p_list.at(0).type = WO_OWN_PEN_RIGHT_T;
-        printf("Saw %s at [%d, %d] with distance %f and bearing %f\n", getName(p_list.at(0).type), p_list.at(0).imageCenterX, p_list.at(0).imageCenterY, p_list.at(0).visionDistance, p_list.at(0).visionBearing*180.0/M_PI);
+        // printf("Saw %s at [%d, %d] with distance %f and bearing %f\n", getName(p_list.at(0).type), p_list.at(0).imageCenterX, p_list.at(0).imageCenterY, p_list.at(0).visionDistance, p_list.at(0).visionBearing*180.0/M_PI);
       } else {
         p_list.at(0).type = WO_OPP_PEN_LEFT_L;
-        printf("Saw %s at [%d, %d] with distance %f and bearing %f\n", getName(p_list.at(0).type), p_list.at(0).imageCenterX, p_list.at(0).imageCenterY, p_list.at(0).visionDistance, p_list.at(0).visionBearing*180.0/M_PI);
+        // printf("Saw %s at [%d, %d] with distance %f and bearing %f\n", getName(p_list.at(0).type), p_list.at(0).imageCenterX, p_list.at(0).imageCenterY, p_list.at(0).visionDistance, p_list.at(0).visionBearing*180.0/M_PI);
       }   
     }
   }
 
 }
-
