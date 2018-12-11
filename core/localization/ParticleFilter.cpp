@@ -183,7 +183,7 @@ std::vector<Particle> ParticleFilter::resampleStep(){
   int k = 0;
   double pcum = particles().at(k).w;
   for(int j = 0; j < M_; j++){
-    while(pcum < (j+r)/M_)  pcum += particles().at(++k).w;
+    while((pcum < (j+r)/M_) && (k < M_-1))  pcum += particles().at(++k).w;
     resampled_particles.at(j) = particles().at(k);
   }
   return resampled_particles;

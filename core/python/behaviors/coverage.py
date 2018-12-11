@@ -39,9 +39,9 @@ class FollowPath(Node):
     self.destloc = memory.planning.getDestPose()
     self.pathidx = memory.planning.pathIdx
     self.robot = robot
-    self.k_x = (0.0002, 0.01, 0.01)
-    self.k_y = (0.0002, 0.01, 0.01)
-    self.k_t = (0.005, 0.01, 0.1)
+    self.k_x = (0.0002, 0.01, 0.03)
+    self.k_y = (0.0002, 0.01, 0.03)
+    self.k_t = (0.008, 0.01, 0.2)
     self.x_int = 0.0
     self.y_int = 0.0
     self.t_int = 0.0
@@ -59,11 +59,11 @@ class FollowPath(Node):
     self.x_int = self.x_int + dt*e_x
     self.y_int = self.y_int + dt*e_y
     self.t_int = self.t_int + dt*e_t
-    if abs(self.x_int) >= 15.0:
+    if abs(self.x_int) >= 35.0:
       self.x_int = 15.0*np.sign(self.x_int)
-    if abs(self.y_int) >= 15.0:
+    if abs(self.y_int) >= 35.0:
       self.y_int = 15.0*np.sign(self.y_int)
-    if abs(self.t_int) >= 15.0:
+    if abs(self.t_int) >= 25.0:
       self.t_int = 15.0*np.sign(self.t_int)
 
   def run(self):
@@ -78,14 +78,23 @@ class FollowPath(Node):
     x_des = self.destloc.translation.x
     y_des = self.destloc.translation.y
     t_des = self.destloc.rotation
-    print("desired theta = %f" % (t_des))
     print("[pathIdx: %f, robot x: %f, robot y: %f, robot orientation: %f]" % (self.pathidx, self.robot.loc.x, self.robot.loc.y, core.RAD_T_DEG * self.robot.orientation))
-    print("destloc: [%f,%f,%f]" % (self.destloc.translation.x, self.destloc.translation.y, self.destloc.rotation))
+    print("destloc: [%f,%f,%f]" % (self.destloc.translation.x, self.destloc.translation.y, core.RAD_T_DEG * self.destloc.rotation))
     
     # The error in x, y, t
     e_x = -(self.robot.loc.x - x_des)
     e_y = -(self.robot.loc.y - y_des)
-    e_t = (self.robot.orientation - t_des)
+    if t_des > 0:
+      if self.robot.orientation > t_des - np.sign(t_des)*np.pi:
+        e_t = t_des - self.robot.orientation
+      else:
+        e_t = t_des - (2*np.pi + self.robot.orientation)
+    else:
+      if self.robot.orientation > t_des - np.sign(t_des)*np.pi:
+        e_t = t_des - (self.robot.orientation -2*np.pi)
+      else:
+        e_t = t_des - self.robot.orientation
+
     self.tk = time.clock()
     dt = self.tk - self.tkm1
     self.calc_int(x_des, y_des, t_des, dt)
