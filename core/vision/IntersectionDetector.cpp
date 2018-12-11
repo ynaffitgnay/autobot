@@ -9,7 +9,7 @@ IntersectionDetector::IntersectionDetector(DETECTOR_DECLARE_ARGS) : DETECTOR_INI
 
 void IntersectionDetector::findIntersections(std::vector<Blob>& blobs) {
   if(camera_ == Camera::BOTTOM) return;
-  // printf("\n\nNew frame\n");
+  printf("\n\nNew frame\n");
   // std::cout << std::endl;
   // std::cout << "Frame ID: " << vblocks_.frame_info->frame_id << std::endl;
   // std::cout << std::endl;
@@ -75,12 +75,13 @@ void IntersectionDetector::processBlobs(std::vector<Blob>& yBlobs, std::vector<B
         } 
       }
     } 
+    printf("Yellow pixel ratio: %f Xdiff: %d Ydiff: %d Calc ratio: %f\n",yBlobs.at(i).correctPixelRatio, yBlobs.at(i).dx, yBlobs.at(i).dy, (float)yBlobs.at(i).dx/ (float)yBlobs.at(i).dy);
     if (yBlobs.at(i).correctPixelRatio < 1.8) {
-      // printf("Yellow pixel ratio: %f\n",yBlobs.at(i).correctPixelRatio);
       mightBeABeacon = true;
     }
     if (!mightBeABeacon) {
-      // printf("Yellow intersection of size:%d at [%d, %d]\n",yBlobs.at(i).total, yBlobs.at(i).avgX, yBlobs.at(i).avgY);
+      printf("Yellow intersection of size:%d at [%d, %d]\n",yBlobs.at(i).total, yBlobs.at(i).avgX, yBlobs.at(i).avgY);
+      printf("Xdiff: %d Ydiff: %d\n", yBlobs.at(i).dx, yBlobs.at(i).dy);
       object = addIntersectionObject(yBlobs.at(i).avgX,yBlobs.at(i).avgY, yBlobs.at(i).correctPixelRatio);
       y_intersections.push_back(object);
     }
@@ -106,12 +107,13 @@ void IntersectionDetector::processBlobs(std::vector<Blob>& yBlobs, std::vector<B
         }
       }
     } 
+    printf("Pink pixel ratio: %f Xdiff: %d Ydiff: %d Calc ratio: %f\n",pBlobs.at(p).correctPixelRatio, pBlobs.at(p).dx, pBlobs.at(p).dy, (float)pBlobs.at(p).dx/ (float)pBlobs.at(p).dy);
     if (pBlobs.at(p).correctPixelRatio < 1.8) {
-      // printf("Pink pixel ratio: %f\n",pBlobs.at(p).correctPixelRatio);
       mightBeABeacon = true;
     }
     if (!mightBeABeacon) {
-      // printf("Pink intersection of size: %d at [%d, %d]\n", pBlobs.at(p).total, pBlobs.at(p).avgX, pBlobs.at(p).avgY);
+      printf("Pink intersection of size: %d at [%d, %d]\n", pBlobs.at(p).total, pBlobs.at(p).avgX, pBlobs.at(p).avgY);
+      printf("Xdiff: %d Ydiff: %d\n", pBlobs.at(p).dx, pBlobs.at(p).dy);
       object = addIntersectionObject(pBlobs.at(p).avgX, pBlobs.at(p).avgY, pBlobs.at(p).correctPixelRatio);
       p_intersections.push_back(object);
     }
@@ -140,7 +142,6 @@ WorldObject IntersectionDetector::addIntersectionObject(int newCenterX,int newCe
 
   intersectionObject.imageCenterX = newCenterX;
   intersectionObject.imageCenterY = newCenterY;
-  // printf("Old height: %d New height: %d\n", heights_[wo_type], newHeight);
   auto position = cmatrix_.getWorldPosition(intersectionObject.imageCenterX, intersectionObject.imageCenterY, 0);
   intersectionObject.visionDistance = cmatrix_.groundDistance(position);
   intersectionObject.visionBearing = cmatrix_.bearing(position);
@@ -156,13 +157,13 @@ WorldObject IntersectionDetector::addIntersectionObject(int newCenterX,int newCe
 
 void IntersectionDetector::chooseBestIntersections(std::vector<WorldObject>& y_list, std::vector<WorldObject>& p_list) {
   // Cycle through beacon types
-  for (int i = 0; i < y_list.size(); i++){
-    printf("Width yellow: %d\n",y_list.at(i).width);
-  }
+  // for (int i = 0; i < y_list.size(); i++){
+  //   printf("Width yellow: %d\n",y_list.at(i).width);
+  // }
 
-  for (int j = 0; j < p_list.size(); j++){
-    printf("Width pink: %d\n",p_list.at(j).width);
-  }
+  // for (int j = 0; j < p_list.size(); j++){
+  //   printf("Width pink: %d\n",p_list.at(j).width);
+  // }
 
 }
 

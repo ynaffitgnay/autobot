@@ -8,7 +8,7 @@ ObstacleDetector::ObstacleDetector(DETECTOR_DECLARE_ARGS) : DETECTOR_INITIALIZE 
 }
 
 void ObstacleDetector::findObstacles(std::vector<Blob>& blobs) {
-  if(camera_ == Camera::BOTTOM) return;
+  if(camera_ == Camera::TOP) return;
   std::vector<Blob> obstaclesCands;
   std::vector<WorldObject> obstacles;
   for (int i = 0; i < blobs.size(); i++) {
@@ -37,7 +37,7 @@ void ObstacleDetector::obsAssign(std::vector<Blob>& obstaclesCands) {
       float dist = obsPt.getDistanceTo(relPos);
       // printf("Estimated distance: %f\n", dist);
       if (blob.total > 2000){
-        printf("Blob size: %d Blob width: %d Blob height: %d \n", blob.total, blob.xf-blob.xi, blob.yf-blob.yi);
+        // printf("Blob size: %d Blob width: %d Blob height: %d \n", blob.total, blob.xf-blob.xi, blob.yf-blob.yi);
         addObstaclesObject(center.x, center.y, blob.xf - blob.xi, blob.yf - blob.yi, WO_OBSTACLE_UNKNOWN);
       }
     }
@@ -63,6 +63,7 @@ void ObstacleDetector::addObstaclesObject(int newCenterX, int newCenterY, int wi
   obsObject.seen = true;
   obsObject.cwidth = width;
   obsObject.cheight = height;
-  printf("Obstacle at [%f, %f]\n", position.x, position.y);
-  tlog(30, "saw %s at (%i,%i) with calculated distance %2.4f", getName(wo_type), obsObject.imageCenterX, obsObject.imageCenterY, obsObject.visionDistance);
+  obsObject.fromTopCamera = camera_ == Camera::TOP;
+  // printf("Obstacle at [%f, %f]\n", position.x, position.y);
+  // tlog(30, "saw %s at (%i,%i) with calculated distance %2.4f", getName(wo_type), obsObject.imageCenterX, obsObject.imageCenterY, obsObject.visionDistance);
 }
