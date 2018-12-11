@@ -67,8 +67,8 @@ void PlanningModule::initSpecificModule() {
 
   int desiredCellIdx = cache_.planning->path[cache_.planning->pathIdx];
 
-  std::cout << "pathIdx: " << cache_.planning->pathIdx << ". I should be in idx " << desiredCellIdx << "  (" << getRowFromIdx(desiredCellIdx)  <<
-      ", " << getColFromIdx(desiredCellIdx) << ")." << std::endl;
+  // std::cout << "pathIdx: " << cache_.planning->pathIdx << ". I should be in idx " << desiredCellIdx << "  (" << getRowFromIdx(desiredCellIdx)  <<
+  //     ", " << getColFromIdx(desiredCellIdx) << ")." << std::endl;
 
   // TODO: re-initialize features in planning block (maybe shift planning stuff to world_object)?
 }
@@ -110,20 +110,20 @@ void PlanningModule::updateCell() {
 
   // get information about the new cell
   if (currIdx != desiredCellIdx) {
-    std::cout << "I should be in idx " << desiredCellIdx << "  (" << getRowFromIdx(desiredCellIdx)  <<
-      ", " << getColFromIdx(desiredCellIdx) << "), but I'm in " << currIdx << " (" <<
-      curr_r << ", " << curr_c << ")." << std::endl;
+    // std::cout << "I should be in idx " << desiredCellIdx << "  (" << getRowFromIdx(desiredCellIdx)  <<
+      // ", " << getColFromIdx(desiredCellIdx) << "), but I'm in " << currIdx << " (" <<
+      // curr_r << ", " << curr_c << ")." << std::endl;
 
     // TODO: Check if desired cell is occupied and trigger replanning?
 
-    std::cout << "rest of path: " << std::endl;
-    for (int i = cache_.planning->pathIdx; i < cache_.planning->nodesLeft; ++i) {
-      if (i % 10 == 0)
-        std::cout << std::endl;
+    // std::cout << "rest of path: " << std::endl;
+    // for (int i = cache_.planning->pathIdx; i < cache_.planning->nodesLeft; ++i) {
+      // if (i % 10 == 0)
+        // std::cout << std::endl;
 
-      std::cout << "(" << getRowFromIdx(cache_.planning->path.at(i)) << ", " << getColFromIdx(cache_.planning->path.at(i)) << ") ";
-    }
-    std::cout << std::endl;
+      // std::cout << "(" << getRowFromIdx(cache_.planning->path.at(i)) << ", " << getColFromIdx(cache_.planning->path.at(i)) << ") ";
+    // }
+    // std::cout << std::endl;
    
     return;
   }

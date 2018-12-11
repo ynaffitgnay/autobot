@@ -39,57 +39,103 @@ class FollowPath(Node):
     self.destloc = memory.planning.getDestPose()
     self.pathidx = memory.planning.pathIdx
     self.robot = robot
-    self.k_t = (0.07, 0.01, 0.1)
-    self.theta_integral = 0.0
-    self.theta_prev = 0.0
-    self.time_last = time.clock()
-    self.time_current = time.clock()
-    self.des_theta = np.pi
-    self.prev_idx = self.pathidx
+    self.k_x = (0.0002, 0.01, 0.01)
+    self.k_y = (0.0002, 0.01, 0.01)
+    self.k_t = (0.005, 0.01, 0.1)
+    self.x_int = 0.0
+    self.y_int = 0.0
+    self.t_int = 0.0
+    self.x_prev = 0.0
+    self.y_prev = 0.0
+    self.t_prev = 0.0
+    self.id_prev = self.pathidx
+    self.tkm1 = time.clock()
+    self.tk = time.clock()
 
-  def calc_integral(self, dt):
-    center = np.sign(self.robot.orientation)*(np.pi - np.abs(self.robot.orientation))
-    self.theta_integral = self.theta_integral + dt*center
-    if abs(self.theta_integral) >= 15.0:
-      self.theta_integral = 15.0*np.sign(self.theta_integral)
+  def findDesTheta(self, x_des, y_des):
+    return np.arctan2(y_des, x_des)
+
+  def calc_int(self, e_x, e_y, e_t, dt):
+    self.x_int = self.x_int + dt*e_x
+    self.y_int = self.y_int + dt*e_y
+    self.t_int = self.t_int + dt*e_t
+    if abs(self.x_int) >= 15.0:
+      self.x_int = 15.0*np.sign(self.x_int)
+    if abs(self.y_int) >= 15.0:
+      self.y_int = 15.0*np.sign(self.y_int)
+    if abs(self.t_int) >= 15.0:
+      self.t_int = 15.0*np.sign(self.t_int)
 
   def run(self):
     commands.setHeadPanTilt(0.0,0.0,1.5)
+    
+    # The desired location on the field
     self.destloc = memory.planning.getDestPose()
     self.pathidx = memory.planning.pathIdx
-    if not (self.prev_idx == self.pathidx):
-      self.postSignal("head")
-    center = np.sign(self.robot.orientation)*(np.pi - np.abs(self.robot.orientation))
-    if memory.planning.nodesLeft == 0:
-      self.finish()
-    self.time_current = time.clock()
-    dt = self.time_current - self.time_last
-    self.calc_integral(dt)
-
-    if dt == 0 or (self.k_t[2] * (center - self.theta_prev) / dt) > 0.3:
-      theta_cont = self.k_t[0] * center + self.k_t[1] * self.theta_integral
-    else:
-      theta_cont = self.k_t[0] * center + self.k_t[1] * self.theta_integral + self.k_t[2] *(center - self.theta_prev) / dt
-
-    if abs(theta_cont) > 0.2:
-      theta_cont = np.sign(theta_cont)*0.2
-    print("[P input: %f, I input: %f, D input: %f]" % (self.k_t[0] * center, self.k_t[1] * self.theta_integral, self.k_t[2] *(center - self.theta_prev)/dt))
+    th = self.robot.orientation
+    
+    # The desired x, y, t
+    x_des = self.destloc.translation.x
+    y_des = self.destloc.translation.y
+    t_des = self.destloc.rotation
+    print("desired theta = %f" % (t_des))
     print("[pathIdx: %f, robot x: %f, robot y: %f, robot orientation: %f]" % (self.pathidx, self.robot.loc.x, self.robot.loc.y, core.RAD_T_DEG * self.robot.orientation))
     print("destloc: [%f,%f,%f]" % (self.destloc.translation.x, self.destloc.translation.y, self.destloc.rotation))
+    
+    # The error in x, y, t
+    e_x = -(self.robot.loc.x - x_des)
+    e_y = -(self.robot.loc.y - y_des)
+    e_t = (self.robot.orientation - t_des)
+    self.tk = time.clock()
+    dt = self.tk - self.tkm1
+    self.calc_int(x_des, y_des, t_des, dt)
 
-    x_disp = self.robot.loc.x - self.destloc.translation.x
-    y_disp = self.robot.loc.y - self.destloc.translation.y
+    de_x = (e_x - self.x_prev)
+    de_y = (e_y - self.y_prev)
+    de_t = (e_t - self.t_prev)
 
-    if abs(y_disp) > abs(x_disp):
-      commands.setWalkVelocity(0.05,0.4*np.sign(y_disp),-0.05*np.sign(y_disp))
+    # Bound the derivative term of x
+    if dt == 0 or (self.k_x[2] * de_x > 0.3 * dt):
+      de_x = 0.0
     else:
-      commands.setWalkVelocity(0.4*np.sign(x_disp),-0.05*np.sign(x_disp),theta_cont)
+      de_x = de_x / dt
 
-    self.curloc = self.destloc
-    self.destloc = memory.planning.getDestPose()
-    self.theta_prev = center
-    self.time_last = self.time_current
-    self.prev_idx = self.pathidx
+    # Bound the derivative term of y
+    if dt == 0 or (self.k_y[2] * de_y > 0.3 * dt):
+      de_y = 0.0
+    else:
+      de_y = de_y / dt
+
+    # Bound the derivative term of theta
+    if dt == 0 or (self.k_t[2] * de_t > 0.3 * dt):
+      de_t = 0.0
+    else:
+      de_t = de_t / dt
+
+    x_cont = self.k_x[0] * e_x + self.k_x[1] * self.x_int + self.k_x[2] * e_x
+    # print("[x_cont: %f, ex: %f, kpx: %f, kix: %f, kdx: %f]" % (x_cont, e_x, self.k_x[0] * e_x, self.k_x[1] * self.x_int, self.k_x[2] * e_x))
+    y_cont = self.k_y[0] * e_y + self.k_y[1] * self.y_int + self.k_y[2] * e_y
+    # print("[y_cont: %f, ey: %f, kpy: %f, kiy: %f, kdy: %f]" % (y_cont, e_y, self.k_y[0] * e_y, self.k_y[1] * self.y_int, self.k_y[2] * e_y))
+    t_cont = self.k_t[0] * e_t + self.k_t[1] * self.t_int + self.k_t[2] * e_t
+    # print("[t_cont: %f, et: %f, kpt: %f, kit: %f, kdt: %f]" % (t_cont, e_t, self.k_t[0] * e_t, self.k_t[1] * self.t_int, self.k_t[2] * e_t))
+
+    K = np.array([[np.cos(th), np.sin(th), 0],[-np.sin(th), np.cos(th), 0],[0, 0, 1]])
+    dstate = np.array([[x_cont], [y_cont], [t_cont]])
+
+    u = np.dot(K,dstate)
+    print("[u_1: %f, u_2: %f, u_3: %f]" % (u[0], u[1], u[2]))
+    commands.setWalkVelocity(u[0,0],u[1,0],u[2,0])
+
+    self.x_prev = e_x
+    self.y_prev = e_y
+    self.t_prev = e_t
+    self.tkm1 = self.tk
+    if not (self.id_prev == self.pathidx):
+      self.postSignal("head")
+    
+    self.id_prev = self.pathidx
+    if memory.planning.nodesLeft == 0:
+      self.finish()
 
 class Stand(Node):
   def run(self):
@@ -121,4 +167,4 @@ class Playing(LoopingStateMachine):
 
     follow = FollowPath(robot)
 
-    self.add_transition(rdy,C,follow,S("head"),moveHeadLeft,C,moveHeadRight,C,follow)
+    self.add_transition(rdy,C,moveHeadLeft,C,moveHeadRight,C,follow,S("head"),moveHeadLeft)

@@ -156,13 +156,13 @@ WorldObject IntersectionDetector::addIntersectionObject(int newCenterX,int newCe
 
 void IntersectionDetector::chooseBestIntersections(std::vector<WorldObject>& y_list, std::vector<WorldObject>& p_list) {
   // Cycle through beacon types
-  for (int i = 0; i < y_list.size(); i++){
-    printf("Width yellow: %d\n",y_list.at(i).width);
-  }
+  // for (int i = 0; i < y_list.size(); i++){
+  //   printf("Width yellow: %d\n",y_list.at(i).width);
+  // }
 
-  for (int j = 0; j < p_list.size(); j++){
-    printf("Width pink: %d\n",p_list.at(j).width);
-  }
+  // for (int j = 0; j < p_list.size(); j++){
+  //   printf("Width pink: %d\n",p_list.at(j).width);
+  // }
 
 }
 
