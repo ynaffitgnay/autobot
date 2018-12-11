@@ -17,12 +17,13 @@ from state_machine import Node, C, S, LoopingStateMachine, EventNode, Event, Neg
 class GetReady(Node):
   def run(self):
     commands.stand()
-    commands.setHeadTilt(5.0)
+    commands.setHeadTilt(-2.0)
     if self.getTime() > 1.5:
       self.finish()
 
 class TurnInPlace(Node):
   def run(self,beacon_by=None, beacon_yb=None, beacon_bp=None, beacon_pb=None, beacon_py=None, beacon_yp=None):
+    commands.setHeadTilt(-2.0)
     commands.setWalkVelocity(0.0,0.0,-0.1)
 
 class Playing(LoopingStateMachine):
