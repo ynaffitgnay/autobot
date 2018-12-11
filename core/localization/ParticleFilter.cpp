@@ -19,8 +19,8 @@ void ParticleFilter::init(Point2D loc, float orientation) {
   particles().resize(M_);
   auto frame = cache_.frame_info->frame_id;
   for(auto& p : particles()) {
-    p.x = Random::inst().sampleU(-2000.0,2000.0);
-    p.y = Random::inst().sampleU(-1200.0,1200.0);
+    p.x = Random::inst().sampleN(1250.0,300.0);
+    p.y = Random::inst().sampleN(-1000.0,300.0);
     p.t = Random::inst().sampleU(-M_PI, M_PI);
     p.w = 1.0/M_;
   }
@@ -39,9 +39,10 @@ void ParticleFilter::processFrame() {
   updateStep();
   
   // Check if resample
-  if(checkResample()){
+  if(checkResample() && !noMeasurement()){
     particles() = resampleStep();
   }
+  std::cout << "x: " << mean_.translation.x << " y: " << mean_.translation.y << " t: " << mean_.rotation << std::endl;
 }
 
 const Pose2D& ParticleFilter::pose() const {
@@ -59,6 +60,7 @@ const Pose2D& ParticleFilter::pose() const {
 
 void ParticleFilter::propagationStep(const Pose2D& disp) {
   // Equivalent to line 4 where we get proposed state based on particles and control input
+  std::cout << "Propogation Step" << std::endl;
   
   for(auto& p : particles()) {
     // Get the belief
@@ -89,7 +91,7 @@ void ParticleFilter::propagationStep(const Pose2D& disp) {
 }
 
 void ParticleFilter::updateStep(){
-  int num_unreliable = 0;
+  std::cout << "Update Step" << std::endl;
   for(auto& p : particles()) {
     double bear_weight = 0.0;
     for(std::map<WorldObjectType,Pose2D>::iterator it=landmarks_.begin(); it!=landmarks_.end(); ++it){
@@ -97,14 +99,14 @@ void ParticleFilter::updateStep(){
       if (landmark_current.seen) {
         // printf("Saw %s at [%f, %f] with distance: %f and bearing: %f\n",getName(it->first),it->second.translation.x, it->second.translation.y,landmark_current.visionDistance,landmark_current.visionBearing*180.0/M_PI);
         //double part_dist = sqrt(pow(p.x - it->second.translation.x, 2) + pow(p.y - it->second.translation.y,2));
-        double part_dist = sqrt(pow(p.x - landmark_current.loc.x, 2) + pow(p.y - landmark_current.loc.y,2));
+        double part_dist = sqrt(pow(p.x - it->second.translation.x, 2) + pow(p.y - it->second.translation.y,2));
         double mean_dist = landmark_current.visionDistance;
         double var_dist = (mean_dist/3.5)*(mean_dist/3.5);
         double dist_weight = foldedNormPDF(part_dist,mean_dist,var_dist);
 
         double part_global_bearing = p.t;  //alpha
 
-        double part_landmark_sep = atan2f(landmark_current.loc.y-p.y,landmark_current.loc.x-p.x);  // beta
+        double part_landmark_sep = atan2f(it->second.translation.y-p.y,it->second.translation.x-p.x);  // beta
         double mean_bear = landmark_current.visionBearing;  //theta
         double x_bear = part_landmark_sep - part_global_bearing;  //phi
 
@@ -140,6 +142,7 @@ double ParticleFilter::truncNormPDF(double x, double mu, double sig_sq, double a
 
 
 bool ParticleFilter::checkResample(){
+  std::cout << "Checking Resampling" << std::endl;
   // W slow and fast calculation
   double w_avg = 0;
   double weights_sum = 0;
@@ -152,7 +155,6 @@ bool ParticleFilter::checkResample(){
   w_slow_ += alpha_slow_ * (w_avg - w_slow_);
   w_fast_ += alpha_fast_ * (w_avg - w_fast_);
 
-
   if(weights_sum == 0.0) return true;
   for(auto& p : particles()) {
     p.w /= weights_sum;
@@ -164,7 +166,16 @@ bool ParticleFilter::checkResample(){
   return (N_eff < (0.9*M_));
 }
 
+bool ParticleFilter::noMeasurement(){
+  for(std::map<WorldObjectType,Pose2D>::iterator it=landmarks_.begin(); it!=landmarks_.end(); ++it){
+    auto& landmark_current = cache_.world_object->objects_[it->first];
+    if (landmark_current.seen) return false;
+  }
+  return true;
+}
+
 std::vector<Particle> ParticleFilter::resampleStep(){
+  std::cout << "Resampling" << std::endl;
   std::vector<Particle> resampled_particles(M_);
   bool noob = false;
   if (particles().size() == 0)

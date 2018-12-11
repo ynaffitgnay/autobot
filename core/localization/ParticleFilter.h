@@ -22,14 +22,20 @@ class ParticleFilter {
       return cache_.localization_mem->particles;
     }
     std::map<WorldObjectType,Pose2D> landmarks_ = {
-    { WO_BEACON_YELLOW_BLUE, Pose2D(0.0, -500.0,-1000.0) },
-    { WO_BEACON_BLUE_YELLOW, Pose2D(0.0, -500.0,-1000.0) },
-    { WO_BEACON_YELLOW_PINK, Pose2D(0.0, 500.0,-1000.0) },
-    { WO_BEACON_PINK_YELLOW, Pose2D(0.0, 500.0,-1000.0) },
-    { WO_BEACON_BLUE_PINK, Pose2D(0.0, 0.0, 1000.0) },
-    { WO_BEACON_PINK_BLUE, Pose2D(0.0, 0.0, 1000.0) },
-    { WO_OBSTACLE_1, Pose2D(0.0, 1800.0, 750.0) },
-    { WO_OBSTACLE_2, Pose2D(0.0, 750.0, 1350.0) }};
+    { WO_BEACON_YELLOW_BLUE, Pose2D(0.0, -1500.0,-1250.0) },
+    { WO_BEACON_BLUE_YELLOW, Pose2D(0.0, -1500.0,1250.0) },
+    { WO_BEACON_YELLOW_PINK, Pose2D(0.0, 1500.0,-1250.0) },
+    { WO_BEACON_PINK_YELLOW, Pose2D(0.0, 1500.0,1250.0) },
+    { WO_BEACON_BLUE_PINK, Pose2D(0.0, 0.0, 1250.0) },
+    { WO_BEACON_PINK_BLUE, Pose2D(0.0, 0.0, -1250.0) },
+    { WO_OPP_PEN_LEFT_L, Pose2D(0.0, 900.0, 700.0)},
+    { WO_OPP_PEN_RIGHT_L, Pose2D(0.0, 900.0, -700.0)},
+    { WO_OPP_PEN_LEFT_T, Pose2D(0.0, 1500.0, 700.0)},
+    { WO_OPP_PEN_RIGHT_T, Pose2D(0.0, 1500.0, -700.0)},
+    { WO_OWN_PEN_RIGHT_T, Pose2D(0.0, -1500.0, 600.0)},
+    { WO_OWN_PEN_LEFT_T, Pose2D(0.0, -1500.0, -600.0)}};
+    // { WO_OBSTACLE_1, Pose2D(0.0, 1800.0, 750.0) },
+    // { WO_OBSTACLE_2, Pose2D(0.0, 750.0, 1350.0) },
 
   protected:
     inline std::vector<Particle>& particles() {
@@ -55,6 +61,7 @@ class ParticleFilter {
     double normPDF(double x, double mu, double sig_sq);
     double foldedNormPDF(double x, double mu, double sig_sq);
     double truncNormPDF(double x, double mu, double sig_sq, double a, double b);
+    bool noMeasurement();
 };
 
 #endif

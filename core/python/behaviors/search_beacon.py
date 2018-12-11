@@ -16,8 +16,8 @@ from state_machine import Node, C, S, LoopingStateMachine, EventNode, Event, Neg
 
 class GetReady(Node):
   def run(self):
-    commands.standStraight()
-    commands.setHeadTilt(10.0)
+    commands.stand()
+    commands.setHeadTilt(5.0)
     if self.getTime() > 1.5:
       self.finish()
 
