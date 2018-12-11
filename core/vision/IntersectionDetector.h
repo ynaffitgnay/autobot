@@ -51,16 +51,8 @@ class IntersectionDetector : public ObjectDetector {
   * Input: XY coords of new intersection and intersection type.
   * Output: WorldObject of the same intersection type.
   */
-  WorldObject addIntersectionObject(int newCenterX,int newCenterY);
+  WorldObject addIntersectionObject(int newCenterX,int newCenterY,float aspectRatio);
 
-
-  /*
-  * Function for examining if the object makes sense in the world when looking at the camera matrix
-  * Input: Intersection object and its component blobs.
-  * Output: Probably vs probably not in the world
-  * 
-  */
-  bool objectValidInWorld(WorldObject& object, Blob& blob);
 
   /*
   * Function for discriminating between potential intersections of the same type.
@@ -69,18 +61,18 @@ class IntersectionDetector : public ObjectDetector {
   * The actual world objects are sent out in this function.
   * Input: A vector of all of the candidates for each intersection type
   */
-  void chooseBestIntersections(std::vector<std::vector<WorldObject> >& intersection_list);
+  void chooseBestIntersections(std::vector<WorldObject>& y_intersections,std::vector<WorldObject>& p_intersections);
 
   /*
   * All cards are 65mmx75mm individually
   */
-  std::map<WorldObjectType,int> widths_ = {
-    { WO_OPP_PEN_LEFT_L, 225 },
-    { WO_OPP_PEN_RIGHT_L, 225 },
-    { WO_OPP_PEN_LEFT_T, 150 },
-    { WO_OPP_PEN_RIGHT_T, 150 },
-    { WO_OWN_PEN_RIGHT_T, 75 },
-    { WO_OWN_PEN_LEFT_T, 75 }};
+  std::map<WorldObjectType,int> aspectRatios_ = {
+    { WO_OPP_PEN_LEFT_L, 3 },
+    { WO_OPP_PEN_RIGHT_L, 3 },
+    { WO_OPP_PEN_LEFT_T, 2 },
+    { WO_OPP_PEN_RIGHT_T, 2 },
+    { WO_OWN_PEN_RIGHT_T, 4 },
+    { WO_OWN_PEN_LEFT_T, 4 }};
 
 };
 
