@@ -47,10 +47,6 @@ class ParticleFilter {
     TextLogger*& tlogger_;
     KMeans* kmeans_;
     int M_;
-    double w_slow_;
-    double w_fast_;
-    double alpha_slow_;
-    double alpha_fast_;
     bool robot_localized_;
     mutable Pose2D mean_;
     mutable bool dirty_;

@@ -91,35 +91,24 @@ class FollowPath(Node):
     self.time_last = self.time_current
     self.prev_idx = self.pathidx
 
-
 class Stand(Node):
   def run(self):
     # print("STAND????")
     commands.stand()
     commands.setHeadPanTilt(0.0,0.0,1.5)
 
-class MoveHeadLeft(Node):
+class MoveHead(Node):
   """Search for the ball to the left"""
-  def __init__(self, tilt):
-    super(MoveHeadLeft, self).__init__()
+  def __init__(self, pan, tilt, time):
+    super(MoveHead, self).__init__()
     self.tilt = tilt
-  def run(self):
-    commands.setWalkVelocity(0.0,0.0,0.0)
-    commands.setHeadPanTilt(core.DEG_T_RAD*85.0,self.tilt,2.0)
-    commands.setHeadTilt(self.tilt)
-    if self.getTime() > 2.5:
-      self.finish()
+    self.pan = pan
+    self.time = time
 
-class MoveHeadRight(Node):
-  """Search for the ball to the right"""
-  def __init__(self, tilt):
-    super(MoveHeadRight, self).__init__()
-    self.tilt = tilt
   def run(self):
     commands.setWalkVelocity(0.0,0.0,0.0)
-    commands.setHeadPanTilt(-core.DEG_T_RAD*85.0,self.tilt,4.0)
-    commands.setHeadTilt(self.tilt)
-    if self.getTime() > 5.0:
+    commands.setHeadPanTilt(core.DEG_T_RAD*self.pan,self.tilt, self.time)
+    if self.getTime() > (self.time + 0.5):
       self.finish()
 
 class Playing(LoopingStateMachine):
@@ -127,8 +116,8 @@ class Playing(LoopingStateMachine):
     robot = memory.world_objects.getObjPtr(core.WO_TEAM5)
     rdy = GetReady()
     stand = Stand()
-    moveHeadLeft = MoveHeadLeft(0.0)
-    moveHeadRight = MoveHeadRight(0.0)
+    moveHeadLeft = MoveHead(110.0, 0.0, 3.0)
+    moveHeadRight = MoveHead(-110.0, 0.0, 6.0)
 
     follow = FollowPath(robot)
 
