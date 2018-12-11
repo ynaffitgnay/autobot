@@ -51,7 +51,7 @@ class IntersectionDetector : public ObjectDetector {
   * Input: XY coords of new intersection and intersection type.
   * Output: WorldObject of the same intersection type.
   */
-  WorldObject addIntersectionObject(int newCenterX,int newCenterY,float aspectRatio);
+  WorldObject addIntersectionObject(int newCenterX,int newCenterY,int xdiff, int ydiff);
 
 
   /*
@@ -66,13 +66,13 @@ class IntersectionDetector : public ObjectDetector {
   /*
   * All cards are 65mmx75mm individually
   */
-  std::map<WorldObjectType,int> aspectRatios_ = {
-    { WO_OPP_PEN_LEFT_L, 3 },
-    { WO_OPP_PEN_RIGHT_L, 3 },
-    { WO_OPP_PEN_LEFT_T, 2 },
-    { WO_OPP_PEN_RIGHT_T, 2 },
-    { WO_OWN_PEN_RIGHT_T, 4 },
-    { WO_OWN_PEN_LEFT_T, 4 }};
+  std::map<WorldObjectType,int> widths_ = {
+    { WO_OPP_PEN_LEFT_L, 225 },
+    { WO_OPP_PEN_RIGHT_L, 225 },
+    { WO_OPP_PEN_LEFT_T, 150 },
+    { WO_OPP_PEN_RIGHT_T, 150 },
+    { WO_OWN_PEN_RIGHT_T, 375 },
+    { WO_OWN_PEN_LEFT_T, 375 }};
 
 };
 
