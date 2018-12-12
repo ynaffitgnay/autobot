@@ -102,7 +102,7 @@ void PlanningModule::updateCell() {
   int curr_c = getGridCol(robot.loc.x);
 
   // if we haven't changed cells, return
-  if (cache_.planning->pathIdx != 0 && curr_r == prevLoc_r && curr_c == prevLoc_c) return;
+  //if (cache_.planning->pathIdx != 0 && curr_r == prevLoc_r && curr_c == prevLoc_c) return;
   // TODO: check if the cell we're trying to go to is occupied??
 
   int desiredCellIdx = cache_.planning->path[cache_.planning->pathIdx];
@@ -111,8 +111,8 @@ void PlanningModule::updateCell() {
   // get information about the new cell
   if (currIdx != desiredCellIdx) {
     // std::cout << "I should be in idx " << desiredCellIdx << "  (" << getRowFromIdx(desiredCellIdx)  <<
-      // ", " << getColFromIdx(desiredCellIdx) << "), but I'm in " << currIdx << " (" <<
-      // curr_r << ", " << curr_c << ")." << std::endl;
+    //   ", " << getColFromIdx(desiredCellIdx) << "), but I'm in " << currIdx << " (" <<
+    //   curr_r << ", " << curr_c << ")." << std::endl;
 
     // TODO: Check if desired cell is occupied and trigger replanning?
 

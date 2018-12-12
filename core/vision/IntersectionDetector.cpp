@@ -215,7 +215,7 @@ void IntersectionDetector::chooseBestIntersections(std::vector<WorldObject>& y_l
       }
     } else {  // only one intersection
       // printf("Width yellow: %f at [%d, %d] with distance %f and bearing %f and adjusted width %f\n",y_list.at(0).width, y_list.at(0).imageCenterX, y_list.at(0).imageCenterY, y_list.at(0).visionDistance, y_list.at(0).visionBearing*180.0/M_PI, y_list.at(0).width);
-      float case1 = std::abs(1.0 - y_list.at(0).width/300.0);
+      float case1 = std::abs(1.0 - y_list.at(0).width/375.0);
       float case2 = std::abs(1.0 - y_list.at(0).width/225.0);
       // printf("T case: %f L case: %f\n", case1, case2);
       if (case1 < case2) {
@@ -244,7 +244,7 @@ void IntersectionDetector::chooseBestIntersections(std::vector<WorldObject>& y_l
       }
     } else {  // only one intersection
       // printf("Width pink: %f at [%d, %d] with distance %f and bearing %f and adjusted width %f\n",p_list.at(0).width, p_list.at(0).imageCenterX, p_list.at(0).imageCenterY, p_list.at(0).visionDistance, p_list.at(0).visionBearing*180.0/M_PI);
-      float case1 = std::abs(1.0 - p_list.at(0).width/300.0);
+      float case1 = std::abs(1.0 - p_list.at(0).width/375.0);
       float case2 = std::abs(1.0 - p_list.at(0).width/225.0);
       // printf("T case: %f L case: %f\n", case1, case2);
       if (case1 < case2) {
