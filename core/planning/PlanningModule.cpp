@@ -87,6 +87,8 @@ void PlanningModule::processFrame() {
     return;
   }
   
+
+
   updateCell();
   
   
@@ -94,6 +96,16 @@ void PlanningModule::processFrame() {
   if (!cache_.planning->changedCost) return;
 
   DSL_->runDSL();
+
+  // IF WAVEFRONT UNCOMMENT/COMMENT THIS BLOCK
+  // wfStartPose = cache_.planning->grid.at(cache_.planning->path.at(cache_.planning->pathIdx - 1)).center;
+  // wfStartPose.translation.x = wfStartPose.translation.x + FIELD_WIDTH/2.0;
+  // wfStartPose.translation.y = wfStartPose.translation.y - FIELD_HEIGHT/2.0;
+  // wfStartPose.rotation = 0;
+  // GG_->generateGrid(*initial_cost_map_, true);
+  // WP_->getCosts(*initial_cost_map_, wfStartPose);
+  // DSL_->init(initial_cost_map_->cells, WP_->start_index_, true);
+  // std::cout << "AHHHH A* planning" << std::endl;
 }
 
 // Check if robot has moved to new cell
