@@ -48,7 +48,7 @@ void PlanningModule::initSpecificModule() {
   wfStartPose.translation.y = 1250 - startLoc_.y; //mm
   wfStartPose.rotation = 0;
   printf("Generating grid\n");
-  GG_->generateGrid(*initial_cost_map_);
+  GG_->generateGrid(*initial_cost_map_, false);
   printf("Generating wave\n");
   WP_->getCosts(*initial_cost_map_, wfStartPose);
   
@@ -75,16 +75,11 @@ void PlanningModule::initSpecificModule() {
 
 void PlanningModule::processFrame() {
   if (cache_.planning->resetPath) {
-    if (initial_cost_map_ == NULL) delete(initial_cost_map_);
-
-    // Make a new initial_cost_map_
-    initial_cost_map_ = new Grid(grid());
-    
     // Mark all cells as unvisited
     for (int i = 0; i < GRID_SIZE; ++i) {
       initial_cost_map_->cells.at(i).visited = false;
     }
-    GG_->generateGrid(*initial_cost_map_);
+    GG_->generateGrid(*initial_cost_map_, true);
     WP_->getCosts(*initial_cost_map_, wfStartPose);
     DSL_->init(initial_cost_map_->cells, WP_->start_index_);
     cache_.planning->resetPath = false;
