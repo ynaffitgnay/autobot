@@ -400,7 +400,11 @@ void DStarLite::printPath() {
   
   std::cout << std::endl;
   for (int row = 0; row < GRID_HEIGHT; ++row) {
-    std::cout << "    |";
+    if (row < 10) {
+      std::cout << "  " << row << " |";
+    } else {
+      std::cout << " " << row << " |";
+    }
     for (int col = 0; col < GRID_WIDTH; ++col) {
       index = row * GRID_WIDTH + col;
       if (map_.at(index).cell.occupied) {

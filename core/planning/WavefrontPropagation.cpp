@@ -20,8 +20,8 @@ WavefrontPropagation::~WavefrontPropagation() {
 bool WavefrontPropagation::getCosts(Grid& map, Pose2D& startPose) {
   // Set map variables
   map_size_ = map.cells.size();
-  num_rows_ = std::round(float(map.height)/float(map.cell_height));
-  num_cols_ = std::round(float(map.width)/float(map.cell_width));
+  num_rows_ = GRID_HEIGHT;
+  num_cols_ = GRID_WIDTH;
 
   printf("Start pose: [%f, %f]\n",startPose.translation.x, startPose.translation.y);
   
