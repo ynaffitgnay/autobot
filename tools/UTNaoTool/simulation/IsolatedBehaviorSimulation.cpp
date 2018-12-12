@@ -118,7 +118,10 @@ void IBSim::simulationStep() {
 }
 
 void IBSim::teleportPlayer(Point2D position, float orientation, int player) {
-  if(find(activePlayers_.begin(), activePlayers_.end(), player) == activePlayers_.end()) return;
+  if(find(activePlayers_.begin(), activePlayers_.end(), player) == activePlayers_.end()) {
+    std::cout << "Couldn't find player " << player << " to teleport" << std::endl;
+    return;
+  }
   auto& woPlayer = gtcache_.world_object->objects_[player];
   woPlayer.loc = position;
   woPlayer.orientation = orientation;

@@ -28,6 +28,7 @@
 #include <memory/ProcessedSonarBlock.h>
 #include <memory/WalkInfoBlock.h>
 #include <memory/BehaviorParamBlock.h>
+#include <memory/PlanningBlock.h>
 
 #include <localization/LocalizationModule.h>
 

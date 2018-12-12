@@ -10,6 +10,8 @@
 #include "LocalizationGL.h"
 
 #include <common/Field.h>
+#include <math/Geometry.h>
+#include <vector>
 #include <QtGui>
 
 class AnnotationGroup;
@@ -63,10 +65,14 @@ class GLDrawer {
       SHOW_GOALS,
       SHOW_LINES,
       SHOW_OBSTACLES,
-      SHOW_PLANNING_GRID   
+      SHOW_PLANNING_GRID,
+      SHOW_TRUTH_PATH,
+      SHOW_BELIEF_PATH,
+      SHOW_PLANNED_PATH
     );
 
     GLDrawer(QGLWidget* parent);
+    ~GLDrawer();
 
     void setGtCache(MemoryCache cache);
     void setBeliefCache(MemoryCache cache);
@@ -115,6 +121,9 @@ class GLDrawer {
     void drawBeacons();
     void drawObstacles();
     void drawPlanningGrid();
+    void drawTruthPath();
+    void drawBeliefPath();
+    void drawPlannedPath();
    
     void overlayOdometry();
     void overlayObservationText();
@@ -141,6 +150,9 @@ class GLDrawer {
     std::map<DisplayOption, bool> display_;
     BehaviorModule* behaviorModule;
     AnnotationGroup* annotations_;
+
+    std::unique_ptr<std::vector<Point2D>> truth_path_;
+    std::unique_ptr<std::vector<Point2D>> belief_path_;
 };
 
 #endif
