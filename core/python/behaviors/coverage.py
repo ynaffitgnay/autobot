@@ -162,6 +162,7 @@ class FaceNextCell(Node):
     self.id_prev = self.pathidx
     self.tkm1 = time.clock()
     self.tk = time.clock()
+    self.listy_thing = [core.LHipYawPitch, core.LHipRoll, core.LHipPitch, core.LKneePitch, core.LAnklePitch, core.LAnkleRoll, core.RHipYawPitch, core.RHipRoll, core.RHipPitch, core.RKneePitch, core.RAnklePitch, core.RAnkleRoll]
 
   def calc_int(self, e_t, dt):
     self.t_int = self.t_int + dt*e_t
@@ -170,7 +171,6 @@ class FaceNextCell(Node):
 
   def run(self):
     # The desired location on the field
-    
     self.destloc = memory.planning.getDestPose()
     self.tk = time.clock()
     dt = self.tk - self.tkm1
@@ -205,6 +205,9 @@ class FaceNextCell(Node):
     self.tkm1 = self.tk
     if (abs(e_t) < 0.1):
       memory.planning.observedNextGC = True
+      for joint in self.listy_thing:
+        if memory.sensors.getJointTemperature(joint) > 95.0:
+          self.postSignal("hot")
       self.finish()
 
 class Stand(Node):
@@ -212,6 +215,24 @@ class Stand(Node):
     # print("STAND????")
     commands.stand()
     commands.setHeadPanTilt(0.0,0.0,1.5)
+
+class RestJoints(Node):
+  """Rest those achey bones, I mean joints"""
+  def __init__(self):
+    super(RestJoints, self).__init__()
+    self.listy_thing = [core.LHipYawPitch, core.LHipRoll, core.LHipPitch, core.LKneePitch, core.LAnklePitch, core.LAnkleRoll, core.RHipYawPitch, core.RHipRoll, core.RHipPitch, core.RKneePitch, core.RAnklePitch, core.RAnkleRoll]
+
+  def run(self):
+    pose.Sit()
+    cooledDown = True
+    
+    for joint in self.listy_thing:
+      if memory.sensors.getJointTemperature(joint) > 50.0:
+        cooledDown = False
+
+    if cooledDown:
+      self.postSignal("cool")
+
 
 class MoveHead(Node):
   """Search for the ball to the left"""
@@ -222,6 +243,7 @@ class MoveHead(Node):
     self.time = time
 
   def run(self):
+    commands.setStiffness()
     commands.setWalkVelocity(0.0,0.0,0.0)
     commands.setHeadPanTilt(core.DEG_T_RAD*self.pan,self.tilt, self.time)
     if self.getTime() > (self.time + 0.5):
@@ -237,7 +259,9 @@ class Playing(LoopingStateMachine):
     moveHeadRight = MoveHead(-110.0, 0.0, 6.0)
 
     follow = FollowPath(robot)
+    restJoints = RestJoints()
 
     faceNextCell = FaceNextCell(robot, faced)
 
     self.add_transition(rdy,C,moveHeadLeft,C,moveHeadRight,C,follow,S("head"),faceNextCell,C,moveHeadLeft)
+    self.add_transition(faceNextCell,S("hot"),restJoints,S("cool"),moveHeadLeft)

@@ -110,10 +110,12 @@ bool WavefrontPropagation::fill(Pose2D& startPose) {
 
     int wallFactor = wc.getWallFactor();
     wall_factors.push_back(wallFactor);
-    int newValue = wc.getValue() + alpha*wallFactor;
+    int newValue = 2*wc.getValue() + alpha*wallFactor;
     // printf("Old wave value: %d Wall factor: %d New wave value: %d\n", wc.getValue(),wallFactor,newValue);
     if (wc.getValue() != WAVE_OBSTRUCTION && wc.getValue() != WAVE_START && wc.getValue() != WAVE_END) {
       wc.setValue(newValue);
+    } else if (wc.getValue() == WAVE_START) {
+      wc.setValue(1);
     }
   }
   
