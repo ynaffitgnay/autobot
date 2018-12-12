@@ -12,7 +12,7 @@
 class GridGenerator {
 private:
   std::vector<Obstacle> obstacles_= { Obstacle(Pose2D(0.0, 1800.0, 750.0), 30, 60), 
-                                      Obstacle(Pose2D(0.0, 750.0, 1500.0), 30, 60) };
+                                      Obstacle(Pose2D(0.0, 900.0, 1350.0), 30, 60) };
   bool checkObstruction(GridCell& cell);
 
 public:
