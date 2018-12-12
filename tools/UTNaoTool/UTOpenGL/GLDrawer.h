@@ -61,7 +61,9 @@ class GLDrawer {
       SHOW_TRUE_SIM_LOCATION,
       SHOW_BEACONS,
       SHOW_GOALS,
-      SHOW_LINES
+      SHOW_LINES,
+      SHOW_OBSTACLES,
+      SHOW_PLANNING_GRID   
     );
 
     GLDrawer(QGLWidget* parent);
@@ -112,6 +114,7 @@ class GLDrawer {
     void drawAnnotations();
     void drawBeacons();
     void drawObstacles();
+    void drawPlanningGrid();
    
     void overlayOdometry();
     void overlayObservationText();

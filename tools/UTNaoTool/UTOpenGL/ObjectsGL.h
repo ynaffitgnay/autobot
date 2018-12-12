@@ -8,7 +8,10 @@
 class ObjectsGL {
 public:
   void drawGreenCarpet();
-  void drawFieldLine(Point2D start, Point2D end);
+  void drawVerticalFieldLine(Point2D start, Point2D end);
+  void drawHorizontalFieldLine(Point2D start, Point2D end);
+  void drawVerticalGridLine(Point2D start, Point2D end);
+  void drawHorizontalGridLine(Point2D start, Point2D end);
 
   void drawIntersection(Point2D p, float alpha);
   void drawLinePoint(Point2D p, float alpha);

@@ -26,7 +26,6 @@ void PlanningBlock::RestartPath() {
   resetPath = true;
   pathIdx = 0;
   nodesLeft = nodesInPath;
-  // TODO: go back to pre-obstacle path
 }
 
 Pose2D PlanningBlock::getDestPose() {
