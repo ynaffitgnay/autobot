@@ -32,7 +32,7 @@ class PlanningModule: public Module {
     MemoryCache cache_;
     TextLogger*& tlogger_;
     Grid* initial_cost_map_;
-    
+    Pose2D wfStartPose;
     std::unique_ptr<GridGenerator> GG_;
     std::unique_ptr<WavefrontPropagation> WP_;
     std::unique_ptr<CoverageDSL> DSL_;

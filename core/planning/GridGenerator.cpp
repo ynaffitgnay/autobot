@@ -12,6 +12,9 @@ bool GridGenerator::generateGrid(Grid& grid, bool& gridCellsGlobalized) {
     }
 		cell.occupied = checkObstruction(cell);
 		// printf("Processing cell at [%d,%d]. Occupied: %d\n",cell.r,cell.c, cell.occupied);
+		if (cell.occupied) {
+			//std::cout << "cell " << cell.r << ", " << cell.c << " occupied??" << std::endl;
+		}
 	}
 	return true;
 }

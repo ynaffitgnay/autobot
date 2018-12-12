@@ -12,7 +12,7 @@ PlanningModule::PlanningModule() : tlogger_(textlogger) {
 }
 
 PlanningModule::~PlanningModule() {
-  delete(initial_cost_map_);
+  if (initial_cost_map_ == NULL) delete(initial_cost_map_);
 }
 
 void PlanningModule::specifyMemoryDependency() {
@@ -42,13 +42,13 @@ void PlanningModule::initSpecificModule() {
   startLoc_ = Point2D(cache_.planning->startPoint.x, cache_.planning->startPoint.y);
   prevLoc_r = getGridRow(startLoc_.x);
   prevLoc_c = getGridCol(startLoc_.y);
-  Pose2D wfStartPose;
+  //Pose2D wfStartPose;
 
   wfStartPose.translation.x = startLoc_.x + 1500; //mm
   wfStartPose.translation.y = 1250 - startLoc_.y; //mm
   wfStartPose.rotation = 0;
   printf("Generating grid\n");
-  GG_->generateGrid(*initial_cost_map_);
+  GG_->generateGrid(*initial_cost_map_, false);
   printf("Generating wave\n");
   WP_->getCosts(*initial_cost_map_, wfStartPose);
   
@@ -75,6 +75,12 @@ void PlanningModule::initSpecificModule() {
 
 void PlanningModule::processFrame() {
   if (cache_.planning->resetPath) {
+    // Mark all cells as unvisited
+    for (int i = 0; i < GRID_SIZE; ++i) {
+      initial_cost_map_->cells.at(i).visited = false;
+    }
+    GG_->generateGrid(*initial_cost_map_, true);
+    WP_->getCosts(*initial_cost_map_, wfStartPose);
     DSL_->init(initial_cost_map_->cells, WP_->start_index_);
     cache_.planning->resetPath = false;
     std::cout << "Re-initialized planning" << std::endl;
@@ -130,7 +136,7 @@ void PlanningModule::updateCell() {
    
     return;
   }
-  
+  //std::cout << "Marking cell " << getRowFromIdx(currIdx) << ", " << getColFromIdx(currIdx) << " visited" << std::endl;
   cache_.planning->grid.at(currIdx).visited = true;
 
   // Remove a node on the path

@@ -16,6 +16,10 @@ CoverageDSL::~CoverageDSL() {
 void CoverageDSL::init(std::vector<GridCell>& wavefront, int startCoverageIdx) {
   DStarLite::init(wavefront, startCoverageIdx, -1, &(cache_.planning->path));
   buildBlankGrid();
+
+  //std::cout << "Map before doing dsl stuff: " << std::endl;
+
+  //printGrid();
   
   if (map_.size() <= 0) {
     std::cout << "EMPTY MAP IN RUNDSL?!\n" << std::endl;
@@ -29,14 +33,14 @@ void CoverageDSL::init(std::vector<GridCell>& wavefront, int startCoverageIdx) {
   // Initialize costs for each node to S_
   int calcNode = 0;
   for (mapIt = map_.begin(); mapIt != map_.end(); mapIt++) {
-    // TODO: try without??
+    // Skip the goal node
     if (S_ == &(*mapIt)) {
       continue;
     }
         
     computeShortestPath(*mapIt);
-
-    std::cout << "Intermediate node expansions: " << nodeExpansions << std::endl;
+    //printGrid();
+    //std::cout << "Intermediate node expansions: " << nodeExpansions << std::endl;
     
     if (mapIt->g != mapIt->rhs) {
       //std::cout << "Cell at (" << mapIt->cell.r << ", " << mapIt->cell.c << ") was inconsistent" << std::endl;
@@ -84,7 +88,7 @@ void CoverageDSL::runDSL() {
     if (mapIt->cell.visited) continue;
 
     computeShortestPath(*mapIt);
-    std::cout << "Intermediate expanded nodes after replan: " << nodeExpansions;
+    std::cout << "Intermediate expanded nodes after replan: " << nodeExpansions << std::endl;
   }
   
 

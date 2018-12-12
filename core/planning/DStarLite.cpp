@@ -36,12 +36,11 @@ void DStarLite::init(std::vector<GridCell>& wavefront, int goal, int start, std:
 
   // Insert the start into the pqueue
   U_.push(S_);
-
-  ++nodeExpansions;
 }
 
 // runDSL with no replanning
 int DStarLite::runDSL() {
+  //std::cout << "This DSL is running for some reason?\n";
   std::vector<PathNode>::iterator mapIt;
 
   if (endPlanIdx_ == -1) {
@@ -68,14 +67,14 @@ DSLKey DStarLite::calcKey(PathNode& successor) {
 
 void DStarLite::updateVertex(PathNode& u) {
   PathNode* uPtr = &u;
-  if (u.g != u.rhs && U_.contains(uPtr)) {
+  bool inPQ = U_.contains(uPtr);
+  if (u.g != u.rhs && inPQ) {
     U_.remove(uPtr);
     u.key = calcKey(u);
     U_.push(uPtr);
-  } else if (u.g != u.rhs && !U_.contains(uPtr)) {
+  } else if (u.g != u.rhs && !inPQ) {
     u.key = calcKey(u);
     U_.push(uPtr);
-    ++nodeExpansions;
   } else {
     U_.remove(uPtr);
   }
@@ -86,13 +85,13 @@ void DStarLite::computeShortestPath(PathNode& curr) {
   // Don't compute for occupied cells
   if (curr.cell.occupied) {
     //std::cout << "Cell is occupied." << std::endl;
+    //std::cout << "Occupied cell at " << curr.cell.r << ", " << curr.cell.c << std::endl;
     return;
   }
   PathNode* u = nullptr;
   
   // Calculate the key for the current node
   while (U_.top()->key < calcKey(curr) || curr.rhs > curr.g) {
-    //++nodeExpansions;
     u = U_.top();
     DSLKey k_new = calcKey(*u);
 
@@ -108,6 +107,7 @@ void DStarLite::computeShortestPath(PathNode& curr) {
       std::vector<PathNode*> preds;
       std::vector<PathNode*>::iterator predIt;
       getNeighbors(*u, preds);
+      ++nodeExpansions;
 
       for (predIt = preds.begin(); predIt != preds.end(); predIt++) {
         int c = getTransitionCost(*u, **predIt);
@@ -123,6 +123,7 @@ void DStarLite::computeShortestPath(PathNode& curr) {
       std::vector<PathNode*> preds;
       std::vector<PathNode*>::iterator predIt;
       getNeighbors(*u, preds);
+      ++nodeExpansions;
       preds.push_back(u);
 
       for (predIt = preds.begin(); predIt != preds.end(); predIt++) {
@@ -134,7 +135,7 @@ void DStarLite::computeShortestPath(PathNode& curr) {
             std::vector<PathNode*>::iterator succIt;
 
             getNeighbors(**predIt, succs);
-
+            ++nodeExpansions;
             for (succIt = succs.begin(); succIt != succs.end(); succIt++) {
               int t2 = safeAdd(getTransitionCost(**predIt, **succIt), (*succIt)->g); 
               if (t2 < minrhs) {
@@ -205,7 +206,7 @@ int DStarLite::getTransitionCost(PathNode& s, PathNode& p) {
   if (s.cell.r == p.cell.r && s.cell.c == p.cell.c) return 0;
 
   // can add more costs for different types of movement here (e.g., based on turning?)
-  return 1;
+  return 2;
 }
 
 // Generate path from idx startIdx
