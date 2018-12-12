@@ -30,7 +30,7 @@ class CoverageDSL : public DStarLite {
     //Point2D startCoords_;
     //PathNode* S_;  // Start/current location
     
-    void init(std::vector<GridCell>& wavefront, int startCoverageIdx);
+    void init(std::vector<GridCell>& wavefront, int startCoverageIdx, bool = false);
     void runDSL();
     
     //int safeAdd(int q1, int q2);
