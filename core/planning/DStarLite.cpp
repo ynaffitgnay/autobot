@@ -85,6 +85,7 @@ void DStarLite::computeShortestPath(PathNode& curr) {
   // Don't compute for occupied cells
   if (curr.cell.occupied) {
     //std::cout << "Cell is occupied." << std::endl;
+    //std::cout << "Occupied cell at " << curr.cell.r << ", " << curr.cell.c << std::endl;
     return;
   }
   PathNode* u = nullptr;

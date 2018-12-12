@@ -130,7 +130,7 @@ void PlanningModule::updateCell() {
    
     return;
   }
-  
+  //std::cout << "Marking cell " << getRowFromIdx(currIdx) << ", " << getColFromIdx(currIdx) << " visited" << std::endl;
   cache_.planning->grid.at(currIdx).visited = true;
 
   // Remove a node on the path
