@@ -200,10 +200,10 @@ void ObjectsGL::drawObstacle(Point2D p, float alpha){
   basicGL.colorRGBAlpha(Colors::Orange, alpha);
   float zero = 0.0;
   auto 
-    v0 = Vector3<float>(p.x+30.0, p.y+15.0,0),
-    v1 = Vector3<float>(p.x-30.0, p.y+15.0,0),
-    v2 = Vector3<float>(p.x-30.0, p.y-15.0,0),
-    v3 = Vector3<float>(p.x+30.0, p.y-15.0,0)
+    v0 = Vector3<float>(p.x+300.0, p.y+150.0,0),
+    v1 = Vector3<float>(p.x-300.0, p.y+150.0,0),
+    v2 = Vector3<float>(p.x-300.0, p.y-150.0,0),
+    v3 = Vector3<float>(p.x+300.0, p.y-150.0,0)
   ;
   basicGL.drawSurface(v0, v1, v2, v3);
 }

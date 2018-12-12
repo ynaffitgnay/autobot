@@ -57,8 +57,8 @@ void GLDrawer::draw(const map<DisplayOption,bool>& displayOptions) {
   if (display_[SHOW_BEACONS]) drawBeacons();
 
   // planning information
-  if (display_[SHOW_OBSTACLES]) drawObstacles();
   if (display_[SHOW_PLANNING_GRID]) drawPlanningGrid();
+  if (display_[SHOW_OBSTACLES]) drawObstacles();
 
   // truth data from sim
   if (display_[SHOW_TRUTH_ROBOT]) drawTruthRobot();
