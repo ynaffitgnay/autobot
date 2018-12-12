@@ -12,7 +12,7 @@ PlanningModule::PlanningModule() : tlogger_(textlogger) {
 }
 
 PlanningModule::~PlanningModule() {
-  delete(initial_cost_map_);
+  if (initial_cost_map_ == NULL) delete(initial_cost_map_);
 }
 
 void PlanningModule::specifyMemoryDependency() {
@@ -75,6 +75,11 @@ void PlanningModule::initSpecificModule() {
 
 void PlanningModule::processFrame() {
   if (cache_.planning->resetPath) {
+    if (initial_cost_map_ == NULL) delete(initial_cost_map_);
+
+    // Make a new initial_cost_map_
+    initial_cost_map_ = new Grid(grid());
+    
     // Mark all cells as unvisited
     for (int i = 0; i < GRID_SIZE; ++i) {
       initial_cost_map_->cells.at(i).visited = false;
