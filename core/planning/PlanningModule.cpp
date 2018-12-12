@@ -42,7 +42,7 @@ void PlanningModule::initSpecificModule() {
   startLoc_ = Point2D(cache_.planning->startPoint.x, cache_.planning->startPoint.y);
   prevLoc_r = getGridRow(startLoc_.x);
   prevLoc_c = getGridCol(startLoc_.y);
-  Pose2D wfStartPose;
+  //Pose2D wfStartPose;
 
   wfStartPose.translation.x = startLoc_.x + 1500; //mm
   wfStartPose.translation.y = 1250 - startLoc_.y; //mm
@@ -75,6 +75,12 @@ void PlanningModule::initSpecificModule() {
 
 void PlanningModule::processFrame() {
   if (cache_.planning->resetPath) {
+    // Mark all cells as unvisited
+    for (int i = 0; i < GRID_SIZE; ++i) {
+      initial_cost_map_->cells.at(i).visited = false;
+    }
+    GG_->generateGrid(*initial_cost_map_);
+    WP_->getCosts(*initial_cost_map_, wfStartPose);
     DSL_->init(initial_cost_map_->cells, WP_->start_index_);
     cache_.planning->resetPath = false;
     std::cout << "Re-initialized planning" << std::endl;
