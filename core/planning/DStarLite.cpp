@@ -18,6 +18,7 @@ void DStarLite::init(std::vector<GridCell>& wavefront, int goal, int start, std:
   lastReplanIdx = 0;
   goalIdx_ = goal;
   endPlanIdx_ = start;
+  nodeExpansions = 0;
   
   // Make a 2D array out of PathNodes
   if (!buildPathGrid()) {
