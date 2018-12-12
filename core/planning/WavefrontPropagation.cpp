@@ -60,7 +60,7 @@ bool WavefrontPropagation::getCosts(Grid& map, Pose2D& startPose) {
       float globX = map.cells[i].center.translation.x-FIELD_WIDTH/2.0;  // Converts from local x,y to global x,y not r,c
       float globY = -map.cells[i].center.translation.y +FIELD_HEIGHT/2.0;
       float globTh = atan2f(-globY, -globX);
-      printf("Location: [%f,%f] Angle to center: %f\n", globX, globY, globTh*180/M_PI);
+      //printf("Location: [%f,%f] Angle to center: %f\n", globX, globY, globTh*180/M_PI);
 
       // float globTh = map.cells[i].center.rotation;
       Pose2D globCenter(globTh,globX,globY);
@@ -227,7 +227,7 @@ bool WavefrontPropagation::traverse(std::vector<GridCell> &orig_cells) {
   addPose(index, end_index_, plan, orig_cells); // add end cell to the plan
   debugPoses.push_back(end_index_);
   
-  printf("Orig cell size: %d Debug pose size: %d", orig_cells.size(), debugPoses.size());
+  printf("Orig cell size: %d Debug pose size: %d\n", orig_cells.size(), debugPoses.size());
 
   std::vector<GridCell*> ordered_plan;
   for (int i = 0; i < orig_cells.size(); i++){

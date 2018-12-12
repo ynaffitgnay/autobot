@@ -40,7 +40,7 @@ void DStarLite::init(std::vector<GridCell>& wavefront, int goal, int start, std:
 
 // runDSL with no replanning
 int DStarLite::runDSL() {
-  std::cout << "This DSL is running for some reason?\n";
+  //std::cout << "This DSL is running for some reason?\n";
   std::vector<PathNode>::iterator mapIt;
 
   if (endPlanIdx_ == -1) {
@@ -205,7 +205,7 @@ int DStarLite::getTransitionCost(PathNode& s, PathNode& p) {
   if (s.cell.r == p.cell.r && s.cell.c == p.cell.c) return 0;
 
   // can add more costs for different types of movement here (e.g., based on turning?)
-  return 7;
+  return 2;
 }
 
 // Generate path from idx startIdx

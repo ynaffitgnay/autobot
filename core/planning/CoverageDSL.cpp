@@ -17,9 +17,9 @@ void CoverageDSL::init(std::vector<GridCell>& wavefront, int startCoverageIdx) {
   DStarLite::init(wavefront, startCoverageIdx, -1, &(cache_.planning->path));
   buildBlankGrid();
 
-  std::cout << "Map before doing dsl stuff: " << std::endl;
+  //std::cout << "Map before doing dsl stuff: " << std::endl;
 
-  printGrid();
+  //printGrid();
   
   if (map_.size() <= 0) {
     std::cout << "EMPTY MAP IN RUNDSL?!\n" << std::endl;
@@ -32,22 +32,21 @@ void CoverageDSL::init(std::vector<GridCell>& wavefront, int startCoverageIdx) {
 
   // Initialize costs for each node to S_
   int calcNode = 0;
-  //for (mapIt = map_.begin(); mapIt != map_.end(); mapIt++) {
-  //  // Skip the goal node
-  //  if (S_ == &(*mapIt)) {
-  //    continue;
-  //  }
-  //      
-  //  computeShortestPath(*mapIt);
-  //  printGrid();
-  //  std::cout << "Intermediate node expansions: " << nodeExpansions << std::endl;
-  //  
-  //  if (mapIt->g != mapIt->rhs) {
-  //    //std::cout << "Cell at (" << mapIt->cell.r << ", " << mapIt->cell.c << ") was inconsistent" << std::endl;
-  //    mapIt->g = mapIt->rhs;
-  //  }    
-  //}
-  computeShortestPath(map_.at(46));
+  for (mapIt = map_.begin(); mapIt != map_.end(); mapIt++) {
+    // Skip the goal node
+    if (S_ == &(*mapIt)) {
+      continue;
+    }
+        
+    computeShortestPath(*mapIt);
+    //printGrid();
+    //std::cout << "Intermediate node expansions: " << nodeExpansions << std::endl;
+    
+    if (mapIt->g != mapIt->rhs) {
+      //std::cout << "Cell at (" << mapIt->cell.r << ", " << mapIt->cell.c << ") was inconsistent" << std::endl;
+      mapIt->g = mapIt->rhs;
+    }    
+  }
 
   std::cout << "Final map: \n" << std::endl;
   printGrid();
