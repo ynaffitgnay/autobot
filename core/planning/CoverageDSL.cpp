@@ -32,21 +32,22 @@ void CoverageDSL::init(std::vector<GridCell>& wavefront, int startCoverageIdx) {
 
   // Initialize costs for each node to S_
   int calcNode = 0;
-  for (mapIt = map_.begin(); mapIt != map_.end(); mapIt++) {
-    // Skip the goal node
-    if (S_ == &(*mapIt)) {
-      continue;
-    }
-        
-    computeShortestPath(*mapIt);
-    printGrid();
-    std::cout << "Intermediate node expansions: " << nodeExpansions << std::endl;
-    
-    if (mapIt->g != mapIt->rhs) {
-      //std::cout << "Cell at (" << mapIt->cell.r << ", " << mapIt->cell.c << ") was inconsistent" << std::endl;
-      mapIt->g = mapIt->rhs;
-    }    
-  }
+  //for (mapIt = map_.begin(); mapIt != map_.end(); mapIt++) {
+  //  // Skip the goal node
+  //  if (S_ == &(*mapIt)) {
+  //    continue;
+  //  }
+  //      
+  //  computeShortestPath(*mapIt);
+  //  printGrid();
+  //  std::cout << "Intermediate node expansions: " << nodeExpansions << std::endl;
+  //  
+  //  if (mapIt->g != mapIt->rhs) {
+  //    //std::cout << "Cell at (" << mapIt->cell.r << ", " << mapIt->cell.c << ") was inconsistent" << std::endl;
+  //    mapIt->g = mapIt->rhs;
+  //  }    
+  //}
+  computeShortestPath(map_.at(46));
 
   std::cout << "Final map: \n" << std::endl;
   printGrid();

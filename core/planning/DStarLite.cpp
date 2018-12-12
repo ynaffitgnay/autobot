@@ -36,8 +36,6 @@ void DStarLite::init(std::vector<GridCell>& wavefront, int goal, int start, std:
 
   // Insert the start into the pqueue
   U_.push(S_);
-
-  ++nodeExpansions;
 }
 
 // runDSL with no replanning
@@ -77,7 +75,6 @@ void DStarLite::updateVertex(PathNode& u) {
   } else if (u.g != u.rhs && !inPQ) {
     u.key = calcKey(u);
     U_.push(uPtr);
-    ++nodeExpansions;
   } else {
     U_.remove(uPtr);
   }
@@ -94,7 +91,6 @@ void DStarLite::computeShortestPath(PathNode& curr) {
   
   // Calculate the key for the current node
   while (U_.top()->key < calcKey(curr) || curr.rhs > curr.g) {
-    //++nodeExpansions;
     u = U_.top();
     DSLKey k_new = calcKey(*u);
 
@@ -110,6 +106,7 @@ void DStarLite::computeShortestPath(PathNode& curr) {
       std::vector<PathNode*> preds;
       std::vector<PathNode*>::iterator predIt;
       getNeighbors(*u, preds);
+      ++nodeExpansions;
 
       for (predIt = preds.begin(); predIt != preds.end(); predIt++) {
         int c = getTransitionCost(*u, **predIt);
@@ -125,6 +122,7 @@ void DStarLite::computeShortestPath(PathNode& curr) {
       std::vector<PathNode*> preds;
       std::vector<PathNode*>::iterator predIt;
       getNeighbors(*u, preds);
+      ++nodeExpansions;
       preds.push_back(u);
 
       for (predIt = preds.begin(); predIt != preds.end(); predIt++) {
@@ -136,7 +134,7 @@ void DStarLite::computeShortestPath(PathNode& curr) {
             std::vector<PathNode*>::iterator succIt;
 
             getNeighbors(**predIt, succs);
-
+            ++nodeExpansions;
             for (succIt = succs.begin(); succIt != succs.end(); succIt++) {
               int t2 = safeAdd(getTransitionCost(**predIt, **succIt), (*succIt)->g); 
               if (t2 < minrhs) {
