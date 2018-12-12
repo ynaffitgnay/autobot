@@ -146,8 +146,13 @@ void ImageProcessor::processFrame(){
   // Detecting the intersections
   intersection_detector_->findIntersections(blobs_);
 
-  // Detecting Orange colored Obstacles
-  obstacle_detector_->findObstacles(blobs_);
+  if (vblocks_.planning->observedNextGC) {
+    // Detecting Orange colored Obstacles
+    obstacle_detector_->findObstacles(blobs_);
+
+    // Set the flag back to false
+    vblocks_.planning->observedNextGC = false;
+  }
 }
 
 int ImageProcessor::getTeamColor() {

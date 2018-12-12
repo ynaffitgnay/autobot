@@ -53,7 +53,9 @@ void CoverageDSL::runDSL() {
   std::vector<PathNode>::iterator mapIt;
 
   // Check if any edge costs have changed
-  if (!cache_.planning->changedCost) return;  
+  if (!cache_.planning->changedCost) {
+    std::cout << "Unexpectedly in CoverageDSL::runDSL() with no detected changes" << std::endl;
+  }
 
   // Get the new k offset
   // use pathIdx - 1 because we only want to replan up to visited node
@@ -93,8 +95,8 @@ void CoverageDSL::runDSL() {
   // Replan
   generateCoveragePath(cache_.planning->pathIdx);
 
-  // here we're going to need to update the DSL from a certain coordinate
-  // TODO: update this function to use the robot's current location when replanning
+  // Now that costs are consistent, reset the boolean in planning block
+  cache_.planning->changedCost = false;
 }
 
 // This only works if we include the nodes discovered in "hop" in the path

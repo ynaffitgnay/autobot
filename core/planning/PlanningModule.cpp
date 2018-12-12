@@ -56,7 +56,7 @@ void PlanningModule::initSpecificModule() {
 
   std::cout << "Initialized D* lite. Initial path: " << std::endl;
 
-  for (int i = 0; i < GRID_SIZE; ++i) {
+  for (int i = 0; i < cache_.planning->nodesInPath; ++i) {
     if (i % 10 == 0) {
       std::cout << std::endl;
     }
@@ -83,7 +83,10 @@ void PlanningModule::processFrame() {
   
   updateCell();
   
-  // Check if any obstacles have been encountered -- maybe store this in world objects?
+  
+  // Check if any edge costs have changed
+  if (!cache_.planning->changedCost) return;
+
   DSL_->runDSL();
 }
 
