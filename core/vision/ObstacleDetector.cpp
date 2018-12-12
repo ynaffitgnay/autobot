@@ -16,34 +16,32 @@ void ObstacleDetector::findObstacles(std::vector<Blob>& blobs) {
     if(blobs.at(i).color == c_ORANGE) obstaclesCands.push_back(blobs.at(i));
   }
   // printf("Num Obstacle Cands: %d\n",obstaclesCands.size());
-  auto& obs1 = vblocks_.world_object->objects_[WO_OBSTACLE_1];
-  auto& obs2 = vblocks_.world_object->objects_[WO_OBSTACLE_2];
-  obs1.width = 600.0;
-  obs1.length = 300.0;
-  obs2.width = 600.0;
-  obs2.length = 300.0;
+  // auto& obs1 = vblocks_.world_object->objects_[WO_OBSTACLE_1];
+  // auto& obs2 = vblocks_.world_object->objects_[WO_OBSTACLE_2];
+  // obs1.width = 600.0;
+  // obs1.length = 300.0;
+  // obs2.width = 600.0;
+  // obs2.length = 300.0;
   obsAssign(obstaclesCands);
 }
 
 void ObstacleDetector::obsAssign(std::vector<Blob>& obstaclesCands) {
   int count = 0;
   for(auto& blob : obstaclesCands) {
-    for(auto& obs : obstacles_){
       Point2D center = findCenter(blob);
-      // printf("Image center of blob [%f, %f]\n", center.x, center.y);
-      auto position = cmatrix_.getWorldPosition(center.x, center.y, 0.0);
-      Point2D relPos(position[0],position[1]);
-      // printf("Relative position of blob center to robot [%f, %f]\n", relPos.x, relPos.y);
-      Point2D obsPt(obs.second.translation.x,obs.second.translation.y);
-      // printf("Comparing with obstacle: %s at [%f, %f]\n",getName(obs.first), obsPt.x, obsPt.y);
-      float dist = obsPt.getDistanceTo(relPos);
+      // // printf("Image center of blob [%f, %f]\n", center.x, center.y);
+      // auto position = cmatrix_.getWorldPosition(center.x, center.y, 0.0);
+      // Point2D relPos(position[0],position[1]);
+      // // printf("Relative position of blob center to robot [%f, %f]\n", relPos.x, relPos.y);
+      // Point2D obsPt(obs.second.translation.x,obs.second.translation.y);
+      // // printf("Comparing with obstacle: %s at [%f, %f]\n",getName(obs.first), obsPt.x, obsPt.y);
+      // float dist = obsPt.getDistanceTo(relPos);
       // printf("Estimated distance: %f\n", dist);
-      if (blob.total > 2000){
-        // printf("Blob size: %d Blob width: %d Blob height: %d \n", blob.total, blob.xf-blob.xi, blob.yf-blob.yi);
+      printf("Blob size: %d Blob width: %d Blob height: %d \n", blob.total, blob.xf-blob.xi, blob.yf-blob.yi);
+      if (blob.total > 6000){
         addObstaclesObject(center.x, center.y, blob.xf - blob.xi, blob.yf - blob.yi, WO_OBSTACLE_UNKNOWN);
         count++;
       }
-    }
   }
   std::cout << "Detected " << count << " obstacles in this frame." << std::endl;
 }
@@ -87,6 +85,6 @@ void ObstacleDetector::addObstaclesObject(int newCenterX, int newCenterY, int wi
     std::cout << "Unexpectedly discovered previously-known obstacle" << std::endl;
   }
   
-  // printf("Obstacle at [%f, %f]\n", position.x, position.y);
+  printf("\n\nObstacle at [%f, %f]\n\n\n", obsObject.loc.x, obsObject.loc.y);
   // tlog(30, "saw %s at (%i,%i) with calculated distance %2.4f", getName(wo_type), obsObject.imageCenterX, obsObject.imageCenterY, obsObject.visionDistance);
 }

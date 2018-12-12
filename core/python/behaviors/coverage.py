@@ -124,17 +124,17 @@ class FollowPath(Node):
       de_t = de_t / dt
 
     x_cont = self.k_x[0] * e_x + self.k_x[1] * self.x_int + self.k_x[2] * de_x
-    print("[x_cont: %f, ex: %f, kpx: %f, kix: %f, kdx: %f]" % (x_cont, e_x, self.k_x[0] * e_x, self.k_x[1] * self.x_int, self.k_x[2] * de_x))
+    # print("[x_cont: %f, ex: %f, kpx: %f, kix: %f, kdx: %f]" % (x_cont, e_x, self.k_x[0] * e_x, self.k_x[1] * self.x_int, self.k_x[2] * de_x))
     y_cont = self.k_y[0] * e_y + self.k_y[1] * self.y_int + self.k_y[2] * de_y
-    print("[y_cont: %f, ey: %f, kpy: %f, kiy: %f, kdy: %f]" % (y_cont, e_y, self.k_y[0] * e_y, self.k_y[1] * self.y_int, self.k_y[2] * de_y))
+    # print("[y_cont: %f, ey: %f, kpy: %f, kiy: %f, kdy: %f]" % (y_cont, e_y, self.k_y[0] * e_y, self.k_y[1] * self.y_int, self.k_y[2] * de_y))
     t_cont = self.k_t[0] * e_t + self.k_t[1] * self.t_int + self.k_t[2] * de_t
-    print("[t_cont: %f, et: %f, kpt: %f, kit: %f, kdt: %f]" % (t_cont, e_t, self.k_t[0] * e_t, self.k_t[1] * self.t_int, self.k_t[2] * de_t))
+    # print("[t_cont: %f, et: %f, kpt: %f, kit: %f, kdt: %f]" % (t_cont, e_t, self.k_t[0] * e_t, self.k_t[1] * self.t_int, self.k_t[2] * de_t))
 
     K = np.array([[np.cos(th), np.sin(th), 0],[-np.sin(th), np.cos(th), 0],[0, 0, 1]])
     dstate = np.array([[x_cont], [y_cont], [t_cont]])
 
     u = np.dot(K,dstate)
-    print("[u_1: %f, u_2: %f, u_3: %f]" % (u[0], u[1], u[2]))
+    # print("[u_1: %f, u_2: %f, u_3: %f]" % (u[0], u[1], u[2]))
     commands.setWalkVelocity(u[0,0],u[1,0],u[2,0])
 
     self.x_prev = e_x
@@ -153,7 +153,7 @@ class FaceNextCell(Node):
   def __init__(self, robot, faced):
     super(FaceNextCell, self).__init__()
     self.robot = robot
-    self.faced = memory.planning.observedNextGC
+    # self.faced = memory.planning.observedNextGC
     self.destloc = memory.planning.getDestPose()
     self.pathidx = memory.planning.pathIdx
     self.k_t = (0.7, 0.01, 0.1)
@@ -170,6 +170,7 @@ class FaceNextCell(Node):
 
   def run(self):
     # The desired location on the field
+    
     self.destloc = memory.planning.getDestPose()
     self.tk = time.clock()
     dt = self.tk - self.tkm1
@@ -193,7 +194,7 @@ class FaceNextCell(Node):
       de_t = de_t / dt
 
     t_cont = self.k_t[0] * e_t + self.k_t[1] * self.t_int + self.k_t[2] *de_t
-    print("t_cont = %f" % (t_cont))
+    # print("t_cont = %f" % (t_cont))
 
     if abs(e_t) >=0.3:
       commands.setWalkVelocity(0.0, 0.0, 0.4*np.sign(e_t))
@@ -203,7 +204,7 @@ class FaceNextCell(Node):
     self.t_prev = e_t
     self.tkm1 = self.tk
     if (abs(e_t) < 0.1):
-      self.faced = True
+      memory.planning.observedNextGC = True
       self.finish()
 
 class Stand(Node):
