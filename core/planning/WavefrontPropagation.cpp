@@ -41,6 +41,7 @@ bool WavefrontPropagation::getCosts(Grid& map, Pose2D& startPose) {
   waveCells.clear();
   waveCells.resize(map.cells.size());
   for(int i = 0; i<waveCells.size(); i++) {
+    if (map.cells[i].visited) map.cells[i].occupied = true;
   	WaveCell wc(map.cells[i].center, map.cells[i]);
     waveCells[i]=wc;
   }
