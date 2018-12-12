@@ -53,6 +53,7 @@ class FollowPath(Node):
     self.id_prev = self.pathidx
     self.tkm1 = time.clock()
     self.tk = time.clock()
+    self.listy_thing = [core.LHipYawPitch, core.LHipRoll, core.LHipPitch, core.LKneePitch, core.LAnklePitch, core.LAnkleRoll, core.RHipYawPitch, core.RHipRoll, core.RHipPitch, core.RKneePitch, core.RAnklePitch, core.RAnkleRoll]
 
   def calc_int(self, e_x, e_y, e_t, dt):
     self.x_int = self.x_int + dt*e_x
@@ -137,6 +138,10 @@ class FollowPath(Node):
     # print("[u_1: %f, u_2: %f, u_3: %f]" % (u[0], u[1], u[2]))
     commands.setWalkVelocity(u[0,0],u[1,0],u[2,0])
 
+    for joint in self.listy_thing:
+        if memory.sensors.getJointTemperature(joint) >= 85.0:
+          self.postSignal("hot")
+
     self.x_prev = e_x
     self.y_prev = e_y
     self.t_prev = e_t
@@ -162,7 +167,6 @@ class FaceNextCell(Node):
     self.id_prev = self.pathidx
     self.tkm1 = time.clock()
     self.tk = time.clock()
-    self.listy_thing = [core.LHipYawPitch, core.LHipRoll, core.LHipPitch, core.LKneePitch, core.LAnklePitch, core.LAnkleRoll, core.RHipYawPitch, core.RHipRoll, core.RHipPitch, core.RKneePitch, core.RAnklePitch, core.RAnkleRoll]
 
   def calc_int(self, e_t, dt):
     self.t_int = self.t_int + dt*e_t
@@ -205,9 +209,7 @@ class FaceNextCell(Node):
     self.tkm1 = self.tk
     if (abs(e_t) < 0.1):
       memory.planning.observedNextGC = True
-      for joint in self.listy_thing:
-        if memory.sensors.getJointTemperature(joint) > 95.0:
-          self.postSignal("hot")
+      
       self.finish()
 
 class Stand(Node):
@@ -221,16 +223,21 @@ class RestJoints(Node):
   def __init__(self):
     super(RestJoints, self).__init__()
     self.listy_thing = [core.LHipYawPitch, core.LHipRoll, core.LHipPitch, core.LKneePitch, core.LAnklePitch, core.LAnkleRoll, core.RHipYawPitch, core.RHipRoll, core.RHipPitch, core.RKneePitch, core.RAnklePitch, core.RAnkleRoll]
+    self.isSitting = False
 
   def run(self):
-    pose.Sit()
     cooledDown = True
     
     for joint in self.listy_thing:
       if memory.sensors.getJointTemperature(joint) > 50.0:
         cooledDown = False
 
+    if not cooledDown and not self.isSitting:
+      self.isSitting = True
+      return pose.Sit()
+
     if cooledDown:
+      self.isSitting = False
       self.postSignal("cool")
 
 
@@ -264,4 +271,4 @@ class Playing(LoopingStateMachine):
     faceNextCell = FaceNextCell(robot, faced)
 
     self.add_transition(rdy,C,moveHeadLeft,C,moveHeadRight,C,follow,S("head"),faceNextCell,C,moveHeadLeft)
-    self.add_transition(faceNextCell,S("hot"),restJoints,S("cool"),moveHeadLeft)
+    self.add_transition(follow,S("hot"),restJoints,S("cool"),moveHeadLeft)
