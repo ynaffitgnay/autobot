@@ -13,11 +13,11 @@ class GridGenerator {
 private:
   std::vector<Obstacle> obstacles_= { Obstacle(Pose2D(0.0, 1800.0, 750.0), 30, 60), 
                                       Obstacle(Pose2D(0.0, 900.0, 1350.0), 30, 60) };
-  bool checkObstruction(GridCell& cell, bool& gridCellsGlobalized);
+  bool checkObstruction(GridCell& cell);
 
 public:
   GridGenerator();
-  bool generateGrid(Grid& map);
+  bool generateGrid(Grid& map, bool& gridCellsGlobalized);
   // std::map<WorldObjectType,Pose2D> obstacles_ = {
   //   { WO_OBSTACLE_1, Pose2D(0.0, 1800.0, 750.0) },
   //   { WO_OBSTACLE_2, Pose2D(0.0, 900.0, 1350.0) }};
