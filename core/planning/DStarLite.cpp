@@ -69,11 +69,12 @@ DSLKey DStarLite::calcKey(PathNode& successor) {
 
 void DStarLite::updateVertex(PathNode& u) {
   PathNode* uPtr = &u;
-  if (u.g != u.rhs && U_.contains(uPtr)) {
+  bool inPQ = U_.contains(uPtr);
+  if (u.g != u.rhs && inPQ) {
     U_.remove(uPtr);
     u.key = calcKey(u);
     U_.push(uPtr);
-  } else if (u.g != u.rhs && !U_.contains(uPtr)) {
+  } else if (u.g != u.rhs && !inPQ) {
     u.key = calcKey(u);
     U_.push(uPtr);
     ++nodeExpansions;
