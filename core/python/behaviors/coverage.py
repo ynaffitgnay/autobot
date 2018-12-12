@@ -83,16 +83,19 @@ class FollowPath(Node):
     # The error in x, y, t
     e_x = -(self.robot.loc.x - x_des)
     e_y = -(self.robot.loc.y - y_des)
-    if t_des > 0:
-      if self.robot.orientation > t_des - np.sign(t_des)*np.pi:
-        e_t = t_des - self.robot.orientation
-      else:
-        e_t = t_des - (2*np.pi + self.robot.orientation)
-    else:
-      if self.robot.orientation > t_des - np.sign(t_des)*np.pi:
-        e_t = t_des - (self.robot.orientation -2*np.pi)
-      else:
-        e_t = t_des - self.robot.orientation
+    e_t = t_des - self.robot.orientation
+    if np.sign(t_des)*e_t - np.pi > 0:
+      e_t = e_t - np.sign(t_des) * 2 * np.pi
+    # if t_des > 0:
+    #   if self.robot.orientation > t_des - np.sign(t_des)*np.pi:
+    #     e_t = t_des - self.robot.orientation
+    #   else:
+    #     e_t = t_des - (2*np.pi + self.robot.orientation)
+    # else:
+    #   if self.robot.orientation > t_des - np.sign(t_des)*np.pi:
+    #     e_t = t_des - (self.robot.orientation -2*np.pi)
+    #   else:
+    #     e_t = t_des - self.robot.orientation
 
     self.tk = time.clock()
     dt = self.tk - self.tkm1
@@ -150,7 +153,7 @@ class FaceNextCell(Node):
   def __init__(self, robot, faced):
     super(FaceNextCell, self).__init__()
     self.robot = robot
-    self.faced = False
+    self.faced = memory.planning.observedNextGC
     self.destloc = memory.planning.getDestPose()
     self.pathidx = memory.planning.pathIdx
     self.k_t = (0.7, 0.01, 0.1)
@@ -165,9 +168,6 @@ class FaceNextCell(Node):
     if abs(self.t_int) >= 15.0:
       self.t_int = 15.0*np.sign(self.t_int)
 
-  def findDesTheta(self, x_des, y_des):
-    return np.arctan2(y_des, x_des)
-
   def run(self):
     # The desired location on the field
     self.destloc = memory.planning.getDestPose()
@@ -175,13 +175,17 @@ class FaceNextCell(Node):
     dt = self.tk - self.tkm1
     x_des = self.destloc.translation.x
     y_des = self.destloc.translation.y
-    e_t = self.findDesTheta(y_des - self.robot.loc.y, x_des - self.robot.loc.x)
+    t_des = np.arctan2(y_des - self.robot.loc.y, x_des - self.robot.loc.x)
+    e_t = t_des - self.robot.orientation
+    if np.sign(t_des)*e_t - np.pi > 0:
+      e_t = e_t - np.sign(t_des) * 2 * np.pi
     self.calc_int(e_t, dt)
-    print("e_t = %f" % (e_t))
     commands.setHeadPanTilt(e_t, 0.0, 1.5)
 
     de_t = (e_t - self.t_prev)
-
+    print("[pathIdx: %f, robot x: %f, robot y: %f, robot orientation: %f]" % (memory.planning.pathIdx, self.robot.loc.x, self.robot.loc.y, core.RAD_T_DEG * self.robot.orientation))
+    print("destloc: [%f,%f,%f], e_t: %f" % (self.destloc.translation.x, self.destloc.translation.y, core.RAD_T_DEG * self.destloc.rotation, e_t))
+    
     # Bound the derivative term of theta
     if dt == 0:
       de_t = 0.0
@@ -235,4 +239,4 @@ class Playing(LoopingStateMachine):
 
     faceNextCell = FaceNextCell(robot, faced)
 
-    self.add_transition(rdy,C,moveHeadLeft,C,moveHeadRight,C,follow,S("head"),moveHeadLeft)
+    self.add_transition(rdy,C,moveHeadLeft,C,moveHeadRight,C,follow,S("head"),faceNextCell,C,moveHeadLeft)
