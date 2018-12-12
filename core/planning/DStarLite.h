@@ -25,6 +25,7 @@ class DStarLite {
     DSLPQueue U_;
     
     int k_;  // key modifier
+    int nodeExpansions;
     std::vector<GridCell>* cells_;
     PathNode* S_;  // Start/current location
     int goalIdx_;
@@ -36,7 +37,7 @@ class DStarLite {
     int safeAdd(int q1, int q2);
   protected:
     TextLogger*& tlogger_;
-    
+
     int lastReplanIdx;
     bool initialized;
     DSLKey calcKey(PathNode& successor);

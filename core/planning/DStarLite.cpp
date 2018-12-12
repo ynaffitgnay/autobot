@@ -6,7 +6,7 @@
 #include <common/GridCell.h>
 
 DStarLite::DStarLite(TextLogger*& tlogger)
-  : tlogger_(tlogger), cells_(nullptr), k_(0), lastReplanIdx(0),
+  : tlogger_(tlogger), cells_(nullptr), k_(0), lastReplanIdx(0), nodeExpansions(0),
     initialized(false), goalIdx_(-1), endPlanIdx_(-1), path_(nullptr) {
 }
   
@@ -35,6 +35,8 @@ void DStarLite::init(std::vector<GridCell>& wavefront, int goal, int start, std:
 
   // Insert the start into the pqueue
   U_.push(S_);
+
+  ++nodeExpansions;
 }
 
 // runDSL with no replanning
@@ -72,6 +74,7 @@ void DStarLite::updateVertex(PathNode& u) {
   } else if (u.g != u.rhs && !U_.contains(uPtr)) {
     u.key = calcKey(u);
     U_.push(uPtr);
+    ++nodeExpansions;
   } else {
     U_.remove(uPtr);
   }
@@ -88,6 +91,7 @@ void DStarLite::computeShortestPath(PathNode& curr) {
   
   // Calculate the key for the current node
   while (U_.top()->key < calcKey(curr) || curr.rhs > curr.g) {
+    //++nodeExpansions;
     u = U_.top();
     DSLKey k_new = calcKey(*u);
 
@@ -257,8 +261,9 @@ int DStarLite::generatePath(int startIdx) {
   
   //printPath();
   //printf("Path size: %d\n", numPlanned);
+  printf("Node expansions in vanilla DSL: %d\n", nodeExpansions);
+  
   return numPlanned;
-
 }
 
 bool DStarLite::buildPathGrid() {
