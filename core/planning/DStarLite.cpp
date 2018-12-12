@@ -6,7 +6,7 @@
 #include <common/GridCell.h>
 
 DStarLite::DStarLite(TextLogger*& tlogger)
-  : tlogger_(tlogger), cells_(nullptr), k_(0), lastReplanIdx(0),
+  : tlogger_(tlogger), cells_(nullptr), k_(0), lastReplanIdx(0), nodeExpansions(0),
     initialized(false), goalIdx_(-1), endPlanIdx_(-1), path_(nullptr) {
 }
   
@@ -18,6 +18,7 @@ void DStarLite::init(std::vector<GridCell>& wavefront, int goal, int start, std:
   lastReplanIdx = 0;
   goalIdx_ = goal;
   endPlanIdx_ = start;
+  nodeExpansions = 0;
   
   // Make a 2D array out of PathNodes
   if (!buildPathGrid()) {
@@ -39,6 +40,7 @@ void DStarLite::init(std::vector<GridCell>& wavefront, int goal, int start, std:
 
 // runDSL with no replanning
 int DStarLite::runDSL() {
+  //std::cout << "This DSL is running for some reason?\n";
   std::vector<PathNode>::iterator mapIt;
 
   if (endPlanIdx_ == -1) {
@@ -65,11 +67,12 @@ DSLKey DStarLite::calcKey(PathNode& successor) {
 
 void DStarLite::updateVertex(PathNode& u) {
   PathNode* uPtr = &u;
-  if (u.g != u.rhs && U_.contains(uPtr)) {
+  bool inPQ = U_.contains(uPtr);
+  if (u.g != u.rhs && inPQ) {
     U_.remove(uPtr);
     u.key = calcKey(u);
     U_.push(uPtr);
-  } else if (u.g != u.rhs && !U_.contains(uPtr)) {
+  } else if (u.g != u.rhs && !inPQ) {
     u.key = calcKey(u);
     U_.push(uPtr);
   } else {
@@ -82,6 +85,7 @@ void DStarLite::computeShortestPath(PathNode& curr) {
   // Don't compute for occupied cells
   if (curr.cell.occupied) {
     //std::cout << "Cell is occupied." << std::endl;
+    //std::cout << "Occupied cell at " << curr.cell.r << ", " << curr.cell.c << std::endl;
     return;
   }
   PathNode* u = nullptr;
@@ -103,6 +107,7 @@ void DStarLite::computeShortestPath(PathNode& curr) {
       std::vector<PathNode*> preds;
       std::vector<PathNode*>::iterator predIt;
       getNeighbors(*u, preds);
+      ++nodeExpansions;
 
       for (predIt = preds.begin(); predIt != preds.end(); predIt++) {
         int c = getTransitionCost(*u, **predIt);
@@ -118,6 +123,7 @@ void DStarLite::computeShortestPath(PathNode& curr) {
       std::vector<PathNode*> preds;
       std::vector<PathNode*>::iterator predIt;
       getNeighbors(*u, preds);
+      ++nodeExpansions;
       preds.push_back(u);
 
       for (predIt = preds.begin(); predIt != preds.end(); predIt++) {
@@ -129,7 +135,7 @@ void DStarLite::computeShortestPath(PathNode& curr) {
             std::vector<PathNode*>::iterator succIt;
 
             getNeighbors(**predIt, succs);
-
+            ++nodeExpansions;
             for (succIt = succs.begin(); succIt != succs.end(); succIt++) {
               int t2 = safeAdd(getTransitionCost(**predIt, **succIt), (*succIt)->g); 
               if (t2 < minrhs) {
@@ -200,7 +206,7 @@ int DStarLite::getTransitionCost(PathNode& s, PathNode& p) {
   if (s.cell.r == p.cell.r && s.cell.c == p.cell.c) return 0;
 
   // can add more costs for different types of movement here (e.g., based on turning?)
-  return 1;
+  return 2;
 }
 
 // Generate path from idx startIdx
@@ -257,8 +263,9 @@ int DStarLite::generatePath(int startIdx) {
   
   //printPath();
   //printf("Path size: %d\n", numPlanned);
+  printf("Node expansions in vanilla DSL: %d\n", nodeExpansions);
+  
   return numPlanned;
-
 }
 
 bool DStarLite::buildPathGrid() {
@@ -400,7 +407,11 @@ void DStarLite::printPath() {
   
   std::cout << std::endl;
   for (int row = 0; row < GRID_HEIGHT; ++row) {
-    std::cout << "    |";
+    if (row < 10) {
+      std::cout << "  " << row << " |";
+    } else {
+      std::cout << " " << row << " |";
+    }
     for (int col = 0; col < GRID_WIDTH; ++col) {
       index = row * GRID_WIDTH + col;
       if (map_.at(index).cell.occupied) {

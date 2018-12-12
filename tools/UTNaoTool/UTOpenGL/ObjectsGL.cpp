@@ -17,15 +17,59 @@ void ObjectsGL::drawGreenCarpet() {
   glEnable(GL_LIGHTING);
 }
 
-void ObjectsGL::drawFieldLine(Point2D start, Point2D end) {
+void ObjectsGL::drawVerticalFieldLine(Point2D start, Point2D end) {
   glDisable(GL_LIGHTING);
   basicGL.colorRGB(Colors::White);
-  float height = 2;
+  float height = 0;
   auto 
     v0 = Vector3<float>(start.x-LINE_WIDTH/2,start.y-LINE_WIDTH/2,height),
     v1 = Vector3<float>(end.x+LINE_WIDTH/2,end.y-LINE_WIDTH/2,height),
     v2 = Vector3<float>(end.x+LINE_WIDTH/2,end.y+LINE_WIDTH/2,height),
     v3 = Vector3<float>(start.x-LINE_WIDTH/2,start.y+LINE_WIDTH/2,height)
+  ;
+  basicGL.drawSurface(v0, v1, v2, v3);
+  glEnable(GL_LIGHTING);
+}
+
+void ObjectsGL::drawHorizontalFieldLine(Point2D start, Point2D end) {
+  glDisable(GL_LIGHTING);
+  basicGL.colorRGB(Colors::White);
+  float height = 0;
+  auto 
+    v0 = Vector3<float>(end.x-LINE_WIDTH/2,end.y-LINE_WIDTH/2,height),
+    v1 = Vector3<float>(end.x+LINE_WIDTH/2,end.y-LINE_WIDTH/2,height),
+    v2 = Vector3<float>(start.x+LINE_WIDTH/2,start.y+LINE_WIDTH/2,height),
+    v3 = Vector3<float>(start.x-LINE_WIDTH/2,start.y+LINE_WIDTH/2,height)
+  ;
+  basicGL.drawSurface(v0, v1, v2, v3);
+  glEnable(GL_LIGHTING);
+}
+
+void ObjectsGL::drawVerticalGridLine(Point2D start, Point2D end) {
+  glDisable(GL_LIGHTING);
+  basicGL.colorRGB(Colors::Black);
+  float height = 0;
+  float GLThickness = 20;
+  auto 
+    v0 = Vector3<float>(start.x-GLThickness/2,start.y-GLThickness/2,height),
+    v1 = Vector3<float>(end.x+GLThickness/2,end.y-GLThickness/2,height),
+    v2 = Vector3<float>(end.x+GLThickness/2,end.y+GLThickness/2,height),
+    v3 = Vector3<float>(start.x-GLThickness/2,start.y+GLThickness/2,height)
+  ;
+  basicGL.drawSurface(v0, v1, v2, v3);
+  glEnable(GL_LIGHTING);
+}
+
+void ObjectsGL::drawHorizontalGridLine(Point2D start, Point2D end) {
+  glDisable(GL_LIGHTING);
+  basicGL.colorRGB(Colors::Black);
+  float height = 0;
+  float GLThickness = 20;
+  auto 
+    v0 = Vector3<float>(end.x-GLThickness/2,end.y-GLThickness/2,height),
+    v1 = Vector3<float>(end.x+GLThickness/2,end.y-GLThickness/2,height),
+    v2 = Vector3<float>(start.x+GLThickness/2,start.y+GLThickness/2,height),
+    v3 = Vector3<float>(start.x-GLThickness/2,start.y+GLThickness/2,height)
   ;
   basicGL.drawSurface(v0, v1, v2, v3);
   glEnable(GL_LIGHTING);
@@ -47,8 +91,8 @@ void ObjectsGL::drawPenaltyCross(Point2D p, float alpha){
   auto p2 = p; p2.x += 50;
   auto p3 = p; p3.y -= 50;
   auto p4 = p; p4.y += 50;
-  drawFieldLine(p1, p2);
-  drawFieldLine(p3, p4);
+  drawVerticalFieldLine(p1, p2);
+  drawVerticalFieldLine(p3, p4);
   glEnable(GL_LIGHTING);
 }
 
@@ -156,10 +200,10 @@ void ObjectsGL::drawObstacle(Point2D p, float alpha){
   basicGL.colorRGBAlpha(Colors::Orange, alpha);
   float zero = 0.0;
   auto 
-    v0 = Vector3<float>(p.x+30.0, p.y+15.0,0),
-    v1 = Vector3<float>(p.x-30.0, p.y+15.0,0),
-    v2 = Vector3<float>(p.x-30.0, p.y-15.0,0),
-    v3 = Vector3<float>(p.x+30.0, p.y-15.0,0)
+    v0 = Vector3<float>(p.x+300.0, p.y+150.0,0),
+    v1 = Vector3<float>(p.x-300.0, p.y+150.0,0),
+    v2 = Vector3<float>(p.x-300.0, p.y-150.0,0),
+    v3 = Vector3<float>(p.x+300.0, p.y-150.0,0)
   ;
   basicGL.drawSurface(v0, v1, v2, v3);
 }

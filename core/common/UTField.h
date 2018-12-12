@@ -13,9 +13,9 @@
 
 const float BALL_RADIUS = 31;
 
-const float FIELD_Y = 2480;
-const float FIELD_X = 3020;
-const float GRASS_Y = 2500;
+const float FIELD_Y = 2500;
+const float FIELD_X = 3000;
+const float GRASS_Y = 2800;
 const float GRASS_X = 5000;
 
 const float HALF_FIELD_Y = FIELD_Y/2.0;
@@ -29,7 +29,7 @@ const float GOAL_WIDTH = GOAL_Y + GOAL_POST_WIDTH;
 const float GOAL_X = 500;
 const float HALF_GOAL_Y = GOAL_Y / 2.0;
 const float PENALTY_Y = 1400;
-const float PENALTY_X =  650;
+const float PENALTY_X =  600;
 const float CIRCLE_DIAMETER = 1205;
 const float CIRCLE_RADIUS = CIRCLE_DIAMETER / 2.0;
 const float LINE_WIDTH = 50;
@@ -63,25 +63,24 @@ const Point2D ownCrossLocation = Point2D(-PENALTY_CROSS_X, 0);
 // Landmark locations
 const Point2D landmarkLocation[] = {
   Point2D(-HALF_FIELD_X, 0),  // Semi-circle
+  Point2D(-1530.0,1220.0),                    // WO_BEACON_BLUE_YELLOW
+  Point2D(-1530.0,-1280.0),                   // WO_BEACON_YELLOW_BLUE
+  Point2D(0.0, 1230.0),                       // WO_BEACON_BLUE_PINK
+  Point2D(0.0, -1300.0),                      // WO_BEACON_PINK_BLUE
+  Point2D(1500.0,1240.0),                     // WO_BEACON_PINK_YELLOW
+  Point2D(1500.0,-1240.0),                    // WO_BEACON_YELLOW_PINK
 
-  Point2D(-HALF_FIELD_X, HALF_FIELD_Y),      // WO_BEACON_BLUE_YELLOW
-  Point2D(-HALF_FIELD_X, -HALF_FIELD_Y),     // WO_BEACON_YELLOW_BLUE
-  Point2D(0, HALF_FIELD_Y),                  // WO_BEACON_BLUE_PINK
-  Point2D(0, -HALF_FIELD_Y),                 // WO_BEACON_PINK_BLUE
-  Point2D(HALF_FIELD_X, HALF_FIELD_Y),       // WO_BEACON_PINK_YELLOW
-  Point2D(HALF_FIELD_X, -HALF_FIELD_Y),      // WO_BEACON_YELLOW_PINK
+  Point2D(1800.0, 750.0),                     // WO_OBSTACLE_1
+  Point2D(750.0, 1350.0),                     // WO_OBSTACLE_2
 
-  Point2D(1800.0, 750.0),                    // WO_OBSTACLE_1
-  Point2D(750.0, 1350.0),                    // WO_OBSTACLE_2
+  Point2D( -FIELD_X / 2, 0),                  // WO_OWN_GOAL
+  Point2D( FIELD_X / 2, 0 ),                  // WO_OPP_GOAL
 
-  Point2D( -FIELD_X / 2, 0),                 // WO_OWN_GOAL
-  Point2D( FIELD_X / 2, 0 ),                 // WO_OPP_GOAL
+  Point2D( -FIELD_X / 2, -GOAL_Y / 2),        // WO_OWN_LEFT_GOALPOST
+  Point2D( FIELD_X / 2, GOAL_Y / 2 ),         // WO_OPP_LEFT_GOALPOST
 
-  Point2D( -FIELD_X / 2, -GOAL_Y / 2),       // WO_OWN_LEFT_GOALPOST
-  Point2D( FIELD_X / 2, GOAL_Y / 2 ),        // WO_OPP_LEFT_GOALPOST
-
-  Point2D( -FIELD_X / 2, GOAL_Y / 2),        // WO_OWN_RIGHT_GOALPOST
-  Point2D( FIELD_X / 2, -GOAL_Y / 2)         // WO_OPP_RIGHT_GOALPOST
+  Point2D( -FIELD_X / 2, GOAL_Y / 2),         // WO_OWN_RIGHT_GOALPOST
+  Point2D( FIELD_X / 2, -GOAL_Y / 2)          // WO_OPP_RIGHT_GOALPOST
 };
 
 
@@ -90,8 +89,8 @@ const Point2D intersectionLocation[] = {
   // L
   Point2D( FIELD_X / 2, FIELD_Y / 2),                 // 0 WO_OPP_FIELD_LEFT_L
   Point2D( FIELD_X / 2, -FIELD_Y / 2),                //   WO_OPP_FIELD_RIGHT_L
-  Point2D( FIELD_X / 2 - PENALTY_X, PENALTY_Y / 2),   // 2 WO_OPP_PEN_LEFT_L
-  Point2D( FIELD_X / 2 - PENALTY_X, -PENALTY_Y / 2),  //   WO_OPP_PEN_RIGHT_L
+  Point2D( 900.0, 680.0),   // 2 WO_OPP_PEN_LEFT_L
+  Point2D( 900.0, -690.0),  //   WO_OPP_PEN_RIGHT_L
   Point2D( -FIELD_X / 2 - PENALTY_X, PENALTY_Y / 2),  // 4 WO_OWN_PEN_RIGHT_L
   Point2D( -FIELD_X / 2 - PENALTY_X, -PENALTY_Y / 2), //   WO_OWN_PEN_LEFT_L
   Point2D( -FIELD_X / 2, FIELD_Y / 2),                // 6 WO_OWN_FIELD_RIGHT_L
@@ -110,12 +109,12 @@ const Point2D intersectionLocation[] = {
   Point2D( -HALF_FIELD_X - GOAL_X,  HALF_GOAL_Y),      // Back left of own goal post
 
   // T
-  Point2D( FIELD_X / 2, PENALTY_Y / 2),               // 8  WO_OPP_PEN_LEFT_T
-  Point2D( FIELD_X / 2, -PENALTY_Y / 2),              //    WO_OPP_PEN_RIGHT_T
+  Point2D( 1500.0, 700.0),                            // 8  WO_OPP_PEN_LEFT_T
+  Point2D( 1500.0, -650.0),                           //    WO_OPP_PEN_RIGHT_T
   Point2D( 0, FIELD_Y / 2),                           // 10 WO_CENTER_TOP_T
   Point2D( 0, -FIELD_Y / 2),                          //    WO_CENTER_BOTTOM_T,
-  Point2D( -FIELD_X / 2, PENALTY_Y / 2),              // 12 WO_OWN_PEN_RIGHT_T
-  Point2D( -FIELD_X / 2, -PENALTY_Y / 2),             // 13 WO_OWN_PEN_LEFT_T
+  Point2D( -1530.0, 650.0),                           // 12 WO_OWN_PEN_RIGHT_T
+  Point2D( -1500.0, -700.0),                          // 13 WO_OWN_PEN_LEFT_T
   
   Point2D(  HALF_FIELD_X, -HALF_GOAL_Y),              // front right of opp goal
   Point2D(  HALF_FIELD_X,  HALF_GOAL_Y),              // front left of opp goal

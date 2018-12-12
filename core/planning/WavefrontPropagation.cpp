@@ -20,8 +20,8 @@ WavefrontPropagation::~WavefrontPropagation() {
 bool WavefrontPropagation::getCosts(Grid& map, Pose2D& startPose) {
   // Set map variables
   map_size_ = map.cells.size();
-  num_rows_ = std::round(float(map.height)/float(map.cell_height));
-  num_cols_ = std::round(float(map.width)/float(map.cell_width));
+  num_rows_ = GRID_HEIGHT;
+  num_cols_ = GRID_WIDTH;
 
   printf("Start pose: [%f, %f]\n",startPose.translation.x, startPose.translation.y);
   
@@ -41,6 +41,11 @@ bool WavefrontPropagation::getCosts(Grid& map, Pose2D& startPose) {
   waveCells.clear();
   waveCells.resize(map.cells.size());
   for(int i = 0; i<waveCells.size(); i++) {
+    if (map.cells[i].visited) {
+      //std::cout << "cell at " << getRowFromIdx(i) << ", " << getColFromIdx(i) << " visited before initialization" << std::endl;
+      
+      map.cells[i].occupied = true;
+    }
   	WaveCell wc(map.cells[i].center, map.cells[i]);
     waveCells[i]=wc;
   }
@@ -109,10 +114,12 @@ bool WavefrontPropagation::fill(Pose2D& startPose) {
 
     int wallFactor = wc.getWallFactor();
     wall_factors.push_back(wallFactor);
-    int newValue = wc.getValue() + alpha*wallFactor;
+    int newValue = 2*wc.getValue() + alpha*wallFactor;
     // printf("Old wave value: %d Wall factor: %d New wave value: %d\n", wc.getValue(),wallFactor,newValue);
     if (wc.getValue() != WAVE_OBSTRUCTION && wc.getValue() != WAVE_START && wc.getValue() != WAVE_END) {
       wc.setValue(newValue);
+    } else if (wc.getValue() == WAVE_START) {
+      wc.setValue(1);
     }
   }
   

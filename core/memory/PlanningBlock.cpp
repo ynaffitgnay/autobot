@@ -4,12 +4,11 @@ PlanningBlock::PlanningBlock() {
   header.version = 1;
   header.size = sizeof(PlanningBlock);
   startPoint = Point2D(START_X, START_Y);
-  //grid = std::vector<GridCell>(GRID_SIZE);
   changedCost = false;
   coverageStarted = false;
+  observedNextGC = false;
   resetPath = false;
   pathIdx = 0;
-  //path = std::vector<GridCell>(PATH_SIZE);
   path = std::vector<int>(PATH_SIZE);
   nodesLeft = 0;  // to keep track of when finished
   nodesInPath = 0;
@@ -23,10 +22,10 @@ PlanningBlock::PlanningBlock() {
 
 void PlanningBlock::RestartPath() {
   coverageStarted = false;
+  observedNextGC = false;
   resetPath = true;
   pathIdx = 0;
   nodesLeft = nodesInPath;
-  // TODO: go back to pre-obstacle path
 }
 
 Pose2D PlanningBlock::getDestPose() {

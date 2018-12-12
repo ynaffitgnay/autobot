@@ -4,7 +4,7 @@
 #include <common/Random.h>
 
 ParticleFilter::ParticleFilter(MemoryCache& cache, TextLogger*& tlogger) 
-  : cache_(cache), tlogger_(tlogger), dirty_(true), kmeans_(new KMeans(cache, tlogger, 3, 10)), M_(1000), alpha_slow_(0.01), alpha_fast_(0.5),robot_localized_(false) {
+  : cache_(cache), tlogger_(tlogger), dirty_(true), kmeans_(new KMeans(cache, tlogger, 3, 10)), M_(1000), robot_localized_(false) {
 }
 
 ParticleFilter::~ParticleFilter() {
@@ -14,13 +14,11 @@ ParticleFilter::~ParticleFilter() {
 void ParticleFilter::init(Point2D loc, float orientation) {
   mean_.translation = loc;
   mean_.rotation = orientation;
-  w_slow_ = 0.0;
-  w_fast_ = 0.0;
   particles().resize(M_);
   auto frame = cache_.frame_info->frame_id;
   for(auto& p : particles()) {
-    p.x = Random::inst().sampleU(-2000.0,2000.0);
-    p.y = Random::inst().sampleU(-1200.0,1200.0);
+    p.x = Random::inst().sampleN(1250.0,10.0);
+    p.y = Random::inst().sampleN(-1000.0,10.0);
     p.t = Random::inst().sampleU(-M_PI, M_PI);
     p.w = 1.0/M_;
   }
@@ -39,7 +37,7 @@ void ParticleFilter::processFrame() {
   updateStep();
   
   // Check if resample
-  if(checkResample()){
+  if(checkResample() && !noMeasurement()){
     particles() = resampleStep();
   }
 }
@@ -59,7 +57,6 @@ const Pose2D& ParticleFilter::pose() const {
 
 void ParticleFilter::propagationStep(const Pose2D& disp) {
   // Equivalent to line 4 where we get proposed state based on particles and control input
-  
   for(auto& p : particles()) {
     // Get the belief
     float stdevX = 10.0;
@@ -89,22 +86,19 @@ void ParticleFilter::propagationStep(const Pose2D& disp) {
 }
 
 void ParticleFilter::updateStep(){
-  int num_unreliable = 0;
   for(auto& p : particles()) {
     double bear_weight = 0.0;
     for(std::map<WorldObjectType,Pose2D>::iterator it=landmarks_.begin(); it!=landmarks_.end(); ++it){
       auto& landmark_current = cache_.world_object->objects_[it->first];
       if (landmark_current.seen) {
-        // printf("Saw %s at [%f, %f] with distance: %f and bearing: %f\n",getName(it->first),it->second.translation.x, it->second.translation.y,landmark_current.visionDistance,landmark_current.visionBearing*180.0/M_PI);
-        //double part_dist = sqrt(pow(p.x - it->second.translation.x, 2) + pow(p.y - it->second.translation.y,2));
-        double part_dist = sqrt(pow(p.x - landmark_current.loc.x, 2) + pow(p.y - landmark_current.loc.y,2));
+        double part_dist = sqrt(pow(p.x - it->second.translation.x, 2) + pow(p.y - it->second.translation.y,2));
         double mean_dist = landmark_current.visionDistance;
         double var_dist = (mean_dist/3.5)*(mean_dist/3.5);
         double dist_weight = foldedNormPDF(part_dist,mean_dist,var_dist);
 
-        double part_global_bearing = p.t;  //alpha
+        double part_global_bearing = p.t;
 
-        double part_landmark_sep = atan2f(landmark_current.loc.y-p.y,landmark_current.loc.x-p.x);  // beta
+        double part_landmark_sep = atan2f(it->second.translation.y-p.y,it->second.translation.x-p.x);  // beta
         double mean_bear = landmark_current.visionBearing;  //theta
         double x_bear = part_landmark_sep - part_global_bearing;  //phi
 
@@ -138,20 +132,13 @@ double ParticleFilter::truncNormPDF(double x, double mu, double sig_sq, double a
   }
 }
 
-
 bool ParticleFilter::checkResample(){
   // W slow and fast calculation
-  double w_avg = 0;
   double weights_sum = 0;
   double sum_weights_squared = 0.0;
   for(auto& p : particles()){
     weights_sum += p.w;
-    w_avg += (p.w / (double)M_);
   }
-
-  w_slow_ += alpha_slow_ * (w_avg - w_slow_);
-  w_fast_ += alpha_fast_ * (w_avg - w_fast_);
-
 
   if(weights_sum == 0.0) return true;
   for(auto& p : particles()) {
@@ -164,81 +151,40 @@ bool ParticleFilter::checkResample(){
   return (N_eff < (0.9*M_));
 }
 
+bool ParticleFilter::noMeasurement(){
+  for(std::map<WorldObjectType,Pose2D>::iterator it=landmarks_.begin(); it!=landmarks_.end(); ++it){
+    auto& landmark_current = cache_.world_object->objects_[it->first];
+    if (landmark_current.seen) return false;
+  }
+  return true;
+}
+
 std::vector<Particle> ParticleFilter::resampleStep(){
   std::vector<Particle> resampled_particles(M_);
-  bool noob = false;
-  if (particles().size() == 0)
-  {
-    //std::cout << "No particles to resample from!" << std::endl;
-    noob = true;
-  }
-
-  if (!noob)
-  {
-    double r = Random::inst().sampleU(0.0, 1.0 / M_);
-    double c = particles().at(0).w;
-    double u;
-    double resample_prob = std::max((1.0 - (w_fast_ / w_slow_)), 0.0);
-    int rand_injected = 0;
-    int area_injected = 0;
-    
-    int i = 0;
-    //bool noob = false;
-    double stdev_x = 10.0;
-    double stdev_y = 10.0;
-    double stdev_th = 0.01;
-    double mu_x = mean_.translation.x;
-    double mu_y = mean_.translation.y;
-    double mu_th = mean_.rotation;
-    
-    double N_eff;
-    
-    for(int m = 0; m < M_; m++){
-      u = r + (double(m) - 1.0) / double(M_);
-    
-      while(u > c){
-        ++i;
-        if(i >= M_){
-          noob = true;
-          break;
-        }
-        c += particles().at(i).w;
-      }
-    
-      if(noob){
-        break;
-      }
-    
-      double rand_prob = Random::inst().sampleU(0.0, 1.0);
-      if (rand_prob < resample_prob && rand_injected < (0.0 * (double)M_)) {
-        if (area_injected < (0.20 * (double)M_)) {
-          ++rand_injected;
-          ++area_injected;
-          particles().at(i).x = stdev_x*Random::inst().sampleN(0.0,1.0) + mu_x;
-          particles().at(i).y = stdev_y*Random::inst().sampleN(0.0,1.0) + mu_y;
-          particles().at(i).t = stdev_th*Random::inst().sampleN(0.0,1.0) + mu_th;
-        } else{
-          ++rand_injected;
-          particles().at(i).x = Random::inst().sampleU(-2000.0,2000.0);
-          particles().at(i).y = Random::inst().sampleU(-1200.0,1200.0);
-          particles().at(i).t = Random::inst().sampleU(-M_PI, M_PI);
-        }
-      }
-      particles().at(i).w = 1.0 / M_;
-      resampled_particles.at(m) = particles().at(i);
-    }
-  }
-  
-  if(noob){
+  if (particles().size() == 0){
+    double  stdev_x = 15.0,
+            stdev_y = 15.0,
+            stdev_th = 0.1,
+            mu_x = mean_.translation.x,
+            mu_y = mean_.translation.y,
+            mu_th = mean_.rotation;
     resampled_particles.clear();
     resampled_particles.resize(M_);
     for(auto& p : resampled_particles) {
-      p.x = Random::inst().sampleU(-2000.0,2000.0);
-      p.y = Random::inst().sampleU(-1200.0,1200.0);
-      p.t = Random::inst().sampleU(-M_PI, M_PI);  
+      p.x = Random::inst().sampleN(mu_x,stdev_x);
+      p.y = Random::inst().sampleN(mu_y,stdev_y);
+      p.t = Random::inst().sampleN(mu_th,stdev_th);
       p.w = 1.0/M_;
     }
+    return resampled_particles;
+  }
+
+  double r = Random::inst().sampleU(1.0);
+  int k = 0;
+  double pcum = particles().at(k).w;
+  for(int j = 0; j < M_; j++){
+    while((pcum < (j+r)/M_) && (k < M_-1))  pcum += particles().at(++k).w;
+    resampled_particles.at(j) = particles().at(k);
   }
   return resampled_particles;
 }
-

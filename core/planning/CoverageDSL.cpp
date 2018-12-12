@@ -16,6 +16,10 @@ CoverageDSL::~CoverageDSL() {
 void CoverageDSL::init(std::vector<GridCell>& wavefront, int startCoverageIdx) {
   DStarLite::init(wavefront, startCoverageIdx, -1, &(cache_.planning->path));
   buildBlankGrid();
+
+  //std::cout << "Map before doing dsl stuff: " << std::endl;
+
+  //printGrid();
   
   if (map_.size() <= 0) {
     std::cout << "EMPTY MAP IN RUNDSL?!\n" << std::endl;
@@ -29,11 +33,14 @@ void CoverageDSL::init(std::vector<GridCell>& wavefront, int startCoverageIdx) {
   // Initialize costs for each node to S_
   int calcNode = 0;
   for (mapIt = map_.begin(); mapIt != map_.end(); mapIt++) {
+    // Skip the goal node
     if (S_ == &(*mapIt)) {
       continue;
     }
         
     computeShortestPath(*mapIt);
+    //printGrid();
+    //std::cout << "Intermediate node expansions: " << nodeExpansions << std::endl;
     
     if (mapIt->g != mapIt->rhs) {
       //std::cout << "Cell at (" << mapIt->cell.r << ", " << mapIt->cell.c << ") was inconsistent" << std::endl;
@@ -53,7 +60,9 @@ void CoverageDSL::runDSL() {
   std::vector<PathNode>::iterator mapIt;
 
   // Check if any edge costs have changed
-  if (!cache_.planning->changedCost) return;  
+  if (!cache_.planning->changedCost) {
+    std::cout << "Unexpectedly in CoverageDSL::runDSL() with no detected changes" << std::endl;
+  }
 
   // Get the new k offset
   // use pathIdx - 1 because we only want to replan up to visited node
@@ -79,7 +88,9 @@ void CoverageDSL::runDSL() {
     if (mapIt->cell.visited) continue;
 
     computeShortestPath(*mapIt);
+    std::cout << "Intermediate expanded nodes after replan: " << nodeExpansions << std::endl;
   }
+  
 
   printGrid();
 
@@ -93,8 +104,8 @@ void CoverageDSL::runDSL() {
   // Replan
   generateCoveragePath(cache_.planning->pathIdx);
 
-  // here we're going to need to update the DSL from a certain coordinate
-  // TODO: update this function to use the robot's current location when replanning
+  // Now that costs are consistent, reset the boolean in planning block
+  cache_.planning->changedCost = false;
 }
 
 // This only works if we include the nodes discovered in "hop" in the path
@@ -227,6 +238,9 @@ void CoverageDSL::generateCoveragePath(int startIdx) {
   printPath();
   
   printf("Path size: %d\n", numPlanned);
+  printf("Node expansions in coverage: %d\n", nodeExpansions);
+
+  //TODO: maybe sum the number of node expansions for vanilla DSL before deleting
 
   cache_.planning->nodesLeft = numPlanned;
   cache_.planning->nodesInPath += numPlanned;

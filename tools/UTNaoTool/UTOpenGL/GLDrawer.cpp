@@ -11,6 +11,8 @@
 #include <memory/TeamPacketsBlock.h>
 #include <memory/JointBlock.h>
 #include <memory/GameStateBlock.h>
+#include <planning/PlanningConstants.h>
+#include <common/Field.h>
 
 using namespace Eigen;
 
@@ -53,7 +55,10 @@ void GLDrawer::draw(const map<DisplayOption,bool>& displayOptions) {
   if (display_[SHOW_ODOMETRY_OVERLAY]) overlayOdometry();
   if (display_[SHOW_RELATIVE_OBJECT_UNCERTS]) localizationGL.drawRelativeObjectUncerts(gtcache_.world_object, bcache_.world_object, gtcache_.robot_state, bcache_.localization_mem);
   if (display_[SHOW_BEACONS]) drawBeacons();
-  if (display_[SHOW_BEACONS]) drawObstacles();
+
+  // planning information
+  if (display_[SHOW_PLANNING_GRID]) drawPlanningGrid();
+  if (display_[SHOW_OBSTACLES]) drawObstacles();
 
   // truth data from sim
   if (display_[SHOW_TRUTH_ROBOT]) drawTruthRobot();
@@ -111,7 +116,11 @@ void GLDrawer::drawField() {
     for (int i = LINE_OFFSET; i < LINE_OFFSET + NUM_LINES; i++){
       WorldObject* wo = &(gtcache_.world_object->objects_[i]);
       if (i == WO_CENTER_LINE || i == WO_OWN_LEFT_GOALBAR || i == WO_OWN_RIGHT_GOALBAR) continue;
-      objectsGL.drawFieldLine(wo->loc, wo->endLoc);
+      if (WorldObject::isVerticalLine(i)) {
+        objectsGL.drawVerticalFieldLine(wo->loc, wo->endLoc);
+      } else {
+        objectsGL.drawHorizontalFieldLine(wo->loc, wo->endLoc);
+      }
     }
     WorldObject* wo = &(gtcache_.world_object->objects_[WO_OPP_GOAL]);
     glColor3f(1,1,0);
@@ -1098,12 +1107,26 @@ void GLDrawer::drawBeacons() {
   }
 }
 
-void GLDrawer::drawObstacles(){
+void GLDrawer::drawObstacles() {
   if(gtcache_.world_object == NULL) return;
   std::vector<WorldObjectType> obstacles(WO_OBSTACLE_1, WO_OBSTACLE_2);
 
   for(auto obs : obstacles) {
     const auto& object = gtcache_.world_object->objects_[obs];
     objectsGL.drawObstacle(object.loc);
+  }
+}
+
+void GLDrawer::drawPlanningGrid() {
+  float gridRowWidth = GRID_WIDTH * CELL_WIDTH;
+  float gridColLength = GRID_HEIGHT * CELL_HEIGHT; 
+  for (int i = 0; i <= GRID_HEIGHT; ++i) {
+    objectsGL.drawVerticalGridLine(Point2D(-HALF_FIELD_X, HALF_FIELD_Y - i * CELL_HEIGHT),
+                                     Point2D(-HALF_FIELD_X + gridRowWidth, HALF_FIELD_Y - i * CELL_HEIGHT));
+  }
+
+  for (int j = 0; j <= GRID_WIDTH; ++j) {
+    objectsGL.drawHorizontalGridLine(Point2D(-HALF_FIELD_X + j * CELL_WIDTH, HALF_FIELD_Y),
+                           Point2D(-HALF_FIELD_X + j * CELL_WIDTH, HALF_FIELD_Y - gridColLength));
   }
 }

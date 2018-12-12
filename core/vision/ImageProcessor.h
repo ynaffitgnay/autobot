@@ -13,6 +13,8 @@
 #include <math/Pose3D.h>
 #include <vision/structures/VisionParams.h>
 #include <vision/structures/Blob.h>
+#include <vision/IntersectionDetector.h>
+
 
 class Classifier;
 class BeaconDetector;
@@ -29,6 +31,7 @@ class ImageProcessor {
     void SetColorTable(unsigned char*);
     std::unique_ptr<Classifier> color_segmenter_;
     std::unique_ptr<BeaconDetector> beacon_detector_;
+    std::unique_ptr<IntersectionDetector> intersection_detector_;
     std::unique_ptr<ObstacleDetector> obstacle_detector_;
     std::vector<Blob> blobs_;
     unsigned char* getImg();

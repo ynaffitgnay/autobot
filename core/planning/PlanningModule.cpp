@@ -42,7 +42,7 @@ void PlanningModule::initSpecificModule() {
   startLoc_ = Point2D(cache_.planning->startPoint.x, cache_.planning->startPoint.y);
   prevLoc_r = getGridRow(startLoc_.x);
   prevLoc_c = getGridCol(startLoc_.y);
-  Pose2D wfStartPose;
+  //Pose2D wfStartPose;
 
   wfStartPose.translation.x = startLoc_.x + 1500; //mm
   wfStartPose.translation.y = 1250 - startLoc_.y; //mm
@@ -56,7 +56,7 @@ void PlanningModule::initSpecificModule() {
 
   std::cout << "Initialized D* lite. Initial path: " << std::endl;
 
-  for (int i = 0; i < GRID_SIZE; ++i) {
+  for (int i = 0; i < cache_.planning->nodesInPath; ++i) {
     if (i % 10 == 0) {
       std::cout << std::endl;
     }
@@ -67,14 +67,20 @@ void PlanningModule::initSpecificModule() {
 
   int desiredCellIdx = cache_.planning->path[cache_.planning->pathIdx];
 
-  std::cout << "pathIdx: " << cache_.planning->pathIdx << ". I should be in idx " << desiredCellIdx << "  (" << getRowFromIdx(desiredCellIdx)  <<
-      ", " << getColFromIdx(desiredCellIdx) << ")." << std::endl;
+  // std::cout << "pathIdx: " << cache_.planning->pathIdx << ". I should be in idx " << desiredCellIdx << "  (" << getRowFromIdx(desiredCellIdx)  <<
+  //     ", " << getColFromIdx(desiredCellIdx) << ")." << std::endl;
 
   // TODO: re-initialize features in planning block (maybe shift planning stuff to world_object)?
 }
 
 void PlanningModule::processFrame() {
   if (cache_.planning->resetPath) {
+    // Mark all cells as unvisited
+    for (int i = 0; i < GRID_SIZE; ++i) {
+      initial_cost_map_->cells.at(i).visited = false;
+    }
+    GG_->generateGrid(*initial_cost_map_);
+    WP_->getCosts(*initial_cost_map_, wfStartPose);
     DSL_->init(initial_cost_map_->cells, WP_->start_index_);
     cache_.planning->resetPath = false;
     std::cout << "Re-initialized planning" << std::endl;
@@ -83,7 +89,10 @@ void PlanningModule::processFrame() {
   
   updateCell();
   
-  // Check if any obstacles have been encountered -- maybe store this in world objects?
+  
+  // Check if any edge costs have changed
+  if (!cache_.planning->changedCost) return;
+
   DSL_->runDSL();
 }
 
@@ -102,7 +111,7 @@ void PlanningModule::updateCell() {
   int curr_c = getGridCol(robot.loc.x);
 
   // if we haven't changed cells, return
-  if (cache_.planning->pathIdx != 0 && curr_r == prevLoc_r && curr_c == prevLoc_c) return;
+  //if (cache_.planning->pathIdx != 0 && curr_r == prevLoc_r && curr_c == prevLoc_c) return;
   // TODO: check if the cell we're trying to go to is occupied??
 
   int desiredCellIdx = cache_.planning->path[cache_.planning->pathIdx];
@@ -110,24 +119,24 @@ void PlanningModule::updateCell() {
 
   // get information about the new cell
   if (currIdx != desiredCellIdx) {
-    std::cout << "I should be in idx " << desiredCellIdx << "  (" << getRowFromIdx(desiredCellIdx)  <<
-      ", " << getColFromIdx(desiredCellIdx) << "), but I'm in " << currIdx << " (" <<
-      curr_r << ", " << curr_c << ")." << std::endl;
+    // std::cout << "I should be in idx " << desiredCellIdx << "  (" << getRowFromIdx(desiredCellIdx)  <<
+    //   ", " << getColFromIdx(desiredCellIdx) << "), but I'm in " << currIdx << " (" <<
+    //   curr_r << ", " << curr_c << ")." << std::endl;
 
     // TODO: Check if desired cell is occupied and trigger replanning?
 
-    std::cout << "rest of path: " << std::endl;
-    for (int i = cache_.planning->pathIdx; i < cache_.planning->nodesLeft; ++i) {
-      if (i % 10 == 0)
-        std::cout << std::endl;
+    // std::cout << "rest of path: " << std::endl;
+    // for (int i = cache_.planning->pathIdx; i < cache_.planning->nodesLeft; ++i) {
+      // if (i % 10 == 0)
+        // std::cout << std::endl;
 
-      std::cout << "(" << getRowFromIdx(cache_.planning->path.at(i)) << ", " << getColFromIdx(cache_.planning->path.at(i)) << ") ";
-    }
-    std::cout << std::endl;
+      // std::cout << "(" << getRowFromIdx(cache_.planning->path.at(i)) << ", " << getColFromIdx(cache_.planning->path.at(i)) << ") ";
+    // }
+    // std::cout << std::endl;
    
     return;
   }
-  
+  //std::cout << "Marking cell " << getRowFromIdx(currIdx) << ", " << getColFromIdx(currIdx) << " visited" << std::endl;
   cache_.planning->grid.at(currIdx).visited = true;
 
   // Remove a node on the path

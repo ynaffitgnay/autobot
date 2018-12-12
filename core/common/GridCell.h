@@ -18,9 +18,12 @@ DECLARE_INTERNAL_SCHEMA(struct GridCell {
   SCHEMA_FIELD(bool visited);
   SCHEMA_FIELD(int order_index);
 
-  GridCell() : r(-1), c(-1), cost(0), occupied(false), order_index(-1), visited(false) {};
+  GridCell() : r(-1), c(-1), cost(0), occupied(false), order_index(-1),
+    visited(false) {};
 
-  GridCell(int row, int col) : r(row), c(col), cost(0), occupied(false) {
+  GridCell(int row, int col) : r(row), c(col), cost(0), occupied(false),
+    visited(false), order_index(-1)
+  {
   	int centerX = CELL_WIDTH * col + CELL_WIDTH / 2;  // Need to translate
   	int centerY = CELL_HEIGHT * row + CELL_HEIGHT / 2;  // Need to translate
   	center.translation.x = centerX;
@@ -29,6 +32,7 @@ DECLARE_INTERNAL_SCHEMA(struct GridCell {
   };
 
   GridCell(const GridCell& other) : r(other.r), c(other.c), center(other.center),
-    cost(other.cost), occupied(other.occupied), order_index(other.order_index) {};
+    cost(other.cost), occupied(other.occupied), visited(other.visited),
+    order_index(other.order_index) { };
 });
 #endif
