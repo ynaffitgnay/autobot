@@ -87,6 +87,17 @@ void PlanningModule::processFrame() {
     return;
   }
   
+  // IF WAVEFRONT UNCOMMENT/COMMENT THIS BLOCK
+  wfStartPose = cache_.planning->grid.at(cache_.planning->path.at(cache_.planning->pathIdx - 1)).center;
+  wfStartPose.center.translation.x = wfStartPose.center.translation.x + FIELD_WIDTH/2.0;
+  wfStartPose.center.translation.y = wfStartPose.center.translation.y - FIELD_HEIGHT/2.0;
+  wfStartPose.center.rotation = 0;
+  GG_->generateGrid(*initial_cost_map_, true);
+  WP_->getCosts(*initial_cost_map_, wfStartPose);
+  DSL_->init(initial_cost_map_->cells, WP_->start_index_, true);
+  std::cout << "AHHHH A* planning" << std::endl;
+
+
   updateCell();
   
   
