@@ -93,7 +93,7 @@ void ParticleFilter::updateStep(){
       if (landmark_current.seen) {
         double part_dist = sqrt(pow(p.x - it->second.translation.x, 2) + pow(p.y - it->second.translation.y,2));
         double mean_dist = landmark_current.visionDistance;
-        double var_dist = (mean_dist/3.5)*(mean_dist/3.5);
+        double var_dist = (30.0 + mean_dist/3.0)*(30.0 + mean_dist/3.0);
         double dist_weight = foldedNormPDF(part_dist,mean_dist,var_dist);
 
         double part_global_bearing = p.t;
@@ -102,7 +102,7 @@ void ParticleFilter::updateStep(){
         double mean_bear = landmark_current.visionBearing;  //theta
         double x_bear = part_landmark_sep - part_global_bearing;  //phi
 
-        double var_bear = 0.3 * 0.3;
+        double var_bear = 0.4 * 0.4;
         if (x_bear > M_PI  || x_bear < -M_PI) {
           p.t = -p.t;
           x_bear = part_landmark_sep - p.t;
