@@ -3,7 +3,7 @@
 GridGenerator::GridGenerator() {
 }
 
-bool GridGenerator::generateGrid(Grid& grid, bool& gridCellsGlobalized) {
+bool GridGenerator::generateGrid(Grid& grid, bool gridCellsGlobalized) {
 	for (auto& cell : grid.cells) {
     if (gridCellsGlobalized) {
       cell.center.translation.x = cell.center.translation.x + FIELD_WIDTH/2.0;

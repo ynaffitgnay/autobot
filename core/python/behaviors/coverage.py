@@ -19,10 +19,10 @@ from state_machine import Node, C, T, S, LoopingStateMachine, StateMachine, Even
 class GetReady(Node):
   def __init__(self):
     super(GetReady, self).__init__()
-    memory.planning.coverageStarted = False
-    memory.planning.planningIdx = 0
-    memory.planning.nodesLeft = memory.planning.nodesInPath
-    memory.planning.RestartPath()
+    # memory.planning.coverageStarted = False
+    # memory.planning.planningIdx = 0
+    # memory.planning.nodesLeft = memory.planning.nodesInPath
+    # memory.planning.RestartPath()
 
   def run(self):
     commands.stand()
