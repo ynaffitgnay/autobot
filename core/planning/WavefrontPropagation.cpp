@@ -41,11 +41,7 @@ bool WavefrontPropagation::getCosts(Grid& map, Pose2D& startPose) {
   waveCells.clear();
   waveCells.resize(map.cells.size());
   for(int i = 0; i<waveCells.size(); i++) {
-    if (map.cells[i].visited) {
-      //std::cout << "cell at " << getRowFromIdx(i) << ", " << getColFromIdx(i) << " visited before initialization" << std::endl;
-      
-      map.cells[i].occupied = true;
-    }
+    if (map.cells[i].visited) map.cells[i].occupied = true;
   	WaveCell wc(map.cells[i].center, map.cells[i]);
     waveCells[i]=wc;
   }
@@ -64,7 +60,7 @@ bool WavefrontPropagation::getCosts(Grid& map, Pose2D& startPose) {
       float globX = map.cells[i].center.translation.x-FIELD_WIDTH/2.0;  // Converts from local x,y to global x,y not r,c
       float globY = -map.cells[i].center.translation.y +FIELD_HEIGHT/2.0;
       float globTh = atan2f(-globY, -globX);
-      //printf("Location: [%f,%f] Angle to center: %f\n", globX, globY, globTh*180/M_PI);
+      printf("Location: [%f,%f] Angle to center: %f\n", globX, globY, globTh*180/M_PI);
 
       // float globTh = map.cells[i].center.rotation;
       Pose2D globCenter(globTh,globX,globY);
@@ -107,14 +103,14 @@ bool WavefrontPropagation::fill(Pose2D& startPose) {
     waveNumber++;
   }
 
-  // Add a factor for the distance from the wall. We want cells on the outside to have a higher value.
+  // Add a factor for the distance from the landmarks. We want cells near landmarks to have a higher value.
   int alpha = 1;
-  std::vector<int> wall_factors;
+  std::vector<int> lm_factors;
   for (auto& wc : waveCells) {
 
-    int wallFactor = wc.getWallFactor();
-    wall_factors.push_back(wallFactor);
-    int newValue = 2*wc.getValue() + alpha*wallFactor;
+    int lmFactor = wc.getLandmarkFactor();
+    lm_factors.push_back(lmFactor);
+    int newValue = 2*wc.getValue() + alpha*lmFactor;
     // printf("Old wave value: %d Wall factor: %d New wave value: %d\n", wc.getValue(),wallFactor,newValue);
     if (wc.getValue() != WAVE_OBSTRUCTION && wc.getValue() != WAVE_START && wc.getValue() != WAVE_END) {
       wc.setValue(newValue);
@@ -231,7 +227,7 @@ bool WavefrontPropagation::traverse(std::vector<GridCell> &orig_cells) {
   addPose(index, end_index_, plan, orig_cells); // add end cell to the plan
   debugPoses.push_back(end_index_);
   
-  printf("Orig cell size: %d Debug pose size: %d\n", orig_cells.size(), debugPoses.size());
+  printf("Orig cell size: %d Debug pose size: %d", orig_cells.size(), debugPoses.size());
 
   std::vector<GridCell*> ordered_plan;
   for (int i = 0; i < orig_cells.size(); i++){

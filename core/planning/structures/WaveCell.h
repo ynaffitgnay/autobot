@@ -32,7 +32,7 @@ public:
   bool contains(Pose2D pose);
   int getValue(void);
   int setNeighborsValues(int wave_label);
-  int getWallFactor(void);
+  int getLandmarkFactor(void);
   std::vector<WaveCell*> getNeighbors(void);
   Pose2D getPosition(void);
   void setNeighbors(std::vector<WaveCell*> nbs);

@@ -86,8 +86,8 @@ int WaveCell::setNeighborsValues(int wave_label) {
   return count;
 }
 
-int  WaveCell::getWallFactor() {
-  int wall_factor;
+int  WaveCell::getLandmarkFactor() {
+  int lm_factor;
   int row = gc_.r+1;
   int col = gc_.c+1;
 
@@ -97,23 +97,23 @@ int  WaveCell::getWallFactor() {
 
   switch (min_index) {
     case 0:
-      wall_factor = std::round(float(GRID_HEIGHT)/2.0)-(row-1);
+      lm_factor = std::round(float(GRID_HEIGHT)/2.0)-(row-1);
       break;
     case 1:
-      wall_factor = std::round(float(GRID_HEIGHT)/2.0)-( GRID_HEIGHT-row);
+      lm_factor = std::round(float(GRID_HEIGHT)/2.0)-( GRID_HEIGHT-row);
       break;
     case 2:
-      wall_factor = std::round(float(GRID_WIDTH)/2.0)-(col-1);
+      lm_factor = std::round(float(GRID_WIDTH)/2.0)-(col-1);
       break;
     case 3:
-      wall_factor = std::round(float(GRID_WIDTH)/2.0)-(GRID_WIDTH-col);
+      lm_factor = std::round(float(GRID_WIDTH)/2.0)-(GRID_WIDTH-col);
       break;
     default:
-      wall_factor = 0;
+      lm_factor = 0;
       break;
   }
 
-  return wall_factor;
+  return lm_factor;
 }
 
 Pose2D WaveCell::getPosition() {
