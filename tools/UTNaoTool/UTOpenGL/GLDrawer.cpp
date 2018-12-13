@@ -11,6 +11,7 @@
 #include <memory/TeamPacketsBlock.h>
 #include <memory/JointBlock.h>
 #include <memory/GameStateBlock.h>
+#include <memory/PlanningBlock.h>
 #include <planning/PlanningConstants.h>
 #include <common/Field.h>
 
@@ -19,8 +20,14 @@ using namespace Eigen;
 GLDrawer::GLDrawer(QGLWidget* parent) : 
     parent_(parent), 
     teammate(WO_TEAM_COACH),
-    annotations_(NULL) {
+    annotations_(NULL)
+{
   kickGridSize = 100.0f;
+  truth_path_ = std::make_unique<std::vector<Point2D>>();
+  belief_path_ = std::make_unique<std::vector<Point2D>>();
+}
+
+GLDrawer::~GLDrawer() {
 }
 
 void GLDrawer::setGtCache(MemoryCache cache) {
@@ -59,6 +66,15 @@ void GLDrawer::draw(const map<DisplayOption,bool>& displayOptions) {
   // planning information
   if (display_[SHOW_PLANNING_GRID]) drawPlanningGrid();
   if (display_[SHOW_OBSTACLES]) drawObstacles();
+  if (display_[SHOW_TRUTH_PATH]) drawTruthPath();
+  if (!display_[SHOW_TRUTH_PATH]) {
+    truth_path_->clear();
+  }
+  if (display_[SHOW_BELIEF_PATH]) drawBeliefPath();
+  if (!display_[SHOW_BELIEF_PATH]) {
+    belief_path_->clear();
+  }
+  if (display_[SHOW_PLANNED_PATH]) drawPlannedPath();
 
   // truth data from sim
   if (display_[SHOW_TRUTH_ROBOT]) drawTruthRobot();
@@ -1128,5 +1144,47 @@ void GLDrawer::drawPlanningGrid() {
   for (int j = 0; j <= GRID_WIDTH; ++j) {
     objectsGL.drawHorizontalGridLine(Point2D(-HALF_FIELD_X + j * CELL_WIDTH, HALF_FIELD_Y),
                            Point2D(-HALF_FIELD_X + j * CELL_WIDTH, HALF_FIELD_Y - gridColLength));
+  }
+}
+
+void GLDrawer::drawTruthPath() {
+  if (gtcache_.robot_state == NULL) return;
+  //if (truth_path_ == NULL) truth_path_ = new std::vector<Point2D>();
+
+  WorldObject* self = &(gtcache_.world_object->objects_[gtcache_.robot_state->WO_SELF]);
+  truth_path_->push_back(self->loc);
+
+  basicGL.colorRGBAlpha(Colors::Green, 1.0);
+  for (int i = 0; i < (truth_path_->size() - 1); ++i) {
+    basicGL.drawLine(truth_path_->at(i), truth_path_->at(i + 1));
+  }
+
+}
+
+void GLDrawer::drawBeliefPath() {
+  if (bcache_.robot_state == NULL) return;
+  //if (belief_path_ == NULL) belief_path_ = new std::vector<Point2D>();
+
+  WorldObject* self = &(bcache_.world_object->objects_[bcache_.robot_state->WO_SELF]);
+  belief_path_->push_back(self->loc);
+
+  basicGL.colorRGBAlpha(Colors::Blue, 1.0);
+  for (int i = 0; i < (belief_path_->size() - 1); ++i) {
+    basicGL.drawLine(belief_path_->at(i), belief_path_->at(i + 1));
+  }
+}
+
+void GLDrawer::drawPlannedPath() {
+  Point2D p1, p2;
+  if (bcache_.robot_state == NULL) return;
+
+  PlanningBlock*& plan = bcache_.planning;
+  p1 = plan->grid.at(plan->path.at(0)).center.translation;
+  
+  basicGL.colorRGBAlpha(Colors::Magenta, 1.0);
+  for (int i = 0; i < (plan->nodesInPath - 1); ++i) {
+    p2 = plan->grid.at(plan->path.at(i + 1)).center.translation;
+    basicGL.drawLine(p1, p2);
+    p1 = p2;
   }
 }
