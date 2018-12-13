@@ -13,7 +13,10 @@ CoverageDSL::~CoverageDSL() {
   delete blankGrid;
 }
 
-void CoverageDSL::init(std::vector<GridCell>& wavefront, int startCoverageIdx) {
+
+//TODO** D* BOOLEAN THAT TELLS WHETHER OR NOT TO CHANGE PLAN FROM CURRENT IDX
+
+void CoverageDSL::init(std::vector<GridCell>& wavefront, int startCoverageIdx, bool AStar) {
   DStarLite::init(wavefront, startCoverageIdx, -1, &(cache_.planning->path));
   buildBlankGrid();
 

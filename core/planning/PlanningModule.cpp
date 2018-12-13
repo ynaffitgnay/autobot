@@ -48,7 +48,7 @@ void PlanningModule::initSpecificModule() {
   wfStartPose.translation.y = 1250 - startLoc_.y; //mm
   wfStartPose.rotation = 0;
   printf("Generating grid\n");
-  GG_->generateGrid(*initial_cost_map_);
+  GG_->generateGrid(*initial_cost_map_, false);
   printf("Generating wave\n");
   WP_->getCosts(*initial_cost_map_, wfStartPose);
   
@@ -65,8 +65,7 @@ void PlanningModule::initSpecificModule() {
   }
   std::cout << std::endl;
 
-  int desiredCellIdx = cache_.planning->path[cache_.planning->pathIdx];
-
+  // int desiredCellIdx = cache_.planning->path[cache_.planning->pathIdx];
   // std::cout << "pathIdx: " << cache_.planning->pathIdx << ". I should be in idx " << desiredCellIdx << "  (" << getRowFromIdx(desiredCellIdx)  <<
   //     ", " << getColFromIdx(desiredCellIdx) << ")." << std::endl;
 
@@ -84,7 +83,7 @@ void PlanningModule::processFrame() {
     for (int i = 0; i < GRID_SIZE; ++i) {
       initial_cost_map_->cells.at(i).visited = false;
     }
-    GG_->generateGrid(*initial_cost_map_);
+    GG_->generateGrid(*initial_cost_map_, true);
     WP_->getCosts(*initial_cost_map_, wfStartPose);
     DSL_->init(initial_cost_map_->cells, WP_->start_index_);
     cache_.planning->resetPath = false;
@@ -92,6 +91,8 @@ void PlanningModule::processFrame() {
     return;
   }
   
+
+
   updateCell();
   
   
@@ -99,6 +100,16 @@ void PlanningModule::processFrame() {
   if (!cache_.planning->changedCost) return;
 
   DSL_->runDSL();
+
+  // IF WAVEFRONT UNCOMMENT/COMMENT THIS BLOCK
+  // wfStartPose = cache_.planning->grid.at(cache_.planning->path.at(cache_.planning->pathIdx - 1)).center;
+  // wfStartPose.translation.x = wfStartPose.translation.x + FIELD_WIDTH/2.0;
+  // wfStartPose.translation.y = wfStartPose.translation.y - FIELD_HEIGHT/2.0;
+  // wfStartPose.rotation = 0;
+  // GG_->generateGrid(*initial_cost_map_, true);
+  // WP_->getCosts(*initial_cost_map_, wfStartPose);
+  // DSL_->init(initial_cost_map_->cells, WP_->start_index_, true);
+  // std::cout << "AHHHH A* planning" << std::endl;
 }
 
 // Check if robot has moved to new cell
