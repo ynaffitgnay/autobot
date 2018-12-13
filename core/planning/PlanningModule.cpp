@@ -65,8 +65,7 @@ void PlanningModule::initSpecificModule() {
   }
   std::cout << std::endl;
 
-  int desiredCellIdx = cache_.planning->path[cache_.planning->pathIdx];
-
+  // int desiredCellIdx = cache_.planning->path[cache_.planning->pathIdx];
   // std::cout << "pathIdx: " << cache_.planning->pathIdx << ". I should be in idx " << desiredCellIdx << "  (" << getRowFromIdx(desiredCellIdx)  <<
   //     ", " << getColFromIdx(desiredCellIdx) << ")." << std::endl;
 
