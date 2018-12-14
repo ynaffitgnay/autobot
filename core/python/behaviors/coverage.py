@@ -262,8 +262,8 @@ class Playing(LoopingStateMachine):
     rdy = GetReady()
     stand = Stand()
     faced = False
-    moveHeadLeft = MoveHead(110.0, 0.0, 3.0)
-    moveHeadRight = MoveHead(-110.0, 0.0, 6.0)
+    moveHeadLeft = MoveHead(110.0, 0.0, .1)
+    moveHeadRight = MoveHead(-110.0, 0.0, .2)
 
     follow = FollowPath(robot)
     restJoints = RestJoints()
