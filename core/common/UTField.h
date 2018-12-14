@@ -70,8 +70,8 @@ const Point2D landmarkLocation[] = {
   Point2D(1500.0,1240.0),                     // WO_BEACON_PINK_YELLOW
   Point2D(1500.0,-1240.0),                    // WO_BEACON_YELLOW_PINK
 
-  Point2D(1800.0, 750.0),                     // WO_OBSTACLE_1
-  Point2D(750.0, 1350.0),                     // WO_OBSTACLE_2
+  Point2D(300.0, 500.0),                      // WO_OBSTACLE_1
+  Point2D(-600.0, -100.0),                    // WO_OBSTACLE_2
 
   Point2D( -FIELD_X / 2, 0),                  // WO_OWN_GOAL
   Point2D( FIELD_X / 2, 0 ),                  // WO_OPP_GOAL
@@ -89,8 +89,8 @@ const Point2D intersectionLocation[] = {
   // L
   Point2D( FIELD_X / 2, FIELD_Y / 2),                 // 0 WO_OPP_FIELD_LEFT_L
   Point2D( FIELD_X / 2, -FIELD_Y / 2),                //   WO_OPP_FIELD_RIGHT_L
-  Point2D( 900.0, 680.0),   // 2 WO_OPP_PEN_LEFT_L
-  Point2D( 900.0, -690.0),  //   WO_OPP_PEN_RIGHT_L
+  Point2D( 900.0, 680.0),                             // 2 WO_OPP_PEN_LEFT_L
+  Point2D( 900.0, -690.0),                            //   WO_OPP_PEN_RIGHT_L
   Point2D( -FIELD_X / 2 - PENALTY_X, PENALTY_Y / 2),  // 4 WO_OWN_PEN_RIGHT_L
   Point2D( -FIELD_X / 2 - PENALTY_X, -PENALTY_Y / 2), //   WO_OWN_PEN_LEFT_L
   Point2D( -FIELD_X / 2, FIELD_Y / 2),                // 6 WO_OWN_FIELD_RIGHT_L

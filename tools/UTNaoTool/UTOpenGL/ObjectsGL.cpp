@@ -196,14 +196,14 @@ void ObjectsGL::drawBeacon(Point2D p, RGB topColor, RGB bottomColor, float alpha
   basicGL.drawCylinder(p.x, p.y, 0, p.x, p.y, 200, 110);
 }
 
-void ObjectsGL::drawObstacle(Point2D p, float alpha){
-  basicGL.colorRGBAlpha(Colors::Orange, alpha);
+void ObjectsGL::drawObstacle(Point2D p, RGB color, float alpha){
+  basicGL.colorRGBAlpha(color, alpha);
   float zero = 0.0;
   auto 
-    v0 = Vector3<float>(p.x+300.0, p.y+150.0,0),
-    v1 = Vector3<float>(p.x-300.0, p.y+150.0,0),
-    v2 = Vector3<float>(p.x-300.0, p.y-150.0,0),
-    v3 = Vector3<float>(p.x+300.0, p.y-150.0,0)
+    v0 = Vector3<float>(p.x + 300.0, p.y + 150.0,0),
+    v1 = Vector3<float>(p.x - 300.0, p.y + 150.0,0),
+    v2 = Vector3<float>(p.x - 300.0, p.y - 150.0,0),
+    v3 = Vector3<float>(p.x + 300.0, p.y - 150.0,0)
   ;
   basicGL.drawSurface(v0, v1, v2, v3);
 }

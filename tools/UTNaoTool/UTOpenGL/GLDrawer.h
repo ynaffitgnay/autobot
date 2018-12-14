@@ -65,6 +65,7 @@ class GLDrawer {
       SHOW_GOALS,
       SHOW_LINES,
       SHOW_OBSTACLES,
+      SHOW_UNKNOWN_OBSTACLES,
       SHOW_PLANNING_GRID,
       SHOW_TRUTH_PATH,
       SHOW_BELIEF_PATH,
@@ -120,6 +121,7 @@ class GLDrawer {
     void drawAnnotations();
     void drawBeacons();
     void drawObstacles();
+    void drawUnknownObstacles();
     void drawPlanningGrid();
     void drawTruthPath();
     void drawBeliefPath();

@@ -65,6 +65,7 @@ void GLDrawer::draw(const map<DisplayOption,bool>& displayOptions) {
 
   // planning information
   if (display_[SHOW_PLANNING_GRID]) drawPlanningGrid();
+  if (display_[SHOW_UNKNOWN_OBSTACLES]) drawUnknownObstacles();
   if (display_[SHOW_OBSTACLES]) drawObstacles();
   if (display_[SHOW_TRUTH_PATH]) drawTruthPath();
   if (!display_[SHOW_TRUTH_PATH]) {
@@ -1125,13 +1126,25 @@ void GLDrawer::drawBeacons() {
 
 void GLDrawer::drawObstacles() {
   if(gtcache_.world_object == NULL) return;
-  std::vector<WorldObjectType> obstacles(WO_OBSTACLE_1, WO_OBSTACLE_2);
+  std::vector<WorldObjectType> obstacles = {WO_OBSTACLE_1, WO_OBSTACLE_2};
 
   for(auto obs : obstacles) {
     const auto& object = gtcache_.world_object->objects_[obs];
-    objectsGL.drawObstacle(object.loc);
+    objectsGL.drawObstacle(object.loc, Colors::Orange);
   }
 }
+
+void GLDrawer::drawUnknownObstacles() {
+  if(gtcache_.world_object == NULL) return;
+  std::vector<WorldObjectType> obstacles = {WO_OBSTACLE_UNKNOWN_1, WO_OBSTACLE_UNKNOWN_2,
+                                            WO_OBSTACLE_UNKNOWN_3, WO_OBSTACLE_UNKNOWN_4};
+
+  for(auto obs : obstacles) {
+    const auto& object = gtcache_.world_object->objects_[obs];
+    objectsGL.drawObstacle(object.loc, Colors::Red);
+  }
+}
+
 
 void GLDrawer::drawPlanningGrid() {
   float gridRowWidth = GRID_WIDTH * CELL_WIDTH;

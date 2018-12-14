@@ -39,7 +39,7 @@ void ObstacleDetector::obsAssign(std::vector<Blob>& obstaclesCands) {
       // printf("Estimated distance: %f\n", dist);
       printf("Blob size: %d Blob width: %d Blob height: %d \n", blob.total, blob.xf-blob.xi, blob.yf-blob.yi);
       if (blob.total > 6000){
-        addObstaclesObject(center.x, center.y, blob.xf - blob.xi, blob.yf - blob.yi, WO_OBSTACLE_UNKNOWN);
+        addObstaclesObject(center.x, center.y, blob.xf - blob.xi, blob.yf - blob.yi, WO_OBSTACLE_UNKNOWN_1);
         count++;
       }
   }

@@ -188,7 +188,7 @@ class FaceNextCell(Node):
     commands.setHeadPanTilt(e_t, 0.0, 1.5)
 
     de_t = (e_t - self.t_prev)
-    print("[pathIdx: %f. Current location: x: %f, y: %f, (%d, %d), t: %f]" % (memory.planning.pathIdx, self.robot.loc.x, self.robot.loc.y, memory.planning.getGridRowFromLoc(self.robot.loc.y), memory.planning.getGridColFromLoc(self.robot.loc.x), core.RAD_T_DEG * self.robot.orientation))
+    print("pathIdx: %f. Current Loc: [x: %f, y: %f, t:%f] (%d, %d)" % (memory.planning.pathIdx, self.robot.loc.x, self.robot.loc.y,  core.RAD_T_DEG * self.robot.orientation, memory.planning.getGridRowFromLoc(self.robot.loc.y), memory.planning.getGridColFromLoc(self.robot.loc.x)))
     print("destloc: [%f,%f,%f] (%d, %d)" % (self.destloc.translation.x, self.destloc.translation.y, core.RAD_T_DEG * self.destloc.rotation, memory.planning.getDestGridRow(), memory.planning.getDestGridCol()))
     
     # Bound the derivative term of theta
@@ -262,6 +262,7 @@ class Playing(LoopingStateMachine):
     rdy = GetReady()
     stand = Stand()
     faced = False
+    #####TODO: remember to change these times back!!
     moveHeadLeft = MoveHead(110.0, 0.0, .1)
     moveHeadRight = MoveHead(-110.0, 0.0, .2)
 

@@ -43,20 +43,25 @@ ENUM(WorldObjectType,   // Types of objects  // 0
   WO_BEACON_PINK_YELLOW,  // 20
   WO_BEACON_YELLOW_PINK,  // 21
 
+  WO_OBSTACLE_1, // 22
+  WO_OBSTACLE_2, // 23
+     
   // 2 Landmark goals
-  WO_OWN_GOAL,  // 22
-  WO_OPP_GOAL,  // 23
+  WO_OWN_GOAL,  // 24
+  WO_OPP_GOAL,  // 25
 
-  WO_OWN_LEFT_GOALPOST,  // 24
-  WO_OPP_LEFT_GOALPOST,  // 25
-  
-  WO_OBSTACLE_1, // 26
-  WO_OBSTACLE_2, // 27
-  WO_OBSTACLE_UNKNOWN, // 28
+  WO_OWN_LEFT_GOALPOST,  // 26
+  WO_OPP_LEFT_GOALPOST,  // 27
 
-  WO_OWN_RIGHT_GOALPOST,  // 29
-  WO_OPP_RIGHT_GOALPOST,  // 30  // AND END HERE
+  WO_OWN_RIGHT_GOALPOST,  // 28
+  WO_OPP_RIGHT_GOALPOST,  // 29  // AND END HERE
 
+  // Unknown landmarks
+  WO_OBSTACLE_UNKNOWN_1, // 30
+  WO_OBSTACLE_UNKNOWN_2, // 31
+  WO_OBSTACLE_UNKNOWN_3, // 32
+  WO_OBSTACLE_UNKNOWN_4, // 33
+     
   // Unknown goals and goal posts
   WO_UNKNOWN_GOAL,  // 28  --  CHANGED
   WO_UNKNOWN_LEFT_GOALPOST,  // 29  --  CHANGED
@@ -171,6 +176,7 @@ const int WO_GOAL_FIRST = WO_OWN_GOAL;
 const int WO_GOAL_LAST = WO_UNKNOWN_GOALPOST;
 const int LANDMARK_OFFSET = WO_CENTER_CIRCLE;
 const int NUM_LANDMARKS = WO_OPP_RIGHT_GOALPOST - LANDMARK_OFFSET + 1;
+const int NUM_UNKNOWN_OBSTACLES = 4;
 const int INTERSECTION_OFFSET =  WO_OPP_FIELD_LEFT_L;
 const int NUM_INTERSECTIONS = WO_OWN_FRONT_LEFT_GOAL_T - INTERSECTION_OFFSET + 1;
 const int LINE_OFFSET =  WO_OPP_GOAL_LINE;
@@ -210,7 +216,7 @@ DECLARE_INTERNAL_SCHEMA(class WorldObject {
 
     // quick functions to determine which class of object this is
     WO_PROPERTY(isUnknown) {
-      return isUnknownPost(type) || isUnknownGoalCenter(type) || isUnknownGoal(type) || isUnknownIntersection(type) || isUnknownLine(type) || isUnknownPenaltyCross(type);
+      return isUnknownPost(type) || isUnknownGoalCenter(type) || isUnknownGoal(type) || isUnknownIntersection(type) || isUnknownLine(type) || isUnknownPenaltyCross(type) || isUnknownObstacle(type);
     }
 
     WO_PROPERTY(isLine) {
@@ -223,6 +229,10 @@ DECLARE_INTERNAL_SCHEMA(class WorldObject {
 
     WO_PROPERTY(isLandmark) {
       return (type >= LANDMARK_OFFSET && type < (LANDMARK_OFFSET + NUM_LANDMARKS));
+    }
+
+    WO_PROPERTY(isUnknownObstacle) {
+      return (type >= WO_OBSTACLE_UNKNOWN_1 && type <= WO_OBSTACLE_UNKNOWN_4);
     }
 
     WO_PROPERTY(isGoal) {
@@ -342,7 +352,7 @@ DECLARE_INTERNAL_SCHEMA(class WorldObject {
     }
 
     WO_PROPERTY(isObstacle) {
-      return type >= WO_OBSTACLE_1 && type <= WO_OBSTACLE_UNKNOWN;
+      return type >= WO_OBSTACLE_1 && type <= WO_OBSTACLE_2;
     }
 
     WO_PROPERTY(isEdgeIntersection) {
