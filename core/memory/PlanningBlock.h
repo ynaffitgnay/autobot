@@ -56,6 +56,10 @@ DECLARE_INTERNAL_SCHEMA(struct PlanningBlock : public MemoryBlock {
 
   void RestartPath();
   Pose2D getDestPose();
+  int getDestGridRow();
+  int getDestGridCol();
+  int getGridRowFromLoc(float y);
+  int getGridColFromLoc(float x);
 });
 
 #endif

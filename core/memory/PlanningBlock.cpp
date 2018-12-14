@@ -32,3 +32,18 @@ Pose2D PlanningBlock::getDestPose() {
   return grid.at(path.at(pathIdx)).center;
 }
 
+int PlanningBlock::getDestGridRow() {
+  return getRowFromIdx(path.at(pathIdx));
+}
+
+int PlanningBlock::getDestGridCol() {
+  return getColFromIdx(path.at(pathIdx));
+}
+
+int PlanningBlock::getGridRowFromLoc(float y) {
+  return getGridRow(y);
+}   
+    
+int PlanningBlock::getGridColFromLoc(float x) {
+  return getGridCol(x);
+}

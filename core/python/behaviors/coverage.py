@@ -188,8 +188,8 @@ class FaceNextCell(Node):
     commands.setHeadPanTilt(e_t, 0.0, 1.5)
 
     de_t = (e_t - self.t_prev)
-    print("[pathIdx: %f, robot x: %f, robot y: %f, robot orientation: %f]" % (memory.planning.pathIdx, self.robot.loc.x, self.robot.loc.y, core.RAD_T_DEG * self.robot.orientation))
-    print("destloc: [%f,%f,%f], e_t: %f" % (self.destloc.translation.x, self.destloc.translation.y, core.RAD_T_DEG * self.destloc.rotation, e_t))
+    print("[pathIdx: %f. Current location: x: %f, y: %f, (%d, %d), t: %f]" % (memory.planning.pathIdx, self.robot.loc.x, self.robot.loc.y, memory.planning.getGridRowFromLoc(self.robot.loc.y), memory.planning.getGridColFromLoc(self.robot.loc.x), core.RAD_T_DEG * self.robot.orientation))
+    print("destloc: [%f,%f,%f] (%d, %d)" % (self.destloc.translation.x, self.destloc.translation.y, core.RAD_T_DEG * self.destloc.rotation, memory.planning.getDestGridRow(), memory.planning.getDestGridCol()))
     
     # Bound the derivative term of theta
     if dt == 0:

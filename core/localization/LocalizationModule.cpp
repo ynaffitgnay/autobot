@@ -147,7 +147,8 @@ void LocalizationModule::processFrame() {
 
   // Process the current frame and retrieve our location/orientation estimate
   // from the particle filter
-  pfilter_->processFrame(); 
+  pfilter_->processFrame();
+  //std::cout << "At least I'm localizing..." << std::endl;
   Pose2D pose_avg; 
   pose_avg = avgLocVals(pfilter_->pose());
   self.loc = pose_avg.translation;

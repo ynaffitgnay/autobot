@@ -31,6 +31,7 @@
 #include <memory/PlanningBlock.h>
 
 #include <localization/LocalizationModule.h>
+#include <planning/PlanningModule.h>
 
 #include <stdlib.h>
 #include <InterpreterModule.h>
@@ -165,6 +166,7 @@ bool SimulatedPlayer::processFrame(WorldObjectBlock* simulationMem, GameStateBlo
     cache_.behavior->keeperRelBallVel = ball->absVel.globalToRelative(Point2D(0,0),robot->orientation);
   }
 
+  core->planning_->processFrame();
   // call cache_.behavior process frame
   core->interpreter_->processBehaviorFrame();
   core->communications_->processFrame();
