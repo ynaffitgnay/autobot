@@ -12,7 +12,7 @@ PlanningModule::PlanningModule() : tlogger_(textlogger) {
 }
 
 PlanningModule::~PlanningModule() {
-  if (initial_cost_map_ == NULL) delete(initial_cost_map_);
+  if (initial_cost_map_ != NULL) delete(initial_cost_map_);
 }
 
 void PlanningModule::specifyMemoryDependency() {
@@ -74,7 +74,7 @@ void PlanningModule::initSpecificModule() {
 
 void PlanningModule::processFrame() {
   if (cache_.planning->resetPath) {
-    if (initial_cost_map_ == NULL) delete(initial_cost_map_);
+    if (initial_cost_map_ != NULL) delete(initial_cost_map_);
 
     // Make a new initial_cost_map_
     initial_cost_map_ = new Grid(grid());
@@ -135,9 +135,9 @@ void PlanningModule::updateCell() {
 
   // get information about the new cell
   if (currIdx != desiredCellIdx) {
-    // std::cout << "I should be in idx " << desiredCellIdx << "  (" << getRowFromIdx(desiredCellIdx)  <<
-    //   ", " << getColFromIdx(desiredCellIdx) << "), but I'm in " << currIdx << " (" <<
-    //   curr_r << ", " << curr_c << ")." << std::endl;
+     //std::cout << "I should be in idx " << desiredCellIdx << "  (" << getRowFromIdx(desiredCellIdx)  <<
+     //  ", " << getColFromIdx(desiredCellIdx) << "), but I'm in " << currIdx << " (" <<
+     //  curr_r << ", " << curr_c << ")." << std::endl;
 
     // TODO: Check if desired cell is occupied and trigger replanning?
 
