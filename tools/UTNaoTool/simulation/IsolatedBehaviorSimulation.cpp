@@ -44,8 +44,11 @@ void IBSim::randomizePlayers(FieldConfiguration& config) {
     config[i].loc.x = rand_.sampleU(0.f, HALF_FIELD_X);
     config[i].loc.y = rand_.sampleU(-1500, 1500);
   }
-  config[player_].loc.x = rand_.sampleU(0.f, HALF_FIELD_X);
-  config[player_].loc.y = rand_.sampleU(-HALF_FIELD_Y, HALF_FIELD_Y);
+
+  // init location to starting point
+  
+  config[player_].loc.x = 1350.0; //rand_.sampleU(0.f, HALF_FIELD_X);
+  config[player_].loc.y = -1000.0; //rand_.sampleU(-HALF_FIELD_Y, HALF_FIELD_Y);
   config[player_].orientation = rand_.sampleU(-M_PI,M_PI);
   
   config[WO_BALL].loc.x = rand_.sampleU(0.f, HALF_FIELD_X);
