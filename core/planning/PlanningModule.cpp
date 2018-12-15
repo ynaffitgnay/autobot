@@ -36,7 +36,8 @@ void PlanningModule::specifyMemoryBlocks() {
 }
 
 // Perform startup initialization for planning
-void PlanningModule::initSpecificModule() {
+void PlanningModule::initSpecificModule(bool AStar) {
+  AStar_ = AStar;
   grid().resize(GRID_SIZE);
   initial_cost_map_ = new Grid(grid());
   startLoc_ = Point2D(cache_.planning->startPoint.x, cache_.planning->startPoint.y);
@@ -52,7 +53,7 @@ void PlanningModule::initSpecificModule() {
   printf("Generating wave\n");
   WP_->getCosts(*initial_cost_map_, wfStartPose);
   
-  DSL_->init(initial_cost_map_->cells, WP_->start_index_);
+  DSL_->init(initial_cost_map_->cells, WP_->start_index_, AStar_);
 
   std::cout << "Initialized D* lite. Initial path: " << std::endl;
 
@@ -91,19 +92,26 @@ void PlanningModule::processFrame() {
     return;
   }
   
-
-
   updateCell();
-  
   
   // Check if any edge costs have changed
   if (!cache_.planning->changedCost) return;
 
-  DSL_->runDSL();
+  if (!AStar_) {
+    DSL_->runDSL();
+  } else {
+    wfStartPose = cache_.planning->grid.at(cache_.planning->path.at(cache_.planning->pathIdx - 1)).center;
+    wfStartPose.translation.x = wfStartPose.translation.x + FIELD_WIDTH/2.0;
+    wfStartPose.translation.y = -wfStartPose.translation.y + FIELD_HEIGHT/2.0;
+    wfStartPose.rotation = 0;
+    GG_->generateGrid(*initial_cost_map_, true);
+    WP_->getCosts(*initial_cost_map_, wfStartPose);
+    DSL_->init(initial_cost_map_->cells, WP_->start_index_, true);
+    //std::cout << "AHHHH A* planning" << std::endl;
+  }
 
   std::cout << "Replanned beginning with pathIdx " << cache_.planning->pathIdx << std::endl;
   
-
   for (int i = cache_.planning->pathIdx; i < cache_.planning->nodesInPath; ++i) {
     if (i % 10 == 0) {
       std::cout << std::endl;
@@ -114,14 +122,7 @@ void PlanningModule::processFrame() {
   std::cout << std::endl;
 
   // IF WAVEFRONT UNCOMMENT/COMMENT THIS BLOCK
-  // wfStartPose = cache_.planning->grid.at(cache_.planning->path.at(cache_.planning->pathIdx - 1)).center;
-  // wfStartPose.translation.x = wfStartPose.translation.x + FIELD_WIDTH/2.0;
-  // wfStartPose.translation.y = wfStartPose.translation.y - FIELD_HEIGHT/2.0;
-  // wfStartPose.rotation = 0;
-  // GG_->generateGrid(*initial_cost_map_, true);
-  // WP_->getCosts(*initial_cost_map_, wfStartPose);
-  // DSL_->init(initial_cost_map_->cells, WP_->start_index_, true);
-  // std::cout << "AHHHH A* planning" << std::endl;
+  
 }
 
 // Check if robot has moved to new cell
@@ -172,4 +173,8 @@ void PlanningModule::updateCell() {
   
   // Increment the place along the path
   cache_.planning->pathIdx++;
+}
+
+bool PlanningModule::isAStar() {
+  return AStar_;
 }

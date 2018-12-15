@@ -7,7 +7,7 @@
 
 DStarLite::DStarLite(TextLogger*& tlogger)
   : tlogger_(tlogger), cells_(nullptr), k_(0), lastReplanIdx(0), nodeExpansions(0),
-    initialized(false), goalIdx_(-1), endPlanIdx_(-1), path_(nullptr) {
+    goalIdx_(-1), endPlanIdx_(-1), path_(nullptr) {
 }
   
 void DStarLite::init(std::vector<GridCell>& wavefront, int goal, int start, std::vector<int>* path) {

@@ -21,16 +21,18 @@ class PlanningModule: public Module {
 
     void specifyMemoryDependency();
     void specifyMemoryBlocks();
-    void initSpecificModule();
+    void initSpecificModule(bool AStar=false);
     void processFrame();
 
     inline std::vector<GridCell>& grid() {
       return cache_.planning->grid;
     }
 
+    bool isAStar();
   protected:
     MemoryCache cache_;
     TextLogger*& tlogger_;
+    bool AStar_;
     Grid* initial_cost_map_;
     Pose2D wfStartPose;
     std::unique_ptr<GridGenerator> GG_;

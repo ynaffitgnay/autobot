@@ -5,7 +5,7 @@
 #include <common/GridCell.h>
 
 CoverageDSL::CoverageDSL(MemoryCache& cache, TextLogger*& tlogger) :
-  DStarLite(tlogger), cache_(cache)
+  DStarLite(tlogger), cache_(cache), AStar_(false)
 {
 }
 
@@ -17,6 +17,7 @@ CoverageDSL::~CoverageDSL() {
 //TODO** D* BOOLEAN THAT TELLS WHETHER OR NOT TO CHANGE PLAN FROM CURRENT IDX
 
 void CoverageDSL::init(std::vector<GridCell>& wavefront, int startCoverageIdx, bool AStar) {
+  AStar_ = AStar;
   DStarLite::init(wavefront, startCoverageIdx, -1, &(cache_.planning->path));
   buildBlankGrid();
   // 0 paths have been planned!
@@ -57,8 +58,11 @@ void CoverageDSL::init(std::vector<GridCell>& wavefront, int startCoverageIdx, b
   printGrid();
   
   std::cout << "About to generate path!\n";
-  generateCoveragePath(0);
-  initialized = true;
+  if (AStar_) {
+    generateCoveragePath(cache_.planning->pathIdx);
+  } else {
+    generateCoveragePath(0);
+  }
 }
 
 void CoverageDSL::runDSL() {
@@ -146,6 +150,13 @@ void CoverageDSL::runDSL() {
 
   // Now that costs are consistent, reset the boolean in planning block
   cache_.planning->changedCost = false;
+
+  // Set the number of node expansions
+  if (AStar_) {
+    cache_.planning->nodeExpansions += nodeExpansions;
+  } else {
+    cache_.planning->nodeExpansions == nodeExpansions;
+  }
 }
 
 // This only works if we include the nodes discovered in "hop" in the path
@@ -189,7 +200,7 @@ void CoverageDSL::generateCoveragePath(int startIdx) {
   int newNumPlanned;
   int currCellIdx;
   
-  if (startIdx == 0) {                  // Add the start pose as the first pose in the plan
+  if (startIdx == 0 || AStar_) {                  // Add the start pose as the first pose in the plan
     currCellIdx = S_->idx;              // index of the current cell being added to the plan
     S_->planned = true;
     S_->pathorder = pathIdx;
