@@ -78,7 +78,7 @@ void ObstacleDetector::addObstaclesObject(int newCenterX, int newCenterY, int wi
   // For now, can assume that the detected obstacle is in the next cell in the path
   auto& obsCell = plan->grid.at(plan->path[plan->pathIdx]);
   if (!obsCell.occupied) {
-    obsCell.occupied = true; 
+    // obsCell.occupied = true; 
     // Since this cell was originally on our path, we know that the occupancy of this cell has changed
     plan->changedCost = true;
   } else {

@@ -295,7 +295,7 @@ void ObservationGenerator::generateObstacleObservations() {
          planning_->getDestGridCol() == planning_->getGridColFromLoc(gtObstacle.loc.x) - 1))
       {
       // Only expect one obstacle to print here
-      planning_->grid.at(planning_->path[planning_->pathIdx]).occupied = true;
+      //planning_->grid.at(planning_->path[planning_->pathIdx]).occupied = true;
       planning_->changedCost = true;
       //obsObstacle.seen = true;
       //float diff = joint_->values_[HeadPan] - bearing;
@@ -437,7 +437,7 @@ void ObservationGenerator::generateGroundTruthObservations(){
             (planning_->getDestGridCol() == planning_->getGridColFromLoc(gto->loc.x) ||
              planning_->getDestGridCol() == planning_->getGridColFromLoc(gto->loc.x) - 1))
           {
-            planning_->grid.at(planning_->path[planning_->pathIdx]).occupied = true;
+            //planning_->grid.at(planning_->path[planning_->pathIdx]).occupied = true;
             planning_->changedCost = true;
           }
       }
