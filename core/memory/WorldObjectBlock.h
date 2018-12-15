@@ -39,6 +39,15 @@ DECLARE_INTERNAL_SCHEMA(struct WorldObjectBlock : public MemoryBlock {
         }
       }
 
+      // set unknown obstacles for ground truth
+      for (int i = 0; i < NUM_UNKNOWN_OBSTACLES; i++ ) {
+        WorldObject *wo = &(objects_[i + UNKNOWN_OBSTACLE_OFFSET]);
+        wo->loc = obstacleLocation[i];
+        wo->upperHeight = 0;
+        wo->lowerHeight = 0;
+        wo->elevation = 0;
+      }
+      
       // set intersection locations
       for (int i = 0; i < NUM_INTERSECTIONS; i++){
         WorldObject *wo = &(objects_[i + INTERSECTION_OFFSET]);

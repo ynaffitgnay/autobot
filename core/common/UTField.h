@@ -84,6 +84,26 @@ const Point2D landmarkLocation[] = {
 };
 
 
+// Set unknown obstacle locations for different replanning
+const Point2D obstacleLocation[] = {
+  Point2D(-1200.0, 1100.0),   // WO_OBSTACLE_UNKNOWN_1
+  Point2D(-1200.0, 800.0),    // WO_OBSTACLE_UNKNOWN_2
+  Point2D(-900.0, 500.0),     // WO_OBSTACLE_UNKNOWN_3
+  Point2D(-300.0, 500.0),     // WO_OBSTACLE_UNKNOWN_4
+  Point2D(900.0, 500.0),      // WO_OBSTACLE_UNKNOWN_5
+  Point2D(1200.0, 500.0),     // WO_OBSTACLE_UNKNOWN_6
+  Point2D(600.0, 200.0),      // WO_OBSTACLE_UNKNOWN_7
+  Point2D(-1200.0, -100.0),   // WO_OBSTACLE_UNKNOWN_8
+  Point2D(300.0, -100.0),     // WO_OBSTACLE_UNKNOWN_9
+  Point2D(-300.0, -400.0),    // WO_OBSTACLE_UNKNOWN_10
+  Point2D(600.0, -400.0),     // WO_OBSTACLE_UNKNOWN_11
+  Point2D(-900.0, -700.0),    // WO_OBSTACLE_UNKNOWN_12
+  Point2D(300.0, -700.0),     // WO_OBSTACLE_UNKNOWN_13
+  Point2D(0.0, -1000.0),      // WO_OBSTACLE_UNKNOWN_14
+  Point2D(300.0, -1000.0)    // WO_OBSTACLE_UNKNOWN_15
+};
+
+
 // Line intersection locations
 const Point2D intersectionLocation[] = {
   // L
