@@ -1024,13 +1024,20 @@ void GLDrawer::overlayPlanning() {
   y += 10;
 
   PlanningBlock*& plan = bcache_.planning;
+  Pose2D destPose = plan->getDestPose();
   
-  text = "pathIdx: " + QString::number(plan->pathIdx) + " numReplans: " + QString::number(plan->pathsPlanned);
+  text = "Dest: (" + QString::number(destPose.translation.x) + ", " + QString::number(destPose.translation.y) + "), " + QString::number(destPose.rotation * RAD_T_DEG);
   parent_->renderText(x,y,text);
-
+  y+= 10;
+  text = "Dest cell: [" + QString::number(plan->getDestGridRow()) + ", " + QString::number(plan->getDestGridCol()) + "] curr: [" + QString::number(plan->getGridRowFromLoc(beliefself->loc.y)) + ", " + QString::number(plan->getGridColFromLoc(beliefself->loc.x)) + "]";
+  parent_->renderText(x,y,text);
+  y+= 10;
+  text = "pathIdx: " + QString::number(plan->pathIdx) + " paths planned: " + QString::number(plan->pathsPlanned);
+  parent_->renderText(x,y,text);
   y+= 10;
   text = "nodesInPath: " + QString::number(plan->nodesInPath) + " nodesLeft: " + QString::number(plan->nodesLeft);
   parent_->renderText(x,y,text);
+  
 }
 
 
@@ -1200,7 +1207,7 @@ void GLDrawer::drawUnknownObstacles() {
     WO_OBSTACLE_UNKNOWN_12,
     // WO_OBSTACLE_UNKNOWN_13,
     // WO_OBSTACLE_UNKNOWN_14,
-    // WO_OBSTACLE_UNKNOWN_15,
+    WO_OBSTACLE_UNKNOWN_15,
   };
 
   for(auto obs : obstacles) {
@@ -1284,16 +1291,16 @@ void GLDrawer::drawPrevPaths() {
 
     switch(i % 4) {
     case 0: 
-      basicGL.colorRGBAlpha(Colors::LightRed, 0.5);
+      basicGL.colorRGBAlpha(Colors::LightRed, 1.0);
       break;
     case 1:
-      basicGL.colorRGBAlpha(Colors::LightOrange, 0.5);
+      basicGL.colorRGBAlpha(Colors::LightOrange, 1.0);
       break;
     case 2:
-      basicGL.colorRGBAlpha(Colors::LightIndigo, 0.5);
+      basicGL.colorRGBAlpha(Colors::LightIndigo, 1.0);
       break;
     case 3:
-      basicGL.colorRGBAlpha(Colors::LightViolet, 0.5);
+      basicGL.colorRGBAlpha(Colors::LightViolet, 1.0);
       break;
     }
     
