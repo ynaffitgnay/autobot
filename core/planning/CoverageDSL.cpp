@@ -71,7 +71,7 @@ void CoverageDSL::runDSL() {
 
   // Mark this cell as occupied
   PathNode& changedNode = map_.at(cache_.planning->path.at(cache_.planning->pathIdx));
-  changedNode.cell.occupied = true;
+  changedNode.cell.occupied = !changedNode.cell.occupied;
   changedNode.changed = true;
   blankGrid->at(cache_.planning->path.at(cache_.planning->pathIdx)).occupied = true;
 
