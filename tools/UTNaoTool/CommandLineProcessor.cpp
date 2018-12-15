@@ -6,6 +6,7 @@
 #include <communications/CommunicationModule.h>
 #include <tool/simulation/LocalizationSimulation.h>
 #include <tool/simulation/BehaviorSimulation.h>
+#include <tool/simulation/IsolatedBehaviorSimulation.h>
 
 #include <thread>
 
@@ -69,3 +70,22 @@ int CommandLineProcessor::runLocalizationSim() {
   return 0;
 }
 
+int CommandLineProcessor::runPlanningSim() {
+  // TODO: generate random obstacles from list of obstacles
+  auto simulation = std::make_unique<IsolatedBehaviorSimulation>(true);
+
+  while (!simulation->complete()) {
+    simulation->simulationStep();
+  }
+
+  //TODO: print stats of interest:
+  /*
+   1. num replans
+   2. number of re-traced nodes?
+   3. number of expanded nodes?
+   */
+  
+  //std::cout << simulation->simBlueScore << " " << simulation->simRedScore << std::endl;
+
+  return 0;
+}

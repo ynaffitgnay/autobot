@@ -6,4 +6,5 @@ class CommandLineProcessor {
     static int runLogServer(std::string source, bool loop);
     static int runBehaviorSim();
     static int runLocalizationSim();
+    static int runPlanningSim();
 };

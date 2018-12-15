@@ -62,8 +62,10 @@ void ObservationGenerator::setModelBlocks(OpponentBlock* opponentMem) {
 }
 
 // Set the planning block of the simulated player
-void ObservationGenerator::setPlanningBlocks(PlanningBlock* planning) {
+void ObservationGenerator::setPlanningBlocks(PlanningBlock* planning, std::vector<WorldObjectType>* obstacles) {
+  
   planning_ = planning;
+  obstacles_ = (obstacles == nullptr) ? &def_obstacles : obstacles;
 }
 
 void ObservationGenerator::setInfoBlocks(FrameInfoBlock* frameInfo, JointBlock* joint) {
@@ -238,83 +240,34 @@ void ObservationGenerator::generateGoalObservations() {
 
 void ObservationGenerator::generateObstacleObservations() {
   // Don't generate obstacles if you haven't faced next GC!
-  if (!(planning_ && planning_->observedNextGC)) return;
+  if (!(planning_ && planning_->observedNextGC && obstacles_)) return;
   
   getSelf(gtSelf,obsSelf,player_);
-  // Comment out ones you don't want to see!
-  std::vector<WorldObjectType> types = {
-    // WO_OBSTACLE_UNKNOWN_1,
-    // WO_OBSTACLE_UNKNOWN_2,
-    WO_OBSTACLE_UNKNOWN_3,
-    WO_OBSTACLE_UNKNOWN_4,
-    WO_OBSTACLE_UNKNOWN_5, 
-    WO_OBSTACLE_UNKNOWN_6, 
-    // WO_OBSTACLE_UNKNOWN_7, 
-    // WO_OBSTACLE_UNKNOWN_8, 
-    // WO_OBSTACLE_UNKNOWN_9, 
-    // WO_OBSTACLE_UNKNOWN_10,
-    // WO_OBSTACLE_UNKNOWN_11,
-    WO_OBSTACLE_UNKNOWN_12,
-    // WO_OBSTACLE_UNKNOWN_13,
-    // WO_OBSTACLE_UNKNOWN_14,
-    WO_OBSTACLE_UNKNOWN_15,
-  };
-
-  int ctr = 1;
   
-  for(auto t : types) {
-    getObject(gtObstacle, obsObstacle, t);
-    //float bearing = gtSelf.loc.getBearingTo(gtObstacle.loc,gtSelf.orientation);
-    //float distance = gtSelf.loc.getDistanceTo(gtObstacle.loc);
+  int ctr = 1;
+  std::vector<WorldObjectType>::iterator t;
+  //for(auto t : obstacles_) {
+  for (t = obstacles_->begin(); t != obstacles_->end(); t++) {
+    getObject(gtObstacle, obsObstacle, *t);
     Pose2D destPose = planning_->getDestPose();
     Point2D destPoint = Point2D(destPose.translation.x, destPose.translation.y);
     float obsdist = destPoint.getDistanceTo(gtObstacle.loc);
 
-    std::cout << "obs: (" << planning_->getGridRowFromLoc(gtObstacle.loc.y) << ", "
-              << planning_->getGridColFromLoc(gtObstacle.loc.x) << "). dest: ("
-              << planning_->getDestGridRow() << ", " << planning_->getDestGridCol()
-              << "). dist: " << obsdist << std::endl;
-              
-//    std::cout << "dist to obs "<< ctr++ << " at (" << gtObstacle.loc.x <<
-//      ", " << gtObstacle.loc.y << "): " << distance << ", bear: " << bearing * RAD_T_DEG << std::endl;
-//    std::cout << "my orientation: " << gtSelf.orientation * RAD_T_DEG << std::endl;
-//    
-//    std::cout << "next dest: (" << destPose.translation.x << ", " << destPose.translation.y <<
-//      "). dist b/t obstacle: " << obsdist  << std::endl;
-
-    //if (planning_->getDestGridRow() == planning_->getGridRowFromLoc(gtObstacle.loc.y) &&
-    //    planning_->getDestGridCol() == planning_->getGridColFromLoc(gtObstacle.loc.x))
-    //{
-    //  std::cout << "same row and col. dist = " << obsdist << std::endl;
-    //}
-    
-    //if (isVisible(t)) {
-    
+    //std::cout << "obs: (" << planning_->getGridRowFromLoc(gtObstacle.loc.y) << ", "
+    //          << planning_->getGridColFromLoc(gtObstacle.loc.x) << "). dest: ("
+    //          << planning_->getDestGridRow() << ", " << planning_->getDestGridCol()
+    //          << "). dist: " << obsdist << std::endl;
+    //              
     if (planning_->getDestGridRow() == planning_->getGridRowFromLoc(gtObstacle.loc.y) &&
         (planning_->getDestGridCol() == planning_->getGridColFromLoc(gtObstacle.loc.x) ||
          planning_->getDestGridCol() == planning_->getGridColFromLoc(gtObstacle.loc.x) - 1))
       {
-      // Only expect one obstacle to print here
-      //planning_->grid.at(planning_->path[planning_->pathIdx]).occupied = true;
-      planning_->changedCost = true;
-      //obsObstacle.seen = true;
-      //float diff = joint_->values_[HeadPan] - bearing;
-      //obsObstacle.imageCenterX = iparams_.width/2.0 + (diff / (FOVx/2.0) * iparams_.width/2.0);
-      //obsObstacle.imageCenterY = iparams_.height/2.0;
-      //// Add distance and bearing noise
-      //float randNoise = Random::inst().sampleU()-0.5;
-      //obsObstacle.visionDistance = distance + randNoise * VISION_ERROR_FACTOR * 0.2*distance;// up to 15% distance error
-      //obsObstacle.visionBearing = bearing + randNoise * VISION_ERROR_FACTOR * 10.0*DEG_T_RAD;// up to 5 deg bearing error
-      //obsObstacle.visionConfidence = 1.0;
-      //std::cout << "vision dist: " << obsObstacle.visionDistance << ", bear: " <<
-      //  obsObstacle.visionBearing * RAD_T_DEG << std::endl;
-    }
-    //}
+        planning_->changedCost = true;
+      }
   }
 
   // Reset observedGC
   planning_->observedNextGC = false;
-  std::cout << "\n\n\n\n\n\n\n\n\n\n\n" << std::endl;
 }
 
 
@@ -335,25 +288,6 @@ void ObservationGenerator::generateAllObservations() {
 void ObservationGenerator::generateGroundTruthObservations(){
   initializeBelief();
   obs_object_->reset();
-
-  std::vector<WorldObjectType> obstacles = {
-    // WO_OBSTACLE_UNKNOWN_1,
-    // WO_OBSTACLE_UNKNOWN_2,
-    WO_OBSTACLE_UNKNOWN_3,
-    WO_OBSTACLE_UNKNOWN_4,
-    WO_OBSTACLE_UNKNOWN_5, 
-    WO_OBSTACLE_UNKNOWN_6, 
-    // WO_OBSTACLE_UNKNOWN_7, 
-    // WO_OBSTACLE_UNKNOWN_8, 
-    // WO_OBSTACLE_UNKNOWN_9, 
-    // WO_OBSTACLE_UNKNOWN_10,
-    // WO_OBSTACLE_UNKNOWN_11,
-    WO_OBSTACLE_UNKNOWN_12,
-    // WO_OBSTACLE_UNKNOWN_13,
-    // WO_OBSTACLE_UNKNOWN_14,
-    WO_OBSTACLE_UNKNOWN_15,
-  };
-
 
   for (int i = 1; i <= WO_OPPONENT_LAST; i++){
     OpponentModel
@@ -431,19 +365,20 @@ void ObservationGenerator::generateGroundTruthObservations(){
       gto->visionBearing = wo->visionBearing = wo->bearing;
     } else gto->seen = wo->seen = false;
 
-    for (int obIdx = 0; obIdx < obstacles.size(); ++obIdx) {
-      if (obstacles.at(obIdx) == i) {
-        if (planning_->getDestGridRow() == planning_->getGridRowFromLoc(gto->loc.y) &&
-            (planning_->getDestGridCol() == planning_->getGridColFromLoc(gto->loc.x) ||
-             planning_->getDestGridCol() == planning_->getGridColFromLoc(gto->loc.x) - 1))
-          {
-            //planning_->grid.at(planning_->path[planning_->pathIdx]).occupied = true;
-            planning_->changedCost = true;
-          }
+    if (obstacles_) {
+      for (int obIdx = 0; obIdx < obstacles_->size(); ++obIdx) {
+        if (obstacles_->at(obIdx) == i) {
+          if (planning_->getDestGridRow() == planning_->getGridRowFromLoc(gto->loc.y) &&
+              (planning_->getDestGridCol() == planning_->getGridColFromLoc(gto->loc.x) ||
+               planning_->getDestGridCol() == planning_->getGridColFromLoc(gto->loc.x) - 1))
+            {
+              //planning_->grid.at(planning_->path[planning_->pathIdx]).occupied = true;
+              planning_->changedCost = true;
+            }
+        }
       }
     }
   }
-
 
 
   fillObservationObjects();

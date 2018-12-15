@@ -18,12 +18,19 @@
 typedef IsolatedBehaviorSimulation IBSim;
 typedef ObjectConfiguration OP;
 
-IBSim::IsolatedBehaviorSimulation(bool locMode, int player) : 
+IBSim::IsolatedBehaviorSimulation(bool locMode, int player) :
+  IsolatedBehaviorSimulation(nullptr, locMode, player) { }
+
+IBSim::IsolatedBehaviorSimulation(std::vector<WorldObjectType>* obstacles, bool useAStar, bool locMode, int player) : 
     lmode_(locMode),
     player_(player),
-    sim_(team_, player, locMode),
+    sim_(team_, player, locMode, obstacles_, useAStar),
     cg_(team_, player),
-    iparams_(Camera::TOP) {
+    iparams_(Camera::TOP),
+    obstacles_(obstacles),
+    paths_planned_(0),
+    nodes_expanded_(0), 
+    AStar_(useAStar) {
   gtcache_ = MemoryCache::create(team_, player_);
   bcache_ = sim_.getMemoryCache();
   loadConfig();
@@ -37,6 +44,7 @@ IBSim::IsolatedBehaviorSimulation(bool locMode, int player) :
   approachState_ = LONG_RANGE_APPROACH;
   stateTime_ = 0;
 }
+
 
 void IBSim::randomizePlayers(FieldConfiguration& config) {
   rand_ = Random(time(NULL));
@@ -159,4 +167,13 @@ void IBSim::moveBall(Point2D target) {
 
 vector<string> IBSim::getTextDebug(int player) {
   return sim_.getTextDebug();
+}
+
+void IBSim::setObstacles(std::vector<WorldObjectType>* obstacles)
+{
+  obstacles_ = obstacles;
+}
+
+bool IBSim::complete() {
+  return (sim_.cache_.planning->coverageStarted && sim_.cache_.planning->nodesLeft == 0);
 }

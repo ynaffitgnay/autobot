@@ -11,7 +11,8 @@ class FieldConfiguration;
 
 class IsolatedBehaviorSimulation : public Simulation {
   public:
-    IsolatedBehaviorSimulation(bool locMode = true, int player = 5); 
+    IsolatedBehaviorSimulation(bool locMode = true, int player = 5);
+    IsolatedBehaviorSimulation(std::vector<WorldObjectType>* obstacles, bool useAStar=false, bool locMode = true, int player = 5);
     virtual void simulationStep();
     inline MemoryCache getGtMemoryCache(int player = 0) const { return gtcache_; }
     inline MemoryCache getBeliefMemoryCache(int player = 0) const { return bcache_; }
@@ -21,11 +22,16 @@ class IsolatedBehaviorSimulation : public Simulation {
     void teleportBall(Point2D pos);
     void movePlayer(Point2D pos, float orientation, int player);
     void teleportPlayer(Point2D pos, float orientation, int player);
+    void setObstacles(std::vector<WorldObjectType>* obstacles);
+    bool complete();
+    int paths_planned_;
+    int nodes_expanded_;
+    bool AStar_;
   protected:
     void randomizePlayers(FieldConfiguration&);
     void moveBallRandomly();
     void loadConfig();
-
+    std::vector<WorldObjectType>* obstacles_;
     bool lmode_;
     int player_;
     ImageParams iparams_;

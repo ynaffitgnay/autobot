@@ -1283,7 +1283,7 @@ void GLDrawer::drawPrevPaths() {
   if (plan->pathsPlanned != prev_paths_drawn_) {
     //std::cout << "PathsPlanned: " << plan->pathsPlanned << std::endl;
     prev_paths_->push_back(plan->path);
-    prev_paths_drawn_ = plan->pathsPlanned;
+    ++prev_paths_drawn_;// = plan->pathsPlanned;
   }
 
   for (int i = 0; i < (prev_paths_drawn_ - 1); ++i) {
@@ -1308,6 +1308,12 @@ void GLDrawer::drawPrevPaths() {
    
     for (int i = 0; i < (plan->nodesInPath - 1); ++i) {
       p2 = plan->grid.at(path.at(i + 1)).center.translation;
+
+      // Skip paths that map non-adjacent cells
+      if (plan->getGridRowFromLoc(p1.y) != plan->getGridRowFromLoc(p2.y) &&
+        plan->getGridColFromLoc(p1.x) != plan->getGridColFromLoc(p2.x)) {
+        continue;
+      }
       basicGL.drawLine(p1, p2);
       p1 = p2;
     }
