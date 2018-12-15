@@ -22,6 +22,7 @@ DECLARE_INTERNAL_SCHEMA(struct PlanningBlock : public MemoryBlock {
     SCHEMA_FIELD(int pathIdx);
     SCHEMA_FIELD(int nodesInPath);
     SCHEMA_FIELD(int nodesLeft);
+    SCHEMA_FIELD(int pathsPlanned);
 
     mutable SCHEMA_FIELD(std::array<GridCell, GRID_SIZE> grid_data);
     std::vector<GridCell> grid;

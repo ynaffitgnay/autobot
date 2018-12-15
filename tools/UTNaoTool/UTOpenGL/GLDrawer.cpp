@@ -20,11 +20,14 @@ using namespace Eigen;
 GLDrawer::GLDrawer(QGLWidget* parent) : 
     parent_(parent), 
     teammate(WO_TEAM_COACH),
-    annotations_(NULL)
+    annotations_(NULL),
+    prev_paths_drawn_(0)
+    
 {
   kickGridSize = 100.0f;
   truth_path_ = std::make_unique<std::vector<Point2D>>();
   belief_path_ = std::make_unique<std::vector<Point2D>>();
+  prev_paths_ = std::make_unique<std::vector<std::vector<int>>>();
 }
 
 GLDrawer::~GLDrawer() {
@@ -74,6 +77,11 @@ void GLDrawer::draw(const map<DisplayOption,bool>& displayOptions) {
   if (display_[SHOW_BELIEF_PATH]) drawBeliefPath();
   if (!display_[SHOW_BELIEF_PATH]) {
     belief_path_->clear();
+  }
+  if (display_[SHOW_PREV_PLANNED_PATHS]) drawPrevPaths();
+  if (!display_[SHOW_PREV_PLANNED_PATHS]) {
+    prev_paths_->clear();
+    prev_paths_drawn_ = 0;
   }
   if (display_[SHOW_PLANNED_PATH]) drawPlannedPath();
 
@@ -1162,7 +1170,6 @@ void GLDrawer::drawPlanningGrid() {
 
 void GLDrawer::drawTruthPath() {
   if (gtcache_.robot_state == NULL) return;
-  //if (truth_path_ == NULL) truth_path_ = new std::vector<Point2D>();
 
   WorldObject* self = &(gtcache_.world_object->objects_[gtcache_.robot_state->WO_SELF]);
   truth_path_->push_back(self->loc);
@@ -1176,7 +1183,6 @@ void GLDrawer::drawTruthPath() {
 
 void GLDrawer::drawBeliefPath() {
   if (bcache_.robot_state == NULL) return;
-  //if (belief_path_ == NULL) belief_path_ = new std::vector<Point2D>();
 
   WorldObject* self = &(bcache_.world_object->objects_[bcache_.robot_state->WO_SELF]);
   belief_path_->push_back(self->loc);
@@ -1190,6 +1196,7 @@ void GLDrawer::drawBeliefPath() {
 void GLDrawer::drawPlannedPath() {
   Point2D p1, p2;
   if (bcache_.robot_state == NULL) return;
+  if (bcache_.planning == NULL) return;
 
   PlanningBlock*& plan = bcache_.planning;
   p1 = plan->grid.at(plan->path.at(0)).center.translation;
@@ -1201,3 +1208,46 @@ void GLDrawer::drawPlannedPath() {
     p1 = p2;
   }
 }
+
+void GLDrawer::drawPrevPaths() {
+  Point2D p1, p2;
+  
+  if (bcache_.robot_state == NULL) return;
+  if (bcache_.planning == NULL) return;
+  PlanningBlock*& plan = bcache_.planning;
+  
+  // Add the current one and draw the ones up to it
+  if (plan->pathsPlanned != prev_paths_drawn_) {
+    std::cout << "PathsPlanned: " << plan->pathsPlanned << std::endl;
+    prev_paths_->push_back(plan->path);
+    prev_paths_drawn_ = plan->pathsPlanned;
+  }
+
+  for (int i = 0; i < (prev_paths_drawn_ - 1); ++i) {
+    std::vector<int> path = prev_paths_->at(i);
+
+    switch(i % 4) {
+    case 0: 
+      basicGL.colorRGBAlpha(Colors::LightRed, 0.75);
+      break;
+    case 1:
+      basicGL.colorRGBAlpha(Colors::LightOrange, 0.75);
+      break;
+    case 2:
+      basicGL.colorRGBAlpha(Colors::LightIndigo, 0.75);
+      break;
+    case 3:
+      basicGL.colorRGBAlpha(Colors::LightViolet, 0.75);
+      break;
+    }
+    
+    p1 = plan->grid.at(path.at(0)).center.translation;
+   
+    for (int i = 0; i < (plan->nodesInPath - 1); ++i) {
+      p2 = plan->grid.at(path.at(i + 1)).center.translation;
+      basicGL.drawLine(p1, p2);
+      p1 = p2;
+    }
+  }
+}
+

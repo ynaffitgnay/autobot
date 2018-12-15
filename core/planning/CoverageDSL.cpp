@@ -19,6 +19,8 @@ CoverageDSL::~CoverageDSL() {
 void CoverageDSL::init(std::vector<GridCell>& wavefront, int startCoverageIdx, bool AStar) {
   DStarLite::init(wavefront, startCoverageIdx, -1, &(cache_.planning->path));
   buildBlankGrid();
+  // 0 paths have been planned!
+  cache_.planning->pathsPlanned = 0;
 
   //std::cout << "Map before doing dsl stuff: " << std::endl;
 
@@ -247,6 +249,7 @@ void CoverageDSL::generateCoveragePath(int startIdx) {
 
   cache_.planning->nodesLeft = numPlanned;
   cache_.planning->nodesInPath += numPlanned;
+  cache_.planning->pathsPlanned += 1;
 }
 
 void CoverageDSL::buildBlankGrid() {

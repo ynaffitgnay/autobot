@@ -69,7 +69,8 @@ class GLDrawer {
       SHOW_PLANNING_GRID,
       SHOW_TRUTH_PATH,
       SHOW_BELIEF_PATH,
-      SHOW_PLANNED_PATH
+      SHOW_PLANNED_PATH,
+      SHOW_PREV_PLANNED_PATHS
     );
 
     GLDrawer(QGLWidget* parent);
@@ -126,6 +127,7 @@ class GLDrawer {
     void drawTruthPath();
     void drawBeliefPath();
     void drawPlannedPath();
+    void drawPrevPaths();
    
     void overlayOdometry();
     void overlayObservationText();
@@ -155,6 +157,8 @@ class GLDrawer {
 
     std::unique_ptr<std::vector<Point2D>> truth_path_;
     std::unique_ptr<std::vector<Point2D>> belief_path_;
+    std::unique_ptr<std::vector<std::vector<int>>> prev_paths_;
+    int prev_paths_drawn_;
 };
 
 #endif
