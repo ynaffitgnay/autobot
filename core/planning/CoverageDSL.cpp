@@ -69,6 +69,12 @@ void CoverageDSL::runDSL() {
     std::cout << "Unexpectedly in CoverageDSL::runDSL() with no detected changes" << std::endl;
   }
 
+  // Mark this cell as occupied
+  PathNode& changedNode = map_.at(cache_.planning->path.at(cache_.planning->pathIdx));
+  changedNode.cell.occupied = true;
+  changedNode.changed = true;
+  blankGrid->at(cache_.planning->path.at(cache_.planning->pathIdx)).occupied = true;
+
   // Get the new k offset
   // use pathIdx - 1 because we only want to replan up to visited node
   // (so pathIdx may actually be one further than the one we care about...)
@@ -82,11 +88,37 @@ void CoverageDSL::runDSL() {
   // gridCell.
   std::vector<PathNode*> changedEdges;
   std::vector<PathNode*>::iterator changedIt;
-  getNeighbors(map_.at(cache_.planning->path.at(cache_.planning->pathIdx)), changedEdges);
+  getNeighbors(changedNode, changedEdges);
+  ++nodeExpansions;
 
   for (changedIt = changedEdges.begin(); changedIt != changedEdges.end(); changedIt++) {
+    int c_old = getPrevTransitionCost(changedNode, **changedIt);
+    int c_new = getTransitionCost(changedNode, **changedIt);
+    if (c_old > c_new) {
+      (*changedIt)->rhs = std::min((*changedIt)->rhs, safeAdd(c_new, changedNode.g));
+    } else if ((*changedIt)->rhs == safeAdd(c_old, changedNode.g)) {
+      if (*changedIt != S_) {
+        int minrhs = INT_MAX;
+        std::vector<PathNode*> succs;
+        std::vector<PathNode*>::iterator succIt;
+
+        getNeighbors(**changedIt, succs);
+        ++nodeExpansions;
+        for (succIt = succs.begin(); succIt != succs.end(); succIt++) {
+          int t2 = safeAdd(getTransitionCost(**changedIt, **succIt), (*succIt)->g); 
+          if (t2 < minrhs) {
+            minrhs = t2;
+          }
+        }
+        (*changedIt)->rhs = minrhs;
+      }
+    }
+    
     updateVertex(**changedIt);
   }
+
+  // Now mark this edge as no longer changed
+  map_.at(cache_.planning->path.at(cache_.planning->pathIdx)).changed = false;
 
   for (mapIt = map_.begin(); mapIt != map_.end(); mapIt++) {
     // Don't recalculate cost for visited cells
@@ -99,10 +131,13 @@ void CoverageDSL::runDSL() {
 
   printGrid();
 
-  // Mark all cells after the current idx unplanned (so beginning with pathIdx, inclusive)
+  // Mark all cells after the current idx unplanned if they haven't been visited
+  // (so beginning with pathIdx, inclusive)
   for (int i = cache_.planning->pathIdx; i < cache_.planning->nodesInPath; ++i) {
-    map_.at(cache_.planning->path.at(i)).planned = false;
-    map_.at(cache_.planning->path.at(i)).pathorder = -1;
+    if (!map_.at(cache_.planning->path.at(i)).cell.visited) {
+      map_.at(cache_.planning->path.at(i)).planned = false;
+      map_.at(cache_.planning->path.at(i)).pathorder = -1;
+    }
   }
   cache_.planning->nodesInPath -= cache_.planning->nodesLeft;
     
@@ -144,24 +179,27 @@ void CoverageDSL::generateCoveragePath(int startIdx) {
     {
       numPoses++;
     }
+    
   }
 
   std::cout << "Poses to plan: " << numPoses << std::endl;
 
   auto& path = cache_.planning->path;
   int pathIdx = startIdx;
+  int newNumPlanned;
   int currCellIdx;
   
   if (startIdx == 0) {                  // Add the start pose as the first pose in the plan
     currCellIdx = S_->idx;              // index of the current cell being added to the plan
     S_->planned = true;
     S_->pathorder = pathIdx;
-    path.at(pathIdx++) = currCellIdx;   
+    path.at(pathIdx++) = currCellIdx;
+    newNumPlanned = 1;
   } else {
     currCellIdx = cache_.planning->path.at(lastReplanIdx);
+    newNumPlanned = 0;
   }
 
-  int newNumPlanned = 1;
   int numPlanned = newNumPlanned;
   while(newNumPlanned < numPoses)          // while we still have poses that need to be added to the plan
   {
@@ -186,7 +224,14 @@ void CoverageDSL::generateCoveragePath(int startIdx) {
       //int lastIndex = currCellIdx;
       currCellIdx = unplanned.at(maxIndex)->idx;
 
+      if (map_.at(currCellIdx).cell.occupied) {
+        std::cout << "An unexpected occupation" << std::endl;
+      }
+
       map_.at(currCellIdx).pathorder = pathIdx;
+      if (map_.at(currCellIdx).planned == true) {
+        std::cout << "Uh oh! I shouldn't be planned quite yet\n" << std::endl;
+      }
       map_.at(currCellIdx).planned = true;
       path.at(pathIdx++) = currCellIdx;
       ++newNumPlanned;
@@ -224,6 +269,9 @@ void CoverageDSL::generateCoveragePath(int startIdx) {
       // Advance to the next spot in the path (since first one already in the path)
       for (int i = 1; i < hopsize; ++i) {
         //std::cout << "(" << getRowFromIdx(hopPath->at(i)) << ", " << getColFromIdx(hopPath->at(i)) << ") ";
+        if (map_.at(hopPath->at(i)).cell.occupied) {
+          std::cout << "blankGrid not getting updated properly" << std::endl;
+        }
         path.at(pathIdx++) = hopPath->at(i);
         ++numPlanned;
       }
@@ -232,14 +280,18 @@ void CoverageDSL::generateCoveragePath(int startIdx) {
       delete(hopPath);
       
       map_.at(currCellIdx).pathorder = pathIdx - 1;
+      if (map_.at(currCellIdx).planned == true) {
+        std::cout << "Trying to pass off a planned node as unplanned!" << std::endl;
+      }
       map_.at(currCellIdx).planned = true;
       ++newNumPlanned;
 
       //std::cout << "pathIdx = " << pathIdx << " and numPlanned = " << numPlanned << std::endl;
     }
-    
+
     //printPath();
   }
+  
   printPath();
   
   printf("Path size: %d\n", numPlanned);
