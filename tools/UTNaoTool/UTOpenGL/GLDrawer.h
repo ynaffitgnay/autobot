@@ -67,6 +67,7 @@ class GLDrawer {
       SHOW_OBSTACLES,
       SHOW_UNKNOWN_OBSTACLES,
       SHOW_PLANNING_GRID,
+      SHOW_PLANNING_OVERLAY,
       SHOW_TRUTH_PATH,
       SHOW_BELIEF_PATH,
       SHOW_PLANNED_PATH,
@@ -133,6 +134,7 @@ class GLDrawer {
     void overlayObservationText();
     void overlayOpponentText();
     void overlayTruthText();
+    void overlayPlanning();
     void overlayLocationText();
     void overlayAlternLocationText();
     void overlayBasicInfoText();

@@ -150,6 +150,7 @@ bool SimulatedPlayer::processFrame(WorldObjectBlock* simulationMem, GameStateBlo
   updateBasicInputs(simulationMem, simulationState);
   og_.setObjectBlocks(simulationMem, cache_.world_object);
   og_.setInfoBlocks(cache_.frame_info, cache_.joint);
+  og_.setPlanningBlocks(cache_.planning);
   og_.setModelBlocks(cache_.opponent_mem);
   og_.setPlayer(index_, team_);
 

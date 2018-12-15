@@ -84,6 +84,7 @@ void GLDrawer::draw(const map<DisplayOption,bool>& displayOptions) {
     prev_paths_drawn_ = 0;
   }
   if (display_[SHOW_PLANNED_PATH]) drawPlannedPath();
+  if (display_[SHOW_PLANNING_OVERLAY]) overlayPlanning();
 
   // truth data from sim
   if (display_[SHOW_TRUTH_ROBOT]) drawTruthRobot();
@@ -991,7 +992,47 @@ void GLDrawer::overlayTruthText() {
   text = "True Ball: (" + QString::number(gtcache_.sim_truth->ball_pos_.translation.x) + ", " + QString::number(gtcache_.sim_truth->ball_pos_.translation.y) + ")";
   parent_->renderText(x,y,text);
 
+
 }
+
+void GLDrawer::overlayPlanning() {
+  if (gtcache_.world_object == NULL) return;
+  if (bcache_.world_object == NULL) return;
+  if (bcache_.planning == NULL) return;
+
+  QFont serifFont( "Courier", 7);
+  parent_->setFont(serifFont);
+  glColor3f(1.0,1.0,1.0);
+
+  QString text;
+  int height=parent_->height();
+  int x = 1;
+  int y = 370;
+
+  glColor3f(1.0,1.0,1.0);
+  
+  WorldObject* trueself = &(gtcache_.world_object->objects_[gtcache_.robot_state->WO_SELF]);
+  text = "True Robot: (" + QString::number(trueself->loc.x) + ", " + QString::number(trueself->loc.y) + "), " + QString::number(trueself->orientation * RAD_T_DEG);
+  parent_->renderText(x,y,text);
+
+  y += 10;
+
+  WorldObject* beliefself = &(bcache_.world_object->objects_[bcache_.robot_state->WO_SELF]);
+  text = "Belief Robot: (" + QString::number(beliefself->loc.x) + ", " + QString::number(beliefself->loc.y) + "), " + QString::number(beliefself->orientation * RAD_T_DEG);
+  parent_->renderText(x,y,text);
+
+  y += 10;
+
+  PlanningBlock*& plan = bcache_.planning;
+  
+  text = "pathIdx: " + QString::number(plan->pathIdx) + " numReplans: " + QString::number(plan->pathsPlanned);
+  parent_->renderText(x,y,text);
+
+  y+= 10;
+  text = "nodesInPath: " + QString::number(plan->nodesInPath) + " nodesLeft: " + QString::number(plan->nodesLeft);
+  parent_->renderText(x,y,text);
+}
+
 
 void GLDrawer::overlayBasicInfoText() {
   QFont serifFont( "Courier", 7);
@@ -1144,8 +1185,23 @@ void GLDrawer::drawObstacles() {
 
 void GLDrawer::drawUnknownObstacles() {
   if(gtcache_.world_object == NULL) return;
-  std::vector<WorldObjectType> obstacles = {WO_OBSTACLE_UNKNOWN_1, WO_OBSTACLE_UNKNOWN_2,
-                                            WO_OBSTACLE_UNKNOWN_3, WO_OBSTACLE_UNKNOWN_4};
+  std::vector<WorldObjectType> obstacles = {
+    // WO_OBSTACLE_UNKNOWN_1,
+    // WO_OBSTACLE_UNKNOWN_2,
+    WO_OBSTACLE_UNKNOWN_3,
+    WO_OBSTACLE_UNKNOWN_4,
+    WO_OBSTACLE_UNKNOWN_5, 
+    WO_OBSTACLE_UNKNOWN_6, 
+    // WO_OBSTACLE_UNKNOWN_7, 
+    // WO_OBSTACLE_UNKNOWN_8, 
+    // WO_OBSTACLE_UNKNOWN_9, 
+    // WO_OBSTACLE_UNKNOWN_10,
+    // WO_OBSTACLE_UNKNOWN_11,
+    WO_OBSTACLE_UNKNOWN_12,
+    // WO_OBSTACLE_UNKNOWN_13,
+    // WO_OBSTACLE_UNKNOWN_14,
+    // WO_OBSTACLE_UNKNOWN_15,
+  };
 
   for(auto obs : obstacles) {
     const auto& object = gtcache_.world_object->objects_[obs];
@@ -1218,7 +1274,7 @@ void GLDrawer::drawPrevPaths() {
   
   // Add the current one and draw the ones up to it
   if (plan->pathsPlanned != prev_paths_drawn_) {
-    std::cout << "PathsPlanned: " << plan->pathsPlanned << std::endl;
+    //std::cout << "PathsPlanned: " << plan->pathsPlanned << std::endl;
     prev_paths_->push_back(plan->path);
     prev_paths_drawn_ = plan->pathsPlanned;
   }
@@ -1228,16 +1284,16 @@ void GLDrawer::drawPrevPaths() {
 
     switch(i % 4) {
     case 0: 
-      basicGL.colorRGBAlpha(Colors::LightRed, 0.75);
+      basicGL.colorRGBAlpha(Colors::LightRed, 0.5);
       break;
     case 1:
-      basicGL.colorRGBAlpha(Colors::LightOrange, 0.75);
+      basicGL.colorRGBAlpha(Colors::LightOrange, 0.5);
       break;
     case 2:
-      basicGL.colorRGBAlpha(Colors::LightIndigo, 0.75);
+      basicGL.colorRGBAlpha(Colors::LightIndigo, 0.5);
       break;
     case 3:
-      basicGL.colorRGBAlpha(Colors::LightViolet, 0.75);
+      basicGL.colorRGBAlpha(Colors::LightViolet, 0.5);
       break;
     }
     

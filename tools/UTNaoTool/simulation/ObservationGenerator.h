@@ -16,6 +16,7 @@ class ObservationGenerator {
     void setObjectBlocks(WorldObjectBlock* gtObjects, WorldObjectBlock* obsObjects);
     void setObjectBlocks(WorldObjectBlock* gtObjects, std::vector<WorldObjectBlock*> obsObjects);
     void setInfoBlocks(FrameInfoBlock* frameInfo, JointBlock* joints);
+    void setPlanningBlocks(PlanningBlock* planning);
     void setModelBlocks(OpponentBlock* opponentMem);
     void setPlayer(int player, int team);
     void setImageParams(const ImageParams& iparams);
@@ -24,6 +25,7 @@ class ObservationGenerator {
   private:
     void generateBallObservations();
     void generateLineObservations();
+    void generateObstacleObservations();
     void generateOpponentObservations();
     void generateCenterCircleObservations();
     void generateGoalObservations();
@@ -34,6 +36,7 @@ class ObservationGenerator {
     ImageParams iparams_;
     WorldObjectBlock *gt_object_, *obs_object_;
     OpponentBlock* opponent_mem_;
+    PlanningBlock* planning_;
     FrameInfoBlock* frame_info_;
     JointBlock* joint_;
     int player_, team_;
