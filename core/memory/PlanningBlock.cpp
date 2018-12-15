@@ -30,6 +30,19 @@ void PlanningBlock::RestartPath() {
   nodesLeft = nodesInPath;
 }
 
+void PlanningBlock::reInitPath() {
+  coverageStarted = false;
+  changedCost = false;
+  observedNextGC = false;
+  resetPath = true;
+  pathIdx = 0;
+  nodesInPath = 0;
+  nodesLeft = 0;
+  pathsPlanned = 0;
+  nodeExpansions = 0;
+}
+
+
 Pose2D PlanningBlock::getDestPose() {
   return grid.at(path.at(pathIdx)).center;
 }
