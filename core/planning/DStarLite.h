@@ -46,6 +46,7 @@ class DStarLite {
     void getNeighbors(PathNode& curr, std::vector<PathNode*>& neighbors);
     void getUnplannedNeighbors(PathNode& curr, vector<PathNode*>& neighbors);
     int getTransitionCost(PathNode& s, PathNode& p);
+    int getPrevTransitionCost(PathNode& s, PathNode& p);
     int generatePath(int startIdx);
     bool buildPathGrid();
     void printGrid();

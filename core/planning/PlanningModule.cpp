@@ -101,6 +101,18 @@ void PlanningModule::processFrame() {
 
   DSL_->runDSL();
 
+  std::cout << "Replanned beginning with pathIdx " << cache_.planning->pathIdx << std::endl;
+  
+
+  for (int i = cache_.planning->pathIdx; i < cache_.planning->nodesInPath; ++i) {
+    if (i % 10 == 0) {
+      std::cout << std::endl;
+    }
+    
+    std::cout << "(" << getRowFromIdx(cache_.planning->path.at(i)) << ", " << getColFromIdx(cache_.planning->path.at(i)) << ") ";
+  }
+  std::cout << std::endl;
+
   // IF WAVEFRONT UNCOMMENT/COMMENT THIS BLOCK
   // wfStartPose = cache_.planning->grid.at(cache_.planning->path.at(cache_.planning->pathIdx - 1)).center;
   // wfStartPose.translation.x = wfStartPose.translation.x + FIELD_WIDTH/2.0;

@@ -201,7 +201,21 @@ void DStarLite::getUnplannedNeighbors(PathNode& curr, vector<PathNode*>& neighbo
 
 
 int DStarLite::getTransitionCost(PathNode& s, PathNode& p) {
-  if (p.cell.occupied) return INT_MAX;
+  if (p.cell.occupied || s.cell.occupied) return INT_MAX;
+
+  if (s.cell.r == p.cell.r && s.cell.c == p.cell.c) return 0;
+
+  // can add more costs for different types of movement here (e.g., based on turning?)
+  return 2;
+}
+
+int DStarLite::getPrevTransitionCost(PathNode& s, PathNode& p) {
+  if (!p.changed && !s.changed) return getTransitionCost(s,p);
+  bool s_prev_occupied, p_prev_occupied;
+  p_prev_occupied = (p.changed) ? !p.cell.occupied : p.cell.occupied;
+  s_prev_occupied = (s.changed) ? !s.cell.occupied : s.cell.occupied;
+
+  if (p_prev_occupied || s_prev_occupied) return INT_MAX;
 
   if (s.cell.r == p.cell.r && s.cell.c == p.cell.c) return 0;
 

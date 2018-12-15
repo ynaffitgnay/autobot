@@ -3,13 +3,10 @@
 
 PathNode::PathNode(GridCell& cell) : cell(cell) {
   idx = cell.r * GRID_WIDTH + cell.c;
-  pred = -1;
   g = INT_MAX;
   rhs = INT_MAX;
   changed = false;
   numVisits = 0;
-  overlapped = false;
-  initialized = false;
   planned = false;
   pathorder = -1;
 }
@@ -47,7 +44,7 @@ bool PathNode::operator>=(const PathNode& other) const {
 
 const int PathNode::getValue() {
   if (g != rhs) {
-    //std::cout << "Cell " << idx << " is inconsistent!\n";
+    std::cout << "Cell " << idx << " is inconsistent!\n";
   }
   return ((cell.cost > g) ? cell.cost : g);
 }
