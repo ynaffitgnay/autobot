@@ -19,7 +19,7 @@ typedef IsolatedBehaviorSimulation IBSim;
 typedef ObjectConfiguration OP;
 
 IBSim::IsolatedBehaviorSimulation(bool locMode, int player) :
-  IsolatedBehaviorSimulation(nullptr, locMode, player) { }
+  IsolatedBehaviorSimulation(nullptr, false, locMode, player) { }
 
 IBSim::IsolatedBehaviorSimulation(std::vector<WorldObjectType>* obstacles, bool useAStar, bool locMode, int player) : 
     lmode_(locMode),

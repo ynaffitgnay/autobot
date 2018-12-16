@@ -12,7 +12,7 @@ class FieldConfiguration;
 class IsolatedBehaviorSimulation : public Simulation {
   public:
     IsolatedBehaviorSimulation(bool locMode = true, int player = 5);
-    IsolatedBehaviorSimulation(std::vector<WorldObjectType>* obstacles, bool useAStar=false, bool locMode = true, int player = 5);
+    IsolatedBehaviorSimulation(std::vector<WorldObjectType>* obstacles, bool useAStar, bool locMode = true, int player = 5);
     virtual void simulationStep();
     inline MemoryCache getGtMemoryCache(int player = 0) const { return gtcache_; }
     inline MemoryCache getBeliefMemoryCache(int player = 0) const { return bcache_; }
