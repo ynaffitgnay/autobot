@@ -3,14 +3,16 @@
 GridGenerator::GridGenerator() {
 }
 
-bool GridGenerator::generateGrid(Grid& grid, bool gridCellsGlobalized) {
+bool GridGenerator::generateGrid(Grid& grid, bool gridCellsGlobalized, bool leaveOccupied) {
 	for (auto& cell : grid.cells) {
     if (gridCellsGlobalized) {
       cell.center.translation.x = cell.center.translation.x + FIELD_WIDTH/2.0;
       cell.center.translation.y = -cell.center.translation.y + FIELD_HEIGHT/2.0;
       cell.center.rotation = 0;
     }
-		cell.occupied = checkObstruction(cell);
+
+		if (!leaveOccupied) cell.occupied = checkObstruction(cell);
+		
 		// printf("Processing cell at [%d,%d]. Occupied: %d\n",cell.r,cell.c, cell.occupied);
 		if (cell.occupied) {
 			//std::cout << "cell " << cell.r << ", " << cell.c << " occupied??" << std::endl;

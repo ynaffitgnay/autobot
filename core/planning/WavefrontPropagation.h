@@ -125,7 +125,7 @@ public:
    * @param ot  Occupancy threshold for the map grid
    * @return True if initialization was successful
    */
-  bool getCosts(Grid& map, Pose2D& startPose);
+  bool getCosts(Grid& map, Pose2D& startPose, int lastVisitedIdx=-1);
   
   
   

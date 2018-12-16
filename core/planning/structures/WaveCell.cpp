@@ -9,7 +9,7 @@ WaveCell::~WaveCell() {
 }
 
 WaveCell::WaveCell(Pose2D position, GridCell gc):
-    wave_value_(WAVE_INIT), occupied_(false), is_planned_(false), is_initialized_(false), position_(position), neighbors_(NUM_NEIGHBORS,NULL), gc_(gc) { 
+    wave_value_(WAVE_INIT), occupied_(false), is_planned_(false), is_initialized_(false), position_(position), gc_(gc) { 
     if(gc_.occupied) {
       wave_value_ = WAVE_OBSTRUCTION;
       occupied_ = true;

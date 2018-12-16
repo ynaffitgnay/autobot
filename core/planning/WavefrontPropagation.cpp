@@ -1,6 +1,5 @@
 #include "WavefrontPropagation.h"
 
-
 WavefrontPropagation::WavefrontPropagation() :
   map_size_(0),
   num_rows_(0),
@@ -17,7 +16,7 @@ WavefrontPropagation::~WavefrontPropagation() {
   // Do nothing
 }
 
-bool WavefrontPropagation::getCosts(Grid& map, Pose2D& startPose) {
+bool WavefrontPropagation::getCosts(Grid& map, Pose2D& startPose, int lastVisitedIdx) {
   // Set map variables
   map_size_ = map.cells.size();
   num_rows_ = GRID_HEIGHT;
@@ -41,7 +40,7 @@ bool WavefrontPropagation::getCosts(Grid& map, Pose2D& startPose) {
   waveCells.clear();
   waveCells.resize(map.cells.size());
   for(int i = 0; i<waveCells.size(); i++) {
-    if (map.cells[i].visited) map.cells[i].occupied = true;
+    if (map.cells[i].visited && i != lastVisitedIdx) map.cells[i].occupied = true;
   	WaveCell wc(map.cells[i].center, map.cells[i]);
     waveCells[i]=wc;
   }
@@ -105,14 +104,15 @@ bool WavefrontPropagation::fill(Pose2D& startPose) {
 
   // Add a factor for the distance from the landmarks. We want cells near landmarks to have a higher value.
   int alpha = 1;
+  int maxFactor = 0;
   std::vector<int> lm_factors;
   for (auto& wc : waveCells) {
-
     int lmFactor = wc.getLandmarkFactor();
     lm_factors.push_back(lmFactor);
     int newValue = 2*wc.getValue() + alpha*lmFactor;
     // printf("Old wave value: %d Wall factor: %d New wave value: %d\n", wc.getValue(),wallFactor,newValue);
     if (wc.getValue() != WAVE_OBSTRUCTION && wc.getValue() != WAVE_START && wc.getValue() != WAVE_END) {
+      if (newValue > maxFactor) maxFactor = newValue;
       wc.setValue(newValue);
     } else if (wc.getValue() == WAVE_START) {
       wc.setValue(1);
@@ -171,9 +171,9 @@ bool WavefrontPropagation::traverse(std::vector<GridCell> &orig_cells) {
   }
 
   // Start from end index
-  int temp = start_index_;
-  start_index_ = end_index_;
-  end_index_ = temp;
+  //int temp = start_index_;
+  //start_index_ = end_index_;
+  //end_index_ = temp;
   
   // Plan order of poses
   int index = start_index_;                    // index of the current cell being added to the plan
@@ -422,15 +422,26 @@ bool WavefrontPropagation::setStartIndex(Pose2D& startPose) {
     Pose2D endPose = startNeighbors[0]->getPosition();
     // printf("Num neighbors: %d End pose [%f, %f]\n",startNeighbors.size(), endPose.translation.x, endPose.translation.y);
     end_index_ = getIndex(endPose);
-    int temp = start_index_;
-    start_index_ = end_index_;
-    end_index_ = temp;
+    //int temp = start_index_;
+    //start_index_ = end_index_;
+    //end_index_ = temp;
     return true;
   }
   else
   {
-   printf("Start pose invalid: has no valid neighbors\n");
-    return false;
+    //printf("Start pose invalid: has no valid neighbors\n");
+    //return false;
+    // Look for a different member in the graph
+    bool found = false;
+    for (int i = 0; i < waveCells.size(); ++i) {
+      if (WAVE_OBSTRUCTION != waveCells.at(i).getValue() && i != start_index_) {
+        found = true;
+        Pose2D endPose = waveCells.at(i).getPosition();
+        end_index_ = getIndex(endPose);
+        break;
+      }
+    }
+    return found;
   }
 }
 
@@ -440,14 +451,14 @@ bool WavefrontPropagation::checkPose(Pose2D pose) {
   {
     if(WAVE_OBSTRUCTION == waveCells[cell_index].getValue())
     {
-     printf("Start pose invalid: cell is occupied\n");
+      printf("Start pose invalid: cell is occupied\n");
       return false;
     }
     return true;
   }
   else
   {
-   printf("Start pose invalid: not within map bounds.\n");
+    printf("Start pose invalid: not within map bounds.\n");
     return false;
   }
 }
@@ -457,17 +468,17 @@ void WavefrontPropagation::findNeighbors() {
   std::vector<WaveCell*> neighbors; // vector of valid neighbors to be passed to cell
   for(int i = 0; i<waveCells.size(); i++)
   {
-    if(WAVE_OBSTRUCTION != waveCells[i].getValue()) // cell does not need neighbors if it is occupied (and therefore inaccessible)
-    {
-      neighbors.clear();
-      int r,c = 0;
-      getCoordinate(i, r, c);
-      addNeighbor(neighbors,r+1,c); // try adding possible neighbor that sits below this cell
-      addNeighbor(neighbors,r-1,c); // try adding possible neighbor that sits above this cell
-      addNeighbor(neighbors,r,c+1); // try adding possible neighbor that sits to the right
-      addNeighbor(neighbors,r,c-1); // try adding possible neighbor that sits to the left
-      waveCells[i].setNeighbors(neighbors); // set the valid neighbors that we found
-    }
+    //if(WAVE_OBSTRUCTION != waveCells[i].getValue()) // cell does not need neighbors if it is occupied (and therefore inaccessible)
+    //{
+    neighbors.clear();
+    int r,c = 0;
+    getCoordinate(i, r, c);
+    addNeighbor(neighbors,r+1,c); // try adding possible neighbor that sits below this cell
+    addNeighbor(neighbors,r-1,c); // try adding possible neighbor that sits above this cell
+    addNeighbor(neighbors,r,c+1); // try adding possible neighbor that sits to the right
+    addNeighbor(neighbors,r,c-1); // try adding possible neighbor that sits to the left
+    waveCells[i].setNeighbors(neighbors); // set the valid neighbors that we found
+      //}
   }
 }
 
