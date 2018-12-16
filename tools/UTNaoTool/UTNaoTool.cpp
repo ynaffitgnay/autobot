@@ -12,6 +12,8 @@ int main(int argc, char **argv) {
     return CLP::runBehaviorSim();
   if(args.localization_sim)
     return CLP::runLocalizationSim();
+  if (args.planning_sim)
+    return CLP::runPlanningSim();
   if(args.log_server)
     return CLP::runLogServer(args.log_path, args.loop_server);
 

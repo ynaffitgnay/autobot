@@ -15,7 +15,7 @@ struct Arguments {
   ;
   std::vector<int> frame_bounds;
   std::string ip_address;
-  bool behavior_sim, localization_sim, log_server, loop_server;
+  bool behavior_sim, localization_sim, log_server, loop_server, planning_sim;
   bool
     world_window,
     vision_window,

@@ -27,6 +27,7 @@ class IsolatedBehaviorSimulation : public Simulation {
     int paths_planned_;
     int nodes_expanded_;
     bool AStar_;
+    SimulatedPlayer sim_;
   protected:
     void randomizePlayers(FieldConfiguration&);
     void moveBallRandomly();
@@ -36,7 +37,6 @@ class IsolatedBehaviorSimulation : public Simulation {
     int player_;
     ImageParams iparams_;
     MemoryCache gtcache_, bcache_;
-    SimulatedPlayer sim_;
     PhysicsSimulator physics_;
     CommunicationGenerator cg_;
     int approachState_;

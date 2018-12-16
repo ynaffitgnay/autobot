@@ -72,11 +72,45 @@ int CommandLineProcessor::runLocalizationSim() {
 
 int CommandLineProcessor::runPlanningSim() {
   // TODO: generate random obstacles from list of obstacles
-  auto simulation = std::make_unique<IsolatedBehaviorSimulation>(true);
 
-  while (!simulation->complete()) {
-    simulation->simulationStep();
+  std::vector<WorldObjectType> obs1 = {
+      // WO_OBSTACLE_UNKNOWN_1,
+      // WO_OBSTACLE_UNKNOWN_2,
+      WO_OBSTACLE_UNKNOWN_3,
+      WO_OBSTACLE_UNKNOWN_4,
+      WO_OBSTACLE_UNKNOWN_5, 
+      WO_OBSTACLE_UNKNOWN_6, 
+      // WO_OBSTACLE_UNKNOWN_7, 
+      // WO_OBSTACLE_UNKNOWN_8, 
+      // WO_OBSTACLE_UNKNOWN_9, 
+      // WO_OBSTACLE_UNKNOWN_10,
+      // WO_OBSTACLE_UNKNOWN_11,
+      WO_OBSTACLE_UNKNOWN_12,
+      // WO_OBSTACLE_UNKNOWN_13,
+      // WO_OBSTACLE_UNKNOWN_14,
+      WO_OBSTACLE_UNKNOWN_15,
+    };
+
+  // AStar
+  auto Asimulation = std::make_unique<IsolatedBehaviorSimulation>(&obs1, true, false);
+
+  // DStar
+  auto Dsimulation = std::make_unique<IsolatedBehaviorSimulation>(&obs1, false, false);
+  
+  tic();
+  while (!Asimulation->complete()) {
+    Asimulation->simulationStep();
   }
+  
+  fprintf(stderr, "Sim time: %2.2f seconds\n", toc());
+
+  std::cout << "AStar config 1: " << Asimulation->sim_.cache_.planning->nodeExpansions << std::endl;
+
+  while (!Dsimulation->complete()) {
+    Dsimulation->simulationStep();
+  }
+
+  std::cout << "DStar config 1: " << Dsimulation->sim_.cache_.planning->nodeExpansions << std::endl;
 
   //TODO: print stats of interest:
   /*
