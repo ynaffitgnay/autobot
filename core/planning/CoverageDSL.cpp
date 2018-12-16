@@ -76,7 +76,7 @@ void CoverageDSL::runDSL() {
 
   // Mark this cell as occupied
   PathNode& changedNode = map_.at(cache_.planning->path.at(cache_.planning->pathIdx));
-  changedNode.cell.occupied = changedNode.cell.occupied;
+  changedNode.cell.occupied = true;
   changedNode.changed = true;
   blankGrid->at(cache_.planning->path.at(cache_.planning->pathIdx)).occupied = true;
 
@@ -154,11 +154,11 @@ void CoverageDSL::runDSL() {
   cache_.planning->changedCost = false;
 
   // Set the number of node expansions
-  //if (AStar_) {
-  //  cache_.planning->nodeExpansions += nodeExpansions;
-  //} else {
-  cache_.planning->nodeExpansions += nodeExpansions;
-  //}
+  if (AStar_) {
+    cache_.planning->nodeExpansions += nodeExpansions;
+  } else {
+    cache_.planning->nodeExpansions = nodeExpansions;
+  }
 }
 
 // This only works if we include the nodes discovered in "hop" in the path
@@ -222,21 +222,21 @@ void CoverageDSL::generateCoveragePath(int startIdx) {
     getUnplannedNeighbors(map_.at(currCellIdx), unplanned); // vector of valid unvisited neighbors
     if(unplanned.size() > 0)
     {
-      int maxValue = unplanned[0]->getValue();
-      int maxIndex = 0;                       
+      int minValue = unplanned[0]->getValue();
+      int minIndex = 0;                       
       if(unplanned.size() > 1) // If there is more than one unplanned neighbor, find the one with the highest cost
       {
         for(int i = 1; i < unplanned.size(); i++)
         {
-          if(unplanned[i]->getValue() > maxValue)
+          if(unplanned[i]->getValue() < minValue)
           {
-            maxValue = unplanned[i]->getValue();
-            maxIndex = i;
+            minValue = unplanned[i]->getValue();
+            minIndex = i;
           }
         }
       }
       //int lastIndex = currCellIdx;
-      currCellIdx = unplanned.at(maxIndex)->idx;
+      currCellIdx = unplanned.at(minIndex)->idx;
 
       if (map_.at(currCellIdx).cell.occupied) {
         std::cout << "An unexpected occupation" << std::endl;
@@ -317,12 +317,14 @@ void CoverageDSL::generateCoveragePath(int startIdx) {
 
   //TODO: maybe sum the number of node expansions for vanilla DSL before deleting
 
-  cache_.planning->nodeExpansions += nodeExpansions;
+  
   cache_.planning->nodesLeft = numPlanned;
   if (AStar_) {
     cache_.planning->nodesInPath = numPlanned + cache_.planning->pathIdx;
+    cache_.planning->nodeExpansions += nodeExpansions;
   } else {
     cache_.planning->nodesInPath += numPlanned;
+    cache_.planning->nodeExpansions = nodeExpansions;
   }
   cache_.planning->pathsPlanned += 1;
 }
