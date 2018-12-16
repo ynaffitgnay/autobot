@@ -98,9 +98,9 @@ SimulatedPlayer::SimulatedPlayer(int team, int self, bool lMode, std::vector<Wor
   }
 
   // if AStar, init for AStar
-  //if (AStar_) {
+  if (AStar_) {
     core->planning_->setAStar();
-    //}
+  }
 
   // turn on text logging
   core->textlog_->onlineMode() = true;
