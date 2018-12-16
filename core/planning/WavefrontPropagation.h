@@ -49,7 +49,7 @@ private:
    * @param startPose Pose of the robot at the start of the plan
    * @return True if the wavefront was propogated successfully
    */
-  bool fill(Pose2D& startPose);
+  bool fill(Pose2D& startPose, bool swap);
 
     /**
    * @brief Generates an initial plan by ascending the gradient of values
@@ -125,7 +125,7 @@ public:
    * @param ot  Occupancy threshold for the map grid
    * @return True if initialization was successful
    */
-  bool getCosts(Grid& map, Pose2D& startPose, int lastVisitedIdx=-1);
+  bool getCosts(Grid& map, Pose2D& startPose, bool swap, int lastVisitedIdx=-1);
   
   
   

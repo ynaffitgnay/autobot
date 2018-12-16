@@ -16,7 +16,7 @@ WavefrontPropagation::~WavefrontPropagation() {
   // Do nothing
 }
 
-bool WavefrontPropagation::getCosts(Grid& map, Pose2D& startPose, int lastVisitedIdx) {
+bool WavefrontPropagation::getCosts(Grid& map, Pose2D& startPose, bool swap, int lastVisitedIdx) {
   // Set map variables
   map_size_ = map.cells.size();
   num_rows_ = GRID_HEIGHT;
@@ -40,7 +40,7 @@ bool WavefrontPropagation::getCosts(Grid& map, Pose2D& startPose, int lastVisite
   waveCells.clear();
   waveCells.resize(map.cells.size());
   for(int i = 0; i<waveCells.size(); i++) {
-    if (map.cells[i].visited && i != lastVisitedIdx) map.cells[i].occupied = true;
+    //if (map.cells[i].visited && i != lastVisitedIdx) map.cells[i].occupied = true;
   	WaveCell wc(map.cells[i].center, map.cells[i]);
     waveCells[i]=wc;
   }
@@ -52,8 +52,9 @@ bool WavefrontPropagation::getCosts(Grid& map, Pose2D& startPose, int lastVisite
   // Set init flag
   is_initialized_ = true;
 
-  if (fill(startPose)) {
+  if (fill(startPose, swap)) {
   	printf("Success!\n");
+
     for(int i = 0; i<waveCells.size(); i++) {
       map.cells[i].cost = waveCells[i].getValue();
       float globX = map.cells[i].center.translation.x-FIELD_WIDTH/2.0;  // Converts from local x,y to global x,y not r,c
@@ -70,20 +71,33 @@ bool WavefrontPropagation::getCosts(Grid& map, Pose2D& startPose, int lastVisite
     return false;
   }
 
-  if (traverse(map.cells)) {
-    printf("Successfully generated initial path order\n");
-  } else {
-    printf("Failed to generate initial path order\n");
-    return false;
+  if (swap) {
+    int temp = start_index_;
+    start_index_ = end_index_;  // Fill the map with the start location as the goal
+    end_index_ = temp;
   }
+
+  //if (traverse(map.cells)) {
+  //  printf("Successfully generated initial path order\n");
+  //} else {
+  //  printf("Failed to generate initial path order\n");
+  //  return false;
+  //}
   return true;
 }
 
-bool WavefrontPropagation::fill(Pose2D& startPose) {
+bool WavefrontPropagation::fill(Pose2D& startPose, bool swap) {
   // Set start state if it is valid
   if(!setStartIndex(startPose)) {
     return false;
   }
+  
+  if (swap) {
+    int temp = start_index_;
+    start_index_ = end_index_;  // Fill the map with the start location as the goal
+    end_index_ = temp;
+  }
+  
   // Set start and end cell values
   waveCells[start_index_].setValue(WAVE_START);
   waveCells[end_index_].setValue(WAVE_END);

@@ -50,7 +50,7 @@ void PlanningModule::initSpecificModule() {
   printf("Generating grid\n");
   GG_->generateGrid(*initial_cost_map_, false);
   printf("Generating wave\n");
-  WP_->getCosts(*initial_cost_map_, wfStartPose);
+  WP_->getCosts(*initial_cost_map_, wfStartPose, !AStar_);
   
   DSL_->init(initial_cost_map_->cells, WP_->start_index_, AStar_);
 
@@ -84,7 +84,7 @@ void PlanningModule::processFrame() {
       initial_cost_map_->cells.at(i).visited = false;
     }
     GG_->generateGrid(*initial_cost_map_, true);
-    WP_->getCosts(*initial_cost_map_, wfStartPose);
+    WP_->getCosts(*initial_cost_map_, wfStartPose, !AStar_);
     DSL_->init(initial_cost_map_->cells, WP_->start_index_);
     cache_.planning->resetPath = false;
     std::cout << "Re-initialized planning" << std::endl;
@@ -106,7 +106,7 @@ void PlanningModule::processFrame() {
     wfStartPose.translation.y = -wfStartPose.translation.y + FIELD_HEIGHT/2.0;
     wfStartPose.rotation = 0;
     GG_->generateGrid(*initial_cost_map_, true, true);
-    WP_->getCosts(*initial_cost_map_, wfStartPose, cache_.planning->path.at(cache_.planning->pathIdx - 1));
+    WP_->getCosts(*initial_cost_map_, wfStartPose, !AStar_, cache_.planning->path.at(cache_.planning->pathIdx - 1));
     DSL_->init(initial_cost_map_->cells, WP_->start_index_, true);
     //std::cout << "AHHHH A* planning" << std::endl;
     cache_.planning->changedCost = false;

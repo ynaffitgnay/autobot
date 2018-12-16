@@ -60,6 +60,11 @@ void CoverageDSL::init(std::vector<GridCell>& wavefront, int startCoverageIdx, b
   
   std::cout << "About to generate path!\n";
   if (AStar_) {
+    // Need to mark the ones up to this point as planned
+    for (int i = 0; i < cache_.planning->pathIdx; ++i) {
+      map_.at(cache_.planning->path.at(i)).planned = true;
+      map_.at(cache_.planning->path.at(i)).pathorder = i;
+  }
     generateCoveragePath(cache_.planning->pathIdx);
   } else {
     generateCoveragePath(0);
@@ -174,9 +179,13 @@ int CoverageDSL::calcPathCost(int sIdx, int fIdx) {
     traversalCost += getTransitionCost(map_.at(cache_.planning->path.at(i)), map_.at(cache_.planning->path.at(i + 1)));
   }
 
-  std::cout << "Got cost up to " << i << " to " << i + 1 << std::endl;
+  //std::cout << "Got cost up to " << i << " to " << i + 1 << std::endl;
+
+  int h_diff = map_.at(cache_.planning->path.at(fIdx)).cell.cost - map_.at(cache_.planning->path.at(sIdx)).cell.cost;
+
+  std::cout << "traversal cost: " << traversalCost << " h_diff: " << h_diff << std::endl;
   
-  return traversalCost;
+  return h_diff;
 }
 
 //// Generate path from idx startIdx
@@ -222,21 +231,40 @@ void CoverageDSL::generateCoveragePath(int startIdx) {
     getUnplannedNeighbors(map_.at(currCellIdx), unplanned); // vector of valid unvisited neighbors
     if(unplanned.size() > 0)
     {
-      int minValue = unplanned[0]->getValue();
-      int minIndex = 0;                       
-      if(unplanned.size() > 1) // If there is more than one unplanned neighbor, find the one with the highest cost
-      {
-        for(int i = 1; i < unplanned.size(); i++)
+      if (!AStar_) { // AStar_ uses gradient ascent
+        int minValue = unplanned[0]->getValue();
+        int minIndex = 0;                       
+        if(unplanned.size() > 1) // If there is more than one unplanned neighbor, find the one with the highest cost
         {
-          if(unplanned[i]->getValue() < minValue)
+          for(int i = 1; i < unplanned.size(); i++)
           {
-            minValue = unplanned[i]->getValue();
-            minIndex = i;
+            if(unplanned[i]->getValue() < minValue)
+            {
+              minValue = unplanned[i]->getValue();
+              minIndex = i;
+            }
           }
         }
+        //int lastIndex = currCellIdx;
+        currCellIdx = unplanned.at(minIndex)->idx;
+      } else {
+        int maxValue = unplanned[0]->getValue();
+        int maxIndex = 0;                       
+        if(unplanned.size() > 1) // If there is more than one unplanned neighbor, find the one with the highest cost
+        {
+          for(int i = 1; i < unplanned.size(); i++)
+          {
+            if(unplanned[i]->getValue() > maxValue)
+            {
+              maxValue = unplanned[i]->getValue();
+              maxIndex = i;
+            }
+          }
+        }
+        //int lastIndex = currCellIdx;
+        currCellIdx = unplanned.at(maxIndex)->idx;
       }
-      //int lastIndex = currCellIdx;
-      currCellIdx = unplanned.at(minIndex)->idx;
+        
 
       if (map_.at(currCellIdx).cell.occupied) {
         std::cout << "An unexpected occupation" << std::endl;
