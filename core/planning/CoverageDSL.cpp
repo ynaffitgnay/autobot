@@ -21,7 +21,8 @@ void CoverageDSL::init(std::vector<GridCell>& wavefront, int startCoverageIdx, b
   DStarLite::init(wavefront, startCoverageIdx, -1, &(cache_.planning->path));
   buildBlankGrid();
   // 0 paths have been planned!
-  cache_.planning->pathsPlanned = 0;
+  if (!AStar_) cache_.planning->pathsPlanned = 0;
+  //if (AStar_) nodeExpansions = cache_.planning->nodeExpansions;
 
   //std::cout << "Map before doing dsl stuff: " << std::endl;
 
@@ -75,7 +76,7 @@ void CoverageDSL::runDSL() {
 
   // Mark this cell as occupied
   PathNode& changedNode = map_.at(cache_.planning->path.at(cache_.planning->pathIdx));
-  changedNode.cell.occupied = !changedNode.cell.occupied;
+  changedNode.cell.occupied = changedNode.cell.occupied;
   changedNode.changed = true;
   blankGrid->at(cache_.planning->path.at(cache_.planning->pathIdx)).occupied = true;
 
@@ -143,6 +144,7 @@ void CoverageDSL::runDSL() {
       map_.at(cache_.planning->path.at(i)).pathorder = -1;
     }
   }
+  // Note that this only gets run for DStarLite, not for AStar
   cache_.planning->nodesInPath -= cache_.planning->nodesLeft;
     
   // Replan
@@ -152,11 +154,11 @@ void CoverageDSL::runDSL() {
   cache_.planning->changedCost = false;
 
   // Set the number of node expansions
-  if (AStar_) {
-    cache_.planning->nodeExpansions += nodeExpansions;
-  } else {
-    cache_.planning->nodeExpansions == nodeExpansions;
-  }
+  //if (AStar_) {
+  //  cache_.planning->nodeExpansions += nodeExpansions;
+  //} else {
+  cache_.planning->nodeExpansions += nodeExpansions;
+  //}
 }
 
 // This only works if we include the nodes discovered in "hop" in the path
@@ -200,14 +202,15 @@ void CoverageDSL::generateCoveragePath(int startIdx) {
   int newNumPlanned;
   int currCellIdx;
   
-  if (startIdx == 0 || AStar_) {                  // Add the start pose as the first pose in the plan
+  if (startIdx == 0) {                  // Add the start pose as the first pose in the plan
     currCellIdx = S_->idx;              // index of the current cell being added to the plan
     S_->planned = true;
     S_->pathorder = pathIdx;
     path.at(pathIdx++) = currCellIdx;
     newNumPlanned = 1;
   } else {
-    currCellIdx = cache_.planning->path.at(lastReplanIdx);
+    currCellIdx = (AStar_) ? cache_.planning->path.at(cache_.planning->pathIdx - 1) : cache_.planning->path.at(lastReplanIdx);
+    
     newNumPlanned = 0;
   }
 
@@ -256,7 +259,8 @@ void CoverageDSL::generateCoveragePath(int startIdx) {
       if(currCellIdx == lastIndex) {  // if hop was unsuccessful, we should must not have any more cells to plan
         std::cout << "Hop unsuccessful. Original numPlanned: " << numPlanned <<
           " and numPoses: " << numPoses << std::endl;
-        numPlanned = numPoses;
+        //numPlanned = numPoses;
+        numPoses = numPlanned;
         //std::cout << "I guess we're stuck forever\n";
         break;
       }
@@ -272,6 +276,9 @@ void CoverageDSL::generateCoveragePath(int startIdx) {
         std::cout << "Uh oh... no path could be found to hop destination!" << std::endl;
         // TODO: can maybe have hop accept a list of indices that can't be hopped to!
       }
+
+      std::cout << "Adding " << hopDSL->nodeExpansions << " nodeExpansions to curr" << std::endl;
+      nodeExpansions += hopDSL->nodeExpansions;
 
       delete(hopDSL);
  
@@ -310,8 +317,13 @@ void CoverageDSL::generateCoveragePath(int startIdx) {
 
   //TODO: maybe sum the number of node expansions for vanilla DSL before deleting
 
+  cache_.planning->nodeExpansions += nodeExpansions;
   cache_.planning->nodesLeft = numPlanned;
-  cache_.planning->nodesInPath += numPlanned;
+  if (AStar_) {
+    cache_.planning->nodesInPath = numPlanned + cache_.planning->pathIdx;
+  } else {
+    cache_.planning->nodesInPath += numPlanned;
+  }
   cache_.planning->pathsPlanned += 1;
 }
 

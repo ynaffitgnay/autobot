@@ -1037,6 +1037,9 @@ void GLDrawer::overlayPlanning() {
   y+= 10;
   text = "nodesInPath: " + QString::number(plan->nodesInPath) + " nodesLeft: " + QString::number(plan->nodesLeft);
   parent_->renderText(x,y,text);
+  y+= 10;
+  text = "nodesExpanded: " + QString::number(plan->nodeExpansions);
+  parent_->renderText(x,y,text);
   
 }
 

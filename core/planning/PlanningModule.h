@@ -21,7 +21,7 @@ class PlanningModule: public Module {
 
     void specifyMemoryDependency();
     void specifyMemoryBlocks();
-    void initSpecificModule(bool AStar=false);
+    void initSpecificModule();
     void processFrame();
 
     inline std::vector<GridCell>& grid() {
@@ -29,6 +29,8 @@ class PlanningModule: public Module {
     }
 
     bool isAStar();
+    void setAStar();
+    void setDSL();
   protected:
     MemoryCache cache_;
     TextLogger*& tlogger_;

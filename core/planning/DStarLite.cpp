@@ -278,6 +278,9 @@ int DStarLite::generatePath(int startIdx) {
   //printPath();
   //printf("Path size: %d\n", numPlanned);
   printf("Node expansions in vanilla DSL: %d\n", nodeExpansions);
+  //cache_.planning->nodeExpansions += nodeExpansions;
+
+  // TODO: put nodes here?
   
   return numPlanned;
 }

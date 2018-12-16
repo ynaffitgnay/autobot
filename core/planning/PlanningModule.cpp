@@ -4,7 +4,7 @@
 #include <memory/RobotStateBlock.h>
 #include <iostream>
 
-PlanningModule::PlanningModule() : tlogger_(textlogger) {
+PlanningModule::PlanningModule() : tlogger_(textlogger), AStar_(false) {
   //std::cout << "grid.size(): " << grid().size() << std::endl;
   GG_ = std::make_unique<GridGenerator>();
   WP_ = std::make_unique<WavefrontPropagation>();
@@ -36,8 +36,7 @@ void PlanningModule::specifyMemoryBlocks() {
 }
 
 // Perform startup initialization for planning
-void PlanningModule::initSpecificModule(bool AStar) {
-  AStar_ = AStar;
+void PlanningModule::initSpecificModule() {
   grid().resize(GRID_SIZE);
   initial_cost_map_ = new Grid(grid());
   startLoc_ = Point2D(cache_.planning->startPoint.x, cache_.planning->startPoint.y);
@@ -100,14 +99,26 @@ void PlanningModule::processFrame() {
   if (!AStar_) {
     DSL_->runDSL();
   } else {
+    // Mark the most recent cell as occupied
+    initial_cost_map_->cells.at(cache_.planning->path.at(cache_.planning->pathIdx)).occupied = true;
     wfStartPose = cache_.planning->grid.at(cache_.planning->path.at(cache_.planning->pathIdx - 1)).center;
     wfStartPose.translation.x = wfStartPose.translation.x + FIELD_WIDTH/2.0;
     wfStartPose.translation.y = -wfStartPose.translation.y + FIELD_HEIGHT/2.0;
     wfStartPose.rotation = 0;
-    GG_->generateGrid(*initial_cost_map_, true);
-    WP_->getCosts(*initial_cost_map_, wfStartPose);
+    GG_->generateGrid(*initial_cost_map_, true, true);
+    WP_->getCosts(*initial_cost_map_, wfStartPose, cache_.planning->path.at(cache_.planning->pathIdx - 1));
     DSL_->init(initial_cost_map_->cells, WP_->start_index_, true);
     //std::cout << "AHHHH A* planning" << std::endl;
+    cache_.planning->changedCost = false;
+
+    std::cout << "Prev path followed:" << std::endl;
+    for (int i = 0; i < cache_.planning->pathIdx; ++i) {
+      if (i % 10 == 0) {
+        std::cout << std::endl;
+      }  
+      std::cout << "(" << getRowFromIdx(cache_.planning->path.at(i)) << ", " << getColFromIdx(cache_.planning->path.at(i)) << ") ";
+    }
+    std::cout << std::endl;
   }
 
   std::cout << "Replanned beginning with pathIdx " << cache_.planning->pathIdx << std::endl;
@@ -120,9 +131,6 @@ void PlanningModule::processFrame() {
     std::cout << "(" << getRowFromIdx(cache_.planning->path.at(i)) << ", " << getColFromIdx(cache_.planning->path.at(i)) << ") ";
   }
   std::cout << std::endl;
-
-  // IF WAVEFRONT UNCOMMENT/COMMENT THIS BLOCK
-  
 }
 
 // Check if robot has moved to new cell
@@ -138,10 +146,6 @@ void PlanningModule::updateCell() {
   auto& robot = cache_.world_object->objects_[cache_.robot_state->WO_SELF];
   int curr_r = getGridRow(robot.loc.y);
   int curr_c = getGridCol(robot.loc.x);
-
-  // if we haven't changed cells, return
-  //if (cache_.planning->pathIdx != 0 && curr_r == prevLoc_r && curr_c == prevLoc_c) return;
-  // TODO: check if the cell we're trying to go to is occupied??
 
   int desiredCellIdx = cache_.planning->path[cache_.planning->pathIdx];
   int currIdx = getCellIdx(curr_r, curr_c);
@@ -173,6 +177,20 @@ void PlanningModule::updateCell() {
   
   // Increment the place along the path
   cache_.planning->pathIdx++;
+}
+
+void PlanningModule::setAStar() {
+  std::cout << "Resetting path planning to use AStar" << std::endl;
+  AStar_ = true;
+  cache_.planning->reInitPath();
+  processFrame();
+}
+
+void PlanningModule::setDSL() {
+  std::cout << "Resetting path planning to use DStarLite" << std::endl;
+  AStar_ = false;
+  cache_.planning->reInitPath();
+  processFrame();
 }
 
 bool PlanningModule::isAStar() {
