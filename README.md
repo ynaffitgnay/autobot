@@ -1,4 +1,9 @@
-# PlanningModule.cpp
+The complete coverage path planning code is organized into several different
+blocks. The bulk of the code is contained in /core/planning, which is reproduced
+in the zipped /planning directory. Additional structures were made in /core/common,
+they are included in /core/common.
+
+  # PlanningModule.cpp
 Majority of files are contained in Planning folder under "core/"
 To run the project,
 1. run tool
