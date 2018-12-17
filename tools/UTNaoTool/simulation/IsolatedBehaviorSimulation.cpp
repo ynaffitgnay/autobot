@@ -24,7 +24,7 @@ IBSim::IsolatedBehaviorSimulation(bool locMode, int player) :
 IBSim::IsolatedBehaviorSimulation(std::vector<WorldObjectType>* obstacles, bool useAStar, bool locMode, int player) : 
     lmode_(locMode),
     player_(player),
-    sim_(team_, player, locMode, obstacles_, useAStar),
+    sim_(team_, player, locMode, obstacles, useAStar),
     cg_(team_, player),
     iparams_(Camera::TOP),
     obstacles_(obstacles),

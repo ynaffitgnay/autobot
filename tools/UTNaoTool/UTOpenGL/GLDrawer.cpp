@@ -1196,26 +1196,26 @@ void GLDrawer::drawObstacles() {
 void GLDrawer::drawUnknownObstacles() {
   if(gtcache_.world_object == NULL) return;
   std::vector<WorldObjectType> obstacles = {
-    // WO_OBSTACLE_UNKNOWN_1,
-    // WO_OBSTACLE_UNKNOWN_2,
+    WO_OBSTACLE_UNKNOWN_1,
+    WO_OBSTACLE_UNKNOWN_2,
     WO_OBSTACLE_UNKNOWN_3,
     WO_OBSTACLE_UNKNOWN_4,
     WO_OBSTACLE_UNKNOWN_5, 
     WO_OBSTACLE_UNKNOWN_6, 
-    // WO_OBSTACLE_UNKNOWN_7, 
-    // WO_OBSTACLE_UNKNOWN_8, 
-    // WO_OBSTACLE_UNKNOWN_9, 
-    // WO_OBSTACLE_UNKNOWN_10,
-    // WO_OBSTACLE_UNKNOWN_11,
+    WO_OBSTACLE_UNKNOWN_7, 
+    WO_OBSTACLE_UNKNOWN_8, 
+    WO_OBSTACLE_UNKNOWN_9, 
+    WO_OBSTACLE_UNKNOWN_10,
+    WO_OBSTACLE_UNKNOWN_11,
     WO_OBSTACLE_UNKNOWN_12,
-    // WO_OBSTACLE_UNKNOWN_13,
-    // WO_OBSTACLE_UNKNOWN_14,
+    WO_OBSTACLE_UNKNOWN_13,
+    WO_OBSTACLE_UNKNOWN_14,
     WO_OBSTACLE_UNKNOWN_15,
   };
 
   for(auto obs : obstacles) {
     const auto& object = gtcache_.world_object->objects_[obs];
-    objectsGL.drawObstacle(object.loc, Colors::Red);
+    if (object.seen) objectsGL.drawObstacle(object.loc, Colors::Red);
   }
 }
 

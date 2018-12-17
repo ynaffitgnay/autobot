@@ -88,6 +88,12 @@ void DStarLite::computeShortestPath(PathNode& curr) {
     //std::cout << "Occupied cell at " << curr.cell.r << ", " << curr.cell.c << std::endl;
     return;
   }
+
+  std::vector<PathNode*> neighbors;
+  // Don't compute for cells with no unoccupied neighbors
+  getNeighbors(curr, neighbors);
+  if (neighbors.size() == 0) return;
+  
   PathNode* u = nullptr;
   
   // Calculate the key for the current node
@@ -206,7 +212,7 @@ int DStarLite::getTransitionCost(PathNode& s, PathNode& p) {
   if (s.cell.r == p.cell.r && s.cell.c == p.cell.c) return 0;
 
   // can add more costs for different types of movement here (e.g., based on turning?)
-  return 2;
+  return 4;
 }
 
 int DStarLite::getPrevTransitionCost(PathNode& s, PathNode& p) {
@@ -220,7 +226,7 @@ int DStarLite::getPrevTransitionCost(PathNode& s, PathNode& p) {
   if (s.cell.r == p.cell.r && s.cell.c == p.cell.c) return 0;
 
   // can add more costs for different types of movement here (e.g., based on turning?)
-  return 2;
+  return 4;
 }
 
 // Generate path from idx startIdx

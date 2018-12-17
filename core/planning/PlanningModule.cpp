@@ -177,6 +177,7 @@ void PlanningModule::updateCell() {
   
   // Increment the place along the path
   cache_.planning->pathIdx++;
+  std::cout << "Moved to pathIdx " << cache_.planning->pathIdx << std::endl;
 }
 
 void PlanningModule::setAStar() {

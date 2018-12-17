@@ -30,6 +30,7 @@ class BaseTask(object):
   def reset(self):
     if not self._initializing:
       #self.trace("Reset")
+      pass
     self._started = False
     self._finished = False
     self._aborted = False
@@ -206,6 +207,7 @@ class MultiTask(BaseTask):
     self._frames += 1
     if core.instance.type_ == core.CORE_TOOL:
       #self.trace("process frame")
+      pass
     if UTdebug.TIME: UTdebug.stimer(str(self))
     if self.aborted():
       if UTdebug.TIME: UTdebug.ttimer(str(self))

@@ -73,7 +73,8 @@ int CommandLineProcessor::runLocalizationSim() {
 int CommandLineProcessor::runPlanningSim() {
   // TODO: generate random obstacles from list of obstacles
 
-  std::vector<WorldObjectType> obs1 = {
+  std::vector<std::vector<WorldObjectType>> obs = {
+    {
       // WO_OBSTACLE_UNKNOWN_1,
       // WO_OBSTACLE_UNKNOWN_2,
       WO_OBSTACLE_UNKNOWN_3,
@@ -89,29 +90,182 @@ int CommandLineProcessor::runPlanningSim() {
       // WO_OBSTACLE_UNKNOWN_13,
       // WO_OBSTACLE_UNKNOWN_14,
       WO_OBSTACLE_UNKNOWN_15,
-    };
+    },
+    {
+      WO_OBSTACLE_UNKNOWN_1,
+      WO_OBSTACLE_UNKNOWN_2,
+      WO_OBSTACLE_UNKNOWN_3,
+      WO_OBSTACLE_UNKNOWN_4,
+      // WO_OBSTACLE_UNKNOWN_5, 
+      // WO_OBSTACLE_UNKNOWN_6, 
+      // WO_OBSTACLE_UNKNOWN_7, 
+      // WO_OBSTACLE_UNKNOWN_8, 
+      WO_OBSTACLE_UNKNOWN_9, 
+      // WO_OBSTACLE_UNKNOWN_10,
+      WO_OBSTACLE_UNKNOWN_11,
+      // WO_OBSTACLE_UNKNOWN_12,
+      // WO_OBSTACLE_UNKNOWN_13,
+      // WO_OBSTACLE_UNKNOWN_14,
+      // WO_OBSTACLE_UNKNOWN_15,
+    },
+    {
+      // WO_OBSTACLE_UNKNOWN_1,
+      // WO_OBSTACLE_UNKNOWN_2,
+      // WO_OBSTACLE_UNKNOWN_3,
+      // WO_OBSTACLE_UNKNOWN_4,
+      // WO_OBSTACLE_UNKNOWN_5, 
+      // WO_OBSTACLE_UNKNOWN_6, 
+      // WO_OBSTACLE_UNKNOWN_7, 
+      WO_OBSTACLE_UNKNOWN_8, 
+      WO_OBSTACLE_UNKNOWN_9, 
+      // WO_OBSTACLE_UNKNOWN_10,
+      // WO_OBSTACLE_UNKNOWN_11,
+      // WO_OBSTACLE_UNKNOWN_12,
+      // WO_OBSTACLE_UNKNOWN_13,
+      // WO_OBSTACLE_UNKNOWN_14,
+      // WO_OBSTACLE_UNKNOWN_15,
+    },
 
-  // AStar
-  auto Asimulation = std::make_unique<IsolatedBehaviorSimulation>(&obs1, true, false);
+    {
+      // WO_OBSTACLE_UNKNOWN_1,
+      // WO_OBSTACLE_UNKNOWN_2,
+      // WO_OBSTACLE_UNKNOWN_3,
+      // WO_OBSTACLE_UNKNOWN_4,
+      WO_OBSTACLE_UNKNOWN_5, 
+      WO_OBSTACLE_UNKNOWN_6, 
+      WO_OBSTACLE_UNKNOWN_7, 
+      // WO_OBSTACLE_UNKNOWN_8, 
+      WO_OBSTACLE_UNKNOWN_9, 
+      // WO_OBSTACLE_UNKNOWN_10,
+      WO_OBSTACLE_UNKNOWN_11,
+      // WO_OBSTACLE_UNKNOWN_12,
+      // WO_OBSTACLE_UNKNOWN_13,
+      // WO_OBSTACLE_UNKNOWN_14,
+      // WO_OBSTACLE_UNKNOWN_15,
+    },
 
-  // DStar
-  auto Dsimulation = std::make_unique<IsolatedBehaviorSimulation>(&obs1, false, false);
-  
-  tic();
-  while (!Asimulation->complete()) {
-    Asimulation->simulationStep();
-  }
-  
-  fprintf(stderr, "Sim time: %2.2f seconds\n", toc());
+    {
+      // WO_OBSTACLE_UNKNOWN_1,
+      // WO_OBSTACLE_UNKNOWN_2,
+      // WO_OBSTACLE_UNKNOWN_3,
+      // WO_OBSTACLE_UNKNOWN_4,
+      // WO_OBSTACLE_UNKNOWN_5, 
+      // WO_OBSTACLE_UNKNOWN_6, 
+      // WO_OBSTACLE_UNKNOWN_7, 
+      // WO_OBSTACLE_UNKNOWN_8, 
+      // WO_OBSTACLE_UNKNOWN_9, 
+      WO_OBSTACLE_UNKNOWN_10,
+      // WO_OBSTACLE_UNKNOWN_11,
+      WO_OBSTACLE_UNKNOWN_12,
+      // WO_OBSTACLE_UNKNOWN_13,
+      // WO_OBSTACLE_UNKNOWN_14,
+      WO_OBSTACLE_UNKNOWN_15,
+    },
+    {
+      WO_OBSTACLE_UNKNOWN_1,
+      WO_OBSTACLE_UNKNOWN_2,
+      // WO_OBSTACLE_UNKNOWN_3,
+      WO_OBSTACLE_UNKNOWN_4,
+      // WO_OBSTACLE_UNKNOWN_5, 
+      // WO_OBSTACLE_UNKNOWN_6, 
+      WO_OBSTACLE_UNKNOWN_7, 
+      // WO_OBSTACLE_UNKNOWN_8, 
+      // WO_OBSTACLE_UNKNOWN_9, 
+      // WO_OBSTACLE_UNKNOWN_10,
+      // WO_OBSTACLE_UNKNOWN_11,
+      // WO_OBSTACLE_UNKNOWN_12,
+      // WO_OBSTACLE_UNKNOWN_13,
+      // WO_OBSTACLE_UNKNOWN_14,
+      // WO_OBSTACLE_UNKNOWN_15,
+    },
 
-  std::cout << "AStar config 1: " << Asimulation->sim_.cache_.planning->nodeExpansions << std::endl;
+    {
+      // WO_OBSTACLE_UNKNOWN_1,
+      // WO_OBSTACLE_UNKNOWN_2,
+      // WO_OBSTACLE_UNKNOWN_3,
+      // WO_OBSTACLE_UNKNOWN_4,
+      // WO_OBSTACLE_UNKNOWN_5, 
+      // WO_OBSTACLE_UNKNOWN_6, 
+      // WO_OBSTACLE_UNKNOWN_7, 
+      WO_OBSTACLE_UNKNOWN_8, 
+      WO_OBSTACLE_UNKNOWN_9, 
+      // WO_OBSTACLE_UNKNOWN_10,
+      // WO_OBSTACLE_UNKNOWN_11,
+      // WO_OBSTACLE_UNKNOWN_12,
+      // WO_OBSTACLE_UNKNOWN_13,
+      // WO_OBSTACLE_UNKNOWN_14,
+      // WO_OBSTACLE_UNKNOWN_15,
+    },
+    {
+      // WO_OBSTACLE_UNKNOWN_1,
+      // WO_OBSTACLE_UNKNOWN_2,
+      // WO_OBSTACLE_UNKNOWN_3,
+      // WO_OBSTACLE_UNKNOWN_4,
+      WO_OBSTACLE_UNKNOWN_5, 
+      // WO_OBSTACLE_UNKNOWN_6, 
+      WO_OBSTACLE_UNKNOWN_7, 
+      // WO_OBSTACLE_UNKNOWN_8, 
+      WO_OBSTACLE_UNKNOWN_9, 
+      // WO_OBSTACLE_UNKNOWN_10,
+      WO_OBSTACLE_UNKNOWN_11,
+      // WO_OBSTACLE_UNKNOWN_12,
+      WO_OBSTACLE_UNKNOWN_13,
+      // WO_OBSTACLE_UNKNOWN_14,
+      // WO_OBSTACLE_UNKNOWN_15,
+    },
 
-  while (!Dsimulation->complete()) {
-    Dsimulation->simulationStep();
-  }
+    {
+      // WO_OBSTACLE_UNKNOWN_1,
+      // WO_OBSTACLE_UNKNOWN_2,
+      WO_OBSTACLE_UNKNOWN_3,
+      // WO_OBSTACLE_UNKNOWN_4,
+      // WO_OBSTACLE_UNKNOWN_5, 
+      WO_OBSTACLE_UNKNOWN_6, 
+      // WO_OBSTACLE_UNKNOWN_7, 
+      // WO_OBSTACLE_UNKNOWN_8, 
+      // WO_OBSTACLE_UNKNOWN_9, 
+      // WO_OBSTACLE_UNKNOWN_10,
+      // WO_OBSTACLE_UNKNOWN_11,
+      // WO_OBSTACLE_UNKNOWN_12,
+      // WO_OBSTACLE_UNKNOWN_13,
+      // WO_OBSTACLE_UNKNOWN_14,
+      // WO_OBSTACLE_UNKNOWN_15,
+    },
 
-  std::cout << "DStar config 1: " << Dsimulation->sim_.cache_.planning->nodeExpansions << std::endl;
+  };
 
+  for (int i = 0; i < obs.size(); i++) {
+    fprintf(stderr, "Config %d\n", i + 1);
+    // AStar
+    auto Asimulation = std::make_unique<IsolatedBehaviorSimulation>(&(obs.at(i)), true, false);
+    
+    tic();
+    while (!Asimulation->complete()) {
+      Asimulation->simulationStep();
+    }
+    
+    fprintf(stderr, "A* Sim time: %2.2f seconds\n", toc());
+    
+    fprintf(stderr, "nodeExp: %d  pathsPlanned: %d nodesInPath: %d\n", Asimulation->sim_.cache_.planning->nodeExpansions,
+            Asimulation->sim_.cache_.planning->pathsPlanned, Asimulation->sim_.cache_.planning->nodesInPath);
+
+    // DStar
+    auto Dsimulation = std::make_unique<IsolatedBehaviorSimulation>(&(obs.at(i)), false, false);
+    tic();
+    while (!Dsimulation->complete()) {
+      Dsimulation->simulationStep();
+    }
+    fprintf(stderr, "D* Lite Sim time: %2.2f seconds\n", toc());
+    
+
+    fprintf(stderr, "nodeExp: %d  pathsPlanned: %d nodesInPath: %d\n", Dsimulation->sim_.cache_.planning->nodeExpansions,
+            Dsimulation->sim_.cache_.planning->pathsPlanned, Dsimulation->sim_.cache_.planning->nodesInPath);
+
+    //fprintf(stderr, "nodeExp: %d\n", Dsimulation->sim_.cache_.planning->nodeExpansions);
+    fprintf(stderr, "----------------------------------------------------------\n");
+
+    if (i == 0) i = 5;
+  }  
   //TODO: print stats of interest:
   /*
    1. num replans

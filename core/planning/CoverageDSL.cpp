@@ -150,7 +150,9 @@ void CoverageDSL::runDSL() {
     }
   }
   // Note that this only gets run for DStarLite, not for AStar
-  cache_.planning->nodesInPath -= cache_.planning->nodesLeft;
+  //cache_.planning->nodesInPath -= cache_.planning->nodesLeft; somehow this gets corrupted
+  cache_.planning->nodesInPath = cache_.planning->pathIdx - 1;
+  
     
   // Replan
   generateCoveragePath(cache_.planning->pathIdx);
@@ -192,6 +194,9 @@ int CoverageDSL::calcPathCost(int sIdx, int fIdx) {
 void CoverageDSL::generateCoveragePath(int startIdx) {
   // Determine how many cells are to be in the full coverage plan
   int numPoses = 0;
+
+  std::set<int> uset;
+  std::set<int>::iterator uIt;
   
   vector<PathNode>::iterator mapIt;
   for(mapIt = map_.begin(); mapIt != map_.end(); mapIt++)
@@ -200,6 +205,7 @@ void CoverageDSL::generateCoveragePath(int startIdx) {
     if(mapIt->getValue() != INT_MAX && !mapIt->cell.occupied && !mapIt->cell.visited)
     {
       numPoses++;
+      uset.insert(mapIt->idx);
     }
     
   }
@@ -270,7 +276,12 @@ void CoverageDSL::generateCoveragePath(int startIdx) {
         std::cout << "An unexpected occupation" << std::endl;
       }
 
+      uIt = uset.find(currCellIdx);
+      if (uIt == uset.end()) std::cout << "well shit" << std::endl;
+      uset.erase(uIt);
+
       map_.at(currCellIdx).pathorder = pathIdx;
+      
       if (map_.at(currCellIdx).planned == true) {
         std::cout << "Uh oh! I shouldn't be planned quite yet\n" << std::endl;
       }
@@ -318,6 +329,15 @@ void CoverageDSL::generateCoveragePath(int startIdx) {
         if (map_.at(hopPath->at(i)).cell.occupied) {
           std::cout << "blankGrid not getting updated properly" << std::endl;
         }
+        if (!map_.at(hopPath->at(i)).planned) {
+          //std::cout << "planned unplanned node on way to hop" << std::endl;
+          uIt = uset.find(currCellIdx);
+          if (uIt == uset.end()) std::cout << "well shit 2" << std::endl;
+          uset.erase(uIt);
+          map_.at(hopPath->at(i)).planned = true;
+          map_.at(hopPath->at(i)).pathorder = pathIdx;
+          ++newNumPlanned;
+        }
         path.at(pathIdx++) = hopPath->at(i);
         ++numPlanned;
       }
@@ -326,11 +346,11 @@ void CoverageDSL::generateCoveragePath(int startIdx) {
       delete(hopPath);
       
       map_.at(currCellIdx).pathorder = pathIdx - 1;
-      if (map_.at(currCellIdx).planned == true) {
-        std::cout << "Trying to pass off a planned node as unplanned!" << std::endl;
-      }
+      //if (map_.at(currCellIdx).planned == true) {
+      //  std::cout << "Trying to pass off a planned node as unplanned!" << std::endl;
+      //}
       map_.at(currCellIdx).planned = true;
-      ++newNumPlanned;
+      //++newNumPlanned;
 
       //std::cout << "pathIdx = " << pathIdx << " and numPlanned = " << numPlanned << std::endl;
     }

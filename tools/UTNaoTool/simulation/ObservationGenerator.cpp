@@ -353,6 +353,21 @@ void ObservationGenerator::generateGroundTruthObservations(){
     auto distance = gtrobot.loc.getDistanceTo(gt_object_->objects_[i].loc);
     auto bearing = gtrobot.loc.getBearingTo(gt_object_->objects_[i].loc, gtrobot.orientation);
 
+    if (obstacles_) {
+      for (int obIdx = 0; obIdx < obstacles_->size(); ++obIdx) {
+        if (obstacles_->at(obIdx) == i) {
+          if (planning_->getDestGridRow() == planning_->getGridRowFromLoc(gto->loc.y) &&
+              (planning_->getDestGridCol() == planning_->getGridColFromLoc(gto->loc.x) ||
+               planning_->getDestGridCol() == planning_->getGridColFromLoc(gto->loc.x) - 1)) {
+              //planning_->grid.at(planning_->path[planning_->pathIdx]).occupied = true;
+              planning_->changedCost = true;
+              // Mark this object as seen so you can draw...
+              gto->seen = wo->seen = true;
+          }
+        }
+      }
+    }
+    
     // decide if seen depending on pan
     if (fabs(joint_->values_[HeadPan] - bearing) < FOVx/2.0 && distance < 5'000){
       if(wo->isUnknown()) continue;
@@ -365,22 +380,7 @@ void ObservationGenerator::generateGroundTruthObservations(){
       gto->visionBearing = wo->visionBearing = wo->bearing;
     } else gto->seen = wo->seen = false;
 
-    if (obstacles_) {
-      for (int obIdx = 0; obIdx < obstacles_->size(); ++obIdx) {
-        if (obstacles_->at(obIdx) == i) {
-          if (planning_->getDestGridRow() == planning_->getGridRowFromLoc(gto->loc.y) &&
-              (planning_->getDestGridCol() == planning_->getGridColFromLoc(gto->loc.x) ||
-               planning_->getDestGridCol() == planning_->getGridColFromLoc(gto->loc.x) - 1))
-            {
-              //planning_->grid.at(planning_->path[planning_->pathIdx]).occupied = true;
-              planning_->changedCost = true;
-            }
-        }
-      }
-    }
   }
-
-
   fillObservationObjects();
 }
 

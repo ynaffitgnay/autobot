@@ -19,7 +19,7 @@ from state_machine import Node, C, T, S, LoopingStateMachine, StateMachine, Even
 class GetReady(Node):
   def __init__(self):
     super(GetReady, self).__init__()
-    # memory.planning.coverageStarted = False
+    memory.planning.coverageStarted = False
     # memory.planning.planningIdx = 0
     # memory.planning.nodesLeft = memory.planning.nodesInPath
     # memory.planning.RestartPath()
@@ -29,7 +29,7 @@ class GetReady(Node):
     commands.setHeadPanTilt(0.0,0.0,1.5)
     if self.getTime() > 4.5:
       location = memory.planning.getDestPose()
-      print("[%f,%f,%f]" % (location.translation.x, location.translation.y, location.rotation))
+#      print("[%f,%f,%f]" % (location.translation.x, location.translation.y, location.rotation))
       self.finish()
 
 class FollowPath(Node):
@@ -78,8 +78,8 @@ class FollowPath(Node):
     x_des = self.destloc.translation.x
     y_des = self.destloc.translation.y
     t_des = self.destloc.rotation
-    print("[pathIdx: %f, robot x: %f, robot y: %f, robot orientation: %f]" % (self.pathidx, self.robot.loc.x, self.robot.loc.y, core.RAD_T_DEG * self.robot.orientation))
-    print("destloc: [%f,%f,%f]" % (self.destloc.translation.x, self.destloc.translation.y, core.RAD_T_DEG * self.destloc.rotation))
+#    print("[pathIdx: %f, robot x: %f, robot y: %f, robot orientation: %f]" % (self.pathidx, self.robot.loc.x, self.robot.loc.y, core.RAD_T_DEG * self.robot.orientation))
+#    print("destloc: [%f,%f,%f]" % (self.destloc.translation.x, self.destloc.translation.y, core.RAD_T_DEG * self.destloc.rotation))
 
     # The error in x, y, t
     e_x = -(self.robot.loc.x - x_des)
@@ -188,8 +188,8 @@ class FaceNextCell(Node):
     commands.setHeadPanTilt(e_t, 0.0, 1.5)
 
     de_t = (e_t - self.t_prev)
-    print("pathIdx: %f. Current Loc: [x: %f, y: %f, t:%f] (%d, %d)" % (memory.planning.pathIdx, self.robot.loc.x, self.robot.loc.y,  core.RAD_T_DEG * self.robot.orientation, memory.planning.getGridRowFromLoc(self.robot.loc.y), memory.planning.getGridColFromLoc(self.robot.loc.x)))
-    print("destloc: [%f,%f,%f] (%d, %d)" % (self.destloc.translation.x, self.destloc.translation.y, core.RAD_T_DEG * self.destloc.rotation, memory.planning.getDestGridRow(), memory.planning.getDestGridCol()))
+#    print("pathIdx: %f. Current Loc: [x: %f, y: %f, t:%f] (%d, %d)" % (memory.planning.pathIdx, self.robot.loc.x, self.robot.loc.y,  core.RAD_T_DEG * self.robot.orientation, memory.planning.getGridRowFromLoc(self.robot.loc.y), memory.planning.getGridColFromLoc(self.robot.loc.x)))
+#    print("destloc: [%f,%f,%f] (%d, %d)" % (self.destloc.translation.x, self.destloc.translation.y, core.RAD_T_DEG * self.destloc.rotation, memory.planning.getDestGridRow(), memory.planning.getDestGridCol()))
     
     # Bound the derivative term of theta
     if dt == 0:
