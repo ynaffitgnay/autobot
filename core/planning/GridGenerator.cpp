@@ -12,11 +12,6 @@ bool GridGenerator::generateGrid(Grid& grid, bool gridCellsGlobalized, bool leav
     }
 
 		if (!leaveOccupied) cell.occupied = checkObstruction(cell);
-		
-		// printf("Processing cell at [%d,%d]. Occupied: %d\n",cell.r,cell.c, cell.occupied);
-		if (cell.occupied) {
-			//std::cout << "cell " << cell.r << ", " << cell.c << " occupied??" << std::endl;
-		}
 	}
 	return true;
 }
@@ -32,13 +27,8 @@ bool GridGenerator::checkObstruction(GridCell& gc) {
 		int ygc1 = gc.center.translation.y-float(CELL_HEIGHT)/2.0;
 		int ygc2 = gc.center.translation.y+float(CELL_HEIGHT)/2.0;
 
-		// printf("Obstacle bounds:\n[%d,%d]\n[%d,%d]\n",xo1,yo1,xo2,yo2);
-		// printf("Cell bounds:\n[%d,%d]\n[%d,%d]\n",xgc1,ygc1,xgc2,ygc2);
-
-
 		if ((xo1 > xgc1 && xo1 < xgc2) || (xo2 > xgc1 && xo2 < xgc2)) { // if left or right bound betw obst bounds
 			if ((yo1 > ygc1 && yo1 < ygc2) || (yo2 > ygc1 && yo2 < ygc2)) { // AND if top or bottom bound betw obst bounds 
-				// printf("Cell at [%d,%d] is occupied\n",gc.r,gc.c);
 				return true;
 			}
 		}

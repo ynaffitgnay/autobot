@@ -5,6 +5,7 @@
 #include <vector>
 #include <planning/structures/PNCmp.h>
 
+// A derived priority queue to allow for removing a node from the top and updating
 class DSLPQueue : public std::priority_queue<PathNode*, std::vector<PathNode*>, PNCmp> {
   public:
     bool remove(PathNode* value) {

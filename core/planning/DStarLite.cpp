@@ -40,7 +40,6 @@ void DStarLite::init(std::vector<GridCell>& wavefront, int goal, int start, std:
 
 // runDSL with no replanning
 int DStarLite::runDSL() {
-  //std::cout << "This DSL is running for some reason?\n";
   std::vector<PathNode>::iterator mapIt;
 
   if (endPlanIdx_ == -1) {
@@ -50,9 +49,7 @@ int DStarLite::runDSL() {
   computeShortestPath(map_.at(endPlanIdx_));
 
   int pathSize = generatePath(0);
-  //printGrid();
   return pathSize;
-
 }
 
 DSLKey DStarLite::calcKey(PathNode& successor) {
@@ -84,8 +81,6 @@ void DStarLite::updateVertex(PathNode& u) {
 void DStarLite::computeShortestPath(PathNode& curr) {
   // Don't compute for occupied cells
   if (curr.cell.occupied) {
-    //std::cout << "Cell is occupied." << std::endl;
-    //std::cout << "Occupied cell at " << curr.cell.r << ", " << curr.cell.c << std::endl;
     return;
   }
 
@@ -276,23 +271,16 @@ int DStarLite::generatePath(int startIdx) {
     else // if all valid neighbors have been visited, we are stuck
     {
       std::cout << "Stuck: no neighbors are unplanned." << std::endl;
-      //printPath();
       return -1;
     }
   }
   
-  //printPath();
-  //printf("Path size: %d\n", numPlanned);
   printf("Node expansions in vanilla DSL: %d\n", nodeExpansions);
-  //cache_.planning->nodeExpansions += nodeExpansions;
-
-  // TODO: put nodes here?
   
   return numPlanned;
 }
 
 bool DStarLite::buildPathGrid() {
-  // TODO: add checks for robustness
   if (cells_->size() <= 0) {
     std::cout << "Wavefront grid is empty" << std::endl;
     return false;
@@ -307,7 +295,6 @@ bool DStarLite::buildPathGrid() {
 
   if (map_.size() != GRID_SIZE) {
     std::cout << "map_.size(): " << map_.size() << " GRID_SIZE: " << GRID_SIZE << std::endl;
-    std::cout << "GRID_SIZE ALL WRONG WHEN BUILDING PATH_GRID???" << std::endl;
   }
   
   return true;

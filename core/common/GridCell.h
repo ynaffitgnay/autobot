@@ -24,8 +24,8 @@ DECLARE_INTERNAL_SCHEMA(struct GridCell {
   GridCell(int row, int col) : r(row), c(col), cost(0), occupied(false),
     visited(false), order_index(-1)
   {
-  	int centerX = CELL_WIDTH * col + CELL_WIDTH / 2;  // Need to translate
-  	int centerY = CELL_HEIGHT * row + CELL_HEIGHT / 2;  // Need to translate
+  	int centerX = CELL_WIDTH * col + CELL_WIDTH / 2;  
+  	int centerY = CELL_HEIGHT * row + CELL_HEIGHT / 2;
   	center.translation.x = centerX;
   	center.translation.y = centerY;
   	center.rotation = 0.0;

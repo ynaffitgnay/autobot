@@ -64,12 +64,6 @@ void PlanningModule::initSpecificModule() {
     std::cout << "(" << getRowFromIdx(cache_.planning->path.at(i)) << ", " << getColFromIdx(cache_.planning->path.at(i)) << ") ";
   }
   std::cout << std::endl;
-
-  // int desiredCellIdx = cache_.planning->path[cache_.planning->pathIdx];
-  // std::cout << "pathIdx: " << cache_.planning->pathIdx << ". I should be in idx " << desiredCellIdx << "  (" << getRowFromIdx(desiredCellIdx)  <<
-  //     ", " << getColFromIdx(desiredCellIdx) << ")." << std::endl;
-
-  // TODO: re-initialize features in planning block (maybe shift planning stuff to world_object)?
 }
 
 void PlanningModule::processFrame() {
@@ -108,7 +102,6 @@ void PlanningModule::processFrame() {
     GG_->generateGrid(*initial_cost_map_, true, true);
     WP_->getCosts(*initial_cost_map_, wfStartPose, !AStar_, cache_.planning->path.at(cache_.planning->pathIdx - 1));
     DSL_->init(initial_cost_map_->cells, WP_->start_index_, true);
-    //std::cout << "AHHHH A* planning" << std::endl;
     cache_.planning->changedCost = false;
 
     std::cout << "Prev path followed:" << std::endl;
@@ -120,7 +113,7 @@ void PlanningModule::processFrame() {
     }
     std::cout << std::endl;
   }
-
+  
   std::cout << "Replanned beginning with pathIdx " << cache_.planning->pathIdx << std::endl;
   
   for (int i = cache_.planning->pathIdx; i < cache_.planning->nodesInPath; ++i) {
@@ -138,8 +131,6 @@ void PlanningModule::processFrame() {
 // If this is the correct cell in the path, increment the pathIdx
 // Otherwise, warn the user and maintain the same cell destination
 void PlanningModule::updateCell() {
-  //std::cout << "\n\n\n\n\ndoes this happen?\n\n\n\n\n" << std::endl;
-  
   // check in planning block whether coverage has started
   if (!cache_.planning->coverageStarted) return;
   
@@ -151,25 +142,8 @@ void PlanningModule::updateCell() {
   int currIdx = getCellIdx(curr_r, curr_c);
 
   // get information about the new cell
-  if (currIdx != desiredCellIdx) {
-     //std::cout << "I should be in idx " << desiredCellIdx << "  (" << getRowFromIdx(desiredCellIdx)  <<
-     //  ", " << getColFromIdx(desiredCellIdx) << "), but I'm in " << currIdx << " (" <<
-     //  curr_r << ", " << curr_c << ")." << std::endl;
+  if (currIdx != desiredCellIdx) return;
 
-    // TODO: Check if desired cell is occupied and trigger replanning?
-
-    // std::cout << "rest of path: " << std::endl;
-    // for (int i = cache_.planning->pathIdx; i < cache_.planning->nodesLeft; ++i) {
-      // if (i % 10 == 0)
-        // std::cout << std::endl;
-
-      // std::cout << "(" << getRowFromIdx(cache_.planning->path.at(i)) << ", " << getColFromIdx(cache_.planning->path.at(i)) << ") ";
-    // }
-    // std::cout << std::endl;
-   
-    return;
-  }
-  //std::cout << "Marking cell " << getRowFromIdx(currIdx) << ", " << getColFromIdx(currIdx) << " visited" << std::endl;
   cache_.planning->grid.at(currIdx).visited = true;
 
   // Remove a node on the path

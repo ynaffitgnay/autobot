@@ -7,6 +7,7 @@
 #include <common/GridCell.h>
 #include <common/DSLKey.h>
 
+// A class for use in DStarLite Planning
 class PathNode {
   public:
     PathNode(GridCell& cell);
@@ -28,9 +29,8 @@ class PathNode {
     int rhs;          // rhs-value
     DSLKey key;
     bool changed;     // Has this node changed?
-    //bool visited;     // Has this node been visited
     int numVisits;    // How many times has this node been visited?
-    bool planned;   // Is this a free space?
+    bool planned;     // Is this a free space?
     int pathorder;  
 };
 

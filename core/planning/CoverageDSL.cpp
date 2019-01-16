@@ -13,21 +13,13 @@ CoverageDSL::~CoverageDSL() {
   delete blankGrid;
 }
 
-
-//TODO** D* BOOLEAN THAT TELLS WHETHER OR NOT TO CHANGE PLAN FROM CURRENT IDX
-
 void CoverageDSL::init(std::vector<GridCell>& wavefront, int startCoverageIdx, bool AStar) {
   AStar_ = AStar;
   DStarLite::init(wavefront, startCoverageIdx, -1, &(cache_.planning->path));
   buildBlankGrid();
   // 0 paths have been planned!
-  if (!AStar_) cache_.planning->pathsPlanned = 0;
-  //if (AStar_) nodeExpansions = cache_.planning->nodeExpansions;
-
-  //std::cout << "Map before doing dsl stuff: " << std::endl;
-
-  //printGrid();
   
+  if (!AStar_) cache_.planning->pathsPlanned = 0;
   if (map_.size() <= 0) {
     std::cout << "EMPTY MAP IN RUNDSL?!\n" << std::endl;
     return;
@@ -50,7 +42,6 @@ void CoverageDSL::init(std::vector<GridCell>& wavefront, int startCoverageIdx, b
     //std::cout << "Intermediate node expansions: " << nodeExpansions << std::endl;
     
     if (mapIt->g != mapIt->rhs) {
-      //std::cout << "Cell at (" << mapIt->cell.r << ", " << mapIt->cell.c << ") was inconsistent" << std::endl;
       mapIt->g = mapIt->rhs;
     }    
   }
@@ -87,15 +78,13 @@ void CoverageDSL::runDSL() {
 
   // Get the new k offset
   // use pathIdx - 1 because we only want to replan up to visited node
-  // (so pathIdx may actually be one further than the one we care about...)
   k_ = k_ + calcPathCost(lastReplanIdx, cache_.planning->pathIdx - 1);
   lastReplanIdx = cache_.planning->pathIdx - 1;
   S_ = &(map_.at(cache_.planning->path.at(lastReplanIdx)));  // Reset node planning from
 
   // Get a list of all edges with changed edge costs (basically any vertex that is
   // connected to a block w/ changed occupation)
-  // For now, assume that the path with changed occupancy is the current destination
-  // gridCell.
+  // Assume that the next cell on the path is the one that changed occupation
   std::vector<PathNode*> changedEdges;
   std::vector<PathNode*>::iterator changedIt;
   getNeighbors(changedNode, changedEdges);
@@ -150,7 +139,6 @@ void CoverageDSL::runDSL() {
     }
   }
   // Note that this only gets run for DStarLite, not for AStar
-  //cache_.planning->nodesInPath -= cache_.planning->nodesLeft; somehow this gets corrupted
   cache_.planning->nodesInPath = cache_.planning->pathIdx - 1;
   
     
@@ -173,24 +161,17 @@ void CoverageDSL::runDSL() {
 int CoverageDSL::calcPathCost(int sIdx, int fIdx) {
   int traversalCost = 0;
 
-  // Go through each node between these two path indices and sum the transition cost between them
-  // Also check h(sIdx) - h(fIdx) to see what that is...
   int i;
   for (i = sIdx; i < fIdx; ++i) {
-    // TODO: make sure that this is within bounds...
     traversalCost += getTransitionCost(map_.at(cache_.planning->path.at(i)), map_.at(cache_.planning->path.at(i + 1)));
   }
 
-  //std::cout << "Got cost up to " << i << " to " << i + 1 << std::endl;
-
   int h_diff = map_.at(cache_.planning->path.at(fIdx)).cell.cost - map_.at(cache_.planning->path.at(sIdx)).cell.cost;
-
-  std::cout << "traversal cost: " << traversalCost << " h_diff: " << h_diff << std::endl;
   
   return h_diff;
 }
 
-//// Generate path from idx startIdx
+// Generate path from idx startIdx
 void CoverageDSL::generateCoveragePath(int startIdx) {
   // Determine how many cells are to be in the full coverage plan
   int numPoses = 0;
@@ -251,7 +232,6 @@ void CoverageDSL::generateCoveragePath(int startIdx) {
             }
           }
         }
-        //int lastIndex = currCellIdx;
         currCellIdx = unplanned.at(minIndex)->idx;
       } else {
         int maxValue = unplanned[0]->getValue();
@@ -267,7 +247,6 @@ void CoverageDSL::generateCoveragePath(int startIdx) {
             }
           }
         }
-        //int lastIndex = currCellIdx;
         currCellIdx = unplanned.at(maxIndex)->idx;
       }
         
@@ -277,14 +256,10 @@ void CoverageDSL::generateCoveragePath(int startIdx) {
       }
 
       uIt = uset.find(currCellIdx);
-      if (uIt == uset.end()) std::cout << "well shit" << std::endl;
       uset.erase(uIt);
 
       map_.at(currCellIdx).pathorder = pathIdx;
       
-      if (map_.at(currCellIdx).planned == true) {
-        std::cout << "Uh oh! I shouldn't be planned quite yet\n" << std::endl;
-      }
       map_.at(currCellIdx).planned = true;
       path.at(pathIdx++) = currCellIdx;
       ++newNumPlanned;
@@ -300,11 +275,8 @@ void CoverageDSL::generateCoveragePath(int startIdx) {
           " and numPoses: " << numPoses << std::endl;
         //numPlanned = numPoses;
         numPoses = numPlanned;
-        //std::cout << "I guess we're stuck forever\n";
         break;
       }
-
-      //std::cout << "Hop from " << lastIndex << " to " << currCellIdx << std::endl;
 
       std::vector<int>* hopPath = new std::vector<int>(GRID_SIZE);
       DStarLite* hopDSL = new DStarLite(tlogger_);
@@ -313,7 +285,6 @@ void CoverageDSL::generateCoveragePath(int startIdx) {
       int hopsize = hopDSL->runDSL();
       if (hopsize == -1) {
         std::cout << "Uh oh... no path could be found to hop destination!" << std::endl;
-        // TODO: can maybe have hop accept a list of indices that can't be hopped to!
       }
 
       std::cout << "Adding " << hopDSL->nodeExpansions << " nodeExpansions to curr" << std::endl;
@@ -321,18 +292,14 @@ void CoverageDSL::generateCoveragePath(int startIdx) {
 
       delete(hopDSL);
  
-      //std::cout << "hop path: ";
-      //std::cout << "(" << getRowFromIdx(hopPath->at(0)) << ", " << getColFromIdx(hopPath->at(0)) << ") ";
       // Advance to the next spot in the path (since first one already in the path)
       for (int i = 1; i < hopsize; ++i) {
-        //std::cout << "(" << getRowFromIdx(hopPath->at(i)) << ", " << getColFromIdx(hopPath->at(i)) << ") ";
         if (map_.at(hopPath->at(i)).cell.occupied) {
           std::cout << "blankGrid not getting updated properly" << std::endl;
         }
         if (!map_.at(hopPath->at(i)).planned) {
-          //std::cout << "planned unplanned node on way to hop" << std::endl;
           uIt = uset.find(currCellIdx);
-          if (uIt == uset.end()) std::cout << "well shit 2" << std::endl;
+
           uset.erase(uIt);
           map_.at(hopPath->at(i)).planned = true;
           map_.at(hopPath->at(i)).pathorder = pathIdx;
@@ -341,21 +308,12 @@ void CoverageDSL::generateCoveragePath(int startIdx) {
         path.at(pathIdx++) = hopPath->at(i);
         ++numPlanned;
       }
-      //std::cout << std::endl;
       
       delete(hopPath);
       
       map_.at(currCellIdx).pathorder = pathIdx - 1;
-      //if (map_.at(currCellIdx).planned == true) {
-      //  std::cout << "Trying to pass off a planned node as unplanned!" << std::endl;
-      //}
       map_.at(currCellIdx).planned = true;
-      //++newNumPlanned;
-
-      //std::cout << "pathIdx = " << pathIdx << " and numPlanned = " << numPlanned << std::endl;
     }
-
-    //printPath();
   }
   
   printPath();
@@ -363,9 +321,6 @@ void CoverageDSL::generateCoveragePath(int startIdx) {
   printf("Path size: %d\n", numPlanned);
   printf("Node expansions in coverage: %d\n", nodeExpansions);
 
-  //TODO: maybe sum the number of node expansions for vanilla DSL before deleting
-
-  
   cache_.planning->nodesLeft = numPlanned;
   if (AStar_) {
     cache_.planning->nodesInPath = numPlanned + cache_.planning->pathIdx;
@@ -378,7 +333,6 @@ void CoverageDSL::generateCoveragePath(int startIdx) {
 }
 
 void CoverageDSL::buildBlankGrid() {
-  // TODO: add checks for robustness
   if (cells_->size() <= 0) {
     std::cout << "Wavefront grid is empty" << std::endl;
     return;
@@ -419,7 +373,6 @@ int CoverageDSL::hop(int index)
   
   while (!queue.empty() && !found) {
     int s = queue.front();
-    //std::cout << "checking (" << getRowFromIdx(s) << ", " << getColFromIdx(s) << ")" << std::endl;
     if (map_.at(s).planned == false) {
       index = s;
       found = true;
@@ -429,7 +382,6 @@ int CoverageDSL::hop(int index)
 
     std::vector<PathNode*> neighbors;
     std::vector<PathNode*>::const_iterator neighborIt;
-    //list<int>::const_iterator i;
     getNeighbors(map_.at(s), neighbors);
 
     for (neighborIt = neighbors.begin(); neighborIt != neighbors.end(); neighborIt++) {
@@ -437,8 +389,6 @@ int CoverageDSL::hop(int index)
       if (!checked[thisIdx]) {
         checked[thisIdx] = true;
         queue.push_back(thisIdx);
-      } else {
-        //std::cout << "Already checked  (" << getRowFromIdx(thisIdx) << ", " << getColFromIdx(thisIdx) << ")" << std::endl;
       }
     }
     

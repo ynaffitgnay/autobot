@@ -43,10 +43,7 @@ bool PathNode::operator>=(const PathNode& other) const {
 }
 
 const int PathNode::getValue() {
-  if (g != rhs) {
-    std::cout << "Cell " << idx << " is inconsistent!\n";
-  }
-  return ((cell.cost > g) ? cell.cost : g);
+  return g;
 }
 
 int PathNode::getIdx(int row, int col) {

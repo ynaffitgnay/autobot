@@ -40,7 +40,6 @@ bool WavefrontPropagation::getCosts(Grid& map, Pose2D& startPose, bool swap, int
   waveCells.clear();
   waveCells.resize(map.cells.size());
   for(int i = 0; i<waveCells.size(); i++) {
-    //if (map.cells[i].visited && i != lastVisitedIdx) map.cells[i].occupied = true;
   	WaveCell wc(map.cells[i].center, map.cells[i]);
     waveCells[i]=wc;
   }
@@ -60,9 +59,7 @@ bool WavefrontPropagation::getCosts(Grid& map, Pose2D& startPose, bool swap, int
       float globX = map.cells[i].center.translation.x-FIELD_WIDTH/2.0;  // Converts from local x,y to global x,y not r,c
       float globY = -map.cells[i].center.translation.y +FIELD_HEIGHT/2.0;
       float globTh = atan2f(-globY, -globX);
-      //printf("Location: [%f,%f] Angle to center: %f\n", globX, globY, globTh*180/M_PI);
 
-      // float globTh = map.cells[i].center.rotation;
       Pose2D globCenter(globTh,globX,globY);
       map.cells[i].center = globCenter;
     }
@@ -76,13 +73,6 @@ bool WavefrontPropagation::getCosts(Grid& map, Pose2D& startPose, bool swap, int
     start_index_ = end_index_;  // Fill the map with the start location as the goal
     end_index_ = temp;
   }
-
-  //if (traverse(map.cells)) {
-  //  printf("Successfully generated initial path order\n");
-  //} else {
-  //  printf("Failed to generate initial path order\n");
-  //  return false;
-  //}
   return true;
 }
 
@@ -183,11 +173,6 @@ bool WavefrontPropagation::traverse(std::vector<GridCell> &orig_cells) {
       numPoses++;
     }
   }
-
-  // Start from end index
-  //int temp = start_index_;
-  //start_index_ = end_index_;
-  //end_index_ = temp;
   
   // Plan order of poses
   int index = start_index_;                    // index of the current cell being added to the plan
@@ -261,7 +246,6 @@ bool WavefrontPropagation::traverse(std::vector<GridCell> &orig_cells) {
 
   for (int i = 0; i < orig_cells.size(); i++){
     int debug_ind = debugPoses[i];
-    //std::cout << "Adding " << i <<  " to ordered_plan!\n";
     ordered_plan.push_back(&(orig_cells[debug_ind]));
   }
   
@@ -436,15 +420,11 @@ bool WavefrontPropagation::setStartIndex(Pose2D& startPose) {
     Pose2D endPose = startNeighbors[0]->getPosition();
     // printf("Num neighbors: %d End pose [%f, %f]\n",startNeighbors.size(), endPose.translation.x, endPose.translation.y);
     end_index_ = getIndex(endPose);
-    //int temp = start_index_;
-    //start_index_ = end_index_;
-    //end_index_ = temp;
     return true;
   }
   else
   {
     //printf("Start pose invalid: has no valid neighbors\n");
-    //return false;
     // Look for a different member in the graph
     bool found = false;
     for (int i = 0; i < waveCells.size(); ++i) {
@@ -482,8 +462,6 @@ void WavefrontPropagation::findNeighbors() {
   std::vector<WaveCell*> neighbors; // vector of valid neighbors to be passed to cell
   for(int i = 0; i<waveCells.size(); i++)
   {
-    //if(WAVE_OBSTRUCTION != waveCells[i].getValue()) // cell does not need neighbors if it is occupied (and therefore inaccessible)
-    //{
     neighbors.clear();
     int r,c = 0;
     getCoordinate(i, r, c);
@@ -492,7 +470,6 @@ void WavefrontPropagation::findNeighbors() {
     addNeighbor(neighbors,r,c+1); // try adding possible neighbor that sits to the right
     addNeighbor(neighbors,r,c-1); // try adding possible neighbor that sits to the left
     waveCells[i].setNeighbors(neighbors); // set the valid neighbors that we found
-      //}
   }
 }
 

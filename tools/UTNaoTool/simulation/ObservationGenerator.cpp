@@ -253,11 +253,6 @@ void ObservationGenerator::generateObstacleObservations() {
     Point2D destPoint = Point2D(destPose.translation.x, destPose.translation.y);
     float obsdist = destPoint.getDistanceTo(gtObstacle.loc);
 
-    //std::cout << "obs: (" << planning_->getGridRowFromLoc(gtObstacle.loc.y) << ", "
-    //          << planning_->getGridColFromLoc(gtObstacle.loc.x) << "). dest: ("
-    //          << planning_->getDestGridRow() << ", " << planning_->getDestGridCol()
-    //          << "). dist: " << obsdist << std::endl;
-    //              
     if (planning_->getDestGridRow() == planning_->getGridRowFromLoc(gtObstacle.loc.y) &&
         (planning_->getDestGridCol() == planning_->getGridColFromLoc(gtObstacle.loc.x) ||
          planning_->getDestGridCol() == planning_->getGridColFromLoc(gtObstacle.loc.x) - 1))

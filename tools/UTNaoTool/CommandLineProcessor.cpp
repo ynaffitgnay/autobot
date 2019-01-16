@@ -71,171 +71,65 @@ int CommandLineProcessor::runLocalizationSim() {
 }
 
 int CommandLineProcessor::runPlanningSim() {
-  // TODO: generate random obstacles from list of obstacles
-
   std::vector<std::vector<WorldObjectType>> obs = {
-    {
-      // WO_OBSTACLE_UNKNOWN_1,
-      // WO_OBSTACLE_UNKNOWN_2,
+    { // Config 1
       WO_OBSTACLE_UNKNOWN_3,
       WO_OBSTACLE_UNKNOWN_4,
       WO_OBSTACLE_UNKNOWN_5, 
       WO_OBSTACLE_UNKNOWN_6, 
-      // WO_OBSTACLE_UNKNOWN_7, 
-      // WO_OBSTACLE_UNKNOWN_8, 
-      // WO_OBSTACLE_UNKNOWN_9, 
-      // WO_OBSTACLE_UNKNOWN_10,
-      // WO_OBSTACLE_UNKNOWN_11,
       WO_OBSTACLE_UNKNOWN_12,
-      // WO_OBSTACLE_UNKNOWN_13,
-      // WO_OBSTACLE_UNKNOWN_14,
       WO_OBSTACLE_UNKNOWN_15,
-    },
-    {
+    }, 
+    { // Config 2
       WO_OBSTACLE_UNKNOWN_1,
       WO_OBSTACLE_UNKNOWN_2,
       WO_OBSTACLE_UNKNOWN_3,
       WO_OBSTACLE_UNKNOWN_4,
-      // WO_OBSTACLE_UNKNOWN_5, 
-      // WO_OBSTACLE_UNKNOWN_6, 
-      // WO_OBSTACLE_UNKNOWN_7, 
-      // WO_OBSTACLE_UNKNOWN_8, 
       WO_OBSTACLE_UNKNOWN_9, 
-      // WO_OBSTACLE_UNKNOWN_10,
       WO_OBSTACLE_UNKNOWN_11,
-      // WO_OBSTACLE_UNKNOWN_12,
-      // WO_OBSTACLE_UNKNOWN_13,
-      // WO_OBSTACLE_UNKNOWN_14,
-      // WO_OBSTACLE_UNKNOWN_15,
     },
-    {
-      // WO_OBSTACLE_UNKNOWN_1,
-      // WO_OBSTACLE_UNKNOWN_2,
-      // WO_OBSTACLE_UNKNOWN_3,
-      // WO_OBSTACLE_UNKNOWN_4,
-      // WO_OBSTACLE_UNKNOWN_5, 
-      // WO_OBSTACLE_UNKNOWN_6, 
-      // WO_OBSTACLE_UNKNOWN_7, 
+    { // Config 3
       WO_OBSTACLE_UNKNOWN_8, 
       WO_OBSTACLE_UNKNOWN_9, 
-      // WO_OBSTACLE_UNKNOWN_10,
-      // WO_OBSTACLE_UNKNOWN_11,
-      // WO_OBSTACLE_UNKNOWN_12,
-      // WO_OBSTACLE_UNKNOWN_13,
-      // WO_OBSTACLE_UNKNOWN_14,
-      // WO_OBSTACLE_UNKNOWN_15,
     },
-
-    {
-      // WO_OBSTACLE_UNKNOWN_1,
-      // WO_OBSTACLE_UNKNOWN_2,
-      // WO_OBSTACLE_UNKNOWN_3,
-      // WO_OBSTACLE_UNKNOWN_4,
+    { // Config 4
       WO_OBSTACLE_UNKNOWN_5, 
       WO_OBSTACLE_UNKNOWN_6, 
       WO_OBSTACLE_UNKNOWN_7, 
-      // WO_OBSTACLE_UNKNOWN_8, 
       WO_OBSTACLE_UNKNOWN_9, 
-      // WO_OBSTACLE_UNKNOWN_10,
       WO_OBSTACLE_UNKNOWN_11,
-      // WO_OBSTACLE_UNKNOWN_12,
-      // WO_OBSTACLE_UNKNOWN_13,
-      // WO_OBSTACLE_UNKNOWN_14,
-      // WO_OBSTACLE_UNKNOWN_15,
     },
-
-    {
-      // WO_OBSTACLE_UNKNOWN_1,
-      // WO_OBSTACLE_UNKNOWN_2,
-      // WO_OBSTACLE_UNKNOWN_3,
-      // WO_OBSTACLE_UNKNOWN_4,
-      // WO_OBSTACLE_UNKNOWN_5, 
-      // WO_OBSTACLE_UNKNOWN_6, 
-      // WO_OBSTACLE_UNKNOWN_7, 
-      // WO_OBSTACLE_UNKNOWN_8, 
-      // WO_OBSTACLE_UNKNOWN_9, 
+    { // Config 5
       WO_OBSTACLE_UNKNOWN_10,
-      // WO_OBSTACLE_UNKNOWN_11,
       WO_OBSTACLE_UNKNOWN_12,
-      // WO_OBSTACLE_UNKNOWN_13,
-      // WO_OBSTACLE_UNKNOWN_14,
       WO_OBSTACLE_UNKNOWN_15,
     },
-    {
+    { // Config 6
       WO_OBSTACLE_UNKNOWN_1,
       WO_OBSTACLE_UNKNOWN_2,
-      // WO_OBSTACLE_UNKNOWN_3,
       WO_OBSTACLE_UNKNOWN_4,
-      // WO_OBSTACLE_UNKNOWN_5, 
-      // WO_OBSTACLE_UNKNOWN_6, 
       WO_OBSTACLE_UNKNOWN_7, 
-      // WO_OBSTACLE_UNKNOWN_8, 
-      // WO_OBSTACLE_UNKNOWN_9, 
-      // WO_OBSTACLE_UNKNOWN_10,
-      // WO_OBSTACLE_UNKNOWN_11,
-      // WO_OBSTACLE_UNKNOWN_12,
-      // WO_OBSTACLE_UNKNOWN_13,
-      // WO_OBSTACLE_UNKNOWN_14,
-      // WO_OBSTACLE_UNKNOWN_15,
     },
-
-    {
-      // WO_OBSTACLE_UNKNOWN_1,
-      // WO_OBSTACLE_UNKNOWN_2,
-      // WO_OBSTACLE_UNKNOWN_3,
-      // WO_OBSTACLE_UNKNOWN_4,
-      // WO_OBSTACLE_UNKNOWN_5, 
-      // WO_OBSTACLE_UNKNOWN_6, 
-      // WO_OBSTACLE_UNKNOWN_7, 
+    { // Config 7
       WO_OBSTACLE_UNKNOWN_8, 
       WO_OBSTACLE_UNKNOWN_9, 
-      // WO_OBSTACLE_UNKNOWN_10,
-      // WO_OBSTACLE_UNKNOWN_11,
-      // WO_OBSTACLE_UNKNOWN_12,
-      // WO_OBSTACLE_UNKNOWN_13,
-      // WO_OBSTACLE_UNKNOWN_14,
-      // WO_OBSTACLE_UNKNOWN_15,
     },
-    {
-      // WO_OBSTACLE_UNKNOWN_1,
-      // WO_OBSTACLE_UNKNOWN_2,
-      // WO_OBSTACLE_UNKNOWN_3,
-      // WO_OBSTACLE_UNKNOWN_4,
+    { // Config 8
       WO_OBSTACLE_UNKNOWN_5, 
-      // WO_OBSTACLE_UNKNOWN_6, 
       WO_OBSTACLE_UNKNOWN_7, 
-      // WO_OBSTACLE_UNKNOWN_8, 
       WO_OBSTACLE_UNKNOWN_9, 
-      // WO_OBSTACLE_UNKNOWN_10,
       WO_OBSTACLE_UNKNOWN_11,
-      // WO_OBSTACLE_UNKNOWN_12,
       WO_OBSTACLE_UNKNOWN_13,
-      // WO_OBSTACLE_UNKNOWN_14,
-      // WO_OBSTACLE_UNKNOWN_15,
     },
-
-    {
-      // WO_OBSTACLE_UNKNOWN_1,
-      // WO_OBSTACLE_UNKNOWN_2,
+    { // Config 9
       WO_OBSTACLE_UNKNOWN_3,
-      // WO_OBSTACLE_UNKNOWN_4,
-      // WO_OBSTACLE_UNKNOWN_5, 
       WO_OBSTACLE_UNKNOWN_6, 
-      // WO_OBSTACLE_UNKNOWN_7, 
-      // WO_OBSTACLE_UNKNOWN_8, 
-      // WO_OBSTACLE_UNKNOWN_9, 
-      // WO_OBSTACLE_UNKNOWN_10,
-      // WO_OBSTACLE_UNKNOWN_11,
-      // WO_OBSTACLE_UNKNOWN_12,
-      // WO_OBSTACLE_UNKNOWN_13,
-      // WO_OBSTACLE_UNKNOWN_14,
-      // WO_OBSTACLE_UNKNOWN_15,
     },
-
   };
 
   for (int i = 0; i < obs.size(); i++) {
     fprintf(stderr, "Config %d\n", i + 1);
+    
     // AStar
     auto Asimulation = std::make_unique<IsolatedBehaviorSimulation>(&(obs.at(i)), true, false);
     
@@ -261,19 +155,9 @@ int CommandLineProcessor::runPlanningSim() {
     fprintf(stderr, "nodeExp: %d  pathsPlanned: %d nodesInPath: %d\n", Dsimulation->sim_.cache_.planning->nodeExpansions,
             Dsimulation->sim_.cache_.planning->pathsPlanned, Dsimulation->sim_.cache_.planning->nodesInPath);
 
-    //fprintf(stderr, "nodeExp: %d\n", Dsimulation->sim_.cache_.planning->nodeExpansions);
     fprintf(stderr, "----------------------------------------------------------\n");
 
     if (i == 0) i = 5;
   }  
-  //TODO: print stats of interest:
-  /*
-   1. num replans
-   2. number of re-traced nodes?
-   3. number of expanded nodes?
-   */
-  
-  //std::cout << simulation->simBlueScore << " " << simulation->simRedScore << std::endl;
-
   return 0;
 }

@@ -18,9 +18,6 @@ private:
 public:
   GridGenerator();
   bool generateGrid(Grid& map, bool gridCellsGlobalized, bool leaveOccupied=false);
-  // std::map<WorldObjectType,Pose2D> obstacles_ = {
-  //   { WO_OBSTACLE_1, Pose2D(0.0, 1800.0, 750.0) },
-  //   { WO_OBSTACLE_2, Pose2D(0.0, 900.0, 1350.0) }};
 
 };
 
