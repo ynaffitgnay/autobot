@@ -10,6 +10,8 @@
 #include "LocalizationGL.h"
 
 #include <common/Field.h>
+#include <math/Geometry.h>
+#include <vector>
 #include <QtGui>
 
 class AnnotationGroup;
@@ -61,10 +63,19 @@ class GLDrawer {
       SHOW_TRUE_SIM_LOCATION,
       SHOW_BEACONS,
       SHOW_GOALS,
-      SHOW_LINES
+      SHOW_LINES,
+      SHOW_OBSTACLES,
+      SHOW_UNKNOWN_OBSTACLES,
+      SHOW_PLANNING_GRID,
+      SHOW_PLANNING_OVERLAY,
+      SHOW_TRUTH_PATH,
+      SHOW_BELIEF_PATH,
+      SHOW_PLANNED_PATH,
+      SHOW_PREV_PLANNED_PATHS
     );
 
     GLDrawer(QGLWidget* parent);
+    ~GLDrawer();
 
     void setGtCache(MemoryCache cache);
     void setBeliefCache(MemoryCache cache);
@@ -111,11 +122,19 @@ class GLDrawer {
     void drawCoachBallPackets();
     void drawAnnotations();
     void drawBeacons();
+    void drawObstacles();
+    void drawUnknownObstacles();
+    void drawPlanningGrid();
+    void drawTruthPath();
+    void drawBeliefPath();
+    void drawPlannedPath();
+    void drawPrevPaths();
    
     void overlayOdometry();
     void overlayObservationText();
     void overlayOpponentText();
     void overlayTruthText();
+    void overlayPlanning();
     void overlayLocationText();
     void overlayAlternLocationText();
     void overlayBasicInfoText();
@@ -137,6 +156,11 @@ class GLDrawer {
     std::map<DisplayOption, bool> display_;
     BehaviorModule* behaviorModule;
     AnnotationGroup* annotations_;
+
+    std::unique_ptr<std::vector<Point2D>> truth_path_;
+    std::unique_ptr<std::vector<Point2D>> belief_path_;
+    std::unique_ptr<std::vector<std::vector<int>>> prev_paths_;
+    int prev_paths_drawn_;
 };
 
 #endif

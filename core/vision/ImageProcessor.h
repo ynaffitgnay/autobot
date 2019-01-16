@@ -10,16 +10,15 @@
 #include <vision/VisionBlocks.h>
 #include <common/RobotInfo.h>
 #include <common/RobotCalibration.h>
-#include <vision/structures/BallCandidate.h>
 #include <math/Pose3D.h>
 #include <vision/structures/VisionParams.h>
 #include <vision/structures/Blob.h>
+#include <vision/IntersectionDetector.h>
 
-class BallDetector;
+
 class Classifier;
 class BeaconDetector;
-class GoalDetector;
-class LineDetector;
+class ObstacleDetector;
 
 /// @ingroup vision
 class ImageProcessor {
@@ -30,11 +29,10 @@ class ImageProcessor {
     void processFrame();
     void init(TextLogger*);
     void SetColorTable(unsigned char*);
-    std::unique_ptr<BallDetector> ball_detector_;
-    std::unique_ptr<GoalDetector> goal_detector_;
-    std::unique_ptr<BeaconDetector> beacon_detector_;
-    std::unique_ptr<LineDetector> line_detector_;
     std::unique_ptr<Classifier> color_segmenter_;
+    std::unique_ptr<BeaconDetector> beacon_detector_;
+    std::unique_ptr<IntersectionDetector> intersection_detector_;
+    std::unique_ptr<ObstacleDetector> obstacle_detector_;
     std::vector<Blob> blobs_;
     unsigned char* getImg();
     unsigned char* getSegImg();
@@ -47,11 +45,7 @@ class ImageProcessor {
     void setCalibration(const RobotCalibration& calibration);
     void enableCalibration(bool value);
     void updateTransform();
-    std::vector<BallCandidate*> getBallCandidates();
-    BallCandidate* getBestBallCandidate();
     bool isImageLoaded();
-    void detectGoal();
-    bool findGoal(int& imageX, int& imageY);
   private:
     int getTeamColor();
     double getCurrentTime();

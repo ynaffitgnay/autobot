@@ -207,29 +207,29 @@ void VisionWindow::drawSegmentedImage(ImageWidget *image) {
 }
 
 void VisionWindow::drawBall(ImageWidget* image) {
-  if(!config_.all) return;
-  if(!config_.ball) return;
-  QPainter painter(image->getImage());
-  painter.setPen(QPen(QColor(0, 255, 127), 3));
-  if(IS_RUNNING_CORE) {
-    ImageProcessor* processor = getImageProcessor(image);
+  // if(!config_.all) return;
+  // if(!config_.ball) return;
+  // QPainter painter(image->getImage());
+  // painter.setPen(QPen(QColor(0, 255, 127), 3));
+  // if(IS_RUNNING_CORE) {
+  //   ImageProcessor* processor = getImageProcessor(image);
 
-    BallCandidate* best = processor->getBestBallCandidate();
-    if(!best) return;
+  //   BallCandidate* best = processor->getBestBallCandidate();
+  //   if(!best) return;
 
-    int r = best->radius;
-    painter.drawEllipse(
-      (int)best->centerX - r - 1,
-      (int)best->centerY - r - 1, 2 * r + 2, 2 * r + 2);
-  }
-  else if (world_object_block_ != NULL) {
-    WorldObject* ball = &world_object_block_->objects_[WO_BALL];
-    if(!ball->seen) return;
-    if( (ball->fromTopCamera && _widgetAssignments[image] == Camera::BOTTOM) ||
-        (!ball->fromTopCamera && _widgetAssignments[image] == Camera::TOP) ) return;
-    int radius = ball->radius;
-    painter.drawEllipse(ball->imageCenterX - radius, ball->imageCenterY - radius, radius * 2, radius * 2);
-  }
+  //   int r = best->radius;
+  //   painter.drawEllipse(
+  //     (int)best->centerX - r - 1,
+  //     (int)best->centerY - r - 1, 2 * r + 2, 2 * r + 2);
+  // }
+  // else if (world_object_block_ != NULL) {
+  //   WorldObject* ball = &world_object_block_->objects_[WO_BALL];
+  //   if(!ball->seen) return;
+  //   if( (ball->fromTopCamera && _widgetAssignments[image] == Camera::BOTTOM) ||
+  //       (!ball->fromTopCamera && _widgetAssignments[image] == Camera::TOP) ) return;
+  //   int radius = ball->radius;
+  //   painter.drawEllipse(ball->imageCenterX - radius, ball->imageCenterY - radius, radius * 2, radius * 2);
+  // }
 }
 
 void VisionWindow::drawGoal(ImageWidget* image) {
@@ -355,5 +355,33 @@ void VisionWindow::drawBeacons(ImageWidget* image) {
     bpath.addRoundedRect(QRect(x1, by1, width, height), 5, 5);
     painter.setPen(bpen);
     painter.fillPath(bpath, QBrush(beacon.second[1]));
+  }
+}
+
+void VisionWindow::drawObstacles(ImageWidget* image) {
+  if(!config_.all) return;
+  if(world_object_block_ == NULL) return;
+  std::vector<WorldObjectType> obstacles(WO_OBSTACLE_1,WO_OBSTACLE_2);
+  auto processor = getImageProcessor(image);
+  const auto& cmatrix = processor->getCameraMatrix();
+  QPainter painter(image->getImage());
+  painter.setRenderHint(QPainter::Antialiasing);
+  for(auto obs : obstacles) {
+    auto& object = world_object_block_->objects_[obs];
+    if(!object.seen) continue;
+    if(object.fromTopCamera && _widgetAssignments[image] == Camera::BOTTOM) continue;
+    if(!object.fromTopCamera && _widgetAssignments[image] == Camera::TOP) continue;
+    QPen pen(segCol[c_ORANGE]);
+
+    int width = cmatrix.getCameraWidthByDistance(object.visionDistance, object.cwidth);
+    int height = cmatrix.getCameraHeightByDistance(object.visionDistance, object.cheight);
+    int x1 = object.imageCenterX - width / 2;
+    
+    // Draw top
+    int ty1 = object.imageCenterY - height/2;
+    QPainterPath path;
+    path.addRoundedRect(QRect(x1, ty1, width, height), 5, 5);
+    painter.setPen(pen);
+    painter.fillPath(path, QBrush(segCol[c_ORANGE]));
   }
 }

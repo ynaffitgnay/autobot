@@ -12,6 +12,7 @@
 #include <memory/RobotInfoBlock.h>
 #include <memory/SensorBlock.h>
 #include <memory/GameStateBlock.h>
+#include <memory/PlanningBlock.h>
 
 /// @ingroup vision
 class VisionBlocks {
@@ -26,6 +27,7 @@ class VisionBlocks {
     RobotInfoBlock*& robot_info;
     SensorBlock*& sensor;
     GameStateBlock*& game_state;
+    PlanningBlock*& planning;
 
     VisionBlocks(
         WorldObjectBlock*& world_object_block,
@@ -37,7 +39,8 @@ class VisionBlocks {
         RobotStateBlock*& robot_state_block,
         RobotInfoBlock*& robot_info_block,
         SensorBlock*& sensor_block,
-        GameStateBlock*& game_state_block
+        GameStateBlock*& game_state_block,
+        PlanningBlock*& planning_block
       )
       : world_object(world_object_block),
       body_model(body_model_block),
@@ -48,7 +51,8 @@ class VisionBlocks {
       robot_state(robot_state_block),
       robot_info(robot_info_block),
       sensor(sensor_block),
-      game_state(game_state_block)
+      game_state(game_state_block),
+      planning(planning_block)
       { }
 
     VisionBlocks(MemoryCache& cache)
@@ -61,7 +65,8 @@ class VisionBlocks {
       robot_state(cache.robot_state),
       robot_info(cache.robot_info),
       sensor(cache.sensor),
-      game_state(cache.game_state)
+      game_state(cache.game_state),
+      planning(cache.planning)
       { }
 };
 

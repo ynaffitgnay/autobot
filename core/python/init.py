@@ -68,6 +68,7 @@ def processFrame():
         core.visionC.processFrame()
         core.localizationC.processFrame()
         core.opponentsC.processFrame()
+        core.planningC.processFrame()
         processBehaviorFrame()
         lights.processFrame()
         core.instance.publishData()
@@ -82,7 +83,7 @@ def processBehaviorFrame():
     """Run loaded behavior processFrame."""
     global behaviorLoaded
     if not behaviorLoaded:
-        runBehavior("sample")
+        runBehavior("coverage")
         behaviorLoaded = True
     try:
         if memory.robot_state.WO_SELF != core.WO_TEAM_COACH:

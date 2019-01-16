@@ -18,12 +18,19 @@
 typedef IsolatedBehaviorSimulation IBSim;
 typedef ObjectConfiguration OP;
 
-IBSim::IsolatedBehaviorSimulation(bool locMode, int player) : 
+IBSim::IsolatedBehaviorSimulation(bool locMode, int player) :
+  IsolatedBehaviorSimulation(nullptr, false, locMode, player) { }
+
+IBSim::IsolatedBehaviorSimulation(std::vector<WorldObjectType>* obstacles, bool useAStar, bool locMode, int player) : 
     lmode_(locMode),
     player_(player),
-    sim_(team_, player, locMode),
+    sim_(team_, player, locMode, obstacles, useAStar),
     cg_(team_, player),
-    iparams_(Camera::TOP) {
+    iparams_(Camera::TOP),
+    obstacles_(obstacles),
+    paths_planned_(0),
+    nodes_expanded_(0), 
+    AStar_(useAStar) {
   gtcache_ = MemoryCache::create(team_, player_);
   bcache_ = sim_.getMemoryCache();
   loadConfig();
@@ -38,14 +45,18 @@ IBSim::IsolatedBehaviorSimulation(bool locMode, int player) :
   stateTime_ = 0;
 }
 
+
 void IBSim::randomizePlayers(FieldConfiguration& config) {
   rand_ = Random(time(NULL));
   for(int i = WO_TEAM1; i <= WO_OPPONENT5; i++) {
     config[i].loc.x = rand_.sampleU(0.f, HALF_FIELD_X);
     config[i].loc.y = rand_.sampleU(-1500, 1500);
   }
-  config[player_].loc.x = rand_.sampleU(0.f, HALF_FIELD_X);
-  config[player_].loc.y = rand_.sampleU(-HALF_FIELD_Y, HALF_FIELD_Y);
+
+  // init location to starting point
+  
+  config[player_].loc.x = 1350.0; //rand_.sampleU(0.f, HALF_FIELD_X);
+  config[player_].loc.y = -1000.0; //rand_.sampleU(-HALF_FIELD_Y, HALF_FIELD_Y);
   config[player_].orientation = rand_.sampleU(-M_PI,M_PI);
   
   config[WO_BALL].loc.x = rand_.sampleU(0.f, HALF_FIELD_X);
@@ -118,7 +129,10 @@ void IBSim::simulationStep() {
 }
 
 void IBSim::teleportPlayer(Point2D position, float orientation, int player) {
-  if(find(activePlayers_.begin(), activePlayers_.end(), player) == activePlayers_.end()) return;
+  if(find(activePlayers_.begin(), activePlayers_.end(), player) == activePlayers_.end()) {
+    std::cout << "Couldn't find player " << player << " to teleport" << std::endl;
+    return;
+  }
   auto& woPlayer = gtcache_.world_object->objects_[player];
   woPlayer.loc = position;
   woPlayer.orientation = orientation;
@@ -153,4 +167,13 @@ void IBSim::moveBall(Point2D target) {
 
 vector<string> IBSim::getTextDebug(int player) {
   return sim_.getTextDebug();
+}
+
+void IBSim::setObstacles(std::vector<WorldObjectType>* obstacles)
+{
+  obstacles_ = obstacles;
+}
+
+bool IBSim::complete() {
+  return (sim_.cache_.planning->coverageStarted && sim_.cache_.planning->nodesLeft == 0);
 }

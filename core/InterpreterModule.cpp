@@ -42,6 +42,7 @@ void InterpreterModule::specifyMemoryDependency() {
   requiresMemoryBlock("robot_info");
   requiresMemoryBlock("speech");
   requiresMemoryBlock("localization");
+  requiresMemoryBlock("planning");
   requiresMemoryBlock("audio_processing");
   
   // Disabling these for the tool because they are huge and the allocations fail due to fragmentation, and this restricts the number of log frames we can run. - JM 4/21/15
@@ -80,6 +81,7 @@ void InterpreterModule::specifyMemoryBlocks() {
   getOrAddMemoryBlock(speech_,"speech");
   getOrAddMemoryBlock(localization_,"localization");
   getOrAddMemoryBlock(audio_processing_,"audio_processing");
+  getOrAddMemoryBlock(planning_, "planning");
 
   // Disabling these for the tool because they are huge and the allocations fail due to fragmentation, and this restricts the number of log frames we can run. - JM 4/21/15
 #ifndef TOOL

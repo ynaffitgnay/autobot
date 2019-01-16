@@ -28,8 +28,10 @@
 #include <memory/ProcessedSonarBlock.h>
 #include <memory/WalkInfoBlock.h>
 #include <memory/BehaviorParamBlock.h>
+#include <memory/PlanningBlock.h>
 
 #include <localization/LocalizationModule.h>
+#include <planning/PlanningModule.h>
 
 #include <stdlib.h>
 #include <InterpreterModule.h>
@@ -39,7 +41,8 @@
 bool SimulatedPlayer::DEBUGGING_POSITIONING = false;
 bool SimulatedPlayer::ALLOW_FALLING = false;
 
-SimulatedPlayer::SimulatedPlayer(int team, int self, bool lMode) : iparams_(Camera::TOP), rmsim_(self + (team == TEAM_BLUE ? 0 : WO_TEAM_LAST)) {
+SimulatedPlayer::SimulatedPlayer(int team, int self, bool lMode, std::vector<WorldObjectType>* obstacles, bool useAStar) :
+  iparams_(Camera::TOP), rmsim_(self + (team == TEAM_BLUE ? 0 : WO_TEAM_LAST)) {
   team_ = team;
   self_ = self;
   penaltySeconds = 0;
@@ -49,6 +52,8 @@ SimulatedPlayer::SimulatedPlayer(int team, int self, bool lMode) : iparams_(Came
   diving = Dive::NONE;
   walkToTarget = false;
   locMode = lMode;
+  obstacles_ = obstacles;
+  AStar_ = useAStar;
   dt = 1.0/30.0;
 
   panStopTime = 0;
@@ -90,6 +95,11 @@ SimulatedPlayer::SimulatedPlayer(int team, int self, bool lMode) : iparams_(Came
   // set no opponents
   for (int i = 0; i < MAX_OPP_MODELS_IN_MEM; i++){
     cache_.opponent_mem->locModels[i].alpha = -1;
+  }
+
+  // if AStar, init for AStar
+  if (AStar_) {
+    core->planning_->setAStar();
   }
 
   // turn on text logging
@@ -148,6 +158,7 @@ bool SimulatedPlayer::processFrame(WorldObjectBlock* simulationMem, GameStateBlo
   updateBasicInputs(simulationMem, simulationState);
   og_.setObjectBlocks(simulationMem, cache_.world_object);
   og_.setInfoBlocks(cache_.frame_info, cache_.joint);
+  og_.setPlanningBlocks(cache_.planning, obstacles_);
   og_.setModelBlocks(cache_.opponent_mem);
   og_.setPlayer(index_, team_);
 
@@ -164,6 +175,7 @@ bool SimulatedPlayer::processFrame(WorldObjectBlock* simulationMem, GameStateBlo
     cache_.behavior->keeperRelBallVel = ball->absVel.globalToRelative(Point2D(0,0),robot->orientation);
   }
 
+  core->planning_->processFrame();
   // call cache_.behavior process frame
   core->interpreter_->processBehaviorFrame();
   core->communications_->processFrame();

@@ -17,7 +17,7 @@ RAD_T_DEG = 180.0 / math.pi
 def init():
     """Get references to C++ modules."""
     global instance, swig
-    global visionC, pythonC, ledsC, localizationC, opponentsC, behaviorC
+    global visionC, pythonC, ledsC, localizationC, opponentsC, behaviorC, planningC
     global BehaviorModuleLog
     global text_logger
     global sensor_values, joint_values, joint_stiffness
@@ -36,6 +36,7 @@ def init():
     behaviorC = instance.behavior_
     ledsC = instance.leds_
     localizationC = instance.localization_
+    planningC = instance.planning_
     opponentsC = instance.opponents_
     text_logger = instance.textlog()
     TOOL = (instance.type_ == swig.CORE_TOOL)

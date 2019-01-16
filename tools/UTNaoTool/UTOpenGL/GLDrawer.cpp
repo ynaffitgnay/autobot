@@ -11,14 +11,26 @@
 #include <memory/TeamPacketsBlock.h>
 #include <memory/JointBlock.h>
 #include <memory/GameStateBlock.h>
+#include <memory/PlanningBlock.h>
+#include <planning/PlanningConstants.h>
+#include <common/Field.h>
 
 using namespace Eigen;
 
 GLDrawer::GLDrawer(QGLWidget* parent) : 
     parent_(parent), 
     teammate(WO_TEAM_COACH),
-    annotations_(NULL) {
+    annotations_(NULL),
+    prev_paths_drawn_(0)
+    
+{
   kickGridSize = 100.0f;
+  truth_path_ = std::make_unique<std::vector<Point2D>>();
+  belief_path_ = std::make_unique<std::vector<Point2D>>();
+  prev_paths_ = std::make_unique<std::vector<std::vector<int>>>();
+}
+
+GLDrawer::~GLDrawer() {
 }
 
 void GLDrawer::setGtCache(MemoryCache cache) {
@@ -53,6 +65,26 @@ void GLDrawer::draw(const map<DisplayOption,bool>& displayOptions) {
   if (display_[SHOW_ODOMETRY_OVERLAY]) overlayOdometry();
   if (display_[SHOW_RELATIVE_OBJECT_UNCERTS]) localizationGL.drawRelativeObjectUncerts(gtcache_.world_object, bcache_.world_object, gtcache_.robot_state, bcache_.localization_mem);
   if (display_[SHOW_BEACONS]) drawBeacons();
+
+  // planning information
+  if (display_[SHOW_PLANNING_GRID]) drawPlanningGrid();
+  if (display_[SHOW_UNKNOWN_OBSTACLES]) drawUnknownObstacles();
+  if (display_[SHOW_OBSTACLES]) drawObstacles();
+  if (display_[SHOW_TRUTH_PATH]) drawTruthPath();
+  if (!display_[SHOW_TRUTH_PATH]) {
+    truth_path_->clear();
+  }
+  if (display_[SHOW_BELIEF_PATH]) drawBeliefPath();
+  if (!display_[SHOW_BELIEF_PATH]) {
+    belief_path_->clear();
+  }
+  if (display_[SHOW_PREV_PLANNED_PATHS]) drawPrevPaths();
+  if (!display_[SHOW_PREV_PLANNED_PATHS]) {
+    prev_paths_->clear();
+    prev_paths_drawn_ = 0;
+  }
+  if (display_[SHOW_PLANNED_PATH]) drawPlannedPath();
+  if (display_[SHOW_PLANNING_OVERLAY]) overlayPlanning();
 
   // truth data from sim
   if (display_[SHOW_TRUTH_ROBOT]) drawTruthRobot();
@@ -109,7 +141,12 @@ void GLDrawer::drawField() {
   if(display_[SHOW_LINES]) {
     for (int i = LINE_OFFSET; i < LINE_OFFSET + NUM_LINES; i++){
       WorldObject* wo = &(gtcache_.world_object->objects_[i]);
-      objectsGL.drawFieldLine(wo->loc, wo->endLoc);
+      if (i == WO_CENTER_LINE || i == WO_OWN_LEFT_GOALBAR || i == WO_OWN_RIGHT_GOALBAR) continue;
+      if (WorldObject::isVerticalLine(i)) {
+        objectsGL.drawVerticalFieldLine(wo->loc, wo->endLoc);
+      } else {
+        objectsGL.drawHorizontalFieldLine(wo->loc, wo->endLoc);
+      }
     }
     WorldObject* wo = &(gtcache_.world_object->objects_[WO_OPP_GOAL]);
     glColor3f(1,1,0);
@@ -131,8 +168,8 @@ void GLDrawer::drawField() {
       parent_->renderText(wo->loc.x/FACT,wo->loc.y/FACT,1000/FACT,"OWN - BLUE");
     }
 
-    objectsGL.drawPenaltyCross(gtcache_.world_object->objects_[WO_OPP_PENALTY_CROSS].loc,1.0);
-    objectsGL.drawPenaltyCross(gtcache_.world_object->objects_[WO_OWN_PENALTY_CROSS].loc,1.0);
+    //objectsGL.drawPenaltyCross(gtcache_.world_object->objects_[WO_OPP_PENALTY_CROSS].loc,1.0);
+    //objectsGL.drawPenaltyCross(gtcache_.world_object->objects_[WO_OWN_PENALTY_CROSS].loc,1.0);
     objectsGL.drawCenterCircle(gtcache_.world_object->objects_[WO_CENTER_CIRCLE].loc, 1.0);
   }
 }
@@ -955,7 +992,57 @@ void GLDrawer::overlayTruthText() {
   text = "True Ball: (" + QString::number(gtcache_.sim_truth->ball_pos_.translation.x) + ", " + QString::number(gtcache_.sim_truth->ball_pos_.translation.y) + ")";
   parent_->renderText(x,y,text);
 
+
 }
+
+void GLDrawer::overlayPlanning() {
+  if (gtcache_.world_object == NULL) return;
+  if (bcache_.world_object == NULL) return;
+  if (bcache_.planning == NULL) return;
+
+  QFont serifFont( "Courier", 7);
+  parent_->setFont(serifFont);
+  glColor3f(1.0,1.0,1.0);
+
+  QString text;
+  int height=parent_->height();
+  int x = 1;
+  int y = 370;
+
+  glColor3f(1.0,1.0,1.0);
+  
+  WorldObject* trueself = &(gtcache_.world_object->objects_[gtcache_.robot_state->WO_SELF]);
+  text = "True Robot: (" + QString::number(trueself->loc.x) + ", " + QString::number(trueself->loc.y) + "), " + QString::number(trueself->orientation * RAD_T_DEG);
+  parent_->renderText(x,y,text);
+
+  y += 10;
+
+  WorldObject* beliefself = &(bcache_.world_object->objects_[bcache_.robot_state->WO_SELF]);
+  text = "Belief Robot: (" + QString::number(beliefself->loc.x) + ", " + QString::number(beliefself->loc.y) + "), " + QString::number(beliefself->orientation * RAD_T_DEG);
+  parent_->renderText(x,y,text);
+
+  y += 10;
+
+  PlanningBlock*& plan = bcache_.planning;
+  Pose2D destPose = plan->getDestPose();
+  
+  text = "Dest: (" + QString::number(destPose.translation.x) + ", " + QString::number(destPose.translation.y) + "), " + QString::number(destPose.rotation * RAD_T_DEG);
+  parent_->renderText(x,y,text);
+  y+= 10;
+  text = "Dest cell: [" + QString::number(plan->getDestGridRow()) + ", " + QString::number(plan->getDestGridCol()) + "] curr: [" + QString::number(plan->getGridRowFromLoc(beliefself->loc.y)) + ", " + QString::number(plan->getGridColFromLoc(beliefself->loc.x)) + "]";
+  parent_->renderText(x,y,text);
+  y+= 10;
+  text = "pathIdx: " + QString::number(plan->pathIdx) + " paths planned: " + QString::number(plan->pathsPlanned);
+  parent_->renderText(x,y,text);
+  y+= 10;
+  text = "nodesInPath: " + QString::number(plan->nodesInPath) + " nodesLeft: " + QString::number(plan->nodesLeft);
+  parent_->renderText(x,y,text);
+  y+= 10;
+  text = "nodesExpanded: " + QString::number(plan->nodeExpansions);
+  parent_->renderText(x,y,text);
+  
+}
+
 
 void GLDrawer::overlayBasicInfoText() {
   QFont serifFont( "Courier", 7);
@@ -1084,10 +1171,10 @@ void GLDrawer::drawBeacons() {
   if(gtcache_.world_object == NULL) return;
   map<WorldObjectType,vector<RGB>> beacons = {
     { WO_BEACON_BLUE_YELLOW, { Colors::Blue, Colors::Yellow } },
-    //{ WO_BEACON_YELLOW_BLUE, { Colors::Yellow, Colors::Blue } },
-    //{ WO_BEACON_BLUE_PINK, { Colors::Blue, Colors::Pink } },
+    { WO_BEACON_YELLOW_BLUE, { Colors::Yellow, Colors::Blue } },
+    { WO_BEACON_BLUE_PINK, { Colors::Blue, Colors::Pink } },
     { WO_BEACON_PINK_BLUE, { Colors::Pink, Colors::Blue } },
-    //{ WO_BEACON_PINK_YELLOW, { Colors::Pink, Colors::Yellow } },
+    { WO_BEACON_PINK_YELLOW, { Colors::Pink, Colors::Yellow } },
     { WO_BEACON_YELLOW_PINK, { Colors::Yellow, Colors::Pink } }
   };
   for(auto beacon : beacons) {
@@ -1095,3 +1182,144 @@ void GLDrawer::drawBeacons() {
     objectsGL.drawBeacon(object.loc, beacon.second[0], beacon.second[1]);
   }
 }
+
+void GLDrawer::drawObstacles() {
+  if(gtcache_.world_object == NULL) return;
+  std::vector<WorldObjectType> obstacles = {WO_OBSTACLE_1, WO_OBSTACLE_2};
+
+  for(auto obs : obstacles) {
+    const auto& object = gtcache_.world_object->objects_[obs];
+    objectsGL.drawObstacle(object.loc, Colors::Orange);
+  }
+}
+
+void GLDrawer::drawUnknownObstacles() {
+  if(gtcache_.world_object == NULL) return;
+  std::vector<WorldObjectType> obstacles = {
+    WO_OBSTACLE_UNKNOWN_1,
+    WO_OBSTACLE_UNKNOWN_2,
+    WO_OBSTACLE_UNKNOWN_3,
+    WO_OBSTACLE_UNKNOWN_4,
+    WO_OBSTACLE_UNKNOWN_5, 
+    WO_OBSTACLE_UNKNOWN_6, 
+    WO_OBSTACLE_UNKNOWN_7, 
+    WO_OBSTACLE_UNKNOWN_8, 
+    WO_OBSTACLE_UNKNOWN_9, 
+    WO_OBSTACLE_UNKNOWN_10,
+    WO_OBSTACLE_UNKNOWN_11,
+    WO_OBSTACLE_UNKNOWN_12,
+    WO_OBSTACLE_UNKNOWN_13,
+    WO_OBSTACLE_UNKNOWN_14,
+    WO_OBSTACLE_UNKNOWN_15,
+  };
+
+  for(auto obs : obstacles) {
+    const auto& object = gtcache_.world_object->objects_[obs];
+    if (object.seen) objectsGL.drawObstacle(object.loc, Colors::Red);
+  }
+}
+
+
+void GLDrawer::drawPlanningGrid() {
+  float gridRowWidth = GRID_WIDTH * CELL_WIDTH;
+  float gridColLength = GRID_HEIGHT * CELL_HEIGHT; 
+  for (int i = 0; i <= GRID_HEIGHT; ++i) {
+    objectsGL.drawVerticalGridLine(Point2D(-HALF_FIELD_X, HALF_FIELD_Y - i * CELL_HEIGHT),
+                                     Point2D(-HALF_FIELD_X + gridRowWidth, HALF_FIELD_Y - i * CELL_HEIGHT));
+  }
+
+  for (int j = 0; j <= GRID_WIDTH; ++j) {
+    objectsGL.drawHorizontalGridLine(Point2D(-HALF_FIELD_X + j * CELL_WIDTH, HALF_FIELD_Y),
+                           Point2D(-HALF_FIELD_X + j * CELL_WIDTH, HALF_FIELD_Y - gridColLength));
+  }
+}
+
+void GLDrawer::drawTruthPath() {
+  if (gtcache_.robot_state == NULL) return;
+
+  WorldObject* self = &(gtcache_.world_object->objects_[gtcache_.robot_state->WO_SELF]);
+  truth_path_->push_back(self->loc);
+
+  basicGL.colorRGBAlpha(Colors::Green, 1.0);
+  for (int i = 0; i < (truth_path_->size() - 1); ++i) {
+    basicGL.drawLine(truth_path_->at(i), truth_path_->at(i + 1));
+  }
+
+}
+
+void GLDrawer::drawBeliefPath() {
+  if (bcache_.robot_state == NULL) return;
+
+  WorldObject* self = &(bcache_.world_object->objects_[bcache_.robot_state->WO_SELF]);
+  belief_path_->push_back(self->loc);
+
+  basicGL.colorRGBAlpha(Colors::Blue, 1.0);
+  for (int i = 0; i < (belief_path_->size() - 1); ++i) {
+    basicGL.drawLine(belief_path_->at(i), belief_path_->at(i + 1));
+  }
+}
+
+void GLDrawer::drawPlannedPath() {
+  Point2D p1, p2;
+  if (bcache_.robot_state == NULL) return;
+  if (bcache_.planning == NULL) return;
+
+  PlanningBlock*& plan = bcache_.planning;
+  p1 = plan->grid.at(plan->path.at(0)).center.translation;
+  
+  basicGL.colorRGBAlpha(Colors::Magenta, 1.0);
+  for (int i = 0; i < (plan->nodesInPath - 1); ++i) {
+    p2 = plan->grid.at(plan->path.at(i + 1)).center.translation;
+    basicGL.drawLine(p1, p2);
+    p1 = p2;
+  }
+}
+
+void GLDrawer::drawPrevPaths() {
+  Point2D p1, p2;
+  
+  if (bcache_.robot_state == NULL) return;
+  if (bcache_.planning == NULL) return;
+  PlanningBlock*& plan = bcache_.planning;
+  
+  // Add the current one and draw the ones up to it
+  if (plan->pathsPlanned != prev_paths_drawn_) {
+    //std::cout << "PathsPlanned: " << plan->pathsPlanned << std::endl;
+    prev_paths_->push_back(plan->path);
+    ++prev_paths_drawn_;// = plan->pathsPlanned;
+  }
+
+  for (int i = 0; i < (prev_paths_drawn_ - 1); ++i) {
+    std::vector<int> path = prev_paths_->at(i);
+
+    switch(i % 4) {
+    case 0: 
+      basicGL.colorRGBAlpha(Colors::LightRed, 1.0);
+      break;
+    case 1:
+      basicGL.colorRGBAlpha(Colors::LightOrange, 1.0);
+      break;
+    case 2:
+      basicGL.colorRGBAlpha(Colors::LightIndigo, 1.0);
+      break;
+    case 3:
+      basicGL.colorRGBAlpha(Colors::LightViolet, 1.0);
+      break;
+    }
+    
+    p1 = plan->grid.at(path.at(0)).center.translation;
+   
+    for (int i = 0; i < (plan->nodesInPath - 1); ++i) {
+      p2 = plan->grid.at(path.at(i + 1)).center.translation;
+
+      // Skip paths that map non-adjacent cells
+      if (plan->getGridRowFromLoc(p1.y) != plan->getGridRowFromLoc(p2.y) &&
+        plan->getGridColFromLoc(p1.x) != plan->getGridColFromLoc(p2.x)) {
+        continue;
+      }
+      basicGL.drawLine(p1, p2);
+      p1 = p2;
+    }
+  }
+}
+

@@ -366,6 +366,7 @@ void UTMainWnd::runCoreFrame(int i, bool start, bool end) {
   MemoryFrame& memory = memory_log_->getFrame(i);
   auto cache = MemoryCache::read(memory);
   bool locEnabled = cache.localization_mem != nullptr;
+  bool planEnabled = cache.planning != nullptr;
   visionCore_->updateMemory(&memory,config_.bypassVision);
   if(start) {
     // load either sim or robot color tables based on the first frame of the log

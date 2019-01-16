@@ -94,7 +94,7 @@ void LocalizationModule::initFromMemory() {
 void LocalizationModule::initFromWorld() {
   reInit();
   auto& self = cache_.world_object->objects_[cache_.robot_state->WO_SELF];
-  printf("initializing particle filter");
+  printf("initializing particle filter\n");
   pfilter_->init(self.loc, self.orientation);
 }
 
@@ -147,7 +147,8 @@ void LocalizationModule::processFrame() {
 
   // Process the current frame and retrieve our location/orientation estimate
   // from the particle filter
-  pfilter_->processFrame(); 
+  pfilter_->processFrame();
+
   Pose2D pose_avg; 
   pose_avg = avgLocVals(pfilter_->pose());
   self.loc = pose_avg.translation;

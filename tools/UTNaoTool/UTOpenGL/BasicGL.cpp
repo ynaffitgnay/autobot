@@ -99,6 +99,23 @@ void BasicGL::drawEllipse(float xradius, float yradius) {
   glEnd();
 }
 
+void BasicGL::drawSemiCircle(float radius) {
+  drawSemiEllipse(radius,radius);
+}
+
+void BasicGL::drawSemiEllipse(float xradius, float yradius) {
+  xradius/=FACT;
+  yradius/=FACT;
+  glBegin(GL_LINE_LOOP);
+  for (int i=270; i <= 450; i++) {
+    //convert degrees into radians
+    float degInRad = i*DEG_T_RAD;
+    glVertex3f(cos(degInRad)*xradius,sin(degInRad)*yradius,0.0f);
+  } 
+  glEnd();
+}
+
+
 void BasicGL::drawEllipse(Matrix2f covariance) {
   glDisable(GL_LIGHTING);
   glPushMatrix();
