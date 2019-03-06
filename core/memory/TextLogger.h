@@ -19,8 +19,7 @@ ENUM_CLASS(LoggingModule,
   Kinematics,
   Sensors,
   Audio,
-  Communication,
-  Planning
+  Communication
 );
 
 // If debug logging hasn't been enabled through the build script,
@@ -78,7 +77,6 @@ class TextLogger {
     CREATE_MODULE_LOGGER(Audio);
     CREATE_MODULE_LOGGER(Behavior);
     CREATE_MODULE_LOGGER(Communication);
-    CREATE_MODULE_LOGGER(Planning);
 
   private:
     bool isLevelValid(int logLevel) const;

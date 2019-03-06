@@ -266,7 +266,7 @@ void PE::checkRobotStatus(QString ip, StatusCallback callback) {
     fping.start("fping", cmd);
     
     if (!fping.waitForStarted()) {
-      //cout << "fping Error 1 - Try installing fping, if that doesn't work then comment this out" << endl << flush;
+      cout << "fping Error 1 - Try installing fping, if that doesn't work then comment this out" << endl << flush;
       return;
     }
     

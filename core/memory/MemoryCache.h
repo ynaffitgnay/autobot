@@ -32,7 +32,6 @@ class JointCommandBlock;
 class WalkInfoBlock;
 class AudioProcessingBlock;
 class SimTruthDataBlock;
-class PlanningBlock;
 class CalibrationBlock;
 
 class MemoryCache {
@@ -64,7 +63,6 @@ class MemoryCache {
     WalkInfoBlock* walk_info;
     AudioProcessingBlock* audio_processing;
     SimTruthDataBlock* sim_truth;
-    PlanningBlock* planning;
     CalibrationBlock* calibration;
 
     MemoryFrame* memory;

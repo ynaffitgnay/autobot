@@ -33,7 +33,6 @@
 #include <sensor/ButtonModule.h>
 #include <audio/AudioModule.h>
 #include <imageCapture/ImageCapture.h>
-#include <planning/PlanningModule.h>
 
 #include <python/PythonInterface.h>
 
@@ -72,7 +71,6 @@ VisionCore::VisionCore (CoreType type, bool use_shared_memory, int team_num, int
   buttons_(NULL),
   leds_(NULL),
   audio_(NULL),
-  planning_(NULL),
   log_(new FileLogWriter()),
   textlog_(std::make_unique<TextLogger>()),
   image_capture_(NULL),
@@ -124,8 +122,6 @@ VisionCore::~VisionCore() {
     delete behavior_;
   if (buttons_ != NULL)
     delete buttons_;
-  if (planning_ != NULL)
-    delete planning_;
 
   // clean up the entire memory block
   if (delete_memory_on_destruct_ && memory_ != NULL)
@@ -288,9 +284,6 @@ void VisionCore::initModules(LocalizationMethod::Type locMethod) {
 
   buttons_ = new ButtonModule();
   buttons_->init(memory_, textlog_.get());
-
-  planning_ = new PlanningModule();
-  planning_->init(memory_, textlog_.get());
 
   /* MUST DO LUA LAST - OTHERWISE ALL THE MEMORY BLOCK POINTERS ARE NOT INITIALISED
      MQ 3/16/2011 */
@@ -456,8 +449,6 @@ void VisionCore::updateMemory(MemoryFrame* memory, bool locOnly) {
     leds_->updateModuleMemory(memory_);
   if (audio_)
     audio_->updateModuleMemory(memory_);
-  if (planning_)
-    planning_->updateModuleMemory(memory_);
 
   if (interpreter_)
     interpreter_->updateModuleMemory(memory_);

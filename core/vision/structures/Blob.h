@@ -4,7 +4,6 @@
 #include <vision/VisionConstants.h>
 #include <vector>
 #include <inttypes.h>
-#include <math/Geometry.h>
 
 /// @ingroup vision
 struct Blob {
@@ -28,10 +27,6 @@ struct Blob {
   // GOAL DETECTION
   int edgeSize;
   int edgeStrength;
-
-  // LINE DETECTION
-  Point2D start;
-  Point2D end;
 
   Blob() : lpIndex(MAX_BLOB_VISIONPOINTS, 0) { }
   Blob(unsigned char c, uint16_t xi, uint16_t xf, uint16_t dx, uint16_t yi,

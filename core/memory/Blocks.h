@@ -26,4 +26,3 @@
 #include <memory/ProcessedSonarBlock.h>
 #include <memory/RobotInfoBlock.h>
 #include <memory/AudioProcessingBlock.h>
-#include <memory/PlanningBlock.h>

@@ -146,7 +146,6 @@ blocks = {
   "sync_al_walk_param":"ALWalkParamBlock",
   "sync_walk_info":"WalkInfoBlock",
   "audio_processing":"AudioProcessingBlock",
-  "planning":"PlanningBlock",
   "calibration":"CalibrationBlock"
 }
 

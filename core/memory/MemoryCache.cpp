@@ -46,7 +46,6 @@ void MemoryCache::clear() {
   walk_info = nullptr;
   audio_processing = nullptr;
   sim_truth = nullptr;
-  planning = nullptr;
   calibration = nullptr;
 
   memory = nullptr;
@@ -97,7 +96,6 @@ void MemoryCache::fill(MemoryFrame* memory, const unordered_set<string>& blocks)
   ::fill(memory, blocks, walk_info, "vision_walk_info");
   ::fill(memory, blocks, sim_truth, "sim_truth_data");
   ::fill(memory, blocks, audio_processing, "audio_processing");
-  ::fill(memory, blocks, planning, "planning");
   ::fill(memory, blocks, calibration, "calibration");
 
   this->memory = memory;
@@ -135,7 +133,6 @@ MemoryCache MemoryCache::read(MemoryFrame* memory) {
   memory->getBlockByName(cache.walk_info, "vision_walk_info", false);
   memory->getBlockByName(cache.sim_truth, "sim_truth_data", false);
   memory->getBlockByName(cache.audio_processing, "audio_processing", false);
-  memory->getBlockByName(cache.audio_processing, "planning", false);
   memory->getBlockByName(cache.calibration, "calibration", false);
   cache.memory = memory;
   return cache;

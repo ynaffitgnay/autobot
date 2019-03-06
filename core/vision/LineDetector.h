@@ -4,7 +4,7 @@
 #pragma once
 
 #include <vision/ObjectDetector.h>
-#include <vision/structures/Blob.h>
+
 
 class TextLogger;
 
@@ -30,10 +30,6 @@ class LineDetector : public ObjectDetector {
   * Input: Sorted list of blobs
   */
   void findPenaltyLine(std::vector<Blob>& blobs);
-  // unsigned char* getImg();
-  // void findTags();
-  // void saveImg(std::string filepath);
-
  private:
   // Logger
   TextLogger* textlogger;

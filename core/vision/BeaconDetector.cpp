@@ -80,41 +80,11 @@ void BeaconDetector::genCombos(std::vector<Blob>& yBlobs, std::vector<Blob>& pBl
       if (alignsX(yBlobs.at(i),bBlobs.at(j)) ) {
         // std::cout << "Xdiff within threshold" << std::endl;
         if (alignsY(yBlobs.at(i),bBlobs.at(j)) > 0) {
-          // printf("YB: Blue width start: %d width end: %d average x: %d xi: %d xf: %d\n",bBlobs.at(j).widthStart,bBlobs.at(j).widthEnd,bBlobs.at(j).avgX,bBlobs.at(j).xi,bBlobs.at(j).xf);
-          int yb_beacon_xf = std::max(yBlobs.at(i).xf, bBlobs.at(j).xf);
-          int yb_beacon_xi = std::min(yBlobs.at(i).xi, bBlobs.at(j).xi);
-          int avg_blob_x = yb_beacon_xi + std::round((yb_beacon_xf - yb_beacon_xi)/2.0);
-          // printf("Avg blob x: %d\n", avg_blob_x);
-          float del_x = yBlobs.at(i).xi - bBlobs.at(j).xi;
-          float del_y = -1*(yBlobs.at(i).yi - bBlobs.at(j).yi);
-          float cosTh;
-          if (del_x > 3){
-             cosTh = del_y/sqrtf(std::pow(del_x,2) + std::pow(del_y,2));
-          } else if (del_y < 0) {
-            continue;
-          } else {
-            cosTh = 1.0;
-          }
-          object = addBeaconObject(avg_blob_x, bBlobs.at(j).yi, cosTh, WO_BEACON_YELLOW_BLUE);
+          object = addBeaconObject(yBlobs.at(i).avgX, yBlobs.at(i).yf, WO_BEACON_YELLOW_BLUE);
           if(objectValidInWorld(object,yBlobs.at(i),bBlobs.at(j)))  yb_beacons.push_back(object);    
         }
         else if (alignsY(yBlobs.at(i),bBlobs.at(j)) < 0) {          
-          // printf("BY: Yellow width start: %d width end: %d average x: %d xi: %d xf: %d\n",yBlobs.at(i).widthStart,yBlobs.at(i).widthEnd,yBlobs.at(i).avgX,yBlobs.at(i).xi,yBlobs.at(i).xf);
-          int by_beacon_xf = std::max(yBlobs.at(i).xf, bBlobs.at(j).xf);
-          int by_beacon_xi = std::min(yBlobs.at(i).xi, bBlobs.at(j).xi);
-          int avg_blob_x = by_beacon_xi + std::round((by_beacon_xf - by_beacon_xi)/2.0);
-          // printf("Avg blob x: %d\n", avg_blob_x);
-          float del_x = bBlobs.at(j).xi - yBlobs.at(i).xi;
-          float del_y = -1*(bBlobs.at(j).yi - yBlobs.at(i).yi);
-          float cosTh;
-          if (del_x > 3){
-             cosTh = del_y/sqrtf(std::pow(del_x,2) + std::pow(del_y,2));
-          } else if (del_y < 0) {
-            continue;
-          } else {
-            cosTh = 1.0;
-          }
-          object = addBeaconObject(avg_blob_x, yBlobs.at(i).yi, cosTh, WO_BEACON_BLUE_YELLOW);
+          object = addBeaconObject(yBlobs.at(i).avgX, yBlobs.at(i).yi, WO_BEACON_BLUE_YELLOW);
           if(objectValidInWorld(object,bBlobs.at(j),yBlobs.at(i)))  by_beacons.push_back(object); 
         }
       }
@@ -128,41 +98,11 @@ void BeaconDetector::genCombos(std::vector<Blob>& yBlobs, std::vector<Blob>& pBl
         // std::cout << "Xdiff within threshold" << std::endl;
         if (alignsY(yBlobs.at(i),pBlobs.at(k) )> 0) {
           // std::cout << "2 yDiffTop within threshold, yellow is just on top of pink" << std::endl;
-          // printf("YP: Pink width start: %d width end: %d average x: %d xi: %d xf: %d\n",pBlobs.at(k).widthStart,pBlobs.at(k).widthEnd,pBlobs.at(k).avgX,pBlobs.at(k).xi,pBlobs.at(k).xf);
-          int yp_beacon_xf = std::max(yBlobs.at(i).xf, pBlobs.at(k).xf);
-          int yp_beacon_xi = std::min(yBlobs.at(i).xi, pBlobs.at(k).xi);
-          int avg_blob_x = yp_beacon_xi + std::round((yp_beacon_xf - yp_beacon_xi)/2.0);
-          // printf("Avg blob x: %d\n", avg_blob_x);
-          float del_x = yBlobs.at(i).xi - pBlobs.at(k).xi;
-          float del_y = -1*(yBlobs.at(i).yi - pBlobs.at(k).yi);
-          float cosTh;
-          if (del_x > 3){
-             cosTh = del_y/sqrtf(std::pow(del_x,2) + std::pow(del_y,2));
-          } else if (del_y < 0) {
-            continue;
-          } else {
-            cosTh = 1.0;
-          }
-          object = addBeaconObject(avg_blob_x, pBlobs.at(k).yi, cosTh, WO_BEACON_YELLOW_PINK);
+          object = addBeaconObject(yBlobs.at(i).avgX, yBlobs.at(i).yf, WO_BEACON_YELLOW_PINK);
           if(objectValidInWorld(object,yBlobs.at(i),pBlobs.at(k)))  yp_beacons.push_back(object); 
         } else if (alignsY(yBlobs.at(i),pBlobs.at(k) )< 0) {
           // std::cout << "1 yDiffBottom within threshold, pink is just on top of yellow" << std::endl;
-          // printf("PY: Yellow width start: %d width end: %d average x: %d xi: %d xf: %d\n",yBlobs.at(i).widthStart,yBlobs.at(i).widthEnd,yBlobs.at(i).avgX,yBlobs.at(i).xi,yBlobs.at(i).xf);
-          int py_beacon_xf = std::max(yBlobs.at(i).xf, pBlobs.at(k).xf);
-          int py_beacon_xi = std::min(yBlobs.at(i).xi, pBlobs.at(k).xi);
-          int avg_blob_x = py_beacon_xi + std::round((py_beacon_xf - py_beacon_xi)/2.0);
-          // printf("Avg blob x: %d\n", avg_blob_x);
-          float del_x = pBlobs.at(k).xi - yBlobs.at(i).xi;
-          float del_y = -1*(pBlobs.at(k).yi - yBlobs.at(i).yi);
-          float cosTh;
-          if (del_x > 3){
-             cosTh = del_y/sqrtf(std::pow(del_x,2) + std::pow(del_y,2));
-          } else if (del_y < 0) {
-            continue;
-          } else {
-            cosTh = 1.0;
-          }
-          object = addBeaconObject(avg_blob_x, yBlobs.at(i).yi, cosTh, WO_BEACON_PINK_YELLOW);   
+          object = addBeaconObject(yBlobs.at(i).avgX, yBlobs.at(i).yi, WO_BEACON_PINK_YELLOW);   
           if(objectValidInWorld(object,pBlobs.at(k),yBlobs.at(i)))  py_beacons.push_back(object);   
         }
       }
@@ -179,41 +119,11 @@ void BeaconDetector::genCombos(std::vector<Blob>& yBlobs, std::vector<Blob>& pBl
         // std::cout << "Xdiff within threshold" << std::endl;
         if (alignsY(bBlobs.at(p),pBlobs.at(q)) > 0) {
           // std::cout << "2 yDiffTop within threshold, blue is just on top of pink" << std::endl;
-          // printf("BP: Pink width start: %d width end: %d average x: %d xi: %d xf: %d\n",pBlobs.at(q).widthStart,pBlobs.at(q).widthEnd,pBlobs.at(q).avgX,pBlobs.at(q).xi,pBlobs.at(q).xf);
-          int bp_beacon_xf = std::max(bBlobs.at(p).xf, pBlobs.at(q).xf);
-          int bp_beacon_xi = std::min(bBlobs.at(p).xi, pBlobs.at(q).xi);
-          int avg_blob_x = bp_beacon_xi + std::round((bp_beacon_xf - bp_beacon_xi)/2.0);
-          // printf("Avg blob x: %d\n", avg_blob_x);
-          float del_x = bBlobs.at(p).xi - pBlobs.at(q).xi;
-          float del_y = -1*(bBlobs.at(p).yi - pBlobs.at(q).yi);
-          float cosTh;
-          if (del_x > 3){
-             cosTh = del_y/sqrtf(std::pow(del_x,2) + std::pow(del_y,2));
-          } else if (del_y < 0) {
-            continue;
-          } else {
-            cosTh = 1.0;
-          }
-          object = addBeaconObject(avg_blob_x, pBlobs.at(q).yi, cosTh, WO_BEACON_BLUE_PINK);
+          object = addBeaconObject(bBlobs.at(p).avgX, bBlobs.at(p).yf, WO_BEACON_BLUE_PINK);
           if(objectValidInWorld(object,bBlobs.at(p),pBlobs.at(q)))  bp_beacons.push_back(object); 
         } else if (alignsY(bBlobs.at(p),pBlobs.at(q)) < 0) {
           // std::cout << "1 yDiffBottom within threshold, pink is just on top of blue" << std::endl;
-          // printf("PB: Blue width start: %d width end: %d average x: %d xi: %d xf: %d\n",bBlobs.at(p).widthStart,bBlobs.at(p).widthEnd,bBlobs.at(p).avgX,bBlobs.at(p).xi,bBlobs.at(p).xf);
-          int pb_beacon_xf = std::max(bBlobs.at(p).xf, pBlobs.at(q).xf);
-          int pb_beacon_xi = std::min(bBlobs.at(p).xi, pBlobs.at(q).xi);
-          int avg_blob_x = pb_beacon_xi + std::round((pb_beacon_xf - pb_beacon_xi)/2.0);
-          // printf("Avg blob x: %d\n", avg_blob_x);
-          float del_x = pBlobs.at(q).xi - bBlobs.at(p).xi;
-          float del_y = -1*(pBlobs.at(q).yi - bBlobs.at(p).yi);
-          float cosTh;
-          if (del_x > 3){
-             cosTh = del_y/sqrtf(std::pow(del_x,2) + std::pow(del_y,2));
-          } else if (del_y < 0) {
-            continue;
-          } else {
-            cosTh = 1.0;
-          }
-          object = addBeaconObject(avg_blob_x, bBlobs.at(p).yi, cosTh, WO_BEACON_PINK_BLUE);
+          object = addBeaconObject(bBlobs.at(p).avgX, bBlobs.at(p).yi, WO_BEACON_PINK_BLUE);
           if(objectValidInWorld(object,pBlobs.at(q),bBlobs.at(p)))  pb_beacons.push_back(object); 
         }
       }
@@ -266,15 +176,13 @@ int BeaconDetector::alignsY(Blob& blobA, Blob& blobB) {
   return 0;
 }
 
-WorldObject BeaconDetector::addBeaconObject(int newCenterX,int newCenterY, float cosTh, WorldObjectType wo_type) {
+WorldObject BeaconDetector::addBeaconObject(int newCenterX,int newCenterY,WorldObjectType wo_type) {
   WorldObject beaconObject;
   // auto& beaconObject = vblocks_.world_object->objects_[wo_type];
   beaconObject.type = wo_type;
   beaconObject.imageCenterX = newCenterX;
   beaconObject.imageCenterY = newCenterY;
-  int newHeight = std::round(cosTh*heights_[wo_type]);
-  // printf("Old height: %d New height: %d\n", heights_[wo_type], newHeight);
-  auto position = cmatrix_.getWorldPosition(beaconObject.imageCenterX, beaconObject.imageCenterY, newHeight);
+  auto position = cmatrix_.getWorldPosition(beaconObject.imageCenterX, beaconObject.imageCenterY, heights_[wo_type]);
   beaconObject.visionDistance = cmatrix_.groundDistance(position);
   beaconObject.visionBearing = cmatrix_.bearing(position);
   beaconObject.seen = true;

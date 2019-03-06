@@ -41,7 +41,6 @@ Arguments ArgumentParser::Parse(int argc, char **argv) {
   options_description secondary("Secondary Processing Tools");
   secondary.add_options()
     ("behavior-sim", bool_switch(&args.behavior_sim)->default_value(false), "Run the behavior simulator.")
-    ("planning-sim", bool_switch(&args.planning_sim)->default_value(true),  "Run the planning sim.")
     ("loc-sim", bool_switch(&args.localization_sim)->default_value(false), "Run the localization simulator.")
     ("log-server", bool_switch(&args.log_server)->default_value(false), "Simulate streaming by echoing a log over a TCP server.")
     ("loop-server", bool_switch(&args.loop_server)->default_value(false), "Loop through the specified log until the server is forcibly shut down.")

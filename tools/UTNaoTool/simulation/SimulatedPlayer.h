@@ -22,7 +22,7 @@ class SimulatedPlayer {
  public:
   static bool DEBUGGING_POSITIONING, ALLOW_FALLING;
 
-  SimulatedPlayer(int team, int self, bool lMode = false, std::vector<WorldObjectType>* obstacles = nullptr, bool useAStar = false);
+  SimulatedPlayer(int team, int self, bool lMode = false);
   ~SimulatedPlayer();
   void initLocalization();
   void setRole(Role role);
@@ -52,8 +52,6 @@ class SimulatedPlayer {
   void updateMemoryBlocks();
   void setStrategy();
   void setPenaltyPosition(WorldObjectBlock* simMem);
-
-  bool AStar_;
 
   MemoryFrame* memory_;
   float penaltySeconds;
@@ -97,7 +95,6 @@ class SimulatedPlayer {
   ImageParams iparams_;
   ObservationGenerator og_;
   RobotMovementSimulator rmsim_;
-  std::vector<WorldObjectType>* obstacles_;
 };
 
 

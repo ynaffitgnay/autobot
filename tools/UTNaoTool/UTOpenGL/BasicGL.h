@@ -43,8 +43,6 @@ public:
   void drawEllipse(Eigen::Matrix2f covariance);
   void drawArc(float startAngle, float endAngle, float radius);
   void drawArc(float x, float y, float z, float startAng, float endAng, float radius);
-  void drawSemiCircle(float radius);
-  void drawSemiEllipse(float xradius, float yradius);
 
   // Shapes
   void drawRectangle(Vector3<float> x1, Vector3<float>  x2,  Vector3<float>  x3,  Vector3<float>  x4);

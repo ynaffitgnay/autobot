@@ -8,10 +8,7 @@
 class ObjectsGL {
 public:
   void drawGreenCarpet();
-  void drawVerticalFieldLine(Point2D start, Point2D end);
-  void drawHorizontalFieldLine(Point2D start, Point2D end);
-  void drawVerticalGridLine(Point2D start, Point2D end);
-  void drawHorizontalGridLine(Point2D start, Point2D end);
+  void drawFieldLine(Point2D start, Point2D end);
 
   void drawIntersection(Point2D p, float alpha);
   void drawLinePoint(Point2D p, float alpha);
@@ -31,7 +28,6 @@ public:
   void drawPenaltyCross(Point2D p, float alpha);
   void drawCenterCircle(Point2D p, float alpha);
   void drawBeacon(Point2D p, RGB topColor, RGB bottomColor, float alpha=1.0f);
-  void drawObstacle(Point2D p, RGB color, float alpha=1.0f);
 
   BasicGL basicGL;
 };

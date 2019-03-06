@@ -25,7 +25,7 @@ def init():
     global vision_frame_info, walk_param, kick_params, walk_request, walk_response, world_objects, team_packets, opponent_mem
     global behavior_params, joint_commands, processed_sonar, al_walk_param, walk_info, robot_vision, body_model
     global robot_info, speech, localization_mem, image
-    global joint_angles, audio_processing, planning
+    global joint_angles, audio_processing
 
     def behavior_mem(): return core.pythonC.behavior_
     def camera_block(): return core.pythonC.camera_block_
@@ -55,7 +55,6 @@ def init():
     def joint_angles(): return core.pythonC.joint_angles_
     def image(): return core.pythonC.image_
     def audio_processing(): return core.pythonC.audio_processing_
-    def planning(): return core.pythonC.planning_
 
     __blocks__ = [
         "behavior_mem", "camera_block", "game_state", "kick_request",
@@ -64,7 +63,7 @@ def init():
         "team_packets", "opponent_mem", "behavior_params", "joint_commands",
         "processed_sonar", "al_walk_param", "walk_info", "robot_vision",
         "body_model", "robot_info", "speech", "localization_mem", "image",
-        "joint_angles", "audio_processing", "planning"
+        "joint_angles", "audio_processing"
     ]
 
     # If we're running logs from the tool then the memory block pointers change with each frame,

@@ -1,0 +1,11 @@
+diff a/core/VisionCore.cpp b/core/VisionCore.cpp	(rejected hunks)
+@@ -1,6 +1,9 @@
+ #include "VisionCore.h"
+ 
+ 
++
++
++
+ #include <common/States.h>
+ 
+ #include <memory/BodyModelBlock.h>

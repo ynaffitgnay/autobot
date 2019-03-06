@@ -92,7 +92,6 @@ void Classifier::makeBlobs(std::vector<Blob>& blobs) {
   std::vector<VisionPointAlt*>::iterator parentIt;
   unsigned char c;
   uint16_t xi, xf, dx, yi, yf, dy, widthStart, widthEnd, avgX, avgY, total;
-  Point2D start, end;
   float meanX, meanY, pixelRatio, pixelDensity;
 
   // Get the run-length encoding for the frame and compress paths
@@ -249,7 +248,7 @@ void Classifier::mergeRuns(std::vector<VisionPointAlt>& runs) {
         iter->parent = findParent(*iter);
       }
     } else if(camera_ == Camera::TOP) {
-      if (iter->color != c_UNDEFINED && iter->color != c_FIELD_GREEN) {
+      if (iter->color != c_UNDEFINED && iter->color != c_FIELD_GREEN && iter->color != c_WHITE) {
         // Just running through the clean up the parent pointers for disjoint parent chains
         iter->parent = findParent(*iter);
       }
@@ -264,7 +263,7 @@ void Classifier::checkAdj(VisionPointAlt& node, std::vector<VisionPointAlt>::ite
       return;
     }
   } else if(camera_ == Camera::TOP) {
-    if (node.color == c_UNDEFINED || node.color == c_FIELD_GREEN) {
+    if (node.color == c_UNDEFINED || node.color == c_FIELD_GREEN || node.color == c_WHITE) {
       node.parent = nullptr;
       return;
     }

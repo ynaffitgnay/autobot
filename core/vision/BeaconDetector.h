@@ -51,7 +51,7 @@ class BeaconDetector : public ObjectDetector {
   * Input: XY coords of new beacon and beacon type.
   * Output: WorldObject of the same beacon type.
   */
-  WorldObject addBeaconObject(int newCenterX,int newCenterY,float cosTh, WorldObjectType wo_type);
+  WorldObject addBeaconObject(int newCenterX,int newCenterY,WorldObjectType wo_type);
 
   /*
   * Helper function for checking the vertical fitness of both blobs for potential beaconhood

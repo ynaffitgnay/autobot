@@ -162,8 +162,7 @@ void WorldWindow::stopSimulation() {
 void WorldWindow::startSimulation() {
   if(inSimMode()) {
     switch(wconfig_.mode) {
-    case BehaviorSim: simulation_ = std::make_unique<IsolatedBehaviorSimulation>(nullptr, true, false); break;
-      //case BehaviorSim: simulation_ = std::make_unique<BehaviorSimulation>(false); break;
+      case BehaviorSim: simulation_ = std::make_unique<BehaviorSimulation>(false); break;
       case BehaviorSimLoc: simulation_ = std::make_unique<BehaviorSimulation>(true); break;
       case LocalizationSim: {
           if(wconfig_.locSimPathfile == "")
@@ -172,7 +171,7 @@ void WorldWindow::startSimulation() {
             simulation_ = std::make_unique<LocalizationSimulation>(wconfig_.locSimPathfile); 
         }
         break;
-    case IsolatedBehaviorSim: simulation_ = std::make_unique<IsolatedBehaviorSimulation>(nullptr, false, false); break;
+      case IsolatedBehaviorSim: simulation_ = std::make_unique<IsolatedBehaviorSimulation>(false); break;
       case IsolatedBehaviorSimLoc: simulation_ = std::make_unique<IsolatedBehaviorSimulation>(true); break;
       case GoalieSim: simulation_ = std::make_unique<GoalieSimulation>(); break;
     }

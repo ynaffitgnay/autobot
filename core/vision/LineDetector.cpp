@@ -1,34 +1,11 @@
 #include <vision/LineDetector.h>
 #include <memory/TextLogger.h>
 #include <vision/Logging.h>
-#include <common/ColorConversion.h>
 
 using namespace Eigen;
 
 LineDetector::LineDetector(DETECTOR_DECLARE_ARGS) : DETECTOR_INITIALIZE {
 }
-
-// unsigned char* LineDetector::getImg() {
-//   if(camera_ == Camera::TOP)
-//     return vblocks_.image->getImgTop();
-//   return vblocks_.image->getImgBottom();
-// }
-
-// void LineDetector::saveImg(std::string filepath) {
-//   cv::Mat mat;
-//   cv::aruco::Dictionary dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_50);
-//   cv::aruco::drawMarker(dictionary, 0, 200, markerImage, 1);
-//   cv::imwrite(filepath, mat);
-// }
-
-// void LineDetector::findTags(){
-//   cv::Mat grayFrame = color::rawToMatGraySubset(getImg(),iparams_, 0, 0, iparams_.width, iparams_.height, 1, 1);
-//   std::vector< int > markerIds;
-//   std::vector< std::vector<cv::Point2f> > markerCorners, rejectedCandidates;
-//   cv::aruco::DetectorParameters parameters;
-//   cv::aruco::Dictionary dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_50);
-//   cv::aruco::detectMarkers(grayFrame, dictionary, markerCorners, markerIds, parameters, rejectedCandidates);
-// }
 
 void LineDetector::findPenaltyLine(std::vector<Blob>& blobs) {
   if(camera_ == Camera::TOP) return;
@@ -53,6 +30,8 @@ void LineDetector::findPenaltyLine(std::vector<Blob>& blobs) {
     // printf("3\n");
     detBestLine(line_cand);
   }
+
+  
 }
 
 void LineDetector::detBestLine(std::vector<Blob>& line_cand) {

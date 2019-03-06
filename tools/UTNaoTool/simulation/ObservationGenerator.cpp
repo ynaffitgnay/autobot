@@ -3,7 +3,6 @@
 #include <memory/JointBlock.h>
 #include <memory/FrameInfoBlock.h>
 #include <memory/OpponentBlock.h>
-#include <memory/PlanningBlock.h>
 
 #define MISSED_OBS_FACTOR 1.5
 #define VISION_ERROR_FACTOR 1.0
@@ -22,7 +21,6 @@ ObservationGenerator::ObservationGenerator() : iparams_(Camera::TOP) {
   obs_object_->init();
   gt_object_ = NULL;
   opponent_mem_ = NULL;
-  planning_ = NULL;
   frame_info_ = NULL;
   joint_ = NULL;
   lconfig_.load(util::cfgpath(util::Modules) + "/localization.yaml");
@@ -37,7 +35,6 @@ ObservationGenerator::ObservationGenerator(const ObservationGenerator& og) : ipa
   obs_object_ = new WorldObjectBlock();
   gt_object_ = NULL;
   opponent_mem_ = NULL;
-  planning_ = NULL;
   frame_info_ = NULL;
   joint_ = NULL;
 }
@@ -59,13 +56,6 @@ void ObservationGenerator::setObjectBlocks(WorldObjectBlock* gtObjects, vector<W
 
 void ObservationGenerator::setModelBlocks(OpponentBlock* opponentMem) {
   opponent_mem_ = opponentMem;
-}
-
-// Set the planning block of the simulated player
-void ObservationGenerator::setPlanningBlocks(PlanningBlock* planning, std::vector<WorldObjectType>* obstacles) {
-  
-  planning_ = planning;
-  obstacles_ = (obstacles == nullptr) ? &def_obstacles : obstacles;
 }
 
 void ObservationGenerator::setInfoBlocks(FrameInfoBlock* frameInfo, JointBlock* joint) {
@@ -238,34 +228,6 @@ void ObservationGenerator::generateGoalObservations() {
   }
 }
 
-void ObservationGenerator::generateObstacleObservations() {
-  // Don't generate obstacles if you haven't faced next GC!
-  if (!(planning_ && planning_->observedNextGC && obstacles_)) return;
-  
-  getSelf(gtSelf,obsSelf,player_);
-  
-  int ctr = 1;
-  std::vector<WorldObjectType>::iterator t;
-  //for(auto t : obstacles_) {
-  for (t = obstacles_->begin(); t != obstacles_->end(); t++) {
-    getObject(gtObstacle, obsObstacle, *t);
-    Pose2D destPose = planning_->getDestPose();
-    Point2D destPoint = Point2D(destPose.translation.x, destPose.translation.y);
-    float obsdist = destPoint.getDistanceTo(gtObstacle.loc);
-
-    if (planning_->getDestGridRow() == planning_->getGridRowFromLoc(gtObstacle.loc.y) &&
-        (planning_->getDestGridCol() == planning_->getGridColFromLoc(gtObstacle.loc.x) ||
-         planning_->getDestGridCol() == planning_->getGridColFromLoc(gtObstacle.loc.x) - 1))
-      {
-        planning_->changedCost = true;
-      }
-  }
-
-  // Reset observedGC
-  planning_->observedNextGC = false;
-}
-
-
 void ObservationGenerator::generateAllObservations() {
   obs_object_->reset();
   initializeBelief();
@@ -275,7 +237,6 @@ void ObservationGenerator::generateAllObservations() {
   // generateCenterCircleObservations();
   generateBeaconObservations();
   generateGoalObservations();
-  generateObstacleObservations();
   // generatePenaltyCrossObservations();
   fillObservationObjects();
 }
@@ -348,21 +309,6 @@ void ObservationGenerator::generateGroundTruthObservations(){
     auto distance = gtrobot.loc.getDistanceTo(gt_object_->objects_[i].loc);
     auto bearing = gtrobot.loc.getBearingTo(gt_object_->objects_[i].loc, gtrobot.orientation);
 
-    if (obstacles_) {
-      for (int obIdx = 0; obIdx < obstacles_->size(); ++obIdx) {
-        if (obstacles_->at(obIdx) == i) {
-          if (planning_->getDestGridRow() == planning_->getGridRowFromLoc(gto->loc.y) &&
-              (planning_->getDestGridCol() == planning_->getGridColFromLoc(gto->loc.x) ||
-               planning_->getDestGridCol() == planning_->getGridColFromLoc(gto->loc.x) - 1)) {
-              //planning_->grid.at(planning_->path[planning_->pathIdx]).occupied = true;
-              planning_->changedCost = true;
-              // Mark this object as seen so you can draw...
-              gto->seen = wo->seen = true;
-          }
-        }
-      }
-    }
-    
     // decide if seen depending on pan
     if (fabs(joint_->values_[HeadPan] - bearing) < FOVx/2.0 && distance < 5'000){
       if(wo->isUnknown()) continue;
@@ -374,7 +320,6 @@ void ObservationGenerator::generateGroundTruthObservations(){
       gto->visionDistance = wo->visionDistance = wo->distance;
       gto->visionBearing = wo->visionBearing = wo->bearing;
     } else gto->seen = wo->seen = false;
-
   }
   fillObservationObjects();
 }

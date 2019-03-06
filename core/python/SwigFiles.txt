@@ -22,7 +22,6 @@ vision/VisionModule.h
 behavior/BehaviorModule.h
 localization/LocalizationModule.h
 localization/LocalizationParams.h
-planning/PlanningModule.h
 
 common/RobotInfo.h
 common/States.h
@@ -39,6 +38,5 @@ vision/VisionConstants.h
 motion/BHWalkParameters.h
 motion/RSWalkParameters.h
 motion/KickParameters.h
-planning/PlanningConstants.h
 common/RobotConfig.h
 
